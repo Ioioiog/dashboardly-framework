@@ -11,6 +11,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface MenuItem {
   icon: React.ElementType;
@@ -32,14 +33,32 @@ const DashboardSidebar = () => {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (!error) {
-      console.log("Successfully logged out");
+    try {
+      // First check if we have a session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+          console.error("Error during signOut:", error);
+          throw error;
+        }
+      }
+      
+      // Always navigate to auth page, even if there was no session
+      console.log("Navigating to auth page after logout");
       navigate("/auth");
-    } else {
-      console.error("Error logging out:", error);
+      
+    } catch (error) {
+      console.error("Error during logout process:", error);
+      toast({
+        title: "Error logging out",
+        description: "Please try again",
+        variant: "destructive",
+      });
     }
   };
 
@@ -135,6 +154,7 @@ const DashboardSidebar = () => {
       </div>
     </aside>
   );
+
 };
 
 export default DashboardSidebar;
