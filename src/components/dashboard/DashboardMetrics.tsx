@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Home, Tool, Users, Wallet } from "lucide-react";
+import { Home, Settings, Users, Wallet } from "lucide-react";
 import { MetricCard } from "./MetricCard";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -13,46 +13,34 @@ interface Metrics {
 }
 
 async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
-  const [propertiesCount, tenantsCount, maintenanceCount, revenueData] = await Promise.all([
-    supabase
-      .from("properties")
-      .select("id", { count: "exact" })
-      .eq("landlord_id", userId),
+  // First get the properties for this landlord
+  const { data: properties } = await supabase
+    .from("properties")
+    .select("id, monthly_rent")
+    .eq("landlord_id", userId);
+
+  const propertyIds = properties?.map(p => p.id) || [];
+
+  const [tenantsCount, maintenanceCount] = await Promise.all([
     supabase
       .from("tenancies")
       .select("id", { count: "exact" })
       .eq("status", "active")
-      .in(
-        "property_id",
-        supabase
-          .from("properties")
-          .select("id")
-          .eq("landlord_id", userId)
-      ),
+      .in("property_id", propertyIds),
     supabase
       .from("maintenance_requests")
       .select("id", { count: "exact" })
       .eq("status", "pending")
-      .in(
-        "property_id",
-        supabase
-          .from("properties")
-          .select("id")
-          .eq("landlord_id", userId)
-      ),
-    supabase
-      .from("properties")
-      .select("monthly_rent")
-      .eq("landlord_id", userId),
+      .in("property_id", propertyIds),
   ]);
 
-  const totalRevenue = revenueData.data?.reduce(
+  const totalRevenue = properties?.reduce(
     (sum, property) => sum + Number(property.monthly_rent),
     0
   ) || 0;
 
   return {
-    totalProperties: propertiesCount.count || 0,
+    totalProperties: properties?.length || 0,
     monthlyRevenue: totalRevenue,
     activeTenants: tenantsCount.count || 0,
     pendingMaintenance: maintenanceCount.count || 0,
@@ -75,14 +63,13 @@ async function fetchTenantMetrics(userId: string): Promise<Metrics> {
     supabase
       .from("payments")
       .select("status")
-      .eq(
-        "tenancy_id",
+      .eq("tenancy_id", 
         supabase
           .from("tenancies")
           .select("id")
           .eq("tenant_id", userId)
           .eq("status", "active")
-          .single()
+          .limit(1)
       )
       .order("due_date", { ascending: false })
       .limit(1)
@@ -147,7 +134,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
         <MetricCard
           title="Pending Maintenance"
           value={metrics.pendingMaintenance}
-          icon={Tool}
+          icon={Settings}
         />
       </div>
     );
@@ -163,7 +150,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
       <MetricCard
         title="Pending Maintenance"
         value={metrics.pendingMaintenance}
-        icon={Tool}
+        icon={Settings}
       />
       <MetricCard
         title="Payment Status"
