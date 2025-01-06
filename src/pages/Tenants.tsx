@@ -64,7 +64,9 @@ const Tenants = () => {
       <main className="flex-1 ml-64 p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto">
           <header className="mb-8">
-            <h1 className="text-3xl font-semibold text-gray-900">Tenants</h1>
+            <h1 className="text-3xl font-semibold text-gray-900">
+              {userRole === "landlord" ? "Tenants" : "My Tenancy"}
+            </h1>
             <p className="mt-2 text-dashboard-text">
               {userRole === "landlord" 
                 ? "Manage and view your property tenants."
@@ -73,13 +75,7 @@ const Tenants = () => {
           </header>
 
           <div className="space-y-8">
-            {userRole === "landlord" ? (
-              <TenantList userId={userId} />
-            ) : (
-              <div className="text-center p-8 bg-white rounded-lg shadow">
-                <p>You don't have access to this section.</p>
-              </div>
-            )}
+            <TenantList userId={userId} userRole={userRole} />
           </div>
         </div>
       </main>

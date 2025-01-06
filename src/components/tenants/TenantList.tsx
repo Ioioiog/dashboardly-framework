@@ -8,18 +8,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { TenantDialog } from "./TenantDialog";
 import { TenantFilters } from "./TenantFilters";
 import { useTenants } from "@/hooks/useTenants";
+import { TenantCard } from "./TenantCard";
 
 interface TenantListProps {
   userId: string;
+  userRole: "landlord" | "tenant";
 }
 
-export function TenantList({ userId }: TenantListProps) {
+export function TenantList({ userId, userRole }: TenantListProps) {
   const [search, setSearch] = useState("");
   const [propertyFilter, setPropertyFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const { toast } = useToast();
 
-  const { data, isLoading } = useTenants(userId);
+  const { data, isLoading } = useTenants(userId, userRole);
 
   const handleDeleteTenant = async (tenantId: string) => {
     try {
@@ -53,6 +55,18 @@ export function TenantList({ userId }: TenantListProps) {
     );
   }
 
+  // For tenants, show a simple card view of their tenancy
+  if (userRole === "tenant") {
+    return (
+      <div className="max-w-md mx-auto">
+        {data?.tenancies.map((tenant) => (
+          <TenantCard key={tenant.id} tenant={tenant} userRole={userRole} />
+        ))}
+      </div>
+    );
+  }
+
+  // For landlords, show the full table view with filters
   const filteredTenants = data?.tenancies.filter((tenant) => {
     const matchesSearch = 
       tenant.first_name?.toLowerCase().includes(search.toLowerCase()) ||
