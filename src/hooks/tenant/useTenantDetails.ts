@@ -1,9 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Property } from "@/types/tenant";
 
 export async function fetchTenantDetails(userId: string) {
-  console.log("Fetching tenant details for:", userId);
-  
+  console.group("👤 Fetching tenant details for:", userId);
+  console.log("========================================");
+
   // Fetch tenant's own tenancy details
   const { data: tenancy, error: tenancyError } = await supabase
     .from("tenancies")
@@ -22,13 +22,14 @@ export async function fetchTenantDetails(userId: string) {
     .maybeSingle();
 
   if (tenancyError) {
-    console.error("Error fetching tenant details:", tenancyError);
+    console.error("❌ Error fetching tenant details:", tenancyError);
     throw tenancyError;
   }
 
   // If no tenancy found, return empty data
   if (!tenancy) {
-    console.log("No active tenancy found for user:", userId);
+    console.log("ℹ️ No active tenancy found for user:", userId);
+    console.groupEnd();
     return {
       tenancies: [],
       properties: []
@@ -43,9 +44,26 @@ export async function fetchTenantDetails(userId: string) {
     .single();
 
   if (profileError) {
-    console.error("Error fetching profile:", profileError);
+    console.error("❌ Error fetching profile:", profileError);
     throw profileError;
   }
+
+  console.log("\n👤 Tenant Details:");
+  console.log("----------------------------------------");
+  console.log(`  Name: ${profile.first_name} ${profile.last_name}`);
+  console.log(`  Email: ${profile.email}`);
+  console.log(`  Phone: ${profile.phone || 'Not provided'}`);
+  
+  console.log("\n🏠 Property Details:");
+  console.log("----------------------------------------");
+  console.log(`  Property: ${tenancy.property.name}`);
+  console.log(`  Address: ${tenancy.property.address}`);
+  console.log(`  Status: ${tenancy.status}`);
+  console.log(`  Period: ${tenancy.start_date} - ${tenancy.end_date || 'Ongoing'}`);
+
+  console.log("\n✅ Data fetch completed");
+  console.log("========================================\n");
+  console.groupEnd();
 
   return {
     tenancies: [{
@@ -61,6 +79,6 @@ export async function fetchTenantDetails(userId: string) {
         status: tenancy.status
       }
     }],
-    properties: [tenancy.property] as Property[]
+    properties: [tenancy.property]
   };
 }
