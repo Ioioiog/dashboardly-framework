@@ -30,6 +30,7 @@ export function DocumentCard({ document, userRole }: DocumentCardProps) {
 
       if (error) throw error;
 
+      // Create a download link
       const url = URL.createObjectURL(data);
       const a = document.createElement("a");
       a.href = url;
