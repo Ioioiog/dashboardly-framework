@@ -2,6 +2,32 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tenant, Property } from "@/types/tenant";
 
+interface Profile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  role: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface TenancyWithProfile {
+  id: string;
+  property_id: string;
+  tenant_id: string;
+  start_date: string;
+  end_date: string | null;
+  status: string;
+  tenant: Profile;
+  property: {
+    id: string;
+    name: string;
+    address: string;
+  };
+}
+
 async function fetchTenants(userId: string) {
   console.log("Fetching tenants for landlord:", userId);
   
@@ -49,7 +75,7 @@ async function fetchTenants(userId: string) {
   console.log("Fetched tenants:", tenancies);
   
   return { 
-    tenancies: tenancies.map((tenancy: any) => ({
+    tenancies: tenancies.map((tenancy: TenancyWithProfile) => ({
       id: tenancy.tenant?.id || '',
       first_name: tenancy.tenant?.first_name,
       last_name: tenancy.tenant?.last_name,
