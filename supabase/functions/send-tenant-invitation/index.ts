@@ -22,13 +22,22 @@ interface InvitationRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  console.log("Received invitation request");
+  
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    if (!RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY is not set");
+    }
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const invitation: InvitationRequest = await req.json();
+    
+    console.log("Processing invitation for:", invitation.email);
 
     // Generate a secure token
     const token = crypto.randomUUID();
@@ -48,6 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     if (inviteError) {
+      console.error("Error storing invitation:", inviteError);
       throw inviteError;
     }
 
@@ -56,6 +66,8 @@ const handler = async (req: Request): Promise<Response> => {
     const baseUrl = `${inviteUrl.protocol}//${inviteUrl.host}`;
     const acceptUrl = `${baseUrl}/accept-invitation?token=${token}`;
 
+    console.log("Sending email to:", invitation.email);
+    
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -67,24 +79,31 @@ const handler = async (req: Request): Promise<Response> => {
         to: [invitation.email],
         subject: `Invitation to join ${invitation.propertyName} as a tenant`,
         html: `
-          <h1>You've been invited!</h1>
-          <p>Hello ${invitation.firstName},</p>
-          <p>You've been invited to join ${invitation.propertyName} as a tenant.</p>
-          <p>Tenancy details:</p>
-          <ul>
-            <li>Start date: ${new Date(invitation.startDate).toLocaleDateString()}</li>
-            ${invitation.endDate ? `<li>End date: ${new Date(invitation.endDate).toLocaleDateString()}</li>` : ''}
-          </ul>
-          <p>Click the link below to accept the invitation and set up your account:</p>
-          <a href="${acceptUrl}">Accept Invitation</a>
-          <p>This link will expire in 7 days.</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #2563eb;">You've been invited!</h1>
+            <p>Hello ${invitation.firstName},</p>
+            <p>You've been invited to join <strong>${invitation.propertyName}</strong> as a tenant.</p>
+            <p><strong>Tenancy details:</strong></p>
+            <ul>
+              <li>Start date: ${new Date(invitation.startDate).toLocaleDateString()}</li>
+              ${invitation.endDate ? `<li>End date: ${new Date(invitation.endDate).toLocaleDateString()}</li>` : ''}
+            </ul>
+            <p>Click the button below to accept the invitation and set up your account:</p>
+            <a href="${acceptUrl}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">Accept Invitation</a>
+            <p style="color: #666;">This link will expire in 7 days.</p>
+            <p style="color: #666; font-size: 12px;">If you didn't expect this invitation, please ignore this email.</p>
+          </div>
         `,
       }),
     });
 
     if (!res.ok) {
+      const error = await res.text();
+      console.error("Error sending email:", error);
       throw new Error("Failed to send email");
     }
+
+    console.log("Email sent successfully");
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
