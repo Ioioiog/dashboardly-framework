@@ -36,6 +36,9 @@ serve(async (req) => {
     const invitationUrl = `https://preview--dashboardly-framework.lovable.app/accept-invitation?token=${requestData.token}`;
     console.log('Generated invitation URL:', invitationUrl);
 
+    // For development, we'll send all emails to the verified email
+    const DEV_VERIFIED_EMAIL = 'ilinca.obadescu@gmail.com';
+
     // Send the email using Resend
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -45,8 +48,8 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'Property Manager <onboarding@resend.dev>',
-        to: [requestData.email],
-        subject: `Invitation to join ${requestData.propertyName}`,
+        to: [DEV_VERIFIED_EMAIL], // Send to verified email in development
+        subject: `[TEST] Invitation to join ${requestData.propertyName}`,
         html: `
           <!DOCTYPE html>
           <html>
@@ -75,6 +78,7 @@ serve(async (req) => {
               <div class="container">
                 <h2>Welcome to Property Manager!</h2>
                 <p>Hello ${requestData.firstName},</p>
+                <p>[TEST EMAIL - Original recipient: ${requestData.email}]</p>
                 <p>You have been invited to join ${requestData.propertyName} as a tenant.</p>
                 
                 <div class="details">
