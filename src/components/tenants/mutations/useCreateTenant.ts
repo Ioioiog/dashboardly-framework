@@ -21,31 +21,35 @@ export async function verifyPropertyOwnership(propertyId: string, userId: string
   }
 }
 
-async function findOrCreateTenant(data: TenantFormValues) {
-  // First try to find the tenant by email
-  const { data: existingProfile, error: profileError } = await supabase
-    .from("profiles")
-    .select("id, role, email")
-    .eq("email", data.email)
-    .maybeSingle();
-
-  if (profileError) {
-    console.error("Error checking existing profile:", profileError);
-    throw profileError;
-  }
-
-  if (existingProfile) {
-    console.log("Found existing profile:", existingProfile);
-    if (existingProfile.role !== 'tenant') {
-      throw new Error("This user exists but is not a tenant");
+async function findExistingUser(email: string) {
+  console.log("Checking for existing user with email:", email);
+  
+  const { data: authUser, error: authError } = await supabase.auth.admin.listUsers({
+    filters: {
+      email: email
     }
-    return { tenantId: existingProfile.id, isNewUser: false };
+  });
+
+  if (authError) {
+    console.error("Error checking existing user:", authError);
+    return null;
   }
 
-  // Create new user if they don't exist
+  if (authUser.users.length > 0) {
+    console.log("Found existing user:", authUser.users[0]);
+    return authUser.users[0];
+  }
+
+  return null;
+}
+
+async function createNewUser(email: string) {
+  console.log("Creating new user with email:", email);
+  
+  const tempPassword = Math.random().toString(36).slice(-8);
   const { data: authUser, error: authError } = await supabase.auth.signUp({
-    email: data.email,
-    password: Math.random().toString(36).slice(-8),
+    email: email,
+    password: tempPassword,
   });
 
   if (authError) {
@@ -54,8 +58,12 @@ async function findOrCreateTenant(data: TenantFormValues) {
   }
 
   console.log("Created new auth user:", authUser);
+  return authUser.user;
+}
 
-  // Update profile for the new tenant
+async function updateUserProfile(userId: string, data: TenantFormValues) {
+  console.log("Updating profile for user:", userId);
+  
   const { error: updateError } = await supabase
     .from("profiles")
     .update({
@@ -65,17 +73,17 @@ async function findOrCreateTenant(data: TenantFormValues) {
       email: data.email,
       role: 'tenant'
     })
-    .eq("id", authUser.user!.id);
+    .eq("id", userId);
 
   if (updateError) {
     console.error("Error updating profile:", updateError);
     throw updateError;
   }
-
-  return { tenantId: authUser.user!.id, isNewUser: true };
 }
 
 async function checkExistingTenancy(tenantId: string) {
+  console.log("Checking existing tenancy for tenant:", tenantId);
+  
   const { data: existingTenancy, error: tenancyError } = await supabase
     .from("tenancies")
     .select("*")
@@ -94,6 +102,8 @@ async function checkExistingTenancy(tenantId: string) {
 }
 
 async function createTenancy(tenantId: string, data: TenantFormValues) {
+  console.log("Creating tenancy for tenant:", tenantId);
+  
   const { error: tenancyError } = await supabase
     .from("tenancies")
     .insert({
@@ -115,7 +125,7 @@ export function useCreateTenant() {
   const queryClient = useQueryClient();
 
   const createTenant = async (data: TenantFormValues) => {
-    console.log("Creating new tenant with data:", data);
+    console.log("Starting tenant creation process with data:", data);
     
     // Get current user's ID to verify they own the property
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -128,16 +138,32 @@ export function useCreateTenant() {
     // Verify property ownership
     await verifyPropertyOwnership(data.property_id, user.id);
 
-    // Find or create tenant
-    const { tenantId, isNewUser } = await findOrCreateTenant(data);
+    // Try to find existing user first
+    let tenantUser = await findExistingUser(data.email);
+    let isNewUser = false;
+
+    if (tenantUser) {
+      console.log("Using existing user account");
+    } else {
+      console.log("Creating new user account");
+      tenantUser = await createNewUser(data.email);
+      isNewUser = true;
+    }
+
+    if (!tenantUser) {
+      throw new Error("Failed to create or find tenant user");
+    }
+
+    // Update profile
+    await updateUserProfile(tenantUser.id, data);
 
     // Check for existing tenancy
-    await checkExistingTenancy(tenantId);
+    await checkExistingTenancy(tenantUser.id);
 
     // Create tenancy relationship
-    await createTenancy(tenantId, data);
+    await createTenancy(tenantUser.id, data);
 
-    console.log("Created tenancy for user:", tenantId);
+    console.log("Completed tenant creation process");
 
     queryClient.invalidateQueries({ queryKey: ["tenants"] });
     toast({
