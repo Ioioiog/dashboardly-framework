@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 interface CreateMaintenanceRequestData {
   title: string;
   description: string;
+  property_id: string;
+  tenant_id: string;
 }
 
 export function useCreateMaintenanceRequest() {
@@ -14,7 +16,7 @@ export function useCreateMaintenanceRequest() {
       console.log("Creating maintenance request:", data);
       const { data: request, error } = await supabase
         .from("maintenance_requests")
-        .insert([data])
+        .insert(data)
         .select()
         .single();
 

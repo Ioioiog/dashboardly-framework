@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateMaintenanceRequest } from "@/hooks/useCreateMaintenanceRequest";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const maintenanceFormSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -31,24 +33,58 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
     },
   });
 
-  const onSubmit = (values: MaintenanceFormValues) => {
-    createRequest(values, {
-      onSuccess: () => {
-        toast({
-          title: "Success",
-          description: "Maintenance request created successfully",
-        });
-        onSuccess();
+  const onSubmit = async (values: MaintenanceFormValues) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create a maintenance request",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Get the user's active tenancy to get the property_id
+    const { data: tenancy, error: tenancyError } = await supabase
+      .from("tenancies")
+      .select("property_id")
+      .eq("tenant_id", user.id)
+      .eq("status", "active")
+      .single();
+
+    if (tenancyError || !tenancy) {
+      toast({
+        title: "Error",
+        description: "Could not find your active tenancy",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createRequest(
+      {
+        ...values,
+        property_id: tenancy.property_id,
+        tenant_id: user.id,
       },
-      onError: (error) => {
-        toast({
-          title: "Error",
-          description: "Failed to create maintenance request",
-          variant: "destructive",
-        });
-        console.error("Error creating maintenance request:", error);
-      },
-    });
+      {
+        onSuccess: () => {
+          toast({
+            title: "Success",
+            description: "Maintenance request created successfully",
+          });
+          onSuccess();
+        },
+        onError: (error) => {
+          toast({
+            title: "Error",
+            description: "Failed to create maintenance request",
+            variant: "destructive",
+          });
+          console.error("Error creating maintenance request:", error);
+        },
+      }
+    );
   };
 
   return (
