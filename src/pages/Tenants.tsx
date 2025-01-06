@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { TenantList } from "@/components/tenants/TenantList";
 import { useToast } from "@/hooks/use-toast";
+import type { Tenant } from "@/types/tenant";
 
 const Tenants = () => {
   const navigate = useNavigate();
@@ -56,6 +57,16 @@ const Tenants = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
+  const handleEdit = (tenant: Tenant) => {
+    console.log("Edit tenant:", tenant);
+    // Implement edit functionality
+  };
+
+  const handleDelete = (tenant: Tenant) => {
+    console.log("Delete tenant:", tenant);
+    // Implement delete functionality
+  };
+
   if (!userId || !userRole) return null;
 
   return (
@@ -75,7 +86,12 @@ const Tenants = () => {
           </header>
 
           <div className="space-y-8">
-            <TenantList userId={userId} userRole={userRole} />
+            <TenantList 
+              userId={userId} 
+              userRole={userRole}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           </div>
         </div>
       </main>

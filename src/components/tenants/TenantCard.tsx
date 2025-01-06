@@ -1,26 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Home, Calendar } from "lucide-react";
+import type { Tenant } from "@/types/tenant";
 
 interface TenantCardProps {
-  tenant: {
-    id: string;
-    first_name?: string | null;
-    last_name?: string | null;
-    property: {
-      name: string;
-      address: string;
-    };
-    tenancy: {
-      start_date: string;
-      end_date: string | null;
-      status: string;
-    };
-  };
+  tenant: Tenant;
   userRole: "landlord" | "tenant";
+  onEdit?: (tenant: Tenant) => void;
+  onDelete?: (tenant: Tenant) => void;
 }
 
-export function TenantCard({ tenant, userRole }: TenantCardProps) {
+export function TenantCard({ tenant, userRole, onEdit, onDelete }: TenantCardProps) {
   return (
     <Card>
       <CardHeader>

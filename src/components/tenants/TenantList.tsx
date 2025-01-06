@@ -2,23 +2,28 @@ import React from "react";
 import { TenantCard } from "./TenantCard";
 import { TenantListSkeleton } from "./TenantListSkeleton";
 import { EmptyTenantState } from "./EmptyTenantState";
-import type { Property, Tenant } from "@/types/tenant";
+import { useTenants } from "@/hooks/useTenants";
+import type { Tenant } from "@/types/tenant";
 
 interface TenantListProps {
-  tenants: Tenant[] | undefined;
-  isLoading: boolean;
+  isLoading?: boolean;
   userRole: "landlord" | "tenant";
   onEdit?: (tenant: Tenant) => void;
   onDelete?: (tenant: Tenant) => void;
+  userId: string;
 }
 
 export function TenantList({ 
-  tenants, 
-  isLoading, 
+  isLoading: isLoadingProp, 
   userRole, 
   onEdit, 
-  onDelete 
+  onDelete,
+  userId 
 }: TenantListProps) {
+  const { data, isLoading: isLoadingQuery } = useTenants(userId, userRole);
+  const isLoading = isLoadingProp || isLoadingQuery;
+  const tenants = data?.tenancies || [];
+
   if (isLoading) {
     return <TenantListSkeleton />;
   }
