@@ -8,7 +8,6 @@ import AuthPage from "./pages/Auth";
 import Properties from "./pages/Properties";
 import Tenants from "./pages/Tenants";
 import Maintenance from "./pages/Maintenance";
-import AcceptInvitation from "./pages/AcceptInvitation";
 import Documents from "./pages/Documents";
 import { StrictMode, useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
@@ -74,7 +73,6 @@ const App = () => {
               <Route path="/tenants" element={<Tenants />} />
               <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/documents" element={<Documents />} />
-              <Route path="/accept-invitation" element={<AcceptInvitation />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </TooltipProvider>
