@@ -1,5 +1,5 @@
 import React from "react";
-import { useTenants } from "@/hooks/useTenants";
+import { useTenants } from "@/hooks/tenant/useTenants";
 import { TenantListSkeleton } from "./TenantListSkeleton";
 import { EmptyTenantState } from "./EmptyTenantState";
 import { TenantDialog } from "./TenantDialog";
