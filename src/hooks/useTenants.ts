@@ -31,7 +31,7 @@ async function fetchTenants(userId: string) {
         name,
         address
       ),
-      tenant:tenant_id (
+      profiles:tenant_id (
         id,
         first_name,
         last_name,
@@ -50,11 +50,11 @@ async function fetchTenants(userId: string) {
   
   return { 
     tenancies: tenancies.map((tenancy) => ({
-      id: tenancy.tenant?.id,
-      first_name: tenancy.tenant?.first_name,
-      last_name: tenancy.tenant?.last_name,
-      email: tenancy.tenant?.email,
-      phone: tenancy.tenant?.phone,
+      id: tenancy.profiles?.id,
+      first_name: tenancy.profiles?.first_name,
+      last_name: tenancy.profiles?.last_name,
+      email: tenancy.profiles?.email,
+      phone: tenancy.profiles?.phone,
       property: tenancy.properties || { id: '', name: '', address: '' },
       tenancy: {
         start_date: tenancy.start_date,
