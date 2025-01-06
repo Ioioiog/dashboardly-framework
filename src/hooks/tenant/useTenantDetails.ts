@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 export async function fetchTenantDetails(userId: string) {
   console.group("👤 Fetching tenant details for:", userId);
 
-  // Fetch tenant's own tenancy details with profile information
+  // Fetch tenant's own tenancy details with profile and property information
   const { data: tenancy, error: tenancyError } = await supabase
     .from("tenancies")
     .select(`
