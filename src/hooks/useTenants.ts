@@ -22,16 +22,16 @@ async function fetchTenants(userId: string) {
   const { data: tenancies, error: tenanciesError } = await supabase
     .from("tenancies")
     .select(`
-      tenant_id,
+      id,
       start_date,
       end_date,
       status,
-      property:property_id (
+      property:properties!inner (
         id,
         name,
         address
       ),
-      tenant:profiles!tenancies_tenant_id_fkey (
+      tenant:profiles!tenancies_tenant_id_fkey!inner (
         id,
         first_name,
         last_name,
@@ -50,12 +50,12 @@ async function fetchTenants(userId: string) {
   
   return { 
     tenancies: tenancies.map((tenancy) => ({
-      id: tenancy.tenant?.id,
-      first_name: tenancy.tenant?.first_name,
-      last_name: tenancy.tenant?.last_name,
-      email: tenancy.tenant?.email,
-      phone: tenancy.tenant?.phone,
-      property: tenancy.property || { id: '', name: '', address: '' },
+      id: tenancy.tenant.id,
+      first_name: tenancy.tenant.first_name,
+      last_name: tenancy.tenant.last_name,
+      email: tenancy.tenant.email,
+      phone: tenancy.tenant.phone,
+      property: tenancy.property,
       tenancy: {
         start_date: tenancy.start_date,
         end_date: tenancy.end_date,
