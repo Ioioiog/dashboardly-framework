@@ -61,30 +61,31 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
       return;
     }
 
-    createRequest(
-      {
-        ...values,
-        property_id: tenancy.property_id,
-        tenant_id: user.id,
+    // Explicitly create the request data with all required fields
+    const requestData = {
+      title: values.title,
+      description: values.description,
+      property_id: tenancy.property_id,
+      tenant_id: user.id,
+    };
+
+    createRequest(requestData, {
+      onSuccess: () => {
+        toast({
+          title: "Success",
+          description: "Maintenance request created successfully",
+        });
+        onSuccess();
       },
-      {
-        onSuccess: () => {
-          toast({
-            title: "Success",
-            description: "Maintenance request created successfully",
-          });
-          onSuccess();
-        },
-        onError: (error) => {
-          toast({
-            title: "Error",
-            description: "Failed to create maintenance request",
-            variant: "destructive",
-          });
-          console.error("Error creating maintenance request:", error);
-        },
-      }
-    );
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: "Failed to create maintenance request",
+          variant: "destructive",
+        });
+        console.error("Error creating maintenance request:", error);
+      },
+    });
   };
 
   return (
