@@ -1,6 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format } from "date-fns";
-import { Home, Calendar } from "lucide-react";
+import React from "react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { TenantDialog } from "./TenantDialog";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash } from "lucide-react";
 import type { Tenant } from "@/types/tenant";
 
 interface TenantCardProps {
@@ -14,44 +16,48 @@ export function TenantCard({ tenant, userRole, onEdit, onDelete }: TenantCardPro
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>
-            {userRole === "landlord" && tenant.first_name && tenant.last_name
-              ? `${tenant.first_name} ${tenant.last_name}`
-              : "Tenant"}
-          </span>
-          <span className={`text-sm px-2 py-1 rounded-full ${
-            tenant.tenancy.status === 'invitation_pending'
-              ? "bg-yellow-100 text-yellow-800"
-              : tenant.tenancy.status === "active" 
-                ? "bg-green-100 text-green-800"
-                : "bg-gray-100 text-gray-800"
-          }`}>
-            {tenant.tenancy.status === 'invitation_pending' ? 'Invitation Pending' : tenant.tenancy.status}
-          </span>
-        </CardTitle>
+        <CardTitle>{tenant.first_name} {tenant.last_name}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-start gap-2">
-          <Home className="w-4 h-4 mt-1 text-gray-500" />
-          <div>
-            <div className="font-medium">{tenant.property.name}</div>
-            <div className="text-sm text-gray-500">{tenant.property.address}</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-gray-500" />
-          <div className="text-sm">
-            <span>From: {format(new Date(tenant.tenancy.start_date), "PP")}</span>
-            {tenant.tenancy.end_date && (
-              <>
-                <br />
-                <span>To: {format(new Date(tenant.tenancy.end_date), "PP")}</span>
-              </>
-            )}
-          </div>
+      <CardContent>
+        <div className="space-y-2">
+          <p className="text-sm text-gray-500">Email: {tenant.email}</p>
+          {tenant.phone && (
+            <p className="text-sm text-gray-500">Phone: {tenant.phone}</p>
+          )}
+          <p className="text-sm text-gray-500">
+            Property: {tenant.property.name} - {tenant.property.address}
+          </p>
+          <p className="text-sm text-gray-500">
+            Start Date: {new Date(tenant.tenancy.start_date).toLocaleDateString()}
+          </p>
+          {tenant.tenancy.end_date && (
+            <p className="text-sm text-gray-500">
+              End Date: {new Date(tenant.tenancy.end_date).toLocaleDateString()}
+            </p>
+          )}
+          <p className="text-sm text-gray-500">
+            Status: {tenant.tenancy.status}
+          </p>
         </div>
       </CardContent>
+      {userRole === "landlord" && (
+        <CardFooter className="flex justify-end gap-2">
+          <TenantDialog tenant={tenant} properties={[tenant.property]}>
+            <Button variant="outline" size="sm">
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          </TenantDialog>
+          <Button 
+            variant="destructive" 
+            size="sm"
+            onClick={() => onDelete?.(tenant)}
+          >
+            <Trash className="w-4 h-4 mr-2" />
+            Delete
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }

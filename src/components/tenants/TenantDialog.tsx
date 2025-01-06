@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { TenantForm } from "./TenantForm";
 import { useTenantMutation } from "./useTenantMutation";
@@ -24,9 +23,10 @@ interface TenantDialogProps {
       end_date?: string;
     };
   };
+  children: React.ReactNode;
 }
 
-export function TenantDialog({ properties, tenant }: TenantDialogProps) {
+export function TenantDialog({ properties, tenant, children }: TenantDialogProps) {
   const [open, setOpen] = React.useState(false);
   const { toast } = useToast();
   const { createTenant, updateTenant } = useTenantMutation();
@@ -52,9 +52,7 @@ export function TenantDialog({ properties, tenant }: TenantDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={tenant ? "outline" : "default"}>
-          {tenant ? "Edit Tenant" : "Add Tenant"}
-        </Button>
+        {children}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
