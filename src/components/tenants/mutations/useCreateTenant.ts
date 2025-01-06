@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { TenantFormValues } from "../TenantFormSchema";
+import { User } from "@supabase/supabase-js";
 
 export async function verifyPropertyOwnership(propertyId: string, userId: string) {
   const { data: property, error: propertyError } = await supabase
@@ -31,7 +32,7 @@ async function findExistingUser(email: string) {
     return null;
   }
 
-  const existingUser = users.find(user => user.email === email);
+  const existingUser = users.find((user: User) => user.email === email);
   
   if (existingUser) {
     console.log("Found existing user:", existingUser);
