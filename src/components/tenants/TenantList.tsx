@@ -1,13 +1,20 @@
 import React from "react";
-import { TenantCard } from "./TenantCard";
+import { useTenants } from "@/hooks/useTenants";
 import { TenantListSkeleton } from "./TenantListSkeleton";
 import { EmptyTenantState } from "./EmptyTenantState";
-import { useTenants } from "@/hooks/useTenants";
 import { TenantDialog } from "./TenantDialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Table2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { Tenant } from "@/types/tenant";
 
 interface TenantListProps {
@@ -35,7 +42,6 @@ export function TenantList({
     
     try {
       if (tenant.tenancy.status === 'invitation_pending') {
-        // Delete invitation
         const { error: invitationError } = await supabase
           .from('tenant_invitations')
           .delete()
@@ -43,7 +49,6 @@ export function TenantList({
 
         if (invitationError) throw invitationError;
       } else {
-        // Update tenancy status to inactive
         const { error: tenancyError } = await supabase
           .from('tenancies')
           .update({ status: 'inactive' })
@@ -57,7 +62,6 @@ export function TenantList({
         description: "Tenant removed successfully",
       });
 
-      // Refresh the tenants list
       refetch();
     } catch (error) {
       console.error('Error deleting tenant:', error);
@@ -75,30 +79,85 @@ export function TenantList({
 
   return (
     <div className="space-y-4">
-      {userRole === "landlord" && (
-        <div className="flex justify-end mb-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Table2 className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">Tenants List</h2>
+        </div>
+        
+        {userRole === "landlord" && (
           <TenantDialog properties={properties}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               Add Tenant
             </Button>
           </TenantDialog>
-        </div>
-      )}
+        )}
+      </div>
       
       {!tenants?.length ? (
         <EmptyTenantState userRole={userRole} />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {tenants.map((tenant) => (
-            <TenantCard
-              key={tenant.id}
-              tenant={tenant}
-              userRole={userRole}
-              onEdit={onEdit}
-              onDelete={handleDelete}
-            />
-          ))}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Property</TableHead>
+                <TableHead>Start Date</TableHead>
+                <TableHead>Status</TableHead>
+                {userRole === "landlord" && <TableHead className="text-right">Actions</TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tenants.map((tenant) => (
+                <TableRow key={tenant.id}>
+                  <TableCell className="font-medium">
+                    {tenant.first_name} {tenant.last_name}
+                  </TableCell>
+                  <TableCell>{tenant.email}</TableCell>
+                  <TableCell>{tenant.phone || "N/A"}</TableCell>
+                  <TableCell>{tenant.property.name}</TableCell>
+                  <TableCell>
+                    {new Date(tenant.tenancy.start_date).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                      tenant.tenancy.status === 'active' 
+                        ? 'bg-green-50 text-green-700' 
+                        : tenant.tenancy.status === 'invitation_pending'
+                        ? 'bg-yellow-50 text-yellow-700'
+                        : 'bg-gray-50 text-gray-700'
+                    }`}>
+                      {tenant.tenancy.status}
+                    </span>
+                  </TableCell>
+                  {userRole === "landlord" && (
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onEdit?.(tenant)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(tenant)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>
