@@ -26,12 +26,12 @@ async function fetchTenants(userId: string) {
       start_date,
       end_date,
       status,
-      properties!tenancies_property_id_fkey (
+      properties:property_id (
         id,
         name,
         address
       ),
-      profiles!tenancies_tenant_id_fkey (
+      tenant:tenant_id (
         id,
         first_name,
         last_name,
@@ -50,11 +50,11 @@ async function fetchTenants(userId: string) {
   
   return { 
     tenancies: tenancies.map((tenancy) => ({
-      id: tenancy.profiles?.id,
-      first_name: tenancy.profiles?.first_name,
-      last_name: tenancy.profiles?.last_name,
-      email: tenancy.profiles?.email,
-      phone: tenancy.profiles?.phone,
+      id: tenancy.tenant?.id,
+      first_name: tenancy.tenant?.first_name,
+      last_name: tenancy.tenant?.last_name,
+      email: tenancy.tenant?.email,
+      phone: tenancy.tenant?.phone,
       property: tenancy.properties || { id: '', name: '', address: '' },
       tenancy: {
         start_date: tenancy.start_date,
