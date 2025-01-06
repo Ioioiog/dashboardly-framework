@@ -12,5 +12,6 @@ export interface TenantInvitation {
   updated_at: string;
   property?: {
     name: string;
+    address: string;
   };
 }

@@ -34,7 +34,7 @@ export default function AcceptInvitation() {
         value: token
       };
 
-      const { error: rpcError } = await supabase.rpc('set_claim', params);
+      const { error: rpcError } = await supabase.rpc('set_claim', { params });
 
       if (rpcError) {
         console.error("Error setting token claim:", rpcError);
