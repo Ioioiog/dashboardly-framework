@@ -35,43 +35,80 @@ export function useTenantMutation() {
       throw new Error("You can only assign tenants to properties you own");
     }
 
-    // Create new user account for tenant
-    const { data: authUser, error: authError } = await supabase.auth.signUp({
-      email: data.email,
-      password: Math.random().toString(36).slice(-8), // Generate random password
-    });
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('id, role')
+      .eq('email', data.email)
+      .single();
 
-    if (authError) {
-      console.error("Error creating auth user:", authError);
-      throw authError;
-    }
+    let tenantId: string;
 
-    console.log("Created auth user:", authUser);
-
-    // Update profile for the new tenant
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .update({
-        first_name: data.first_name,
-        last_name: data.last_name,
-        phone: data.phone,
+    if (existingUser) {
+      console.log("User already exists:", existingUser);
+      
+      if (existingUser.role !== 'tenant') {
+        throw new Error("This user exists but is not a tenant");
+      }
+      
+      tenantId = existingUser.id;
+    } else {
+      // Create new user account for tenant
+      const { data: authUser, error: authError } = await supabase.auth.signUp({
         email: data.email,
-        role: 'tenant'
-      })
-      .eq("id", authUser.user!.id);
+        password: Math.random().toString(36).slice(-8), // Generate random password
+      });
 
-    if (profileError) {
-      console.error("Error updating profile:", profileError);
-      throw profileError;
+      if (authError) {
+        console.error("Error creating auth user:", authError);
+        throw authError;
+      }
+
+      console.log("Created auth user:", authUser);
+      tenantId = authUser.user!.id;
+
+      // Update profile for the new tenant
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          first_name: data.first_name,
+          last_name: data.last_name,
+          phone: data.phone,
+          email: data.email,
+          role: 'tenant'
+        })
+        .eq("id", tenantId);
+
+      if (profileError) {
+        console.error("Error updating profile:", profileError);
+        throw profileError;
+      }
+
+      console.log("Updated profile for user:", tenantId);
     }
 
-    console.log("Updated profile for user:", authUser.user!.id);
+    // Check if tenant already has an active tenancy
+    const { data: existingTenancy, error: tenancyCheckError } = await supabase
+      .from("tenancies")
+      .select("*")
+      .eq("tenant_id", tenantId)
+      .eq("status", "active")
+      .single();
+
+    if (tenancyCheckError && tenancyCheckError.code !== "PGRST116") { // PGRST116 means no rows returned
+      console.error("Error checking existing tenancy:", tenancyCheckError);
+      throw tenancyCheckError;
+    }
+
+    if (existingTenancy) {
+      throw new Error("This tenant already has an active tenancy");
+    }
 
     // Create tenancy relationship
     const { error: tenancyError } = await supabase
       .from("tenancies")
       .insert({
-        tenant_id: authUser.user!.id,
+        tenant_id: tenantId,
         property_id: data.property_id,
         start_date: data.start_date,
         end_date: data.end_date || null,
@@ -83,12 +120,14 @@ export function useTenantMutation() {
       throw tenancyError;
     }
 
-    console.log("Created tenancy for user:", authUser.user!.id);
+    console.log("Created tenancy for user:", tenantId);
 
     queryClient.invalidateQueries({ queryKey: ["tenants"] });
     toast({
       title: "Success",
-      description: "Tenant added successfully. They will receive an email to set their password.",
+      description: existingUser 
+        ? "Tenant assigned successfully" 
+        : "Tenant added successfully. They will receive an email to set their password.",
     });
   };
 
