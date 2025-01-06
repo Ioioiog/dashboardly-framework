@@ -32,8 +32,9 @@ serve(async (req) => {
     const requestData: InvitationRequest = await req.json();
     console.log('Received invitation request:', requestData);
 
-    // Generate the invitation URL
-    const invitationUrl = `${req.headers.get('origin')}/accept-invitation?token=${requestData.token}`;
+    // Generate the invitation URL using the origin from the request
+    const origin = req.headers.get('origin') || 'http://localhost:5173';
+    const invitationUrl = `${origin}/accept-invitation?token=${requestData.token}`;
     console.log('Generated invitation URL:', invitationUrl);
 
     // Send the email using Resend
@@ -74,6 +75,7 @@ serve(async (req) => {
             <body>
               <div class="container">
                 <h2>Welcome to Property Manager!</h2>
+                <p>Hello ${requestData.firstName},</p>
                 <p>You have been invited to join ${requestData.propertyName} as a tenant.</p>
                 
                 <div class="details">
@@ -84,7 +86,7 @@ serve(async (req) => {
                 </div>
 
                 <p>To accept this invitation and set up your account, please click the button below:</p>
-                <a href="${invitationUrl}" class="button">Accept Invitation</a>
+                <a href="${invitationUrl}" class="button" style="color: white;">Accept Invitation</a>
 
                 <p><small>This invitation link will expire in 7 days. If you did not expect this invitation, please ignore this email.</small></p>
               </div>
