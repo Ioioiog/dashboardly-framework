@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
-import { TenantList } from "@/components/tenants/TenantList";
 import { useToast } from "@/hooks/use-toast";
-import type { Tenant } from "@/types/tenant";
+import { Button } from "@/components/ui/button";
+import { PlusIcon } from "lucide-react";
 
 const Tenants = () => {
   const navigate = useNavigate();
@@ -57,16 +57,6 @@ const Tenants = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
-  const handleEdit = (tenant: Tenant) => {
-    console.log("Edit tenant:", tenant);
-    // Implement edit functionality
-  };
-
-  const handleDelete = (tenant: Tenant) => {
-    console.log("Delete tenant:", tenant);
-    // Implement delete functionality
-  };
-
   if (!userId || !userRole) return null;
 
   return (
@@ -74,24 +64,31 @@ const Tenants = () => {
       <DashboardSidebar />
       <main className="flex-1 ml-64 p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto">
-          <header className="mb-8">
-            <h1 className="text-3xl font-semibold text-gray-900">
-              {userRole === "landlord" ? "Tenants" : "My Tenancy"}
-            </h1>
-            <p className="mt-2 text-dashboard-text">
-              {userRole === "landlord" 
-                ? "Manage and view your property tenants."
-                : "View your tenancy details."}
-            </p>
+          <header className="mb-8 flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-semibold text-gray-900">
+                {userRole === "landlord" ? "Tenants" : "My Tenancy"}
+              </h1>
+              <p className="mt-2 text-dashboard-text">
+                {userRole === "landlord"
+                  ? "Manage and view your property tenants."
+                  : "View your tenancy details."}
+              </p>
+            </div>
+            {userRole === "landlord" && (
+              <Button>
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Add Tenant
+              </Button>
+            )}
           </header>
 
           <div className="space-y-8">
-            <TenantList 
-              userId={userId} 
-              userRole={userRole}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            <div className="rounded-lg border bg-card text-card-foreground shadow p-6">
+              <p className="text-muted-foreground">
+                Tenant management is being rebuilt. Please check back soon.
+              </p>
+            </div>
           </div>
         </div>
       </main>
