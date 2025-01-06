@@ -19,22 +19,22 @@ interface DocumentCardProps {
   userRole: "landlord" | "tenant";
 }
 
-export function DocumentCard({ document, userRole }: DocumentCardProps) {
+export function DocumentCard({ document: doc, userRole }: DocumentCardProps) {
   const { toast } = useToast();
 
   const handleDownload = async () => {
     try {
       const { data, error } = await supabase.storage
         .from("documents")
-        .download(document.file_path);
+        .download(doc.file_path);
 
       if (error) throw error;
 
       // Create a download link
       const url = URL.createObjectURL(data);
-      const a = document.createElement("a");
+      const a = window.document.createElement("a");
       a.href = url;
-      a.download = document.name;
+      a.download = doc.name;
       a.click();
       URL.revokeObjectURL(url);
     } catch (error) {
@@ -51,14 +51,14 @@ export function DocumentCard({ document, userRole }: DocumentCardProps) {
     try {
       const { error: storageError } = await supabase.storage
         .from("documents")
-        .remove([document.file_path]);
+        .remove([doc.file_path]);
 
       if (storageError) throw storageError;
 
       const { error: dbError } = await supabase
         .from("documents")
         .delete()
-        .eq("id", document.id);
+        .eq("id", doc.id);
 
       if (dbError) throw dbError;
 
@@ -81,21 +81,21 @@ export function DocumentCard({ document, userRole }: DocumentCardProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5" />
-          <span className="truncate">{document.name}</span>
+          <span className="truncate">{doc.name}</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {document.property && (
+          {doc.property && (
             <div>
               <p className="text-sm font-medium text-gray-500">Property</p>
-              <p className="text-sm">{document.property.name}</p>
+              <p className="text-sm">{doc.property.name}</p>
             </div>
           )}
           <div>
             <p className="text-sm font-medium text-gray-500">Uploaded</p>
             <p className="text-sm">
-              {format(new Date(document.created_at), "PPP")}
+              {format(new Date(doc.created_at), "PPP")}
             </p>
           </div>
           <div className="flex gap-2">
