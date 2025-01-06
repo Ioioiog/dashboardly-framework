@@ -67,11 +67,12 @@ serve(async (req) => {
 
     console.log('Created invitation record:', invitation);
 
-    // Generate the invitation URL
-    const invitationUrl = `${req.headers.get('origin')}/accept-invitation?token=${token}`;
+    // Generate the invitation URL with the full origin
+    const origin = req.headers.get('origin') || 'http://localhost:5173';
+    const invitationUrl = `${origin}/accept-invitation?token=${token}`;
     console.log('Generated invitation URL:', invitationUrl);
 
-    // Send the email using Resend
+    // Send the email using Resend with improved HTML template
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -83,17 +84,48 @@ serve(async (req) => {
         to: [requestData.email],
         subject: `Invitation to join ${requestData.propertyName}`,
         html: `
-          <h2>Welcome to Property Manager!</h2>
-          <p>You have been invited to join ${requestData.propertyName} as a tenant.</p>
-          <p>Your tenancy details:</p>
-          <ul>
-            <li>Start Date: ${new Date(requestData.startDate).toLocaleDateString()}</li>
-            ${requestData.endDate ? `<li>End Date: ${new Date(requestData.endDate).toLocaleDateString()}</li>` : ''}
-          </ul>
-          <p>To accept this invitation and set up your account, please click the link below:</p>
-          <p><a href="${invitationUrl}">Accept Invitation</a></p>
-          <p>This invitation link will expire in 7 days.</p>
-          <p>If you did not expect this invitation, please ignore this email.</p>
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .button { 
+                  display: inline-block; 
+                  padding: 12px 24px; 
+                  background-color: #4F46E5; 
+                  color: white; 
+                  text-decoration: none; 
+                  border-radius: 6px;
+                  margin: 20px 0;
+                }
+                .details { 
+                  background-color: #f9fafb; 
+                  padding: 15px; 
+                  border-radius: 6px;
+                  margin: 15px 0;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h2>Welcome to Property Manager!</h2>
+                <p>You have been invited to join ${requestData.propertyName} as a tenant.</p>
+                
+                <div class="details">
+                  <h3>Your Tenancy Details:</h3>
+                  <p><strong>Start Date:</strong> ${new Date(requestData.startDate).toLocaleDateString()}</p>
+                  ${requestData.endDate ? `<p><strong>End Date:</strong> ${new Date(requestData.endDate).toLocaleDateString()}</p>` : ''}
+                  <p><strong>Property:</strong> ${requestData.propertyName}</p>
+                </div>
+
+                <p>To accept this invitation and set up your account, please click the button below:</p>
+                <a href="${invitationUrl}" class="button">Accept Invitation</a>
+
+                <p><small>This invitation link will expire in 7 days. If you did not expect this invitation, please ignore this email.</small></p>
+              </div>
+            </body>
+          </html>
         `,
       }),
     });
