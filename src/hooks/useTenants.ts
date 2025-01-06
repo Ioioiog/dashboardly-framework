@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tenant, Property } from "@/types/tenant";
+import type { Property } from "@/types/tenant";
 
 interface Profile {
   id: string;
@@ -9,8 +9,6 @@ interface Profile {
   email: string | null;
   phone: string | null;
   role: string;
-  created_at: string;
-  updated_at: string;
 }
 
 interface TenancyWithProfile {
@@ -23,7 +21,7 @@ interface TenancyWithProfile {
     name: string;
     address: string;
   };
-  tenant: Profile;
+  profiles: Profile;
 }
 
 async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
@@ -54,7 +52,7 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
           name,
           address
         ),
-        tenant:profiles!tenancies_tenant_id_fkey (
+        profiles!tenancies_tenant_id_fkey (
           id,
           first_name,
           last_name,
@@ -73,12 +71,12 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
     console.log("Fetched tenancies:", tenancies);
     
     return { 
-      tenancies: tenancies.map((tenancy: TenancyWithProfile) => ({
-        id: tenancy.tenant?.id || '',
-        first_name: tenancy.tenant?.first_name || null,
-        last_name: tenancy.tenant?.last_name || null,
-        email: tenancy.tenant?.email || null,
-        phone: tenancy.tenant?.phone || null,
+      tenancies: tenancies.map((tenancy: any) => ({
+        id: tenancy.profiles.id,
+        first_name: tenancy.profiles.first_name,
+        last_name: tenancy.profiles.last_name,
+        email: tenancy.profiles.email,
+        phone: tenancy.profiles.phone,
         property: tenancy.property,
         tenancy: {
           start_date: tenancy.start_date,
