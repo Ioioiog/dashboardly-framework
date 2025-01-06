@@ -37,19 +37,14 @@ const DashboardSidebar = () => {
 
   const handleLogout = async () => {
     try {
-      // First check if we have a session
-      const { data: { session } } = await supabase.auth.getSession();
+      console.log("Starting logout process");
       
-      if (session) {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-          console.error("Error during signOut:", error);
-          throw error;
-        }
-      }
+      // Clear any local session state first
+      await supabase.auth.signOut({ scope: 'local' });
+      console.log("Local session cleared");
       
-      // Always navigate to auth page, even if there was no session
-      console.log("Navigating to auth page after logout");
+      // Navigate to auth page immediately
+      console.log("Navigating to auth page");
       navigate("/auth");
       
     } catch (error) {
@@ -154,7 +149,6 @@ const DashboardSidebar = () => {
       </div>
     </aside>
   );
-
 };
 
 export default DashboardSidebar;
