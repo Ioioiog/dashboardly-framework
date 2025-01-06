@@ -12,7 +12,14 @@ import AcceptInvitation from "./pages/AcceptInvitation";
 import { StrictMode, useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Helper function to handle the recovery token
 const handleRecoveryToken = async () => {
