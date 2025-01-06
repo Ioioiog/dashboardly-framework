@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Home,
@@ -30,13 +30,16 @@ const menuItems: MenuItem[] = [
 
 const DashboardSidebar = () => {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
-  const [activePath, setActivePath] = React.useState("/dashboard");
+  const location = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (!error) {
+      console.log("Successfully logged out");
       navigate("/auth");
+    } else {
+      console.error("Error logging out:", error);
     }
   };
 
@@ -68,15 +71,14 @@ const DashboardSidebar = () => {
                 <Link
                   to={item.path}
                   className={`flex items-center px-6 py-3 text-dashboard-text hover:bg-dashboard-accent transition-colors duration-200 ${
-                    activePath === item.path
-                      ? "bg-dashboard-accent font-medium"
+                    location.pathname === item.path
+                      ? "bg-dashboard-accent text-gray-900 font-medium"
                       : ""
                   }`}
-                  onClick={() => setActivePath(item.path)}
                 >
                   <item.icon
                     className={`h-5 w-5 ${
-                      activePath === item.path
+                      location.pathname === item.path
                         ? "text-gray-900"
                         : "text-dashboard-text"
                     }`}
