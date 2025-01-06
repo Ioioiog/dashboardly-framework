@@ -8,7 +8,7 @@ import AuthPage from "./pages/Auth";
 import Properties from "./pages/Properties";
 import Tenants from "./pages/Tenants";
 import AcceptInvitation from "./pages/AcceptInvitation";
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
 
 const queryClient = new QueryClient();
@@ -36,7 +36,7 @@ const handleRecoveryToken = async () => {
 
 const App = () => {
   // Handle recovery token when the app loads
-  React.useEffect(() => {
+  useEffect(() => {
     const checkRecoveryToken = async () => {
       const hasRecoveryToken = await handleRecoveryToken();
       if (hasRecoveryToken) {
