@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import type { TenantInvitation } from "@/types/tenant-invitations";
-import type { SetClaimParams } from "@/integrations/supabase/types/rpc";
+import type { SetClaimRequest } from "@/integrations/supabase/types/rpc";
 
 export default function AcceptInvitation() {
   const [searchParams] = useSearchParams();
@@ -29,12 +29,14 @@ export default function AcceptInvitation() {
 
     const fetchInvitation = async () => {
       // Set the token in the session for RLS policy
-      const params: SetClaimParams = {
-        name: 'app.current_token',
-        value: token
+      const params: SetClaimRequest = {
+        params: {
+          name: 'app.current_token',
+          value: token
+        }
       };
 
-      const { error: rpcError } = await supabase.rpc('set_claim', { params });
+      const { error: rpcError } = await supabase.rpc('set_claim', params);
 
       if (rpcError) {
         console.error("Error setting token claim:", rpcError);

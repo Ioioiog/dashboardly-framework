@@ -11,5 +11,8 @@ export interface SetClaimParams {
 }
 
 export interface SetClaimRequest {
-  params: Json;
+  params: {
+    name: string;
+    value: string;
+  };
 }
