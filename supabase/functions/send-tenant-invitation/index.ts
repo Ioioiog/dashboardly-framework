@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,9 +10,10 @@ interface InvitationRequest {
   propertyId: string;
   propertyName: string;
   startDate: string;
-  endDate: string | null;
+  endDate?: string;
   firstName: string;
   lastName: string;
+  token: string;
 }
 
 serve(async (req) => {
@@ -29,49 +29,14 @@ serve(async (req) => {
       throw new Error('Email service configuration is missing');
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    if (!supabaseUrl || !supabaseKey) {
-      console.error('Supabase configuration is missing');
-      throw new Error('Database configuration is missing');
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
     const requestData: InvitationRequest = await req.json();
     console.log('Received invitation request:', requestData);
 
-    // Generate a unique token for the invitation
-    const token = crypto.randomUUID();
-    console.log('Generated invitation token:', token);
-
-    // Create the invitation record in the database
-    const { data: invitation, error: invitationError } = await supabase
-      .from('tenant_invitations')
-      .insert({
-        email: requestData.email,
-        first_name: requestData.firstName,
-        last_name: requestData.lastName,
-        property_id: requestData.propertyId,
-        token: token,
-        start_date: requestData.startDate,
-        end_date: requestData.endDate,
-        status: 'pending'
-      })
-      .select()
-      .single();
-
-    if (invitationError) {
-      console.error('Error creating invitation:', invitationError);
-      throw new Error('Failed to create invitation');
-    }
-
-    console.log('Created invitation record:', invitation);
-
-    // Use the preview URL for generating the invitation link
-    const invitationUrl = `https://preview--dashboardly-framework.lovable.app/accept-invitation?token=${token}`;
+    // Generate the invitation URL
+    const invitationUrl = `${req.headers.get('origin')}/accept-invitation?token=${requestData.token}`;
     console.log('Generated invitation URL:', invitationUrl);
 
-    // Send the email using Resend with improved HTML template
+    // Send the email using Resend
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -135,8 +100,8 @@ serve(async (req) => {
       throw new Error('Failed to send invitation email');
     }
 
-    const emailResult = await emailResponse.json();
-    console.log('Email sent successfully:', emailResult);
+    const result = await emailResponse.json();
+    console.log('Email sent successfully:', result);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -147,7 +112,7 @@ serve(async (req) => {
     console.error('Error in send-tenant-invitation function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
+      { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
       }

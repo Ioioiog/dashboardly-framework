@@ -64,27 +64,25 @@ export function useCreateTenant() {
       throw new Error("Failed to create tenant invitation");
     }
 
-    // Send invitation email using the edge function
-    const response = await fetch('/api/send-tenant-invitation', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: data.email,
-        propertyId: data.property_id,
-        propertyName: property.name,
-        startDate: data.start_date,
-        endDate: data.end_date,
-        firstName: data.first_name,
-        lastName: data.last_name,
-        token: token,
-      }),
-    });
+    // Send invitation email using Supabase Edge Function
+    const { data: emailResponse, error: emailError } = await supabase.functions.invoke(
+      'send-tenant-invitation',
+      {
+        body: {
+          email: data.email,
+          propertyId: data.property_id,
+          propertyName: property.name,
+          startDate: data.start_date,
+          endDate: data.end_date,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          token: token,
+        },
+      }
+    );
 
-    if (!response.ok) {
-      const error = await response.json();
-      console.error("Error sending invitation:", error);
+    if (emailError) {
+      console.error("Error sending invitation:", emailError);
       throw new Error("Failed to send tenant invitation");
     }
 
