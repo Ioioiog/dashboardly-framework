@@ -26,7 +26,17 @@ export default function AcceptInvitation() {
 
     const fetchInvitation = async () => {
       // Set the token in the session for RLS policy
-      await supabase.rpc('set_claim', { name: 'app.current_token', value: token });
+      const { error: rpcError } = await supabase.rpc('set_claim', {
+        name: 'app.current_token',
+        value: token
+      } as { name: string; value: string });
+
+      if (rpcError) {
+        console.error("Error setting token claim:", rpcError);
+        setError("Error validating invitation");
+        setLoading(false);
+        return;
+      }
 
       const { data, error } = await supabase
         .from("tenant_invitations")
