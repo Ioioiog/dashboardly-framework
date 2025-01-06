@@ -1,78 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { format } from "date-fns";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { TenantDialog } from "./TenantDialog";
-import { format } from "date-fns";
-
-async function fetchTenants(userId: string) {
-  console.log("Fetching tenants for landlord:", userId);
-  
-  const { data: properties, error: propertiesError } = await supabase
-    .from("properties")
-    .select("id, name, address")
-    .eq("landlord_id", userId);
-
-  if (propertiesError) {
-    console.error("Error fetching properties:", propertiesError);
-    throw propertiesError;
-  }
-
-  // First get all properties owned by the landlord
-  const propertyIds = properties.map(p => p.id);
-  
-  // Then get all tenancies for these properties, including tenant profiles
-  const { data: tenancies, error: tenanciesError } = await supabase
-    .from("tenancies")
-    .select(`
-      id,
-      property_id,
-      start_date,
-      end_date,
-      status,
-      tenant:tenant_id (
-        id,
-        first_name,
-        last_name,
-        email,
-        phone
-      ),
-      property:property_id (
-        id,
-        name,
-        address
-      )
-    `)
-    .in('property_id', propertyIds);
-
-  if (tenanciesError) {
-    console.error("Error fetching tenancies:", tenanciesError);
-    throw tenanciesError;
-  }
-
-  console.log("Fetched tenants:", tenancies);
-  return { 
-    tenancies: tenancies.map(({ tenant, property, ...tenancy }) => ({
-      id: tenant?.id,
-      first_name: tenant?.first_name,
-      last_name: tenant?.last_name,
-      email: tenant?.email,
-      phone: tenant?.phone,
-      property: property || { id: '', name: '', address: '' },
-      tenancy: {
-        start_date: tenancy.start_date,
-        end_date: tenancy.end_date,
-        status: tenancy.status
-      }
-    })),
-    properties 
-  };
-}
+import { TenantFilters } from "./TenantFilters";
+import { useTenants } from "@/hooks/useTenants";
 
 interface TenantListProps {
   userId: string;
@@ -84,10 +19,7 @@ export function TenantList({ userId }: TenantListProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const { toast } = useToast();
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["tenants", userId],
-    queryFn: () => fetchTenants(userId),
-  });
+  const { data, isLoading } = useTenants(userId);
 
   const handleDeleteTenant = async (tenantId: string) => {
     try {
@@ -136,37 +68,17 @@ export function TenantList({ userId }: TenantListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Input
-          placeholder="Search tenants..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="sm:max-w-xs"
+      <div className="flex justify-between items-start gap-4">
+        <TenantFilters
+          search={search}
+          onSearchChange={setSearch}
+          propertyFilter={propertyFilter}
+          onPropertyFilterChange={setPropertyFilter}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          properties={data?.properties || []}
         />
-        <Select value={propertyFilter} onValueChange={setPropertyFilter}>
-          <SelectTrigger className="sm:max-w-xs">
-            <SelectValue placeholder="Filter by property" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Properties</SelectItem>
-            {data?.properties.map((property) => (
-              <SelectItem key={property.id} value={property.id}>
-                {property.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="sm:max-w-xs">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className="flex-1 text-right">
+        <div className="flex-shrink-0">
           <TenantDialog properties={data?.properties || []} />
         </div>
       </div>

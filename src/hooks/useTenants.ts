@@ -1,0 +1,72 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tenant, Property } from "@/types/tenant";
+
+async function fetchTenants(userId: string) {
+  console.log("Fetching tenants for landlord:", userId);
+  
+  const { data: properties, error: propertiesError } = await supabase
+    .from("properties")
+    .select("id, name, address")
+    .eq("landlord_id", userId);
+
+  if (propertiesError) {
+    console.error("Error fetching properties:", propertiesError);
+    throw propertiesError;
+  }
+
+  const propertyIds = properties.map(p => p.id);
+  
+  const { data: tenancies, error: tenanciesError } = await supabase
+    .from("tenancies")
+    .select(`
+      id,
+      start_date,
+      end_date,
+      status,
+      profiles!tenancies_tenant_id_fkey (
+        id,
+        first_name,
+        last_name,
+        email,
+        phone
+      ),
+      properties!tenancies_property_id_fkey (
+        id,
+        name,
+        address
+      )
+    `)
+    .in('property_id', propertyIds);
+
+  if (tenanciesError) {
+    console.error("Error fetching tenancies:", tenanciesError);
+    throw tenanciesError;
+  }
+
+  console.log("Fetched tenants:", tenancies);
+  
+  return { 
+    tenancies: tenancies.map((tenancy) => ({
+      id: tenancy.profiles?.id,
+      first_name: tenancy.profiles?.first_name,
+      last_name: tenancy.profiles?.last_name,
+      email: tenancy.profiles?.email,
+      phone: tenancy.profiles?.phone,
+      property: tenancy.properties || { id: '', name: '', address: '' },
+      tenancy: {
+        start_date: tenancy.start_date,
+        end_date: tenancy.end_date,
+        status: tenancy.status
+      }
+    })) as Tenant[],
+    properties: properties as Property[]
+  };
+}
+
+export function useTenants(userId: string) {
+  return useQuery({
+    queryKey: ["tenants", userId],
+    queryFn: () => fetchTenants(userId),
+  });
+}
