@@ -140,11 +140,20 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
         )
       `)
       .eq('tenant_id', userId)
-      .single();
+      .maybeSingle();
 
     if (tenancyError) {
       console.error("Error fetching tenant details:", tenancyError);
       throw tenancyError;
+    }
+
+    // If no tenancy found, return empty data
+    if (!tenancy) {
+      console.log("No active tenancy found for user:", userId);
+      return {
+        tenancies: [],
+        properties: []
+      };
     }
 
     // Fetch tenant's profile
