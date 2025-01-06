@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Home,
@@ -10,6 +10,7 @@ import {
   Zap,
   LogOut,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MenuItem {
   icon: React.ElementType;
@@ -30,6 +31,14 @@ const menuItems: MenuItem[] = [
 const DashboardSidebar = () => {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [activePath, setActivePath] = React.useState("/dashboard");
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      navigate("/auth");
+    }
+  };
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -87,7 +96,7 @@ const DashboardSidebar = () => {
 
         <div className="p-6 border-t border-gray-100">
           <button
-            onClick={() => console.log("Logout clicked")}
+            onClick={handleLogout}
             className="flex items-center w-full text-dashboard-text hover:text-gray-900 transition-colors duration-200"
           >
             <LogOut className="h-5 w-5" />
