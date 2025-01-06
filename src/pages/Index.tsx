@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
+import { RevenueChart } from "@/components/dashboard/RevenueChart";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -59,7 +60,10 @@ const Index = () => {
           </header>
 
           {userId && userRole && (
-            <DashboardMetrics userId={userId} userRole={userRole} />
+            <div className="space-y-8">
+              <DashboardMetrics userId={userId} userRole={userRole} />
+              {userRole === "landlord" && <RevenueChart userId={userId} />}
+            </div>
           )}
         </div>
       </main>
