@@ -162,29 +162,38 @@ export type Database = {
       properties: {
         Row: {
           address: string
+          available_from: string | null
           created_at: string
+          description: string | null
           id: string
           landlord_id: string
           monthly_rent: number
           name: string
+          type: Database["public"]["Enums"]["property_type"]
           updated_at: string
         }
         Insert: {
           address: string
+          available_from?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           landlord_id: string
           monthly_rent: number
           name: string
+          type?: Database["public"]["Enums"]["property_type"]
           updated_at?: string
         }
         Update: {
           address?: string
+          available_from?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           landlord_id?: string
           monthly_rent?: number
           name?: string
+          type?: Database["public"]["Enums"]["property_type"]
           updated_at?: string
         }
         Relationships: []
@@ -279,7 +288,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      property_type: "Apartment" | "House" | "Condo" | "Commercial"
     }
     CompositeTypes: {
       [_ in never]: never
