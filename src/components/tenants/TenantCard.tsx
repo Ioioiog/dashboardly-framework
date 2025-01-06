@@ -1,8 +1,7 @@
 import React from "react";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { TenantDialog } from "./TenantDialog";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import type { Tenant } from "@/types/tenant";
 
 interface TenantCardProps {
@@ -13,64 +12,62 @@ interface TenantCardProps {
 }
 
 export function TenantCard({ tenant, userRole, onEdit, onDelete }: TenantCardProps) {
-  // Transform tenant data to match expected format for TenantDialog
-  const tenantForDialog = {
-    id: tenant.id,
-    email: tenant.email || '',
-    first_name: tenant.first_name || '',
-    last_name: tenant.last_name || '',
-    phone: tenant.phone,
-    tenancy: {
-      property_id: tenant.property.id,
-      start_date: tenant.tenancy.start_date,
-      end_date: tenant.tenancy.end_date
-    }
-  };
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{tenant.first_name} {tenant.last_name}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          <p className="text-sm text-gray-500">Email: {tenant.email}</p>
+    <Card className="p-6 space-y-4">
+      <div>
+        <h3 className="text-2xl font-semibold mb-4">
+          {tenant.first_name} {tenant.last_name}
+        </h3>
+        
+        <div className="space-y-2 text-gray-600">
+          <p>
+            <span className="font-medium">Email: </span>
+            {tenant.email}
+          </p>
+          
           {tenant.phone && (
-            <p className="text-sm text-gray-500">Phone: {tenant.phone}</p>
-          )}
-          <p className="text-sm text-gray-500">
-            Property: {tenant.property.name} - {tenant.property.address}
-          </p>
-          <p className="text-sm text-gray-500">
-            Start Date: {new Date(tenant.tenancy.start_date).toLocaleDateString()}
-          </p>
-          {tenant.tenancy.end_date && (
-            <p className="text-sm text-gray-500">
-              End Date: {new Date(tenant.tenancy.end_date).toLocaleDateString()}
+            <p>
+              <span className="font-medium">Phone: </span>
+              {tenant.phone}
             </p>
           )}
-          <p className="text-sm text-gray-500">
-            Status: {tenant.tenancy.status}
+          
+          <p>
+            <span className="font-medium">Property: </span>
+            {tenant.property.name} - {tenant.property.address}
+          </p>
+          
+          <p>
+            <span className="font-medium">Start Date: </span>
+            {new Date(tenant.tenancy.start_date).toLocaleDateString()}
+          </p>
+          
+          <p>
+            <span className="font-medium">Status: </span>
+            {tenant.tenancy.status}
           </p>
         </div>
-      </CardContent>
+      </div>
+
       {userRole === "landlord" && (
-        <CardFooter className="flex justify-end gap-2">
-          <TenantDialog tenant={tenantForDialog} properties={[tenant.property]}>
-            <Button variant="outline" size="sm">
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          </TenantDialog>
-          <Button 
-            variant="destructive" 
-            size="sm"
+        <div className="flex justify-end gap-2 pt-4">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => onEdit?.(tenant)}
+          >
+            <Edit className="h-4 w-4" />
+            Edit
+          </Button>
+          <Button
+            variant="destructive"
+            className="gap-2"
             onClick={() => onDelete?.(tenant)}
           >
-            <Trash className="w-4 h-4 mr-2" />
+            <Trash2 className="h-4 w-4" />
             Delete
           </Button>
-        </CardFooter>
+        </div>
       )}
     </Card>
   );
