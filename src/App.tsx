@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AuthPage from "./pages/Auth";
+import Properties from "./pages/Properties";
 import { StrictMode } from "react";
 
 const queryClient = new QueryClient();
@@ -19,6 +20,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/dashboard" element={<Index />} />
+            <Route path="/properties" element={<Properties />} />
             <Route path="*" element={<Index />} />
           </Routes>
         </TooltipProvider>
