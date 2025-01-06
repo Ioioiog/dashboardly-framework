@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import AuthPage from "./pages/Auth";
 import Properties from "./pages/Properties";
 import Tenants from "./pages/Tenants";
+import AcceptInvitation from "./pages/AcceptInvitation";
 import { StrictMode } from "react";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/dashboard" element={<Index />} />
             <Route path="/properties" element={<Properties />} />
             <Route path="/tenants" element={<Tenants />} />
+            <Route path="/accept-invitation" element={<AcceptInvitation />} />
             <Route path="*" element={<Index />} />
           </Routes>
         </TooltipProvider>

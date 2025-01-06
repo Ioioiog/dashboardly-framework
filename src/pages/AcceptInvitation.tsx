@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
+import type { TenantInvitation } from "@/types/tenant-invitations";
 
 export default function AcceptInvitation() {
   const [searchParams] = useSearchParams();
@@ -12,7 +13,7 @@ export default function AcceptInvitation() {
   const { toast } = useToast();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(true);
-  const [invitation, setInvitation] = useState<any>(null);
+  const [invitation, setInvitation] = useState<TenantInvitation | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,6 +25,9 @@ export default function AcceptInvitation() {
     }
 
     const fetchInvitation = async () => {
+      // Set the token in the session for RLS policy
+      await supabase.rpc('set_claim', { name: 'app.current_token', value: token });
+
       const { data, error } = await supabase
         .from("tenant_invitations")
         .select("*, property:properties(name)")
@@ -32,12 +36,13 @@ export default function AcceptInvitation() {
         .single();
 
       if (error || !data) {
+        console.error("Error fetching invitation:", error);
         setError("Invalid or expired invitation");
         setLoading(false);
         return;
       }
 
-      setInvitation(data);
+      setInvitation(data as TenantInvitation);
       setLoading(false);
     };
 
@@ -136,11 +141,11 @@ export default function AcceptInvitation() {
         <h1 className="text-2xl font-semibold mb-6">Accept Invitation</h1>
         <div className="mb-6">
           <p className="text-gray-600">
-            You've been invited to join {invitation.property.name} as a tenant.
+            You've been invited to join {invitation?.property?.name} as a tenant.
           </p>
           <div className="mt-4 text-sm text-gray-500">
-            <p>Start date: {new Date(invitation.start_date).toLocaleDateString()}</p>
-            {invitation.end_date && (
+            <p>Start date: {new Date(invitation?.start_date || '').toLocaleDateString()}</p>
+            {invitation?.end_date && (
               <p>End date: {new Date(invitation.end_date).toLocaleDateString()}</p>
             )}
           </div>
