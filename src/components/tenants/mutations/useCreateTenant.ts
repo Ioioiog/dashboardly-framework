@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { TenantFormValues } from "../TenantFormSchema";
 
 export async function verifyPropertyOwnership(propertyId: string, userId: string) {
+  console.log("Verifying property ownership for:", propertyId, "user:", userId);
+  
   const { data: property, error: propertyError } = await supabase
     .from("properties")
     .select("landlord_id, name")
@@ -41,12 +43,32 @@ export function useCreateTenant() {
     // Verify property ownership and get property details
     const property = await verifyPropertyOwnership(data.property_id, user.id);
 
+    // Create invitation token
+    const token = crypto.randomUUID();
+
+    // Create tenant invitation
+    const { error: invitationError } = await supabase
+      .from("tenant_invitations")
+      .insert({
+        email: data.email,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        property_id: data.property_id,
+        token: token,
+        start_date: data.start_date,
+        end_date: data.end_date || null,
+      });
+
+    if (invitationError) {
+      console.error("Error creating tenant invitation:", invitationError);
+      throw new Error("Failed to create tenant invitation");
+    }
+
     // Send invitation email
     const response = await fetch('/functions/v1/send-tenant-invitation', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({
         email: data.email,
@@ -56,6 +78,7 @@ export function useCreateTenant() {
         endDate: data.end_date,
         firstName: data.first_name,
         lastName: data.last_name,
+        token: token,
       }),
     });
 
