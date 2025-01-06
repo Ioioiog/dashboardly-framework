@@ -2,12 +2,14 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const isPasswordReset = location.hash.includes('type=recovery');
 
   useEffect(() => {
     const checkUser = async () => {
@@ -21,7 +23,7 @@ const AuthPage = () => {
         });
         return;
       }
-      if (session) {
+      if (session && !isPasswordReset) {
         navigate("/dashboard");
       }
     };
@@ -38,6 +40,11 @@ const AuthPage = () => {
           console.log("User signed out");
         } else if (event === 'USER_UPDATED') {
           console.log("User updated");
+          toast({
+            title: "Success",
+            description: "Your password has been updated successfully.",
+          });
+          navigate("/dashboard");
         } else if (event === 'PASSWORD_RECOVERY') {
           console.log("Password recovery requested");
           navigate("/update-password");
@@ -46,14 +53,17 @@ const AuthPage = () => {
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate, toast]);
+  }, [navigate, toast, isPasswordReset]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-2xl font-semibold text-center mb-8 text-gray-900">PropertyHub</h1>
+        <h1 className="text-2xl font-semibold text-center mb-8 text-gray-900">
+          {isPasswordReset ? "Update Password" : "PropertyHub"}
+        </h1>
         <Auth
           supabaseClient={supabase}
+          view={isPasswordReset ? "update_password" : "sign_in"}
           appearance={{
             theme: ThemeSupa,
             variables: {
