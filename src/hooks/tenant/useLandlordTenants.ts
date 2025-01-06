@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Property } from "@/types/tenant";
 
 export async function fetchLandlordTenants(userId: string) {
-  console.log("Fetching landlord tenants for:", userId);
+  console.group("🏠 Fetching landlord tenants for:", userId);
   
   // First fetch properties owned by the landlord
   const { data: properties, error: propertiesError } = await supabase
@@ -11,11 +11,16 @@ export async function fetchLandlordTenants(userId: string) {
     .eq("landlord_id", userId);
 
   if (propertiesError) {
-    console.error("Error fetching properties:", propertiesError);
+    console.error("❌ Error fetching properties:", propertiesError);
     throw propertiesError;
   }
 
-  // Fetch both active tenancies and pending invitations
+  console.log("📍 Properties found:", properties.length);
+  properties.forEach((prop, index) => {
+    console.log(`  ${index + 1}. ${prop.name} (${prop.address})`);
+  });
+
+  // Fetch both active tenancies and pending invitations with profile information
   const [tenanciesResponse, invitationsResponse] = await Promise.all([
     supabase
       .from("tenancies")
@@ -29,7 +34,7 @@ export async function fetchLandlordTenants(userId: string) {
           name,
           address
         ),
-        profiles!tenancies_tenant_id_fkey (
+        tenant:profiles!tenancies_tenant_id_fkey (
           id,
           first_name,
           last_name,
@@ -60,25 +65,34 @@ export async function fetchLandlordTenants(userId: string) {
   ]);
 
   if (tenanciesResponse.error) {
-    console.error("Error fetching tenancies:", tenanciesResponse.error);
+    console.error("❌ Error fetching tenancies:", tenanciesResponse.error);
     throw tenanciesResponse.error;
   }
 
   if (invitationsResponse.error) {
-    console.error("Error fetching invitations:", invitationsResponse.error);
+    console.error("❌ Error fetching invitations:", invitationsResponse.error);
     throw invitationsResponse.error;
   }
 
-  console.log("Fetched tenancies:", tenanciesResponse.data);
-  console.log("Fetched invitations:", invitationsResponse.data);
-  
-  // Combine tenancies and invitations into a unified format
-  const tenancies = tenanciesResponse.data.map((tenancy: any) => ({
-    id: tenancy.profiles.id,
-    first_name: tenancy.profiles.first_name,
-    last_name: tenancy.profiles.last_name,
-    email: tenancy.profiles.email,
-    phone: tenancy.profiles.phone,
+  // Log detailed information
+  console.group("👥 Active and Past Tenancies:");
+  tenanciesResponse.data.forEach((tenancy, index) => {
+    console.log(`  ${index + 1}. ${tenancy.tenant.first_name} ${tenancy.tenant.last_name}`);
+    console.log(`     📅 Period: ${tenancy.start_date} - ${tenancy.end_date || 'Ongoing'}`);
+    console.log(`     🏠 Property: ${tenancy.property.name}`);
+    console.log(`     📊 Status: ${tenancy.status}`);
+    console.log(`     📧 Contact: ${tenancy.tenant.email}`);
+    console.log('     ---');
+  });
+  console.groupEnd();
+
+  // Format the response data
+  const tenancies = tenanciesResponse.data.map((tenancy) => ({
+    id: tenancy.tenant.id,
+    first_name: tenancy.tenant.first_name,
+    last_name: tenancy.tenant.last_name,
+    email: tenancy.tenant.email,
+    phone: tenancy.tenant.phone,
     property: tenancy.property,
     tenancy: {
       start_date: tenancy.start_date,
@@ -87,7 +101,7 @@ export async function fetchLandlordTenants(userId: string) {
     }
   }));
 
-  const invitations = invitationsResponse.data.map((invitation: any) => ({
+  const invitations = invitationsResponse.data.map((invitation) => ({
     id: invitation.id,
     first_name: invitation.first_name,
     last_name: invitation.last_name,
@@ -100,6 +114,9 @@ export async function fetchLandlordTenants(userId: string) {
       status: 'invitation_pending'
     }
   }));
+
+  console.log("✅ Data fetch completed");
+  console.groupEnd();
 
   return { 
     tenancies: [...tenancies, ...invitations],

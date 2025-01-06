@@ -2,9 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function fetchTenantDetails(userId: string) {
   console.group("👤 Fetching tenant details for:", userId);
-  console.log("========================================");
 
-  // Fetch tenant's own tenancy details
+  // Fetch tenant's own tenancy details with profile information
   const { data: tenancy, error: tenancyError } = await supabase
     .from("tenancies")
     .select(`
@@ -16,6 +15,13 @@ export async function fetchTenantDetails(userId: string) {
         id,
         name,
         address
+      ),
+      tenant:profiles!tenancies_tenant_id_fkey (
+        id,
+        first_name,
+        last_name,
+        email,
+        phone
       )
     `)
     .eq('tenant_id', userId)
@@ -36,23 +42,11 @@ export async function fetchTenantDetails(userId: string) {
     };
   }
 
-  // Fetch tenant's profile
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("id, first_name, last_name, email, phone")
-    .eq('id', userId)
-    .single();
-
-  if (profileError) {
-    console.error("❌ Error fetching profile:", profileError);
-    throw profileError;
-  }
-
   console.log("\n👤 Tenant Details:");
   console.log("----------------------------------------");
-  console.log(`  Name: ${profile.first_name} ${profile.last_name}`);
-  console.log(`  Email: ${profile.email}`);
-  console.log(`  Phone: ${profile.phone || 'Not provided'}`);
+  console.log(`  Name: ${tenancy.tenant.first_name} ${tenancy.tenant.last_name}`);
+  console.log(`  Email: ${tenancy.tenant.email}`);
+  console.log(`  Phone: ${tenancy.tenant.phone || 'Not provided'}`);
   
   console.log("\n🏠 Property Details:");
   console.log("----------------------------------------");
@@ -62,16 +56,15 @@ export async function fetchTenantDetails(userId: string) {
   console.log(`  Period: ${tenancy.start_date} - ${tenancy.end_date || 'Ongoing'}`);
 
   console.log("\n✅ Data fetch completed");
-  console.log("========================================\n");
   console.groupEnd();
 
   return {
     tenancies: [{
-      id: profile.id,
-      first_name: profile.first_name,
-      last_name: profile.last_name,
-      email: profile.email,
-      phone: profile.phone,
+      id: tenancy.tenant.id,
+      first_name: tenancy.tenant.first_name,
+      last_name: tenancy.tenant.last_name,
+      email: tenancy.tenant.email,
+      phone: tenancy.tenant.phone,
       property: tenancy.property,
       tenancy: {
         start_date: tenancy.start_date,
