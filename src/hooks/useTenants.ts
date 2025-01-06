@@ -20,7 +20,7 @@ interface TenancyWithProfile {
 }
 
 async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
-  console.log(`Fetching tenants for ${userRole}:`, userId);
+  console.group(`🏠 Fetching tenants for ${userRole}:`, userId);
   
   if (userRole === "landlord") {
     // First fetch properties owned by the landlord
@@ -30,9 +30,14 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
       .eq("landlord_id", userId);
 
     if (propertiesError) {
-      console.error("Error fetching properties:", propertiesError);
+      console.error("❌ Error fetching properties:", propertiesError);
       throw propertiesError;
     }
+
+    console.log("📍 Properties found:", properties.length);
+    properties.forEach((prop, index) => {
+      console.log(`  ${index + 1}. ${prop.name} (${prop.address})`);
+    });
 
     // Fetch both active tenancies and pending invitations
     const [tenanciesResponse, invitationsResponse] = await Promise.all([
@@ -79,17 +84,39 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
     ]);
 
     if (tenanciesResponse.error) {
-      console.error("Error fetching tenancies:", tenanciesResponse.error);
+      console.error("❌ Error fetching tenancies:", tenanciesResponse.error);
       throw tenanciesResponse.error;
     }
 
     if (invitationsResponse.error) {
-      console.error("Error fetching invitations:", invitationsResponse.error);
+      console.error("❌ Error fetching invitations:", invitationsResponse.error);
       throw invitationsResponse.error;
     }
 
-    console.log("Fetched tenancies:", tenanciesResponse.data);
-    console.log("Fetched invitations:", invitationsResponse.data);
+    console.group("👥 Active and Past Tenancies:");
+    tenanciesResponse.data.forEach((tenancy, index) => {
+      console.log(`  ${index + 1}. ${tenancy.profiles.first_name} ${tenancy.profiles.last_name}`);
+      console.log(`     📅 Period: ${tenancy.start_date} - ${tenancy.end_date || 'Ongoing'}`);
+      console.log(`     🏠 Property: ${tenancy.property.name}`);
+      console.log(`     📊 Status: ${tenancy.status}`);
+      console.log(`     📧 Contact: ${tenancy.profiles.email}`);
+      console.log('     ---');
+    });
+    console.groupEnd();
+
+    console.group("📨 Pending Invitations:");
+    if (invitationsResponse.data.length === 0) {
+      console.log("  No pending invitations");
+    } else {
+      invitationsResponse.data.forEach((invitation, index) => {
+        console.log(`  ${index + 1}. ${invitation.first_name} ${invitation.last_name}`);
+        console.log(`     📧 Email: ${invitation.email}`);
+        console.log(`     🏠 Property: ${invitation.property.name}`);
+        console.log(`     📅 Start Date: ${invitation.start_date}`);
+        console.log('     ---');
+      });
+    }
+    console.groupEnd();
     
     // Combine tenancies and invitations into a unified format
     const tenancies = tenanciesResponse.data.map((tenancy: any) => ({
@@ -120,6 +147,9 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
       }
     }));
 
+    console.log("✅ Data fetch completed");
+    console.groupEnd();
+
     return { 
       tenancies: [...tenancies, ...invitations],
       properties: properties as Property[]
@@ -143,13 +173,14 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
       .maybeSingle();
 
     if (tenancyError) {
-      console.error("Error fetching tenant details:", tenancyError);
+      console.error("❌ Error fetching tenant details:", tenancyError);
       throw tenancyError;
     }
 
     // If no tenancy found, return empty data
     if (!tenancy) {
-      console.log("No active tenancy found for user:", userId);
+      console.log("ℹ️ No active tenancy found for user:", userId);
+      console.groupEnd();
       return {
         tenancies: [],
         properties: []
@@ -164,9 +195,20 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
       .single();
 
     if (profileError) {
-      console.error("Error fetching profile:", profileError);
+      console.error("❌ Error fetching profile:", profileError);
       throw profileError;
     }
+
+    console.log("👤 Tenant Details:");
+    console.log(`  Name: ${profile.first_name} ${profile.last_name}`);
+    console.log(`  Email: ${profile.email}`);
+    console.log(`  Phone: ${profile.phone || 'Not provided'}`);
+    console.log(`  Property: ${tenancy.property.name}`);
+    console.log(`  Status: ${tenancy.status}`);
+    console.log(`  Period: ${tenancy.start_date} - ${tenancy.end_date || 'Ongoing'}`);
+
+    console.log("✅ Data fetch completed");
+    console.groupEnd();
 
     return {
       tenancies: [{
