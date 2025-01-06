@@ -53,7 +53,7 @@ export function TenantForm({ onSubmit, properties, tenant }: TenantFormProps) {
         <TenantContactFields form={form} isEditing={!!tenant} />
         <TenantPropertyFields form={form} properties={properties} />
         <Button type="submit" className="w-full">
-          {tenant ? "Update Tenant" : "Add Tenant"}
+          {tenant ? "Update Tenant" : "Send Invitation"}
         </Button>
       </form>
     </Form>

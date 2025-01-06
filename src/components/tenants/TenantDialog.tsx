@@ -41,6 +41,10 @@ export function TenantDialog({ properties, tenant, children }: TenantDialogProps
         });
       } else {
         await createTenant(data);
+        toast({
+          title: "Success",
+          description: "Invitation sent successfully. The tenant will receive an email to set up their account.",
+        });
       }
       setOpen(false);
     } catch (error) {
