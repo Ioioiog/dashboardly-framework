@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Building2, MapPin, Edit, Trash2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { PropertyList } from "../properties/PropertyList";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Property {
   id: string;
@@ -31,7 +30,6 @@ async function fetchProperties(userId: string, userRole: string) {
     console.log("Fetched landlord properties:", data);
     return data;
   } else {
-    // For tenants, get properties through active tenancies
     const { data, error } = await supabase
       .from("tenancies")
       .select(`
@@ -59,76 +57,29 @@ async function fetchProperties(userId: string, userRole: string) {
 }
 
 export function DashboardProperties({ userId, userRole }: { userId: string; userRole: "landlord" | "tenant" }) {
+  const { toast } = useToast();
   const { data: properties, isLoading } = useQuery({
     queryKey: ["dashboard-properties", userId, userRole],
     queryFn: () => fetchProperties(userId, userRole),
   });
 
-  if (isLoading) {
-    return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i} className="p-6 animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          </Card>
-        ))}
-      </div>
-    );
-  }
+  const handleEdit = (property: Property) => {
+    console.log("Edit property:", property);
+    // Will implement edit functionality
+  };
 
-  if (!properties?.length) {
-    return (
-      <Card className="p-6">
-        <div className="text-center text-gray-500">
-          {userRole === "landlord" 
-            ? "No properties found. Add your first property to get started!"
-            : "No active leases found."}
-        </div>
-      </Card>
-    );
-  }
+  const handleDelete = (property: Property) => {
+    console.log("Delete property:", property);
+    // Will implement delete functionality
+  };
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {properties.map((property: Property) => (
-        <Card key={property.id} className="p-6 hover:shadow-lg transition-shadow">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center">
-              <Building2 className="h-5 w-5 text-gray-500 mr-2" />
-              <h3 className="font-medium">{property.name}</h3>
-            </div>
-            {userRole === "landlord" && (
-              <div className="flex gap-2">
-                <Button variant="ghost" size="icon">
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </div>
-          <div className="flex items-start text-sm text-gray-500">
-            <MapPin className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-            <span>{property.address}</span>
-          </div>
-          {property.description && (
-            <p className="mt-2 text-sm text-gray-600">{property.description}</p>
-          )}
-          <div className="mt-4 pt-4 border-t">
-            <div className="text-sm font-medium">
-              Monthly Rent: ${property.monthly_rent.toLocaleString()}
-            </div>
-            <div className="mt-2 flex justify-between text-sm text-gray-500">
-              <span>Type: {property.type}</span>
-              {property.available_from && (
-                <span>Available from: {new Date(property.available_from).toLocaleDateString()}</span>
-              )}
-            </div>
-          </div>
-        </Card>
-      ))}
-    </div>
+    <PropertyList
+      properties={properties}
+      isLoading={isLoading}
+      userRole={userRole}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+    />
   );
 }

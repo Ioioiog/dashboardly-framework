@@ -12,6 +12,7 @@ const Properties = () => {
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -24,7 +25,6 @@ const Properties = () => {
 
       setUserId(session.user.id);
 
-      // Fetch user role from profiles
       const { data: profile, error } = await supabase
         .from("profiles")
         .select("role")
@@ -60,6 +60,10 @@ const Properties = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
+  const handleAddProperty = () => {
+    setShowAddModal(true);
+  };
+
   return (
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
@@ -73,7 +77,10 @@ const Properties = () => {
               </p>
             </div>
             {userRole === "landlord" && (
-              <Button className="flex items-center gap-2">
+              <Button 
+                className="flex items-center gap-2"
+                onClick={handleAddProperty}
+              >
                 <Plus className="h-4 w-4" />
                 Add Property
               </Button>

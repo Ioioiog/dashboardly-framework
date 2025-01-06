@@ -1,0 +1,62 @@
+import React from "react";
+import { PropertyCard } from "./PropertyCard";
+import { Card } from "@/components/ui/card";
+
+interface Property {
+  id: string;
+  name: string;
+  address: string;
+  monthly_rent: number;
+  type: string;
+  description?: string;
+  available_from?: string;
+}
+
+interface PropertyListProps {
+  properties: Property[] | undefined;
+  isLoading: boolean;
+  userRole: "landlord" | "tenant";
+  onEdit?: (property: Property) => void;
+  onDelete?: (property: Property) => void;
+}
+
+export function PropertyList({ properties, isLoading, userRole, onEdit, onDelete }: PropertyListProps) {
+  if (isLoading) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="p-6 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (!properties?.length) {
+    return (
+      <Card className="p-6">
+        <div className="text-center text-gray-500">
+          {userRole === "landlord" 
+            ? "No properties found. Add your first property to get started!"
+            : "No active leases found."}
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {properties.map((property) => (
+        <PropertyCard
+          key={property.id}
+          property={property}
+          userRole={userRole}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
+      ))}
+    </div>
+  );
+}
