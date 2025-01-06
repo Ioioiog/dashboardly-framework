@@ -48,38 +48,35 @@ async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
 }
 
 async function fetchTenantMetrics(userId: string): Promise<Metrics> {
-  const [currentTenancy, maintenanceCount, latestPayment] = await Promise.all([
-    supabase
-      .from("tenancies")
-      .select("property:properties(name)")
-      .eq("tenant_id", userId)
-      .eq("status", "active")
-      .single(),
+  // First get the active tenancy
+  const { data: currentTenancy } = await supabase
+    .from("tenancies")
+    .select("id, property:properties(name)")
+    .eq("tenant_id", userId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  const [maintenanceCount, latestPayment] = await Promise.all([
     supabase
       .from("maintenance_requests")
       .select("id", { count: "exact" })
       .eq("tenant_id", userId)
       .eq("status", "pending"),
-    supabase
-      .from("payments")
-      .select("status")
-      .eq("tenancy_id", 
-        supabase
-          .from("tenancies")
-          .select("id")
-          .eq("tenant_id", userId)
-          .eq("status", "active")
+    currentTenancy?.id
+      ? supabase
+          .from("payments")
+          .select("status")
+          .eq("tenancy_id", currentTenancy.id)
+          .order("due_date", { ascending: false })
           .limit(1)
-      )
-      .order("due_date", { ascending: false })
-      .limit(1)
-      .single(),
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
 
   return {
-    currentProperty: currentTenancy.data?.property?.name || "No active lease",
+    currentProperty: currentTenancy?.property?.name || "No active lease",
     pendingMaintenance: maintenanceCount.count || 0,
-    paymentStatus: latestPayment.data?.status || "No payments",
+    paymentStatus: latestPayment?.data?.status || "No payments",
     totalProperties: 0,
     monthlyRevenue: 0,
     activeTenants: 0,
