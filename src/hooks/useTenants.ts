@@ -20,7 +20,7 @@ interface TenancyWithProfile {
     name: string;
     address: string;
   };
-  tenant: Profile;
+  profiles: Profile;
 }
 
 async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
@@ -51,7 +51,7 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
           name,
           address
         ),
-        tenant:profiles!tenancies_tenant_id_fkey (
+        profiles!tenancies_tenant_id_fkey (
           id,
           first_name,
           last_name,
@@ -69,12 +69,12 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
     console.log("Fetched tenancies:", tenancies);
     
     return { 
-      tenancies: tenancies.map((tenancy: TenancyWithProfile) => ({
-        id: tenancy.tenant.id,
-        first_name: tenancy.tenant.first_name,
-        last_name: tenancy.tenant.last_name,
-        email: tenancy.tenant.email,
-        phone: tenancy.tenant.phone,
+      tenancies: tenancies.map((tenancy: any) => ({
+        id: tenancy.profiles.id,
+        first_name: tenancy.profiles.first_name,
+        last_name: tenancy.profiles.last_name,
+        email: tenancy.profiles.email,
+        phone: tenancy.profiles.phone,
         property: tenancy.property,
         tenancy: {
           start_date: tenancy.start_date,
