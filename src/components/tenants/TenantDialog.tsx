@@ -35,6 +35,10 @@ export function TenantDialog({ properties, tenant, children }: TenantDialogProps
     try {
       if (tenant) {
         await updateTenant(tenant.id, data);
+        toast({
+          title: "Success",
+          description: "Tenant updated successfully.",
+        });
       } else {
         await createTenant(data);
       }

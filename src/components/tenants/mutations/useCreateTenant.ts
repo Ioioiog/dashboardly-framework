@@ -64,8 +64,8 @@ export function useCreateTenant() {
       throw new Error("Failed to create tenant invitation");
     }
 
-    // Send invitation email
-    const response = await fetch('/functions/v1/send-tenant-invitation', {
+    // Send invitation email using the edge function
+    const response = await fetch('/api/send-tenant-invitation', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
