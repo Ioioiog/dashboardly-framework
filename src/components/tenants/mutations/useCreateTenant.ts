@@ -24,20 +24,18 @@ export async function verifyPropertyOwnership(propertyId: string, userId: string
 async function findExistingUser(email: string) {
   console.log("Checking for existing user with email:", email);
   
-  const { data: authUser, error: authError } = await supabase.auth.admin.listUsers({
-    filters: {
-      email: email
-    }
-  });
+  const { data: { users }, error: authError } = await supabase.auth.admin.listUsers();
 
   if (authError) {
     console.error("Error checking existing user:", authError);
     return null;
   }
 
-  if (authUser.users.length > 0) {
-    console.log("Found existing user:", authUser.users[0]);
-    return authUser.users[0];
+  const existingUser = users.find(user => user.email === email);
+  
+  if (existingUser) {
+    console.log("Found existing user:", existingUser);
+    return existingUser;
   }
 
   return null;
