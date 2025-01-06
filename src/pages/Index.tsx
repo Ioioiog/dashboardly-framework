@@ -4,6 +4,7 @@ import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { DashboardProperties } from "@/components/dashboard/DashboardProperties";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -62,6 +63,10 @@ const Index = () => {
           {userId && userRole && (
             <div className="space-y-8">
               <DashboardMetrics userId={userId} userRole={userRole} />
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Properties</h2>
+                <DashboardProperties userId={userId} userRole={userRole} />
+              </div>
               {userRole === "landlord" && <RevenueChart userId={userId} />}
             </div>
           )}
