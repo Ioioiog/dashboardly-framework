@@ -15,11 +15,7 @@ interface TenancyWithProfile {
   start_date: string;
   end_date: string | null;
   status: string;
-  property: {
-    id: string;
-    name: string;
-    address: string;
-  };
+  property: Property;
   profiles: Profile;
 }
 
@@ -86,7 +82,7 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
     };
   } else {
     // Fetch tenant's own tenancy details
-    const { data: tenancies, error: tenanciesError } = await supabase
+    const { data: tenancy, error: tenancyError } = await supabase
       .from("tenancies")
       .select(`
         id,
@@ -102,9 +98,9 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
       .eq('tenant_id', userId)
       .single();
 
-    if (tenanciesError) {
-      console.error("Error fetching tenant details:", tenanciesError);
-      throw tenanciesError;
+    if (tenancyError) {
+      console.error("Error fetching tenant details:", tenancyError);
+      throw tenancyError;
     }
 
     // Fetch tenant's profile
@@ -126,14 +122,14 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
         last_name: profile.last_name,
         email: profile.email,
         phone: profile.phone,
-        property: tenancies.property,
+        property: tenancy.property,
         tenancy: {
-          start_date: tenancies.start_date,
-          end_date: tenancies.end_date,
-          status: tenancies.status
+          start_date: tenancy.start_date,
+          end_date: tenancy.end_date,
+          status: tenancy.status
         }
       }],
-      properties: [tenancies.property] as Property[]
+      properties: [tenancy.property] as Property[]
     };
   }
 }

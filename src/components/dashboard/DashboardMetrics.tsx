@@ -71,14 +71,19 @@ async function fetchTenantMetrics(userId: string): Promise<Metrics> {
   console.log("Fetching tenant metrics for user:", userId);
   
   // First get the active tenancy
-  const { data: currentTenancy } = await supabase
+  const { data: tenancy } = await supabase
     .from("tenancies")
-    .select("id, property:properties(name)")
+    .select(`
+      id,
+      property:properties (
+        name
+      )
+    `)
     .eq("tenant_id", userId)
     .eq("status", "active")
     .maybeSingle();
 
-  console.log("Current tenancy:", currentTenancy);
+  console.log("Current tenancy:", tenancy);
 
   const [maintenanceCount, latestPayment] = await Promise.all([
     supabase
@@ -86,11 +91,11 @@ async function fetchTenantMetrics(userId: string): Promise<Metrics> {
       .select("id", { count: "exact" })
       .eq("tenant_id", userId)
       .eq("status", "pending"),
-    currentTenancy?.id
+    tenancy?.id
       ? supabase
           .from("payments")
           .select("status")
-          .eq("tenancy_id", currentTenancy.id)
+          .eq("tenancy_id", tenancy.id)
           .order("due_date", { ascending: false })
           .limit(1)
           .maybeSingle()
@@ -98,13 +103,13 @@ async function fetchTenantMetrics(userId: string): Promise<Metrics> {
   ]);
 
   console.log("Tenant metrics calculated:", {
-    property: currentTenancy?.property?.name,
+    property: tenancy?.property?.name,
     maintenance: maintenanceCount.count,
     payment: latestPayment.data?.status,
   });
 
   return {
-    currentProperty: currentTenancy?.property?.name || "No active lease",
+    currentProperty: tenancy?.property?.name || "No active lease",
     pendingMaintenance: maintenanceCount.count || 0,
     paymentStatus: latestPayment.data?.status || "No payments",
   };
