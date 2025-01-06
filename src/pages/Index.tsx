@@ -2,9 +2,12 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
+import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [userId, setUserId] = React.useState<string | null>(null);
+  const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -12,6 +15,20 @@ const Index = () => {
       if (!session) {
         console.log("No active session found, redirecting to auth");
         navigate("/auth");
+        return;
+      }
+
+      setUserId(session.user.id);
+
+      // Fetch user role from profiles
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .single();
+
+      if (profile?.role) {
+        setUserRole(profile.role as "landlord" | "tenant");
       }
     };
 
@@ -41,21 +58,9 @@ const Index = () => {
             </p>
           </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Placeholder cards for metrics */}
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200"
-              >
-                <div className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
-                  <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                </div>
-              </div>
-            ))}
-          </div>
+          {userId && userRole && (
+            <DashboardMetrics userId={userId} userRole={userRole} />
+          )}
         </div>
       </main>
     </div>
