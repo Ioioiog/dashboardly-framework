@@ -73,7 +73,13 @@ const Tenants = () => {
           </header>
 
           <div className="space-y-8">
-            <TenantList userId={userId} userRole={userRole} />
+            {userRole === "landlord" ? (
+              <TenantList userId={userId} />
+            ) : (
+              <div className="text-center p-8 bg-white rounded-lg shadow">
+                <p>You don't have access to this section.</p>
+              </div>
+            )}
           </div>
         </div>
       </main>
