@@ -54,17 +54,28 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
       return;
     }
 
+    // Use maybeSingle() instead of single() to handle the case where no tenancy exists
     const { data: tenancy, error: tenancyError } = await supabase
       .from("tenancies")
       .select("property_id")
       .eq("tenant_id", user.id)
       .eq("status", "active")
-      .single();
+      .maybeSingle();
 
-    if (tenancyError || !tenancy) {
+    if (tenancyError) {
       toast({
         title: "Error",
-        description: "Could not find your active tenancy",
+        description: "Failed to fetch tenancy information",
+        variant: "destructive",
+      });
+      console.error("Error fetching tenancy:", tenancyError);
+      return;
+    }
+
+    if (!tenancy) {
+      toast({
+        title: "Error",
+        description: "You don't have an active tenancy. Please contact your landlord.",
         variant: "destructive",
       });
       return;
