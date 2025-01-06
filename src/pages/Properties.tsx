@@ -1,12 +1,13 @@
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardProperties } from "@/components/dashboard/DashboardProperties";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 
 const Properties = () => {
   const navigate = useNavigate();
-  const [userId, setUserId] = React.useState<string | null>(null);
-  const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
