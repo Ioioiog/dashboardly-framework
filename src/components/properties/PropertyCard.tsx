@@ -1,5 +1,5 @@
 import React from "react";
-import { Building2, MapPin, Edit, Trash2 } from "lucide-react";
+import { Building2, MapPin, Edit, Trash2, UserPlus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -18,9 +18,16 @@ interface PropertyCardProps {
   userRole: "landlord" | "tenant";
   onEdit?: (property: Property) => void;
   onDelete?: (property: Property) => void;
+  onInviteTenant?: (property: Property) => void;
 }
 
-export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyCardProps) {
+export function PropertyCard({ 
+  property, 
+  userRole, 
+  onEdit, 
+  onDelete,
+  onInviteTenant 
+}: PropertyCardProps) {
   return (
     <Card className="p-6 hover:shadow-lg transition-shadow">
       <div className="flex items-start justify-between mb-4">
@@ -33,7 +40,16 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
             <Button 
               variant="ghost" 
               size="icon"
+              onClick={() => onInviteTenant?.(property)}
+              title="Invite Tenant"
+            >
+              <UserPlus className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
               onClick={() => onEdit?.(property)}
+              title="Edit Property"
             >
               <Edit className="h-4 w-4" />
             </Button>
@@ -41,6 +57,7 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
               variant="ghost" 
               size="icon"
               onClick={() => onDelete?.(property)}
+              title="Delete Property"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
