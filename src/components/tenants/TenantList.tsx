@@ -33,9 +33,34 @@ export function TenantList({
 }: TenantListProps) {
   const { data, isLoading: isLoadingQuery, refetch } = useTenants(userId, userRole);
   const isLoading = isLoadingProp || isLoadingQuery;
+  
+  console.log("🔍 TenantList - User Role:", userRole);
+  console.log("👤 TenantList - User ID:", userId);
+  console.log("📊 TenantList - Fetched Data:", data);
+  
   const tenants = data?.tenancies || [];
   const properties = data?.properties || [];
   const { toast } = useToast();
+
+  // Log detailed information about each tenant and their property
+  React.useEffect(() => {
+    if (tenants.length > 0) {
+      console.group("👥 Tenant Details:");
+      tenants.forEach((tenant, index) => {
+        console.log(`\nTenant ${index + 1}:`);
+        console.log("ID:", tenant.id);
+        console.log("Name:", tenant.first_name, tenant.last_name);
+        console.log("Email:", tenant.email);
+        console.log("Property Details:", tenant.property);
+        console.log("Tenancy Status:", tenant.tenancy.status);
+        console.log("Tenancy Dates:", {
+          start: tenant.tenancy.start_date,
+          end: tenant.tenancy.end_date
+        });
+      });
+      console.groupEnd();
+    }
+  }, [tenants]);
 
   const handleDelete = async (tenant: Tenant) => {
     console.log("Delete tenant:", tenant);
