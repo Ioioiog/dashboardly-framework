@@ -13,6 +13,20 @@ interface TenantCardProps {
 }
 
 export function TenantCard({ tenant, userRole, onEdit, onDelete }: TenantCardProps) {
+  // Transform tenant data to match expected format for TenantDialog
+  const tenantForDialog = {
+    id: tenant.id,
+    email: tenant.email || '',
+    first_name: tenant.first_name || '',
+    last_name: tenant.last_name || '',
+    phone: tenant.phone,
+    tenancy: {
+      property_id: tenant.property.id,
+      start_date: tenant.tenancy.start_date,
+      end_date: tenant.tenancy.end_date
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -42,7 +56,7 @@ export function TenantCard({ tenant, userRole, onEdit, onDelete }: TenantCardPro
       </CardContent>
       {userRole === "landlord" && (
         <CardFooter className="flex justify-end gap-2">
-          <TenantDialog tenant={tenant} properties={[tenant.property]}>
+          <TenantDialog tenant={tenantForDialog} properties={[tenant.property]}>
             <Button variant="outline" size="sm">
               <Edit className="w-4 h-4 mr-2" />
               Edit
