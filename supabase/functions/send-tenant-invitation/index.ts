@@ -32,9 +32,8 @@ serve(async (req) => {
     const requestData: InvitationRequest = await req.json();
     console.log('Received invitation request:', requestData);
 
-    // Generate the invitation URL using the origin from the request
-    const origin = new URL(req.url).origin.replace('.supabase.co/functions/v1', '');
-    const invitationUrl = `${origin}/accept-invitation?token=${requestData.token}`;
+    // Use the preview URL for the invitation link
+    const invitationUrl = `https://preview--dashboardly-framework.lovable.app/accept-invitation?token=${requestData.token}`;
     console.log('Generated invitation URL:', invitationUrl);
 
     // Send the email using Resend
