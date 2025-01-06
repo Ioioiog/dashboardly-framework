@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import AuthPage from "./pages/Auth";
 import Properties from "./pages/Properties";
 import Tenants from "./pages/Tenants";
+import Maintenance from "./pages/Maintenance";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import { StrictMode, useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
@@ -63,6 +64,7 @@ const App = () => {
               <Route path="/dashboard" element={<Index />} />
               <Route path="/properties" element={<Properties />} />
               <Route path="/tenants" element={<Tenants />} />
+              <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/accept-invitation" element={<AcceptInvitation />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
