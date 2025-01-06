@@ -5,6 +5,7 @@ import type { Tenant, Property } from "@/types/tenant";
 async function fetchTenants(userId: string) {
   console.log("Fetching tenants for landlord:", userId);
   
+  // First fetch properties owned by the landlord
   const { data: properties, error: propertiesError } = await supabase
     .from("properties")
     .select("id, name, address")
@@ -17,24 +18,25 @@ async function fetchTenants(userId: string) {
 
   const propertyIds = properties.map(p => p.id);
   
+  // Then fetch tenancies with tenant profile data for those properties
   const { data: tenancies, error: tenanciesError } = await supabase
     .from("tenancies")
     .select(`
-      id,
+      tenant_id,
       start_date,
       end_date,
       status,
+      properties!tenancies_property_id_fkey (
+        id,
+        name,
+        address
+      ),
       profiles!tenancies_tenant_id_fkey (
         id,
         first_name,
         last_name,
         email,
         phone
-      ),
-      properties!tenancies_property_id_fkey (
-        id,
-        name,
-        address
       )
     `)
     .in('property_id', propertyIds);
