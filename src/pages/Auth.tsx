@@ -38,6 +38,19 @@ const AuthPage = () => {
           console.log("User signed out");
         } else if (event === 'USER_UPDATED') {
           console.log("User updated");
+        } else if (event === 'USER_DELETED') {
+          console.log("User deleted");
+          toast({
+            variant: "destructive",
+            title: "Account Deleted",
+            description: "Your account has been deleted.",
+          });
+        } else if (event === 'PASSWORD_RECOVERY') {
+          console.log("Password recovery requested");
+          toast({
+            title: "Password Recovery",
+            description: "Check your email for password reset instructions.",
+          });
         }
       }
     );
@@ -78,14 +91,6 @@ const AuthPage = () => {
           }}
           providers={[]}
           redirectTo={window.location.origin}
-          onError={(error) => {
-            console.error("Auth error:", error);
-            toast({
-              variant: "destructive",
-              title: "Authentication Error",
-              description: error.message,
-            });
-          }}
         />
       </div>
     </div>
