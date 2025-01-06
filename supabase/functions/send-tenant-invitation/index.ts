@@ -67,9 +67,8 @@ serve(async (req) => {
 
     console.log('Created invitation record:', invitation);
 
-    // Generate the invitation URL with the full origin
-    const origin = req.headers.get('origin') || 'http://localhost:5173';
-    const invitationUrl = `${origin}/accept-invitation?token=${token}`;
+    // Use the preview URL for generating the invitation link
+    const invitationUrl = `https://preview--dashboardly-framework.lovable.app/accept-invitation?token=${token}`;
     console.log('Generated invitation URL:', invitationUrl);
 
     // Send the email using Resend with improved HTML template
