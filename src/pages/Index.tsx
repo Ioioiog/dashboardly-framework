@@ -7,8 +7,19 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log("No active session found, redirecting to auth");
+        navigate("/auth");
+      }
+    };
+
+    checkUser();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log("Dashboard auth state changed:", event);
         if (!session) {
           navigate("/auth");
         }
