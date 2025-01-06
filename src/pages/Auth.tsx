@@ -3,13 +3,24 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Error checking session:", error.message);
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: error.message,
+        });
+        return;
+      }
       if (session) {
         navigate("/dashboard");
       }
@@ -18,16 +29,21 @@ const AuthPage = () => {
     checkUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (session) {
-          console.log("Auth state changed:", event, "User:", session.user.id);
+      async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.id);
+        if (event === 'SIGNED_IN') {
+          console.log("User signed in successfully");
           navigate("/dashboard");
+        } else if (event === 'SIGNED_OUT') {
+          console.log("User signed out");
+        } else if (event === 'USER_UPDATED') {
+          console.log("User updated");
         }
       }
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -62,6 +78,14 @@ const AuthPage = () => {
           }}
           providers={[]}
           redirectTo={window.location.origin}
+          onError={(error) => {
+            console.error("Auth error:", error);
+            toast({
+              variant: "destructive",
+              title: "Authentication Error",
+              description: error.message,
+            });
+          }}
         />
       </div>
     </div>
