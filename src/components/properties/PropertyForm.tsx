@@ -18,7 +18,7 @@ import { Property, PropertyType } from "@/utils/propertyUtils";
 const propertyFormSchema = z.object({
   name: z.string().min(1, "Property name is required"),
   address: z.string().min(1, "Address is required"),
-  monthly_rent: z.string().min(1, "Monthly rent is required").transform(Number),
+  monthly_rent: z.coerce.number().min(0, "Monthly rent must be a positive number"),
   type: z.enum(["Apartment", "House", "Condo", "Commercial"] as const),
   description: z.string().optional(),
   available_from: z.string().optional(),
@@ -38,7 +38,7 @@ export function PropertyForm({ onSubmit, initialData, isSubmitting }: PropertyFo
     defaultValues: {
       name: initialData?.name || "",
       address: initialData?.address || "",
-      monthly_rent: initialData?.monthly_rent?.toString() || "",
+      monthly_rent: initialData?.monthly_rent || 0,
       type: initialData?.type || "Apartment",
       description: initialData?.description || "",
       available_from: initialData?.available_from || "",
@@ -87,6 +87,7 @@ export function PropertyForm({ onSubmit, initialData, isSubmitting }: PropertyFo
                   type="number" 
                   placeholder="Enter monthly rent" 
                   {...field}
+                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
                 />
               </FormControl>
               <FormMessage />

@@ -18,6 +18,11 @@ export interface PropertyInput extends Omit<Property, 'id' | 'landlord_id'> {
 }
 
 export async function fetchLandlordProperties(userId: string) {
+  if (!userId) {
+    console.log("No user ID provided for fetchLandlordProperties");
+    return [];
+  }
+
   console.log("Fetching landlord properties for user:", userId);
   const { data, error } = await supabase
     .from("properties")
@@ -34,6 +39,11 @@ export async function fetchLandlordProperties(userId: string) {
 }
 
 export async function fetchTenantProperties(userId: string) {
+  if (!userId) {
+    console.log("No user ID provided for fetchTenantProperties");
+    return [];
+  }
+
   console.log("Fetching tenant properties for user:", userId);
   const { data, error } = await supabase
     .from("tenancies")
