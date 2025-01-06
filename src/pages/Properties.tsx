@@ -7,6 +7,7 @@ import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { PropertyDialog } from "@/components/properties/PropertyDialog";
+import { useProperties } from "@/hooks/useProperties";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -75,6 +76,11 @@ const Properties = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
+  const { handleAdd, handleEdit, handleDelete, isSubmitting } = useProperties({
+    userId: userId || "",
+    userRole: userRole || "tenant"
+  });
+
   const handleAddProperty = () => {
     setShowAddModal(true);
   };
@@ -137,6 +143,7 @@ const Properties = () => {
           }
         }}
         mode="add"
+        isSubmitting={isSubmitting}
       />
 
       {/* Edit Property Dialog */}
@@ -153,6 +160,7 @@ const Properties = () => {
         }}
         property={selectedProperty || undefined}
         mode="edit"
+        isSubmitting={isSubmitting}
       />
 
       {/* Delete Confirmation Dialog */}

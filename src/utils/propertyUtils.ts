@@ -1,14 +1,20 @@
 import { supabase } from "@/integrations/supabase/client";
 
+export type PropertyType = "Apartment" | "House" | "Condo" | "Commercial";
+
 export interface Property {
   id: string;
   name: string;
   address: string;
   monthly_rent: number;
-  type: string;
+  type: PropertyType;
   description?: string;
   available_from?: string;
   landlord_id?: string;
+}
+
+export interface PropertyInput extends Omit<Property, 'id' | 'landlord_id'> {
+  landlord_id: string;
 }
 
 export async function fetchLandlordProperties(userId: string) {
@@ -54,11 +60,11 @@ export async function fetchTenantProperties(userId: string) {
   return data.map(tenancy => tenancy.property);
 }
 
-export async function addProperty(property: Omit<Property, "id">) {
+export async function addProperty(property: PropertyInput) {
   console.log("Adding property:", property);
   const { data, error } = await supabase
     .from("properties")
-    .insert([property])
+    .insert(property)
     .select()
     .single();
 
@@ -71,7 +77,7 @@ export async function addProperty(property: Omit<Property, "id">) {
   return data;
 }
 
-export async function updateProperty(id: string, updates: Partial<Property>) {
+export async function updateProperty(id: string, updates: Partial<PropertyInput>) {
   console.log("Updating property:", id, updates);
   const { data, error } = await supabase
     .from("properties")
