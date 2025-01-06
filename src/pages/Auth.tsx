@@ -3,7 +3,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -40,10 +40,7 @@ const AuthPage = () => {
           console.log("User updated");
         } else if (event === 'PASSWORD_RECOVERY') {
           console.log("Password recovery requested");
-          toast({
-            title: "Password Recovery",
-            description: "Check your email for password reset instructions.",
-          });
+          navigate("/update-password");
         }
       }
     );
