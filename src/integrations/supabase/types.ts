@@ -348,7 +348,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      set_claim: {
+        Args: {
+          params: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       property_type: "Apartment" | "House" | "Condo" | "Commercial"

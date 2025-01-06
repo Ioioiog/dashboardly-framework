@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import type { TenantInvitation } from "@/types/tenant-invitations";
@@ -10,18 +9,21 @@ import type { SetClaimParams } from "@/integrations/supabase/types/rpc";
 
 export default function AcceptInvitation() {
   const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(true);
   const [invitation, setInvitation] = useState<TenantInvitation | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAccepting, setIsAccepting] = useState(false);
 
   useEffect(() => {
-    const token = searchParams.get("token");
     if (!token) {
-      setError("Invalid invitation link");
-      setLoading(false);
+      toast({
+        title: "Error",
+        description: "Invalid invitation link",
+        variant: "destructive",
+      });
+      navigate("/");
       return;
     }
 
@@ -36,46 +38,65 @@ export default function AcceptInvitation() {
 
       if (rpcError) {
         console.error("Error setting token claim:", rpcError);
-        setError("Error validating invitation");
-        setLoading(false);
+        toast({
+          title: "Error",
+          description: "Failed to verify invitation",
+          variant: "destructive",
+        });
+        navigate("/");
         return;
       }
 
-      const { data, error } = await supabase
+      // Fetch the invitation details
+      const { data: invitations, error: fetchError } = await supabase
         .from("tenant_invitations")
-        .select("*, property:properties(name)")
+        .select(`
+          *,
+          property:properties (
+            name,
+            address
+          )
+        `)
         .eq("token", token)
         .eq("status", "pending")
         .single();
 
-      if (error || !data) {
-        console.error("Error fetching invitation:", error);
-        setError("Invalid or expired invitation");
-        setLoading(false);
+      if (fetchError || !invitations) {
+        console.error("Error fetching invitation:", fetchError);
+        toast({
+          title: "Error",
+          description: "Invalid or expired invitation",
+          variant: "destructive",
+        });
+        navigate("/");
         return;
       }
 
-      setInvitation(data as TenantInvitation);
-      setLoading(false);
+      setInvitation(invitations);
+      setIsLoading(false);
     };
 
     fetchInvitation();
-  }, [searchParams]);
+  }, [token, navigate, toast]);
 
-  const handleAccept = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!invitation || !password) return;
+  const handleAcceptInvitation = async () => {
+    if (!invitation) return;
 
+    setIsAccepting(true);
     try {
-      setLoading(true);
-
-      // Create the user account
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Create auth user
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: invitation.email,
-        password: password,
+        password: crypto.randomUUID(), // Generate a random password
+        options: {
+          data: {
+            first_name: invitation.first_name,
+            last_name: invitation.last_name,
+          },
+        },
       });
 
-      if (authError) throw authError;
+      if (signUpError || !authData.user) throw signUpError;
 
       // Update profile
       const { error: profileError } = await supabase
@@ -83,106 +104,100 @@ export default function AcceptInvitation() {
         .update({
           first_name: invitation.first_name,
           last_name: invitation.last_name,
-          email: invitation.email,
           role: "tenant",
+          email: invitation.email,
         })
-        .eq("id", authData.user!.id);
+        .eq("id", authData.user.id);
 
       if (profileError) throw profileError;
 
       // Create tenancy
-      const { error: tenancyError } = await supabase
-        .from("tenancies")
-        .insert({
-          property_id: invitation.property_id,
-          tenant_id: authData.user!.id,
-          start_date: invitation.start_date,
-          end_date: invitation.end_date,
-          status: "active",
-        });
+      const { error: tenancyError } = await supabase.from("tenancies").insert({
+        property_id: invitation.property_id,
+        tenant_id: authData.user.id,
+        start_date: invitation.start_date,
+        end_date: invitation.end_date,
+      });
 
       if (tenancyError) throw tenancyError;
 
-      // Mark invitation as accepted
-      const { error: inviteError } = await supabase
+      // Update invitation status
+      const { error: invitationError } = await supabase
         .from("tenant_invitations")
         .update({ status: "accepted" })
         .eq("id", invitation.id);
 
-      if (inviteError) throw inviteError;
+      if (invitationError) throw invitationError;
 
       toast({
         title: "Success",
-        description: "Your account has been created successfully. You can now sign in.",
+        description:
+          "Invitation accepted! Check your email to set your password and access your account.",
       });
 
+      // Redirect to auth page for password setup
       navigate("/auth");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error accepting invitation:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to accept invitation",
+        description: "Failed to accept invitation. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsAccepting(false);
     }
   };
 
-  if (loading) {
+  if (isLoading || !invitation) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="container max-w-lg mx-auto mt-8">
         <Card className="p-6">
-          <h1 className="text-xl font-semibold text-red-600 mb-2">Error</h1>
-          <p className="text-gray-600">{error}</p>
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-3/4" />
+            <div className="h-4 bg-gray-200 rounded w-1/2" />
+            <div className="h-10 bg-gray-200 rounded" />
+          </div>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md p-6">
-        <h1 className="text-2xl font-semibold mb-6">Accept Invitation</h1>
-        <div className="mb-6">
-          <p className="text-gray-600">
-            You've been invited to join {invitation?.property?.name} as a tenant.
-          </p>
-          <div className="mt-4 text-sm text-gray-500">
-            <p>Start date: {new Date(invitation?.start_date || '').toLocaleDateString()}</p>
-            {invitation?.end_date && (
-              <p>End date: {new Date(invitation.end_date).toLocaleDateString()}</p>
-            )}
-          </div>
-        </div>
-        <form onSubmit={handleAccept} className="space-y-4">
+    <div className="container max-w-lg mx-auto mt-8">
+      <Card className="p-6">
+        <h1 className="text-2xl font-semibold mb-4">Tenant Invitation</h1>
+        <div className="space-y-4">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Set your password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="mt-1"
-            />
+            <p className="text-sm text-gray-500">Property</p>
+            <p className="font-medium">
+              {invitation.property?.name} - {invitation.property?.address}
+            </p>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Processing..." : "Accept and Create Account"}
+          <div>
+            <p className="text-sm text-gray-500">Tenant</p>
+            <p className="font-medium">
+              {invitation.first_name} {invitation.last_name}
+            </p>
+            <p className="text-sm text-gray-600">{invitation.email}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Lease Period</p>
+            <p className="font-medium">
+              From: {new Date(invitation.start_date).toLocaleDateString()}
+              {invitation.end_date &&
+                ` To: ${new Date(invitation.end_date).toLocaleDateString()}`}
+            </p>
+          </div>
+          <Button
+            className="w-full"
+            onClick={handleAcceptInvitation}
+            disabled={isAccepting}
+          >
+            {isAccepting ? "Accepting..." : "Accept Invitation"}
           </Button>
-        </form>
+        </div>
       </Card>
     </div>
   );
-};
+}
