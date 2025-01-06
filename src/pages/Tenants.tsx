@@ -3,14 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
+import { TenantInviteDialog } from "@/components/tenants/TenantInviteDialog";
+import { Property } from "@/utils/propertyUtils";
 
 const Tenants = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
+  const [properties, setProperties] = useState<Property[]>([]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -41,6 +42,26 @@ const Tenants = () => {
 
       if (profile?.role) {
         setUserRole(profile.role as "landlord" | "tenant");
+        
+        // If user is a landlord, fetch their properties
+        if (profile.role === "landlord") {
+          const { data: propertiesData, error: propertiesError } = await supabase
+            .from("properties")
+            .select("*")
+            .eq("landlord_id", session.user.id);
+
+          if (propertiesError) {
+            console.error("Error fetching properties:", propertiesError);
+            toast({
+              title: "Error",
+              description: "Could not fetch properties",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          setProperties(propertiesData);
+        }
       }
     };
 
@@ -76,10 +97,7 @@ const Tenants = () => {
               </p>
             </div>
             {userRole === "landlord" && (
-              <Button>
-                <PlusIcon className="h-4 w-4 mr-2" />
-                Add Tenant
-              </Button>
+              <TenantInviteDialog properties={properties} />
             )}
           </header>
 
