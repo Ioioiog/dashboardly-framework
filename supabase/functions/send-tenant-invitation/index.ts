@@ -33,7 +33,7 @@ serve(async (req) => {
     console.log('Received invitation request:', requestData);
 
     // Generate the invitation URL using the origin from the request
-    const origin = req.headers.get('origin') || 'http://localhost:5173';
+    const origin = new URL(req.url).origin.replace('.supabase.co/functions/v1', '');
     const invitationUrl = `${origin}/accept-invitation?token=${requestData.token}`;
     console.log('Generated invitation URL:', invitationUrl);
 
@@ -98,8 +98,8 @@ serve(async (req) => {
 
     if (!emailResponse.ok) {
       const errorData = await emailResponse.text();
-      console.error('Error sending email:', errorData);
-      throw new Error('Failed to send invitation email');
+      console.error('Error response from Resend:', errorData);
+      throw new Error(`Failed to send email: ${errorData}`);
     }
 
     const result = await emailResponse.json();
@@ -113,7 +113,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in send-tenant-invitation function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error instanceof Error ? error.stack : undefined
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
