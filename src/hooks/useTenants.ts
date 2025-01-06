@@ -49,7 +49,7 @@ async function fetchTenants(userId: string) {
   console.log("Fetched tenants:", tenancies);
   
   return { 
-    tenancies: tenancies.map((tenancy) => ({
+    tenancies: tenancies.map((tenancy: any) => ({
       id: tenancy.tenant?.id || '',
       first_name: tenancy.tenant?.first_name,
       last_name: tenancy.tenant?.last_name,
