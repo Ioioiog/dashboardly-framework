@@ -8,6 +8,7 @@ export interface Property {
   type: string;
   description?: string;
   available_from?: string;
+  landlord_id?: string;
 }
 
 export async function fetchLandlordProperties(userId: string) {
@@ -51,4 +52,54 @@ export async function fetchTenantProperties(userId: string) {
 
   console.log("Fetched tenant properties:", data);
   return data.map(tenancy => tenancy.property);
+}
+
+export async function addProperty(property: Omit<Property, "id">) {
+  console.log("Adding property:", property);
+  const { data, error } = await supabase
+    .from("properties")
+    .insert([property])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error adding property:", error);
+    throw error;
+  }
+
+  console.log("Added property:", data);
+  return data;
+}
+
+export async function updateProperty(id: string, updates: Partial<Property>) {
+  console.log("Updating property:", id, updates);
+  const { data, error } = await supabase
+    .from("properties")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating property:", error);
+    throw error;
+  }
+
+  console.log("Updated property:", data);
+  return data;
+}
+
+export async function deleteProperty(id: string) {
+  console.log("Deleting property:", id);
+  const { error } = await supabase
+    .from("properties")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error deleting property:", error);
+    throw error;
+  }
+
+  console.log("Deleted property:", id);
 }

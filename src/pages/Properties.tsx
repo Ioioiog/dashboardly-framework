@@ -5,7 +5,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { DashboardProperties } from "@/components/dashboard/DashboardProperties";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { PropertyDialog } from "@/components/properties/PropertyDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Property } from "@/utils/propertyUtils";
 
 const Properties = () => {
   const navigate = useNavigate();
@@ -13,6 +25,9 @@ const Properties = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -64,6 +79,16 @@ const Properties = () => {
     setShowAddModal(true);
   };
 
+  const handleEditProperty = (property: Property) => {
+    setSelectedProperty(property);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteProperty = (property: Property) => {
+    setSelectedProperty(property);
+    setShowDeleteDialog(true);
+  };
+
   return (
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
@@ -89,11 +114,74 @@ const Properties = () => {
 
           {userId && userRole && (
             <div className="space-y-8">
-              <DashboardProperties userId={userId} userRole={userRole} />
+              <DashboardProperties 
+                userId={userId} 
+                userRole={userRole}
+                onEdit={handleEditProperty}
+                onDelete={handleDeleteProperty}
+              />
             </div>
           )}
         </div>
       </main>
+
+      {/* Add Property Dialog */}
+      <PropertyDialog
+        open={showAddModal}
+        onOpenChange={setShowAddModal}
+        onSubmit={async (data) => {
+          if (!userId) return;
+          const success = await handleAdd(data);
+          if (success) {
+            setShowAddModal(false);
+          }
+        }}
+        mode="add"
+      />
+
+      {/* Edit Property Dialog */}
+      <PropertyDialog
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        onSubmit={async (data) => {
+          if (!selectedProperty) return;
+          const success = await handleEdit(selectedProperty, data);
+          if (success) {
+            setShowEditModal(false);
+            setSelectedProperty(null);
+          }
+        }}
+        property={selectedProperty || undefined}
+        mode="edit"
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the property
+              and remove all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!selectedProperty) return;
+                const success = await handleDelete(selectedProperty);
+                if (success) {
+                  setShowDeleteDialog(false);
+                  setSelectedProperty(null);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
