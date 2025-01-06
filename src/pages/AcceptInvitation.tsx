@@ -12,6 +12,8 @@ interface SetClaimParams {
   value: string;
 }
 
+type SetClaimFunction = (params: SetClaimParams) => Promise<{ data: null; error: null }>;
+
 export default function AcceptInvitation() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -31,7 +33,7 @@ export default function AcceptInvitation() {
 
     const fetchInvitation = async () => {
       // Set the token in the session for RLS policy
-      const { error: rpcError } = await supabase.rpc('set_claim', {
+      const { error: rpcError } = await (supabase.rpc as unknown as SetClaimFunction)('set_claim', {
         name: 'app.current_token',
         value: token
       });
