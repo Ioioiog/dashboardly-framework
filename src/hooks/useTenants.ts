@@ -8,7 +8,6 @@ interface Profile {
   last_name: string | null;
   email: string | null;
   phone: string | null;
-  role: string;
 }
 
 interface TenancyWithProfile {
@@ -21,7 +20,7 @@ interface TenancyWithProfile {
     name: string;
     address: string;
   };
-  profiles: Profile;
+  tenant: Profile;
 }
 
 async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
@@ -52,13 +51,12 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
           name,
           address
         ),
-        profiles!tenancies_tenant_id_fkey (
+        tenant:profiles!tenancies_tenant_id_fkey (
           id,
           first_name,
           last_name,
           email,
-          phone,
-          role
+          phone
         )
       `)
       .in('property_id', properties.map(p => p.id));
@@ -71,12 +69,12 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
     console.log("Fetched tenancies:", tenancies);
     
     return { 
-      tenancies: tenancies.map((tenancy: any) => ({
-        id: tenancy.profiles.id,
-        first_name: tenancy.profiles.first_name,
-        last_name: tenancy.profiles.last_name,
-        email: tenancy.profiles.email,
-        phone: tenancy.profiles.phone,
+      tenancies: tenancies.map((tenancy: TenancyWithProfile) => ({
+        id: tenancy.tenant.id,
+        first_name: tenancy.tenant.first_name,
+        last_name: tenancy.tenant.last_name,
+        email: tenancy.tenant.email,
+        phone: tenancy.tenant.phone,
         property: tenancy.property,
         tenancy: {
           start_date: tenancy.start_date,
@@ -112,7 +110,7 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
     // Fetch tenant's profile
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("*")
+      .select("id, first_name, last_name, email, phone")
       .eq('id', userId)
       .single();
 
