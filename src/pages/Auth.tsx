@@ -61,6 +61,7 @@ const AuthPage = () => {
             },
           }}
           providers={[]}
+          redirectTo={window.location.origin}
         />
       </div>
     </div>
