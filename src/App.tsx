@@ -20,6 +20,7 @@ const handleRecoveryToken = async () => {
     const params = new URLSearchParams(hash.substring(1));
     const accessToken = params.get("access_token");
     if (accessToken) {
+      console.log("Setting session with recovery token");
       const { data, error } = await supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: params.get("refresh_token") || "",
@@ -40,6 +41,7 @@ const App = () => {
     const checkRecoveryToken = async () => {
       const hasRecoveryToken = await handleRecoveryToken();
       if (hasRecoveryToken) {
+        console.log("Recovery token found, redirecting to update password");
         // Clear the URL hash after handling the token
         window.location.hash = "";
         // Redirect to the update password page
