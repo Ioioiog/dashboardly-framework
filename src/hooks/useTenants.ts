@@ -34,50 +34,94 @@ async function fetchTenants(userId: string, userRole: "landlord" | "tenant") {
       throw propertiesError;
     }
 
-    // Then fetch tenancies with tenant profile data for those properties
-    const { data: tenancies, error: tenanciesError } = await supabase
-      .from("tenancies")
-      .select(`
-        id,
-        start_date,
-        end_date,
-        status,
-        property:properties (
+    // Fetch both active tenancies and pending invitations
+    const [tenanciesResponse, invitationsResponse] = await Promise.all([
+      supabase
+        .from("tenancies")
+        .select(`
           id,
-          name,
-          address
-        ),
-        profiles!tenancies_tenant_id_fkey (
+          start_date,
+          end_date,
+          status,
+          property:properties (
+            id,
+            name,
+            address
+          ),
+          profiles!tenancies_tenant_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone
+          )
+        `)
+        .in('property_id', properties.map(p => p.id)),
+      
+      supabase
+        .from("tenant_invitations")
+        .select(`
           id,
+          email,
           first_name,
           last_name,
-          email,
-          phone
-        )
-      `)
-      .in('property_id', properties.map(p => p.id));
+          start_date,
+          end_date,
+          status,
+          property:properties (
+            id,
+            name,
+            address
+          )
+        `)
+        .in('property_id', properties.map(p => p.id))
+        .eq('status', 'pending')
+    ]);
 
-    if (tenanciesError) {
-      console.error("Error fetching tenancies:", tenanciesError);
-      throw tenanciesError;
+    if (tenanciesResponse.error) {
+      console.error("Error fetching tenancies:", tenanciesResponse.error);
+      throw tenanciesResponse.error;
     }
 
-    console.log("Fetched tenancies:", tenancies);
+    if (invitationsResponse.error) {
+      console.error("Error fetching invitations:", invitationsResponse.error);
+      throw invitationsResponse.error;
+    }
+
+    console.log("Fetched tenancies:", tenanciesResponse.data);
+    console.log("Fetched invitations:", invitationsResponse.data);
     
+    // Combine tenancies and invitations into a unified format
+    const tenancies = tenanciesResponse.data.map((tenancy: any) => ({
+      id: tenancy.profiles.id,
+      first_name: tenancy.profiles.first_name,
+      last_name: tenancy.profiles.last_name,
+      email: tenancy.profiles.email,
+      phone: tenancy.profiles.phone,
+      property: tenancy.property,
+      tenancy: {
+        start_date: tenancy.start_date,
+        end_date: tenancy.end_date,
+        status: tenancy.status
+      }
+    }));
+
+    const invitations = invitationsResponse.data.map((invitation: any) => ({
+      id: invitation.id,
+      first_name: invitation.first_name,
+      last_name: invitation.last_name,
+      email: invitation.email,
+      phone: null,
+      property: invitation.property,
+      tenancy: {
+        start_date: invitation.start_date,
+        end_date: invitation.end_date,
+        status: 'invitation_pending'
+      }
+    }));
+
     return { 
-      tenancies: tenancies.map((tenancy: any) => ({
-        id: tenancy.profiles.id,
-        first_name: tenancy.profiles.first_name,
-        last_name: tenancy.profiles.last_name,
-        email: tenancy.profiles.email,
-        phone: tenancy.profiles.phone,
-        property: tenancy.property,
-        tenancy: {
-          start_date: tenancy.start_date,
-          end_date: tenancy.end_date,
-          status: tenancy.status
-        }
-      })),
+      tenancies: [...tenancies, ...invitations],
       properties: properties as Property[]
     };
   } else {

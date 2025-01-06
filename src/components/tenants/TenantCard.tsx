@@ -31,11 +31,13 @@ export function TenantCard({ tenant, userRole }: TenantCardProps) {
               : "Tenant"}
           </span>
           <span className={`text-sm px-2 py-1 rounded-full ${
-            tenant.tenancy.status === "active" 
-              ? "bg-green-100 text-green-800"
-              : "bg-gray-100 text-gray-800"
+            tenant.tenancy.status === 'invitation_pending'
+              ? "bg-yellow-100 text-yellow-800"
+              : tenant.tenancy.status === "active" 
+                ? "bg-green-100 text-green-800"
+                : "bg-gray-100 text-gray-800"
           }`}>
-            {tenant.tenancy.status}
+            {tenant.tenancy.status === 'invitation_pending' ? 'Invitation Pending' : tenant.tenancy.status}
           </span>
         </CardTitle>
       </CardHeader>
