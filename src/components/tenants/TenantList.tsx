@@ -23,26 +23,32 @@ async function fetchTenants(userId: string) {
     throw propertiesError;
   }
 
+  // First get all properties owned by the landlord
+  const propertyIds = properties.map(p => p.id);
+  
+  // Then get all tenancies for these properties, including tenant profiles
   const { data: tenancies, error: tenanciesError } = await supabase
     .from("tenancies")
     .select(`
-      tenant:profiles!tenancies_tenant_id_fkey(
+      id,
+      property_id,
+      start_date,
+      end_date,
+      status,
+      tenant:tenant_id (
         id,
         first_name,
         last_name,
         email,
         phone
       ),
-      property:properties(
+      property:property_id (
         id,
         name,
         address
-      ),
-      start_date,
-      end_date,
-      status
+      )
     `)
-    .eq("properties.landlord_id", userId);
+    .in('property_id', propertyIds);
 
   if (tenanciesError) {
     console.error("Error fetching tenancies:", tenanciesError);
@@ -52,15 +58,19 @@ async function fetchTenants(userId: string) {
   console.log("Fetched tenants:", tenancies);
   return { 
     tenancies: tenancies.map(({ tenant, property, ...tenancy }) => ({
-      id: tenant.id,
-      first_name: tenant.first_name,
-      last_name: tenant.last_name,
-      email: tenant.email,
-      phone: tenant.phone,
-      property,
-      tenancy,
+      id: tenant?.id,
+      first_name: tenant?.first_name,
+      last_name: tenant?.last_name,
+      email: tenant?.email,
+      phone: tenant?.phone,
+      property: property || { id: '', name: '', address: '' },
+      tenancy: {
+        start_date: tenancy.start_date,
+        end_date: tenancy.end_date,
+        status: tenancy.status
+      }
     })),
-    properties,
+    properties 
   };
 }
 
