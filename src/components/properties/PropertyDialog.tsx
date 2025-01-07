@@ -2,6 +2,7 @@ import React from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -32,6 +33,11 @@ export function PropertyDialog({
           <DialogTitle>
             {mode === "add" ? "Add New Property" : "Edit Property"}
           </DialogTitle>
+          <DialogDescription>
+            {mode === "add" 
+              ? "Add a new property to your portfolio." 
+              : "Update your property details."}
+          </DialogDescription>
         </DialogHeader>
         <PropertyForm
           onSubmit={onSubmit}
