@@ -1,19 +1,23 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 const AuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const isPasswordReset = location.hash.includes('type=recovery');
+  const invitationToken = searchParams.get('invitation');
 
   useEffect(() => {
     const checkUser = async () => {
+      console.log("Checking user session...");
       const { data: { session }, error } = await supabase.auth.getSession();
+      
       if (error) {
         console.error("Error checking session:", error.message);
         toast({
@@ -23,7 +27,10 @@ const AuthPage = () => {
         });
         return;
       }
-      if (session && !isPasswordReset) {
+
+      // If there's an invitation token, we want to stay on the auth page
+      if (session && !isPasswordReset && !invitationToken) {
+        console.log("User is authenticated, redirecting to dashboard");
         navigate("/dashboard");
       }
     };
@@ -33,8 +40,80 @@ const AuthPage = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event, session?.user?.id);
+        
         if (event === 'SIGNED_IN') {
           console.log("User signed in successfully");
+          
+          // If there's an invitation token, handle the tenant invitation
+          if (invitationToken) {
+            console.log("Processing invitation token:", invitationToken);
+            try {
+              // Set the token in the database context
+              await supabase.rpc('set_claim', {
+                params: { value: invitationToken }
+              });
+
+              // Fetch the invitation details
+              const { data: invitation, error: inviteError } = await supabase
+                .from('tenant_invitations')
+                .select('*')
+                .eq('token', invitationToken)
+                .single();
+
+              if (inviteError) throw inviteError;
+
+              if (!invitation) {
+                throw new Error('Invalid or expired invitation');
+              }
+
+              // Update the profile with tenant information
+              const { error: profileError } = await supabase
+                .from('profiles')
+                .update({
+                  first_name: invitation.first_name,
+                  last_name: invitation.last_name,
+                  email: invitation.email,
+                  role: 'tenant'
+                })
+                .eq('id', session.user.id);
+
+              if (profileError) throw profileError;
+
+              // Create the tenancy
+              const { error: tenancyError } = await supabase
+                .from('tenancies')
+                .insert({
+                  property_id: invitation.property_id,
+                  tenant_id: session.user.id,
+                  start_date: invitation.start_date,
+                  end_date: invitation.end_date,
+                  status: 'active'
+                });
+
+              if (tenancyError) throw tenancyError;
+
+              // Update invitation status
+              const { error: updateError } = await supabase
+                .from('tenant_invitations')
+                .update({ status: 'accepted' })
+                .eq('token', invitationToken);
+
+              if (updateError) throw updateError;
+
+              toast({
+                title: "Welcome!",
+                description: "Your account has been set up successfully.",
+              });
+            } catch (error) {
+              console.error("Error processing invitation:", error);
+              toast({
+                variant: "destructive",
+                title: "Error",
+                description: error.message || "Failed to process invitation",
+              });
+            }
+          }
+          
           navigate("/dashboard");
         } else if (event === 'SIGNED_OUT') {
           console.log("User signed out");
@@ -53,17 +132,17 @@ const AuthPage = () => {
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate, toast, isPasswordReset]);
+  }, [navigate, toast, isPasswordReset, invitationToken]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
         <h1 className="text-2xl font-semibold text-center mb-8 text-gray-900">
-          {isPasswordReset ? "Update Password" : "PropertyHub"}
+          {isPasswordReset ? "Update Password" : invitationToken ? "Complete Your Registration" : "PropertyHub"}
         </h1>
         <Auth
           supabaseClient={supabase}
-          view={isPasswordReset ? "update_password" : "sign_in"}
+          view={isPasswordReset ? "update_password" : "sign_up"}
           appearance={{
             theme: ThemeSupa,
             variables: {
