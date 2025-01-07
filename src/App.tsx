@@ -19,12 +19,11 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
     },
   },
 });
 
-// Helper function to handle the recovery token
 const handleRecoveryToken = async () => {
   const hash = window.location.hash;
   try {
@@ -54,8 +53,8 @@ const handleRecoveryToken = async () => {
 const App = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Handle recovery token and session management
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -67,17 +66,18 @@ const App = () => {
           return;
         }
 
-        // Set up auth state change listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             console.log("Auth state changed:", event);
             if (event === 'SIGNED_OUT') {
+              setIsAuthenticated(false);
               queryClient.clear();
+            } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+              setIsAuthenticated(true);
             }
           }
         );
 
-        // Initial session check
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error("Error checking session:", error);
@@ -86,6 +86,9 @@ const App = () => {
             title: "Authentication Error",
             description: "There was a problem checking your session. Please try logging in again.",
           });
+          setIsAuthenticated(false);
+        } else {
+          setIsAuthenticated(!!session);
         }
 
         setIsLoading(false);
@@ -93,6 +96,7 @@ const App = () => {
       } catch (error) {
         console.error("Error in auth initialization:", error);
         setIsLoading(false);
+        setIsAuthenticated(false);
       }
     };
 
@@ -112,13 +116,34 @@ const App = () => {
             <Sonner />
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/tenant-registration" element={<TenantRegistration />} />
-              <Route path="/dashboard" element={<Index />} />
-              <Route path="/properties" element={<Properties />} />
-              <Route path="/tenants" element={<Tenants />} />
-              <Route path="/maintenance" element={<Maintenance />} />
-              <Route path="/documents" element={<Documents />} />
+              <Route 
+                path="/auth" 
+                element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />} 
+              />
+              <Route 
+                path="/tenant-registration" 
+                element={<TenantRegistration />} 
+              />
+              <Route
+                path="/dashboard"
+                element={isAuthenticated ? <Index /> : <Navigate to="/auth" replace />}
+              />
+              <Route
+                path="/properties"
+                element={isAuthenticated ? <Properties /> : <Navigate to="/auth" replace />}
+              />
+              <Route
+                path="/tenants"
+                element={isAuthenticated ? <Tenants /> : <Navigate to="/auth" replace />}
+              />
+              <Route
+                path="/maintenance"
+                element={isAuthenticated ? <Maintenance /> : <Navigate to="/auth" replace />}
+              />
+              <Route
+                path="/documents"
+                element={isAuthenticated ? <Documents /> : <Navigate to="/auth" replace />}
+              />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </TooltipProvider>
