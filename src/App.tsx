@@ -67,6 +67,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/dashboard" element={<Index />} />
               <Route path="/properties" element={<Properties />} />
