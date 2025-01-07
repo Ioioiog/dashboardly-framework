@@ -30,13 +30,15 @@ const Index = () => {
           return;
         }
 
-        setUserId(session.user.id);
-        console.log("User ID set:", session.user.id);
+        const currentUserId = session.user.id;
+        setUserId(currentUserId);
+        console.log("User ID set:", currentUserId);
 
-        // Fetch profile with auth.uid() in RLS policy
+        // Fetch profile with explicit filter for current user
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
+          .eq('id', currentUserId)
           .single();
 
         if (profileError) {
