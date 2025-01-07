@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { AuthError } from "@supabase/supabase-js";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -127,19 +128,29 @@ const AuthPage = () => {
         } else if (event === 'PASSWORD_RECOVERY') {
           console.log("Password recovery requested");
           navigate("/update-password");
-        } else if (event === 'USER_ALREADY_EXISTS') {
-          console.log("User already exists");
-          toast({
-            title: "Account Exists",
-            description: "An account with this email already exists. Please sign in instead.",
-            variant: "destructive",
-          });
         }
       }
     );
 
     return () => subscription.unsubscribe();
   }, [navigate, toast, isPasswordReset, invitationToken]);
+
+  const handleError = (error: AuthError) => {
+    console.error("Auth error:", error);
+    if (error.message.includes("User already registered")) {
+      toast({
+        title: "Account Exists",
+        description: "An account with this email already exists. Please sign in instead.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: error.message,
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -177,6 +188,7 @@ const AuthPage = () => {
           }}
           providers={[]}
           redirectTo={window.location.origin}
+          onError={handleError}
         />
       </div>
     </div>
