@@ -39,7 +39,7 @@ const AuthPage = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth state changed:", event, session?.user?.id);
+        console.log("Auth state changed:", event);
         
         if (event === 'SIGNED_IN') {
           console.log("User signed in successfully");
@@ -104,7 +104,7 @@ const AuthPage = () => {
                 title: "Welcome!",
                 description: "Your account has been set up successfully.",
               });
-            } catch (error) {
+            } catch (error: any) {
               console.error("Error processing invitation:", error);
               toast({
                 variant: "destructive",
@@ -127,6 +127,13 @@ const AuthPage = () => {
         } else if (event === 'PASSWORD_RECOVERY') {
           console.log("Password recovery requested");
           navigate("/update-password");
+        } else if (event === 'USER_ALREADY_EXISTS') {
+          console.log("User already exists");
+          toast({
+            title: "Account Exists",
+            description: "An account with this email already exists. Please sign in instead.",
+            variant: "destructive",
+          });
         }
       }
     );
