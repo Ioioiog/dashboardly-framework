@@ -102,19 +102,32 @@ const Settings = () => {
     setProfile(prev => ({ ...prev, [name]: value }));
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-dashboard-background">
+        <DashboardSidebar />
+        <main className="flex-1 p-8 ml-64">
+          <div className="max-w-2xl mx-auto">
+            <h1 className="text-2xl font-semibold mb-6">Loading...</h1>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
       <main className="flex-1 p-8 ml-64">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-2xl font-semibold mb-6">Settings</h1>
+          <h1 className="text-2xl font-semibold mb-6">Profile Settings</h1>
           <Card>
             <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
+              <CardTitle>Personal Information</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="first_name">First Name</Label>
                     <Input
@@ -123,6 +136,8 @@ const Settings = () => {
                       value={profile.first_name || ""}
                       onChange={handleChange}
                       disabled={isLoading}
+                      className="font-medium"
+                      placeholder="Enter your first name"
                     />
                   </div>
                   <div className="space-y-2">
@@ -133,31 +148,38 @@ const Settings = () => {
                       value={profile.last_name || ""}
                       onChange={handleChange}
                       disabled={isLoading}
+                      className="font-medium"
+                      placeholder="Enter your last name"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">Email Address</Label>
                   <Input
                     id="email"
                     name="email"
                     value={profile.email || ""}
                     disabled
-                    className="border-input text-foreground font-medium"
+                    className="text-foreground font-medium"
                   />
+                  <p className="text-sm text-muted-foreground">
+                    Email cannot be changed directly. Please contact support for email updates.
+                  </p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">Phone Number</Label>
                   <Input
                     id="phone"
                     name="phone"
                     value={profile.phone || ""}
                     onChange={handleChange}
                     disabled={isLoading}
+                    className="font-medium"
+                    placeholder="Enter your phone number"
                   />
                 </div>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Saving..." : "Save Changes"}
+                <Button type="submit" disabled={isLoading} className="w-full">
+                  {isLoading ? "Saving Changes..." : "Save Changes"}
                 </Button>
               </form>
             </CardContent>
