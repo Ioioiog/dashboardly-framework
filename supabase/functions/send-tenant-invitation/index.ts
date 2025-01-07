@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 console.log("Tenant invitation function started!")
@@ -21,16 +22,22 @@ serve(async (req) => {
     
     console.log("Request data:", { email, propertyId, propertyName, startDate, endDate, firstName, lastName })
 
-    // Create the invitation URL - using the correct domain
+    // Create the invitation URL using the correct domain
     const inviteUrl = `${req.headers.get('origin')}/tenant-registration?invitation=${token}`
     
     console.log("Generated invite URL:", inviteUrl)
+
+    // Verify RESEND_API_KEY exists
+    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured')
+    }
 
     // Send email using Resend
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -53,6 +60,7 @@ serve(async (req) => {
     console.log("Email API response:", data)
 
     if (!res.ok) {
+      console.error("Resend API error:", data)
       throw new Error(data.message || 'Failed to send email')
     }
 
