@@ -129,28 +129,30 @@ const AuthPage = () => {
           console.log("Password recovery requested");
           navigate("/update-password");
         }
+
+        // Handle auth errors
+        const { error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Auth error:", error);
+          if (error.message.includes("User already registered")) {
+            toast({
+              title: "Account Exists",
+              description: "An account with this email already exists. Please sign in instead.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              variant: "destructive",
+              title: "Authentication Error",
+              description: error.message,
+            });
+          }
+        }
       }
     );
 
     return () => subscription.unsubscribe();
   }, [navigate, toast, isPasswordReset, invitationToken]);
-
-  const handleError = (error: AuthError) => {
-    console.error("Auth error:", error);
-    if (error.message.includes("User already registered")) {
-      toast({
-        title: "Account Exists",
-        description: "An account with this email already exists. Please sign in instead.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: error.message,
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -188,7 +190,6 @@ const AuthPage = () => {
           }}
           providers={[]}
           redirectTo={window.location.origin}
-          onError={handleError}
         />
       </div>
     </div>
