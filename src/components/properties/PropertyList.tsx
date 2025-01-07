@@ -1,16 +1,7 @@
 import React from "react";
 import { PropertyCard } from "./PropertyCard";
 import { Card } from "@/components/ui/card";
-
-interface Property {
-  id: string;
-  name: string;
-  address: string;
-  monthly_rent: number;
-  type: string;
-  description?: string;
-  available_from?: string;
-}
+import { Property } from "@/utils/propertyUtils";
 
 interface PropertyListProps {
   properties: Property[] | undefined;
