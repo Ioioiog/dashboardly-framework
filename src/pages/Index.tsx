@@ -5,32 +5,70 @@ import { supabase } from "@/integrations/supabase/client";
 import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { DashboardProperties } from "@/components/dashboard/DashboardProperties";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [userId, setUserId] = React.useState<string | null>(null);
   const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        console.log("No active session found, redirecting to auth");
-        navigate("/auth");
-        return;
-      }
+      try {
+        console.log("Checking user session...");
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          throw sessionError;
+        }
 
-      setUserId(session.user.id);
+        if (!session) {
+          console.log("No active session found, redirecting to auth");
+          navigate("/auth");
+          return;
+        }
 
-      // Fetch user role from profiles
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single();
+        setUserId(session.user.id);
+        console.log("User ID set:", session.user.id);
 
-      if (profile?.role) {
+        // Fetch profile with auth.uid() in RLS policy
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .single();
+
+        if (profileError) {
+          console.error("Profile fetch error:", profileError);
+          toast({
+            title: "Error",
+            description: "Failed to load user profile",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (!profile) {
+          console.error("No profile found for user");
+          toast({
+            title: "Error",
+            description: "User profile not found",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        console.log("Profile role:", profile.role);
         setUserRole(profile.role as "landlord" | "tenant");
+
+      } catch (error: any) {
+        console.error("Error in checkUser:", error);
+        toast({
+          title: "Error",
+          description: error.message || "An unexpected error occurred",
+          variant: "destructive",
+        });
       }
     };
 
@@ -38,7 +76,7 @@ const Index = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log("Dashboard auth state changed:", event);
+        console.log("Auth state changed:", event);
         if (!session) {
           navigate("/auth");
         }
@@ -46,7 +84,7 @@ const Index = () => {
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   return (
     <div className="flex bg-dashboard-background min-h-screen">
