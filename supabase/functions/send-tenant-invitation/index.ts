@@ -1,129 +1,72 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-interface InvitationRequest {
-  email: string;
-  propertyId: string;
-  propertyName: string;
-  startDate: string;
-  endDate?: string;
-  firstName: string;
-  lastName: string;
-  token: string;
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-    if (!RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not set');
-      throw new Error('Email service configuration is missing');
-    }
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
 
-    const requestData: InvitationRequest = await req.json();
-    console.log('Received invitation request:', requestData);
+    const { email, propertyId, propertyName, startDate, endDate, firstName, lastName, token } = await req.json()
 
-    // Use the preview URL for the invitation link
-    const invitationUrl = `https://preview--dashboardly-framework.lovable.app/accept-invitation?token=${requestData.token}`;
-    console.log('Generated invitation URL:', invitationUrl);
+    // Create the invitation URL
+    const inviteUrl = `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com')}/auth?invitation=${token}`
 
-    // For development, we'll send all emails to the verified email
-    const DEV_VERIFIED_EMAIL = 'ilinca.obadescu@gmail.com';
-
-    // Send the email using Resend
-    const emailResponse = await fetch('https://api.resend.com/emails', {
+    // Send email using Resend
+    const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
       },
       body: JSON.stringify({
-        from: 'Property Manager <onboarding@resend.dev>',
-        to: [DEV_VERIFIED_EMAIL], // Send to verified email in development
-        subject: `[TEST] Invitation to join ${requestData.propertyName}`,
+        from: 'PropertyHub <onboarding@resend.dev>',
+        to: email,
+        subject: 'Invitation to PropertyHub',
         html: `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .button { 
-                  display: inline-block; 
-                  padding: 12px 24px; 
-                  background-color: #4F46E5; 
-                  color: white; 
-                  text-decoration: none; 
-                  border-radius: 6px;
-                  margin: 20px 0;
-                }
-                .details { 
-                  background-color: #f9fafb; 
-                  padding: 15px; 
-                  border-radius: 6px;
-                  margin: 15px 0;
-                }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <h2>Welcome to Property Manager!</h2>
-                <p>Hello ${requestData.firstName},</p>
-                <p>[TEST EMAIL - Original recipient: ${requestData.email}]</p>
-                <p>You have been invited to join ${requestData.propertyName} as a tenant.</p>
-                
-                <div class="details">
-                  <h3>Your Tenancy Details:</h3>
-                  <p><strong>Start Date:</strong> ${new Date(requestData.startDate).toLocaleDateString()}</p>
-                  ${requestData.endDate ? `<p><strong>End Date:</strong> ${new Date(requestData.endDate).toLocaleDateString()}</p>` : ''}
-                  <p><strong>Property:</strong> ${requestData.propertyName}</p>
-                </div>
-
-                <p>To accept this invitation and set up your account, please click the button below:</p>
-                <a href="${invitationUrl}" class="button" style="color: white;">Accept Invitation</a>
-
-                <p><small>This invitation link will expire in 7 days. If you did not expect this invitation, please ignore this email.</small></p>
-              </div>
-            </body>
-          </html>
+          <h2>Welcome to PropertyHub!</h2>
+          <p>You have been invited to join PropertyHub as a tenant for ${propertyName}.</p>
+          <p>Your tenancy details:</p>
+          <ul>
+            <li>Start Date: ${startDate}</li>
+            ${endDate ? `<li>End Date: ${endDate}</li>` : ''}
+          </ul>
+          <p>To accept this invitation and create your account, please click the link below:</p>
+          <a href="${inviteUrl}" style="display: inline-block; background-color: #0F172A; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Accept Invitation</a>
+          <p>This invitation link will expire in 7 days.</p>
         `,
       }),
-    });
+    })
 
-    if (!emailResponse.ok) {
-      const errorData = await emailResponse.text();
-      console.error('Error response from Resend:', errorData);
-      throw new Error(`Failed to send email: ${errorData}`);
+    if (!res.ok) {
+      throw new Error('Failed to send email')
     }
 
-    const result = await emailResponse.json();
-    console.log('Email sent successfully:', result);
-
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
-
-  } catch (error) {
-    console.error('Error in send-tenant-invitation function:', error);
     return new Response(
-      JSON.stringify({ 
-        error: error.message,
-        details: error instanceof Error ? error.stack : undefined
-      }),
-      { 
+      JSON.stringify({ message: 'Invitation sent successfully' }),
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      }
-    );
+        status: 200,
+      },
+    )
+  } catch (error) {
+    console.error('Error:', error)
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      },
+    )
   }
-});
+})
