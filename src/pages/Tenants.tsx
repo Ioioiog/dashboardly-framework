@@ -15,53 +15,63 @@ const Tenants = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        console.log("No active session found, redirecting to auth");
-        navigate("/auth");
-        return;
-      }
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log("No active session found, redirecting to auth");
+          navigate("/auth");
+          return;
+        }
 
-      setUserId(session.user.id);
+        setUserId(session.user.id);
 
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single();
+        // Fetch profile with a simpler query
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching profile:", error);
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          toast({
+            title: "Error",
+            description: "Could not fetch user profile",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (profileData?.role) {
+          setUserRole(profileData.role as "landlord" | "tenant");
+          
+          // Only fetch properties if user is a landlord
+          if (profileData.role === "landlord") {
+            const { data: propertiesData, error: propertiesError } = await supabase
+              .from("properties")
+              .select("*")
+              .eq("landlord_id", session.user.id);
+
+            if (propertiesError) {
+              console.error("Error fetching properties:", propertiesError);
+              toast({
+                title: "Error",
+                description: "Could not fetch properties",
+                variant: "destructive",
+              });
+              return;
+            }
+
+            setProperties(propertiesData || []);
+          }
+        }
+      } catch (error) {
+        console.error("Error in checkUser:", error);
         toast({
           title: "Error",
-          description: "Could not fetch user profile",
+          description: "An unexpected error occurred",
           variant: "destructive",
         });
-        return;
-      }
-
-      if (profile?.role) {
-        setUserRole(profile.role as "landlord" | "tenant");
-        
-        // If user is a landlord, fetch their properties
-        if (profile.role === "landlord") {
-          const { data: propertiesData, error: propertiesError } = await supabase
-            .from("properties")
-            .select("*")
-            .eq("landlord_id", session.user.id);
-
-          if (propertiesError) {
-            console.error("Error fetching properties:", propertiesError);
-            toast({
-              title: "Error",
-              description: "Could not fetch properties",
-              variant: "destructive",
-            });
-            return;
-          }
-
-          setProperties(propertiesData);
-        }
       }
     };
 
