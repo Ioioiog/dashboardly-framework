@@ -9,6 +9,7 @@ import Properties from "./pages/Properties";
 import Tenants from "./pages/Tenants";
 import Maintenance from "./pages/Maintenance";
 import Documents from "./pages/Documents";
+import TenantRegistration from "./pages/TenantRegistration";
 import { StrictMode, useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
 
@@ -69,6 +70,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/auth" element={<AuthPage />} />
+              <Route path="/tenant-registration" element={<TenantRegistration />} />
               <Route path="/dashboard" element={<Index />} />
               <Route path="/properties" element={<Properties />} />
               <Route path="/tenants" element={<Tenants />} />
