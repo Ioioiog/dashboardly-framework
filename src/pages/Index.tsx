@@ -31,21 +31,21 @@ const Index = () => {
         }
 
         const currentUserId = session.user.id;
+        console.log("Current user ID:", currentUserId);
         setUserId(currentUserId);
-        console.log("User ID set:", currentUserId);
 
         // Fetch profile with explicit filter for current user
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', currentUserId)
-          .single();
+          .maybeSingle();
 
         if (profileError) {
           console.error("Profile fetch error:", profileError);
           toast({
             title: "Error",
-            description: "Failed to load user profile",
+            description: "Failed to load user profile. Please try refreshing the page.",
             variant: "destructive",
           });
           return;
@@ -55,13 +55,13 @@ const Index = () => {
           console.error("No profile found for user");
           toast({
             title: "Error",
-            description: "User profile not found",
+            description: "User profile not found. Please contact support.",
             variant: "destructive",
           });
           return;
         }
 
-        console.log("Profile role:", profile.role);
+        console.log("Profile loaded successfully:", profile);
         setUserRole(profile.role as "landlord" | "tenant");
 
       } catch (error: any) {
