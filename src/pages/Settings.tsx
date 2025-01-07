@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface Profile {
   first_name: string | null;
@@ -22,6 +23,9 @@ const Settings = () => {
     phone: "",
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -97,6 +101,57 @@ const Settings = () => {
     }
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Password updated successfully",
+      });
+      
+      // Clear password fields
+      setNewPassword("");
+      setConfirmPassword("");
+      
+    } catch (error) {
+      console.error("Error updating password:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfile(prev => ({ ...prev, [name]: value }));
@@ -119,8 +174,9 @@ const Settings = () => {
     <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
       <main className="flex-1 p-8 ml-64">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-2xl font-semibold mb-6">Profile Settings</h1>
+        <div className="max-w-2xl mx-auto space-y-6">
+          <h1 className="text-2xl font-semibold">Profile Settings</h1>
+          
           <Card>
             <CardHeader>
               <CardTitle>Personal Information</CardTitle>
@@ -180,6 +236,45 @@ const Settings = () => {
                 </div>
                 <Button type="submit" disabled={isLoading} className="w-full">
                   {isLoading ? "Saving Changes..." : "Save Changes"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Change Password</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePasswordChange} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="new_password">New Password</Label>
+                  <Input
+                    id="new_password"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    disabled={isUpdatingPassword}
+                    className="font-medium"
+                    placeholder="Enter new password"
+                    minLength={6}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm_password">Confirm New Password</Label>
+                  <Input
+                    id="confirm_password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    disabled={isUpdatingPassword}
+                    className="font-medium"
+                    placeholder="Confirm new password"
+                    minLength={6}
+                  />
+                </div>
+                <Button type="submit" disabled={isUpdatingPassword} className="w-full">
+                  {isUpdatingPassword ? "Updating Password..." : "Update Password"}
                 </Button>
               </form>
             </CardContent>
