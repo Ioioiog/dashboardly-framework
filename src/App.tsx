@@ -10,14 +10,16 @@ import Tenants from "./pages/Tenants";
 import Maintenance from "./pages/Maintenance";
 import Documents from "./pages/Documents";
 import TenantRegistration from "./pages/TenantRegistration";
-import { StrictMode, useEffect } from "react";
+import { StrictMode, useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
+import { useToast } from "./hooks/use-toast";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
+      retry: 1,
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
 });
@@ -25,40 +27,81 @@ const queryClient = new QueryClient({
 // Helper function to handle the recovery token
 const handleRecoveryToken = async () => {
   const hash = window.location.hash;
-  if (hash && hash.includes("type=recovery")) {
-    const params = new URLSearchParams(hash.substring(1));
-    const accessToken = params.get("access_token");
-    if (accessToken) {
-      console.log("Setting session with recovery token");
-      const { data, error } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: params.get("refresh_token") || "",
-      });
-      if (error) {
-        console.error("Error setting session:", error);
-        return false;
+  try {
+    if (hash && hash.includes("type=recovery")) {
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get("access_token");
+      if (accessToken) {
+        console.log("Setting session with recovery token");
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: params.get("refresh_token") || "",
+        });
+        if (error) {
+          console.error("Error setting session:", error);
+          return false;
+        }
+        return true;
       }
-      return true;
     }
+    return false;
+  } catch (error) {
+    console.error("Error handling recovery token:", error);
+    return false;
   }
-  return false;
 };
 
 const App = () => {
-  // Handle recovery token when the app loads
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Handle recovery token and session management
   useEffect(() => {
-    const checkRecoveryToken = async () => {
-      const hasRecoveryToken = await handleRecoveryToken();
-      if (hasRecoveryToken) {
-        console.log("Recovery token found, redirecting to update password");
-        // Clear the URL hash after handling the token
-        window.location.hash = "";
-        // Redirect to the update password page
-        window.location.href = "/auth?mode=update_password";
+    const initializeAuth = async () => {
+      try {
+        const hasRecoveryToken = await handleRecoveryToken();
+        if (hasRecoveryToken) {
+          console.log("Recovery token found, redirecting to update password");
+          window.location.hash = "";
+          window.location.href = "/auth?mode=update_password";
+          return;
+        }
+
+        // Set up auth state change listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            console.log("Auth state changed:", event);
+            if (event === 'SIGNED_OUT') {
+              queryClient.clear();
+            }
+          }
+        );
+
+        // Initial session check
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Error checking session:", error);
+          toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "There was a problem checking your session. Please try logging in again.",
+          });
+        }
+
+        setIsLoading(false);
+        return () => subscription.unsubscribe();
+      } catch (error) {
+        console.error("Error in auth initialization:", error);
+        setIsLoading(false);
       }
     };
-    checkRecoveryToken();
-  }, []);
+
+    initializeAuth();
+  }, [toast]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <StrictMode>
