@@ -12,11 +12,19 @@ const Tenants = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Checking user session...");
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          throw sessionError;
+        }
+
         if (!session) {
           console.log("No active session found, redirecting to auth");
           navigate("/auth");
@@ -24,54 +32,59 @@ const Tenants = () => {
         }
 
         setUserId(session.user.id);
+        console.log("User ID set:", session.user.id);
 
-        // Fetch profile with a simpler query
-        const { data: profileData, error: profileError } = await supabase
+        // Fetch profile with a direct query
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', session.user.id)
           .maybeSingle();
 
         if (profileError) {
-          console.error("Error fetching profile:", profileError);
+          console.error("Profile fetch error:", profileError);
+          throw profileError;
+        }
+
+        if (!profile) {
+          console.error("No profile found for user");
           toast({
             title: "Error",
-            description: "Could not fetch user profile",
+            description: "User profile not found",
             variant: "destructive",
           });
           return;
         }
 
-        if (profileData?.role) {
-          setUserRole(profileData.role as "landlord" | "tenant");
-          
-          // Only fetch properties if user is a landlord
-          if (profileData.role === "landlord") {
-            const { data: propertiesData, error: propertiesError } = await supabase
-              .from("properties")
-              .select("*")
-              .eq("landlord_id", session.user.id);
+        console.log("Profile role:", profile.role);
+        setUserRole(profile.role as "landlord" | "tenant");
 
-            if (propertiesError) {
-              console.error("Error fetching properties:", propertiesError);
-              toast({
-                title: "Error",
-                description: "Could not fetch properties",
-                variant: "destructive",
-              });
-              return;
-            }
+        // Only fetch properties for landlords
+        if (profile.role === "landlord") {
+          console.log("Fetching properties for landlord");
+          const { data: propertiesData, error: propertiesError } = await supabase
+            .from("properties")
+            .select("*")
+            .eq("landlord_id", session.user.id);
 
-            setProperties(propertiesData || []);
+          if (propertiesError) {
+            console.error("Properties fetch error:", propertiesError);
+            throw propertiesError;
           }
+
+          console.log("Properties fetched:", propertiesData?.length);
+          setProperties(propertiesData || []);
         }
-      } catch (error) {
+
+      } catch (error: any) {
         console.error("Error in checkUser:", error);
         toast({
           title: "Error",
-          description: "An unexpected error occurred",
+          description: error.message || "An unexpected error occurred",
           variant: "destructive",
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -79,6 +92,7 @@ const Tenants = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log("Auth state changed:", event);
         if (!session) {
           navigate("/auth");
         }
@@ -87,6 +101,23 @@ const Tenants = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
+
+  if (isLoading) {
+    return (
+      <div className="flex bg-dashboard-background min-h-screen">
+        <DashboardSidebar />
+        <main className="flex-1 ml-64 p-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-32 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (!userId || !userRole) return null;
 
