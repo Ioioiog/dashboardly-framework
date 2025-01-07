@@ -9,6 +9,7 @@ import {
   CreditCard,
   Zap,
   LogOut,
+  Settings,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -110,7 +111,20 @@ const DashboardSidebar = () => {
           </ul>
         </nav>
 
-        <div className="p-6 border-t border-gray-100">
+        <div className="p-6 border-t border-gray-100 space-y-2">
+          <Link
+            to="/settings"
+            className="flex items-center w-full text-dashboard-text hover:text-gray-900 transition-colors duration-200"
+          >
+            <Settings className="h-5 w-5" />
+            <span
+              className={`ml-3 transition-opacity duration-200 ${
+                isCollapsed ? "opacity-0 hidden" : "opacity-100"
+              }`}
+            >
+              Settings
+            </span>
+          </Link>
           <button
             onClick={handleLogout}
             className="flex items-center w-full text-dashboard-text hover:text-gray-900 transition-colors duration-200"
