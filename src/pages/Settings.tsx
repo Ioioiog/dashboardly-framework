@@ -143,7 +143,7 @@ const Settings = () => {
                     name="email"
                     value={profile.email || ""}
                     disabled
-                    className="bg-gray-50"
+                    className="border-input text-foreground font-medium"
                   />
                 </div>
                 <div className="space-y-2">
