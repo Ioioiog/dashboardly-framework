@@ -19,8 +19,8 @@ serve(async (req) => {
 
     const { email, propertyId, propertyName, startDate, endDate, firstName, lastName, token } = await req.json()
 
-    // Create the invitation URL
-    const inviteUrl = `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com')}/auth?invitation=${token}`
+    // Create the invitation URL - using the project reference directly
+    const inviteUrl = `https://app.lovableproject.com/auth?invitation=${token}`
 
     // Send email using Resend
     const res = await fetch('https://api.resend.com/emails', {
