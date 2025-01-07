@@ -1,1 +1,2 @@
-project_id = "wecmvyohaxizmnhuvjly"
+[functions.send-tenant-invitation]
+verify_jwt = false

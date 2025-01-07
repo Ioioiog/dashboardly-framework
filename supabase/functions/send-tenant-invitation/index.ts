@@ -1,25 +1,30 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
-console.log("Hello from send-tenant-invitation!")
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+console.log("Tenant invitation function started!")
 
 serve(async (req) => {
-  try {
-    // Enable CORS
-    if (req.method === 'OPTIONS') {
-      return new Response('ok', {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST',
-          'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-        }
-      })
-    }
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
 
+  try {
+    console.log("Processing invitation request")
+    
     // Get the request body
     const { email, propertyId, propertyName, startDate, endDate, firstName, lastName, token } = await req.json()
+    
+    console.log("Request data:", { email, propertyId, propertyName, startDate, endDate, firstName, lastName })
 
-    // Create the invitation URL
-    const inviteUrl = `https://app.lovableproject.com/tenant-registration?invitation=${token}`
+    // Create the invitation URL - using the correct domain
+    const inviteUrl = `${req.headers.get('origin')}/tenant-registration?invitation=${token}`
+    
+    console.log("Generated invite URL:", inviteUrl)
 
     // Send email using Resend
     const res = await fetch('https://api.resend.com/emails', {
@@ -45,18 +50,20 @@ serve(async (req) => {
     })
 
     const data = await res.json()
+    console.log("Email API response:", data)
 
     if (!res.ok) {
       throw new Error(data.message || 'Failed to send email')
     }
 
     return new Response(JSON.stringify({ success: true }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
   } catch (error) {
+    console.error("Error in send-tenant-invitation function:", error)
     return new Response(JSON.stringify({ error: error.message }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     })
   }
