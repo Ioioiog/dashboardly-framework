@@ -30,6 +30,7 @@ interface TenantInviteDialogProps {
 export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<TenantFormValues>({
     resolver: zodResolver(tenantFormSchema),
@@ -42,11 +43,30 @@ export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
   });
 
   const onSubmit = async (data: TenantFormValues) => {
+    setIsSubmitting(true);
     try {
+      console.log("Creating tenant account...");
+      
+      // Create the user account with a default password
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: "Schimba1!", // Default password
+        options: {
+          data: {
+            first_name: data.firstName,
+            last_name: data.lastName,
+            role: 'tenant'
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Failed to create user account");
+
       // Generate a unique token for the invitation
       const token = crypto.randomUUID();
 
-      // Create the invitation in the database
+      // Create the invitation record
       const { error: inviteError } = await supabase
         .from("tenant_invitations")
         .insert({
@@ -61,36 +81,34 @@ export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
 
       if (inviteError) throw inviteError;
 
-      // Call the Edge Function to send the invitation email
-      const { error: emailError } = await supabase.functions.invoke("send-tenant-invitation", {
+      // Send welcome email with login instructions
+      const { error: emailError } = await supabase.functions.invoke("send-tenant-welcome", {
         body: {
           email: data.email,
-          propertyId: data.propertyId,
-          propertyName: properties.find(p => p.id === data.propertyId)?.name || "",
-          startDate: data.startDate,
-          endDate: data.endDate,
           firstName: data.firstName,
-          lastName: data.lastName,
-          token,
+          propertyName: properties.find(p => p.id === data.propertyId)?.name || "",
+          temporaryPassword: "Schimba1!"
         },
       });
 
       if (emailError) throw emailError;
 
       toast({
-        title: "Invitation sent",
-        description: "The tenant invitation has been sent successfully.",
+        title: "Success",
+        description: "Tenant account created and invitation sent successfully.",
       });
 
       setOpen(false);
       form.reset();
     } catch (error) {
-      console.error("Error sending invitation:", error);
+      console.error("Error creating tenant account:", error);
       toast({
         title: "Error",
-        description: "Failed to send tenant invitation. Please try again.",
+        description: "Failed to create tenant account. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -101,7 +119,7 @@ export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Invite New Tenant</DialogTitle>
+          <DialogTitle>Create Tenant Account</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -194,8 +212,8 @@ export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Send Invitation
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
         </Form>
