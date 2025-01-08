@@ -8,17 +8,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Property } from "@/utils/propertyUtils";
+import { PropertySelect } from "./PropertySelect";
+import { TenantSelect } from "./TenantSelect";
 
 interface DocumentDialogProps {
   open: boolean;
@@ -40,7 +36,7 @@ export function DocumentDialog({
   const [file, setFile] = useState<File | null>(null);
   const [documentType, setDocumentType] = useState<DocumentType>("other");
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
-  const [selectedTenantId, setSelectedTenantId] = useState<string>("");
+  const [selectedTenantId, setSelectedTenantId] = useState<string>("none");
 
   // Fetch properties for landlord
   const { data: properties } = useQuery({
@@ -81,6 +77,11 @@ export function DocumentDialog({
     enabled: !!selectedPropertyId && userRole === "landlord",
   });
 
+  const handlePropertyChange = (value: string) => {
+    setSelectedPropertyId(value);
+    setSelectedTenantId("none"); // Reset tenant selection when property changes
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
@@ -114,7 +115,7 @@ export function DocumentDialog({
           uploaded_by: userId,
           document_type: documentType,
           property_id: userRole === "landlord" ? selectedPropertyId : null,
-          tenant_id: selectedTenantId || null,
+          tenant_id: selectedTenantId === "none" ? null : selectedTenantId,
         });
 
       if (dbError) throw dbError;
@@ -154,47 +155,17 @@ export function DocumentDialog({
           </div>
           {userRole === "landlord" && (
             <>
-              <div>
-                <Label htmlFor="property">Select Property</Label>
-                <Select
-                  value={selectedPropertyId}
-                  onValueChange={(value) => {
-                    setSelectedPropertyId(value);
-                    setSelectedTenantId(""); // Reset tenant selection when property changes
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select property" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {properties?.map((property) => (
-                      <SelectItem key={property.id} value={property.id}>
-                        {property.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <PropertySelect
+                properties={properties}
+                selectedPropertyId={selectedPropertyId}
+                onPropertyChange={handlePropertyChange}
+              />
               {selectedPropertyId && (
-                <div>
-                  <Label htmlFor="tenant">Assign to Tenant (Optional)</Label>
-                  <Select
-                    value={selectedTenantId}
-                    onValueChange={setSelectedTenantId}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select tenant" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">None</SelectItem>
-                      {tenants?.map((t) => (
-                        <SelectItem key={t.tenant_id} value={t.tenant_id}>
-                          {t.tenant.first_name} {t.tenant.last_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <TenantSelect
+                  tenants={tenants}
+                  selectedTenantId={selectedTenantId}
+                  onTenantChange={setSelectedTenantId}
+                />
               )}
             </>
           )}
