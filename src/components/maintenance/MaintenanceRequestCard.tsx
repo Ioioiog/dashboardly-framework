@@ -70,9 +70,16 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
       <Card>
         <CardHeader>
           <div className="flex justify-between items-start">
-            <div className="flex items-start gap-2">
+            <div className="flex flex-col gap-1">
               <CardTitle className="text-lg font-semibold">{request.title}</CardTitle>
-              {getPriorityIcon(request.priority)}
+              <div className="text-sm text-gray-500">
+                {request.property?.name && (
+                  <span className="mr-2">Property: {request.property.name}</span>
+                )}
+                {request.property?.address && (
+                  <span className="text-gray-400">({request.property.address})</span>
+                )}
+              </div>
             </div>
             {isLandlord ? (
               <Select
@@ -131,8 +138,13 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
           )}
         </CardContent>
         <CardFooter className="flex justify-between items-center">
-          <div className="text-sm text-gray-500">
-            Created {format(new Date(request.created_at), "MMM d, yyyy")}
+          <div className="flex flex-col gap-1 text-sm">
+            <span className="text-gray-500">
+              Created {format(new Date(request.created_at), "MMM d, yyyy")}
+            </span>
+            <span className="text-gray-500">
+              Requested by: {request.tenant?.first_name} {request.tenant?.last_name}
+            </span>
           </div>
           <div className="flex gap-2">
             {request.images && request.images.length > 0 && (

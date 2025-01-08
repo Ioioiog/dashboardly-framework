@@ -15,6 +15,11 @@ export function useMaintenanceRequests() {
             id,
             name,
             address
+          ),
+          tenant:profiles(
+            id,
+            first_name,
+            last_name
           )
         `)
         .order("created_at", { ascending: false });

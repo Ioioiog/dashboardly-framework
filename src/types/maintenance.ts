@@ -18,6 +18,11 @@ export interface MaintenanceRequest {
     name: string;
     address: string;
   };
+  tenant?: {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+  };
 }
 
 export type MaintenanceRequestStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
