@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Download, Trash2, UserPlus } from "lucide-react";
+import { Download, Trash2, UserPlus, UserX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -9,6 +9,7 @@ interface DocumentActionsProps {
   document: {
     id: string;
     file_path: string;
+    tenant_id?: string | null;
     property: {
       id: string;
       name: string;
@@ -77,6 +78,30 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
     }
   };
 
+  const handleRemoveTenant = async () => {
+    try {
+      const { error } = await supabase
+        .from("documents")
+        .update({ tenant_id: null })
+        .eq("id", doc.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Tenant access removed successfully",
+      });
+      onDocumentUpdated();
+    } catch (error) {
+      console.error("Error removing tenant access:", error);
+      toast({
+        title: "Error",
+        description: "Could not remove tenant access",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex gap-2">
       <Button
@@ -97,6 +122,15 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
           >
             <UserPlus className="h-4 w-4" />
           </Button>
+          {doc.tenant_id && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRemoveTenant}
+            >
+              <UserX className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             variant="destructive"
             size="sm"
