@@ -160,9 +160,16 @@ const AuthPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-2xl font-semibold text-center mb-8 text-gray-900">
-          {isPasswordReset ? "Update Password" : invitationToken ? "Complete Your Registration" : "AdminChirii.ro"}
-        </h1>
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold">
+            <span className="text-blue-600">Admin</span>
+            <span className="text-blue-800">Chirii</span>
+            <span className="text-slate-500 font-light">.ro</span>
+          </h1>
+          <p className="text-xs text-slate-500 mt-2">
+            simplificăm administrarea chiriilor
+          </p>
+        </div>
         <Auth
           supabaseClient={supabase}
           view={isPasswordReset ? "update_password" : "sign_up"}
