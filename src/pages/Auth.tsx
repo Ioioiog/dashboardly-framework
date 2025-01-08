@@ -28,7 +28,6 @@ const AuthPage = () => {
         return;
       }
 
-      // If there's an invitation token, we want to stay on the auth page
       if (session && !isPasswordReset && !invitationToken) {
         console.log("User is authenticated, redirecting to dashboard");
         navigate("/dashboard");
@@ -44,16 +43,13 @@ const AuthPage = () => {
         if (event === 'SIGNED_IN') {
           console.log("User signed in successfully");
           
-          // If there's an invitation token, handle the tenant invitation
           if (invitationToken) {
             console.log("Processing invitation token:", invitationToken);
             try {
-              // Set the token in the database context
               await supabase.rpc('set_claim', {
                 params: { value: invitationToken }
               });
 
-              // Fetch the invitation details
               const { data: invitation, error: inviteError } = await supabase
                 .from('tenant_invitations')
                 .select('*')
@@ -66,7 +62,6 @@ const AuthPage = () => {
                 throw new Error('Invalid or expired invitation');
               }
 
-              // Update the profile with tenant information
               const { error: profileError } = await supabase
                 .from('profiles')
                 .update({
@@ -79,7 +74,6 @@ const AuthPage = () => {
 
               if (profileError) throw profileError;
 
-              // Create the tenancy
               const { error: tenancyError } = await supabase
                 .from('tenancies')
                 .insert({
@@ -92,7 +86,6 @@ const AuthPage = () => {
 
               if (tenancyError) throw tenancyError;
 
-              // Update invitation status
               const { error: updateError } = await supabase
                 .from('tenant_invitations')
                 .update({ status: 'accepted' })
@@ -172,7 +165,7 @@ const AuthPage = () => {
         </div>
         <Auth
           supabaseClient={supabase}
-          view={isPasswordReset ? "update_password" : "sign_up"}
+          view={isPasswordReset ? "update_password" : "sign_in"}
           appearance={{
             theme: ThemeSupa,
             variables: {
