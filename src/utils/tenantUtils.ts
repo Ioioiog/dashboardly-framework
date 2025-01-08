@@ -10,33 +10,48 @@ interface TenantRegistrationData {
 }
 
 export async function registerTenant(data: TenantRegistrationData) {
-  // First check if user exists in auth
-  const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(data.email);
+  console.log("Starting tenant registration process for:", data.email);
   
-  let userId: string;
-  
-  if (userError) {
-    // User doesn't exist, create new account
-    console.log("Creating new user account...");
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: data.email,
-      password: "Schimba1!", // Default password
-      options: {
-        data: {
-          first_name: data.firstName,
-          last_name: data.lastName,
-          role: 'tenant'
-        }
+  // First check if user exists by trying to sign them up
+  console.log("Attempting to create new user account...");
+  const { data: authData, error: signUpError } = await supabase.auth.signUp({
+    email: data.email,
+    password: generateTempPassword(), // Generate a temporary password
+    options: {
+      data: {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        role: 'tenant'
       }
-    });
+    }
+  });
 
-    if (signUpError) throw signUpError;
-    if (!authData.user) throw new Error("Failed to create user account");
-    
-    userId = authData.user.id;
+  let userId: string;
+
+  if (signUpError) {
+    if (signUpError.message === "User already registered") {
+      console.log("User already exists, fetching existing user data...");
+      // If user exists, we'll get their profile from our profiles table
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", data.email)
+        .single();
+
+      if (profileError) throw new Error("Failed to fetch existing user profile");
+      if (!profileData) throw new Error("User profile not found");
+      
+      userId = profileData.id;
+    } else {
+      // If it's any other error, throw it
+      throw signUpError;
+    }
   } else {
-    userId = userData.user.id;
+    if (!authData.user) throw new Error("Failed to create user account");
+    userId = authData.user.id;
   }
+
+  console.log("User ID obtained:", userId);
 
   // Ensure profile exists
   const { error: profileError } = await supabase
@@ -49,11 +64,15 @@ export async function registerTenant(data: TenantRegistrationData) {
       role: 'tenant'
     });
 
-  if (profileError) throw profileError;
+  if (profileError) {
+    console.error("Error updating profile:", profileError);
+    throw profileError;
+  }
 
   // Generate invitation token
   const token = Math.random().toString(36).substring(2, 15);
 
+  console.log("Creating invitation record...");
   // Create invitation record
   const { error: inviteError } = await supabase
     .from("tenant_invitations")
@@ -67,8 +86,12 @@ export async function registerTenant(data: TenantRegistrationData) {
       end_date: data.endDate || null,
     });
 
-  if (inviteError) throw inviteError;
+  if (inviteError) {
+    console.error("Error creating invitation:", inviteError);
+    throw inviteError;
+  }
 
+  console.log("Creating tenancy record...");
   // Create tenancy record
   const { error: tenancyError } = await supabase
     .from("tenancies")
@@ -80,7 +103,16 @@ export async function registerTenant(data: TenantRegistrationData) {
       status: "active",
     });
 
-  if (tenancyError) throw tenancyError;
+  if (tenancyError) {
+    console.error("Error creating tenancy:", tenancyError);
+    throw tenancyError;
+  }
 
+  console.log("Tenant registration completed successfully");
   return { userId, token };
+}
+
+// Helper function to generate a temporary password
+function generateTempPassword() {
+  return 'Temp' + Math.random().toString(36).slice(-8) + '!';
 }
