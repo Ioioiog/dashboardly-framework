@@ -64,16 +64,16 @@ const DashboardSidebar = () => {
       } border-r border-gray-200 shadow-sm`}
     >
       <div className="flex flex-col h-full">
-        <div className="p-6 border-b border-gray-100">
+        <div className="p-8 border-b border-gray-100">
           <div className={`transition-opacity duration-200 ${
             isCollapsed ? "opacity-0" : "opacity-100"
           }`}>
-            <h1 className="text-xl font-bold">
+            <h1 className="text-2xl font-bold text-center">
               <span className="text-blue-600">Admin</span>
               <span className="text-blue-800">Chirii</span>
               <span className="text-slate-500 font-light">.ro</span>
             </h1>
-            <p className="text-xs text-slate-500 mt-1">simplificăm administrarea chiriilor</p>
+            <p className="text-sm text-slate-500 mt-2 text-center">simplificăm administrarea chiriilor</p>
           </div>
         </div>
 
