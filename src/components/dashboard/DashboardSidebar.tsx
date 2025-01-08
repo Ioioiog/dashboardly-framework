@@ -71,10 +71,11 @@ const DashboardSidebar = () => {
             isCollapsed ? "opacity-0" : "opacity-100"
           }`}>
             <h1 className="text-2xl font-bold text-center">
-              <span className="text-blue-600">Property</span>
-              <span className="text-blue-800">Manager</span>
+              <span className="text-blue-600">Admin</span>
+              <span className="text-blue-800">Chirii</span>
+              <span className="text-slate-500 font-light">.ro</span>
             </h1>
-            <p className="text-xs text-slate-500 mt-2 text-center">Simplify your property management</p>
+            <p className="text-xs text-slate-500 mt-2 text-center">simplificăm administrarea chiriilor</p>
           </div>
         </div>
 
