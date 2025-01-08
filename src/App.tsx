@@ -16,6 +16,7 @@ import TenantRegistration from "./pages/TenantRegistration";
 import { StrictMode, useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { useToast } from "./hooks/use-toast";
+import "./i18n/config"; // Import i18n configuration
 
 const queryClient = new QueryClient({
   defaultOptions: {

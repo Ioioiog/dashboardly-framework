@@ -1,0 +1,25 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "overview": "Here's an overview of your property management"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "properties": "Properties",
+    "tenants": "Tenants",
+    "maintenance": "Maintenance",
+    "documents": "Documents",
+    "payments": "Payments",
+    "utilities": "Utilities",
+    "settings": "Settings"
+  },
+  "metrics": {
+    "totalProperties": "Total Properties",
+    "monthlyRevenue": "Monthly Revenue",
+    "activeTenants": "Active Tenants",
+    "pendingMaintenance": "Pending Maintenance",
+    "currentProperty": "Current Property",
+    "paymentStatus": "Payment Status"
+  }
+}

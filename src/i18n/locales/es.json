@@ -1,0 +1,25 @@
+{
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcome": "Bienvenido de nuevo",
+    "overview": "Aquí tiene una vista general de su gestión inmobiliaria"
+  },
+  "navigation": {
+    "dashboard": "Panel",
+    "properties": "Propiedades",
+    "tenants": "Inquilinos",
+    "maintenance": "Mantenimiento",
+    "documents": "Documentos",
+    "payments": "Pagos",
+    "utilities": "Servicios",
+    "settings": "Ajustes"
+  },
+  "metrics": {
+    "totalProperties": "Total de Propiedades",
+    "monthlyRevenue": "Ingresos Mensuales",
+    "activeTenants": "Inquilinos Activos",
+    "pendingMaintenance": "Mantenimiento Pendiente",
+    "currentProperty": "Propiedad Actual",
+    "paymentStatus": "Estado de Pago"
+  }
+}

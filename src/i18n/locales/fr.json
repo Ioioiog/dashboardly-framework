@@ -1,0 +1,25 @@
+{
+  "dashboard": {
+    "title": "Tableau de Bord",
+    "welcome": "Bon retour",
+    "overview": "Voici un aperçu de votre gestion immobilière"
+  },
+  "navigation": {
+    "dashboard": "Tableau de Bord",
+    "properties": "Propriétés",
+    "tenants": "Locataires",
+    "maintenance": "Maintenance",
+    "documents": "Documents",
+    "payments": "Paiements",
+    "utilities": "Services",
+    "settings": "Paramètres"
+  },
+  "metrics": {
+    "totalProperties": "Total des Propriétés",
+    "monthlyRevenue": "Revenu Mensuel",
+    "activeTenants": "Locataires Actifs",
+    "pendingMaintenance": "Maintenance en Attente",
+    "currentProperty": "Propriété Actuelle",
+    "paymentStatus": "État des Paiements"
+  }
+}
