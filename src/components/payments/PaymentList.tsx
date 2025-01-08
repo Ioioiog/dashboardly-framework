@@ -8,10 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Payment } from "@/integrations/supabase/types/payment";
+import { PaymentWithRelations } from "@/integrations/supabase/types/payment";
 
 interface PaymentListProps {
-  payments: Payment[];
+  payments: PaymentWithRelations[];
   userRole: "landlord" | "tenant";
 }
 

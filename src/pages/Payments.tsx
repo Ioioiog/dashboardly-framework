@@ -5,12 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { PaymentList } from "@/components/payments/PaymentList";
-import { Payment } from "@/integrations/supabase/types/payment";
+import { PaymentWithRelations } from "@/integrations/supabase/types/payment";
 
 const Payments = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [payments, setPayments] = useState<Payment[]>([]);
+  const [payments, setPayments] = useState<PaymentWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
 
@@ -41,7 +41,15 @@ const Payments = () => {
           return;
         }
 
-        console.log("User role:", profile.role);
+        if (profile.role !== "landlord" && profile.role !== "tenant") {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Invalid user role",
+          });
+          return;
+        }
+
         setUserRole(profile.role as "landlord" | "tenant");
 
         // Fetch payments based on user role
@@ -73,7 +81,6 @@ const Payments = () => {
           return;
         }
 
-        console.log("Payments data:", paymentsData);
         setPayments(paymentsData);
         setIsLoading(false);
       } catch (error) {
