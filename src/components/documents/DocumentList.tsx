@@ -5,7 +5,7 @@ import { DocumentListSkeleton } from "./DocumentListSkeleton";
 import { EmptyDocumentState } from "./EmptyDocumentState";
 import { useState } from "react";
 import { DocumentFilters } from "./DocumentFilters";
-import { DocumentType } from "@/integrations/supabase/types";
+import { DocumentType } from "@/integrations/supabase/types/document-types";
 
 interface DocumentListProps {
   userId: string;

@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Property } from "@/integrations/supabase/types/property";
-import { DocumentType } from "@/integrations/supabase/types";
+import { DocumentType } from "@/integrations/supabase/types/document-types";
 
 interface DocumentFiltersProps {
   searchTerm: string;
