@@ -38,10 +38,44 @@ export function TenantAssignDialog({
     setIsSubmitting(true);
 
     try {
+      // First, check if a user with this email already exists
+      console.log("Checking if user exists:", email);
+      const { data: existingUser } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", email)
+        .single();
+
+      let userId: string;
+
+      if (existingUser) {
+        console.log("User already exists, using existing account");
+        userId = existingUser.id;
+      } else {
+        console.log("Creating new user account...");
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email,
+          password: "Schimba1!", // Default password
+          options: {
+            data: {
+              first_name: firstName,
+              last_name: lastName,
+              role: 'tenant'
+            }
+          }
+        });
+
+        if (authError) throw authError;
+        if (!authData.user) throw new Error("Failed to create user account");
+        
+        userId = authData.user.id;
+      }
+
       // Generate a unique token for the invitation
       const token = Math.random().toString(36).substring(2, 15);
 
-      const { error } = await supabase
+      // Create the invitation record
+      const { error: inviteError } = await supabase
         .from("tenant_invitations")
         .insert({
           email,
@@ -53,11 +87,25 @@ export function TenantAssignDialog({
           end_date: endDate || null,
         });
 
-      if (error) throw error;
+      if (inviteError) throw inviteError;
+
+      // Create the tenancy record
+      console.log("Creating tenancy record...");
+      const { error: tenancyError } = await supabase
+        .from("tenancies")
+        .insert({
+          property_id: propertyId,
+          tenant_id: userId,
+          start_date: startDate,
+          end_date: endDate || null,
+          status: "active",
+        });
+
+      if (tenancyError) throw tenancyError;
 
       toast({
         title: "Success",
-        description: "Tenant invitation sent successfully",
+        description: "Tenant invitation sent and tenancy created successfully",
       });
 
       onOpenChange(false);
@@ -67,11 +115,11 @@ export function TenantAssignDialog({
       setLastName("");
       setStartDate("");
       setEndDate("");
-    } catch (error) {
-      console.error("Error sending tenant invitation:", error);
+    } catch (error: any) {
+      console.error("Error in tenant assignment:", error);
       toast({
         title: "Error",
-        description: "Failed to send tenant invitation",
+        description: error.message || "Failed to assign tenant",
         variant: "destructive",
       });
     } finally {
