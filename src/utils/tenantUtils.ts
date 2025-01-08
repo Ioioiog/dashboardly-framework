@@ -16,57 +16,47 @@ export async function registerTenant(data: TenantRegistrationData) {
   let userId: string;
 
   try {
-    // First check if user exists by trying to sign them up
-    console.log("Attempting to create new user account...");
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: data.email,
-      password: generateTempPassword(), // Generate a temporary password
-      options: {
-        data: {
-          first_name: data.firstName,
-          last_name: data.lastName,
-          role: 'tenant'
-        }
-      }
-    });
+    // First check if user exists
+    console.log("Checking if user already exists...");
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', data.email)
+      .single();
 
-    if (signUpError) {
-      // Check specifically for user_already_exists error
-      if ((signUpError as AuthError).message.includes("User already registered")) {
-        console.log("User already exists, fetching existing user data...");
-        // If user exists, we'll get their profile from our profiles table
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("email", data.email)
-          .single();
+    if (existingUser) {
+      console.log("User already exists, using existing user ID:", existingUser.id);
+      userId = existingUser.id;
+    } else {
+      // If user doesn't exist, create new account
+      console.log("Creating new user account...");
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: data.email,
+        password: generateTempPassword(),
+        options: {
+          data: {
+            first_name: data.firstName,
+            last_name: data.lastName,
+            role: 'tenant'
+          }
+        }
+      });
 
-        if (profileError) {
-          console.error("Profile fetch error:", profileError);
-          throw new Error("Failed to fetch existing user profile");
-        }
-        if (!profileData) {
-          console.error("No profile found for email:", data.email);
-          throw new Error("User profile not found");
-        }
-        
-        userId = profileData.id;
-      } else {
-        // If it's any other error, throw it
+      if (signUpError) {
         console.error("Signup error:", signUpError);
         throw signUpError;
       }
-    } else {
+
       if (!authData.user) {
         console.error("No user data returned from signup");
         throw new Error("Failed to create user account");
       }
+
       userId = authData.user.id;
     }
 
-    console.log("User ID obtained:", userId);
-
-    // Ensure profile exists
+    console.log("Ensuring profile exists...");
+    // Ensure profile exists and is up to date
     const { error: profileError } = await supabase
       .from("profiles")
       .upsert({
