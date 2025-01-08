@@ -4,34 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { useToast } from "@/hooks/use-toast";
 import { TenantInviteDialog } from "@/components/tenants/TenantInviteDialog";
+import { TenantList } from "@/components/tenants/TenantList";
+import { useTenants } from "@/hooks/useTenants";
 import { Property } from "@/utils/propertyUtils";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-
-interface Tenant {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  email: string | null;
-  phone: string | null;
-  property: {
-    id: string;
-    name: string;
-    address: string;
-  };
-  tenancy: {
-    start_date: string;
-    end_date: string | null;
-    status: string;
-  };
-}
 
 const Tenants = () => {
   const navigate = useNavigate();
@@ -39,15 +14,17 @@ const Tenants = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
-  const [tenants, setTenants] = useState<Tenant[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: tenants = [], isLoading } = useTenants();
 
   useEffect(() => {
     const checkUser = async () => {
       try {
         console.log("Checking user session...");
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
         if (sessionError) {
           console.error("Session error:", sessionError);
           throw sessionError;
@@ -64,9 +41,9 @@ const Tenants = () => {
 
         // Fetch profile with a direct query
         const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
           .maybeSingle();
 
         if (profileError) {
@@ -87,7 +64,7 @@ const Tenants = () => {
         console.log("Profile role:", profile.role);
         setUserRole(profile.role as "landlord" | "tenant");
 
-        // Only fetch properties and tenants for landlords
+        // Only fetch properties for landlords
         if (profile.role === "landlord") {
           console.log("Fetching properties for landlord");
           const { data: propertiesData, error: propertiesError } = await supabase
@@ -102,58 +79,7 @@ const Tenants = () => {
 
           console.log("Properties fetched:", propertiesData?.length);
           setProperties(propertiesData || []);
-
-          // Fetch tenants data
-          const { data: tenantsData, error: tenantsError } = await supabase
-            .from('tenancies')
-            .select(`
-              tenant_id,
-              start_date,
-              end_date,
-              status,
-              profiles!tenancies_tenant_id_fkey (
-                id,
-                first_name,
-                last_name,
-                email,
-                phone
-              ),
-              properties (
-                id,
-                name,
-                address
-              )
-            `)
-            .eq('status', 'active');
-
-          if (tenantsError) {
-            console.error("Tenants fetch error:", tenantsError);
-            throw tenantsError;
-          }
-
-          // Transform the data to match our Tenant interface
-          const formattedTenants = tenantsData.map((tenancy) => ({
-            id: tenancy.profiles.id,
-            first_name: tenancy.profiles.first_name,
-            last_name: tenancy.profiles.last_name,
-            email: tenancy.profiles.email,
-            phone: tenancy.profiles.phone,
-            property: {
-              id: tenancy.properties.id,
-              name: tenancy.properties.name,
-              address: tenancy.properties.address,
-            },
-            tenancy: {
-              start_date: tenancy.start_date,
-              end_date: tenancy.end_date,
-              status: tenancy.status,
-            },
-          }));
-
-          console.log("Tenants fetched:", formattedTenants.length);
-          setTenants(formattedTenants);
         }
-
       } catch (error: any) {
         console.error("Error in checkUser:", error);
         toast({
@@ -161,21 +87,19 @@ const Tenants = () => {
           description: error.message || "An unexpected error occurred",
           variant: "destructive",
         });
-      } finally {
-        setIsLoading(false);
       }
     };
 
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log("Auth state changed:", event);
-        if (!session) {
-          navigate("/auth");
-        }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event);
+      if (!session) {
+        navigate("/auth");
       }
-    );
+    });
 
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
@@ -222,48 +146,7 @@ const Tenants = () => {
 
           <div className="space-y-8">
             {userRole === "landlord" ? (
-              <div className="rounded-lg border bg-card text-card-foreground shadow">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Property</TableHead>
-                      <TableHead>Start Date</TableHead>
-                      <TableHead>End Date</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {tenants.map((tenant) => (
-                      <TableRow key={tenant.id}>
-                        <TableCell>
-                          {tenant.first_name} {tenant.last_name}
-                        </TableCell>
-                        <TableCell>
-                          <div>{tenant.email}</div>
-                          <div className="text-sm text-gray-500">{tenant.phone}</div>
-                        </TableCell>
-                        <TableCell>
-                          <div>{tenant.property.name}</div>
-                          <div className="text-sm text-gray-500">{tenant.property.address}</div>
-                        </TableCell>
-                        <TableCell>{new Date(tenant.tenancy.start_date).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          {tenant.tenancy.end_date 
-                            ? new Date(tenant.tenancy.end_date).toLocaleDateString()
-                            : 'No end date'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={tenant.tenancy.status === 'active' ? 'default' : 'secondary'}>
-                            {tenant.tenancy.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <TenantList tenants={tenants} />
             ) : (
               <div className="rounded-lg border bg-card text-card-foreground shadow p-6">
                 <p className="text-muted-foreground">
