@@ -12,6 +12,7 @@ export type Database = {
       documents: {
         Row: {
           created_at: string
+          document_type: Database["public"]["Enums"]["document_type"]
           file_path: string
           id: string
           name: string
@@ -22,6 +23,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          document_type?: Database["public"]["Enums"]["document_type"]
           file_path: string
           id?: string
           name: string
@@ -32,6 +34,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          document_type?: Database["public"]["Enums"]["document_type"]
           file_path?: string
           id?: string
           name?: string
@@ -439,6 +442,7 @@ export type Database = {
       }
     }
     Enums: {
+      document_type: "lease_agreement" | "invoice" | "receipt" | "other"
       maintenance_request_status:
         | "pending"
         | "in_progress"

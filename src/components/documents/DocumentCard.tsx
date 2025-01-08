@@ -4,6 +4,7 @@ import { FileText, Download, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface DocumentCardProps {
   document: {
@@ -11,6 +12,7 @@ interface DocumentCardProps {
     name: string;
     file_path: string;
     created_at: string;
+    document_type: "lease_agreement" | "invoice" | "receipt" | "other";
     property: {
       name: string;
       address: string;
@@ -18,6 +20,13 @@ interface DocumentCardProps {
   };
   userRole: "landlord" | "tenant";
 }
+
+const documentTypeLabels = {
+  lease_agreement: "Lease Agreement",
+  invoice: "Invoice",
+  receipt: "Receipt",
+  other: "Other",
+};
 
 export function DocumentCard({ document: doc, userRole }: DocumentCardProps) {
   const { toast } = useToast();
@@ -30,7 +39,6 @@ export function DocumentCard({ document: doc, userRole }: DocumentCardProps) {
 
       if (error) throw error;
 
-      // Create a download link
       const url = URL.createObjectURL(data);
       const a = window.document.createElement("a");
       a.href = url;
@@ -79,10 +87,15 @@ export function DocumentCard({ document: doc, userRole }: DocumentCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          <span className="truncate">{doc.name}</span>
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            <span className="truncate">{doc.name}</span>
+          </CardTitle>
+          <Badge variant="secondary">
+            {documentTypeLabels[doc.document_type]}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

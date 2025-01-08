@@ -8,6 +8,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,6 +32,7 @@ export function DocumentDialog({
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [documentType, setDocumentType] = useState<string>("other");
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +55,7 @@ export function DocumentDialog({
           name: file.name,
           file_path: filePath,
           uploaded_by: userId,
+          document_type: documentType,
         });
 
       if (dbError) throw dbError;
@@ -83,6 +92,23 @@ export function DocumentDialog({
               onChange={(e) => setFile(e.target.files?.[0] || null)}
               required
             />
+          </div>
+          <div>
+            <Label htmlFor="type">Document Type</Label>
+            <Select
+              value={documentType}
+              onValueChange={setDocumentType}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="lease_agreement">Lease Agreement</SelectItem>
+                <SelectItem value="invoice">Invoice</SelectItem>
+                <SelectItem value="receipt">Receipt</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <Button type="submit" disabled={!file || isUploading}>
             {isUploading ? "Uploading..." : "Upload"}
