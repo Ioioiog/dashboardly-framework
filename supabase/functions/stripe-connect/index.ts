@@ -12,14 +12,22 @@ serve(async (req) => {
   }
 
   try {
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeSecretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not set in environment variables');
+    }
+
+    console.log('Creating Stripe instance with secret key');
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2023-10-16',
     });
 
+    console.log('Creating Stripe Connect account');
     const account = await stripe.accounts.create({
       type: 'standard',
     });
 
+    console.log('Creating account link for onboarding');
     const session = await stripe.accountLinks.create({
       account: account.id,
       refresh_url: `${req.headers.get('origin')}/settings`,
