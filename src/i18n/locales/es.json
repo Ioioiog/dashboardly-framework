@@ -82,27 +82,44 @@
   "maintenance": {
     "title": "Solicitudes de Mantenimiento",
     "newRequest": "Nueva Solicitud",
-    "noRequests": "No hay solicitudes de mantenimiento"
-  },
-  "documents": {
-    "title": "Documentos",
-    "upload": "Subir Documento",
-    "noDocuments": "No se encontraron documentos"
-  },
-  "payments": {
-    "title": "Pagos",
-    "noPayments": "No se encontraron pagos",
+    "noRequests": "No se encontraron solicitudes de mantenimiento",
+    "form": {
+      "title": "Título",
+      "titlePlaceholder": "Breve descripción del problema",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Descripción detallada del problema de mantenimiento",
+      "issueType": "Tipo de Problema",
+      "issueTypePlaceholder": "Seleccione un tipo de problema",
+      "priority": "Prioridad",
+      "priorityPlaceholder": "Seleccione nivel de prioridad",
+      "notes": "Notas Adicionales",
+      "notesPlaceholder": "Cualquier información adicional o instrucciones especiales",
+      "images": "Imágenes",
+      "submit": {
+        "create": "Crear Solicitud",
+        "update": "Actualizar Solicitud",
+        "creating": "Creando...",
+        "updating": "Actualizando..."
+      }
+    },
     "status": {
-      "paid": "Pagado",
       "pending": "Pendiente",
-      "overdue": "Vencido"
+      "in_progress": "En Progreso",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    },
+    "priority": {
+      "high": "Alta Prioridad",
+      "medium": "Prioridad Media",
+      "low": "Baja Prioridad"
+    },
+    "details": {
+      "createdOn": "Creado el",
+      "requestedBy": "Solicitado por",
+      "property": "Propiedad",
+      "viewImages": "Ver Imágenes",
+      "viewHistory": "Ver Historial",
+      "edit": "Editar"
     }
-  },
-  "utilities": {
-    "title": "Servicios",
-    "noUtilities": "No se encontraron servicios",
-    "type": "Tipo",
-    "amount": "Importe",
-    "dueDate": "Fecha de Vencimiento"
   }
 }

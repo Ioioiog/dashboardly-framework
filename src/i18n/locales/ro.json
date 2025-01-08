@@ -31,7 +31,7 @@
     }
   },
   "navigation": {
-    "dashboard": "Panou de Control",
+    "dashboard": "Panou",
     "properties": "Proprietăți",
     "tenants": "Chiriași",
     "maintenance": "Întreținere",
@@ -82,27 +82,44 @@
   "maintenance": {
     "title": "Cereri de Întreținere",
     "newRequest": "Cerere Nouă",
-    "noRequests": "Nu există cereri de întreținere"
-  },
-  "documents": {
-    "title": "Documente",
-    "upload": "Încarcă Document",
-    "noDocuments": "Nu s-au găsit documente"
-  },
-  "payments": {
-    "title": "Plăți",
-    "noPayments": "Nu s-au găsit plăți",
+    "noRequests": "Nu s-au găsit cereri de întreținere",
+    "form": {
+      "title": "Titlu",
+      "titlePlaceholder": "Scurtă descriere a problemei",
+      "description": "Descriere",
+      "descriptionPlaceholder": "Descriere detaliată a problemei de întreținere",
+      "issueType": "Tip Problemă",
+      "issueTypePlaceholder": "Selectați un tip de problemă",
+      "priority": "Prioritate",
+      "priorityPlaceholder": "Selectați nivelul de prioritate",
+      "notes": "Note Adiționale",
+      "notesPlaceholder": "Orice informații suplimentare sau instrucțiuni speciale",
+      "images": "Imagini",
+      "submit": {
+        "create": "Creează Cerere",
+        "update": "Actualizează Cerere",
+        "creating": "Se creează...",
+        "updating": "Se actualizează..."
+      }
+    },
     "status": {
-      "paid": "Plătit",
       "pending": "În Așteptare",
-      "overdue": "Întârziat"
+      "in_progress": "În Lucru",
+      "completed": "Finalizat",
+      "cancelled": "Anulat"
+    },
+    "priority": {
+      "high": "Prioritate Înaltă",
+      "medium": "Prioritate Medie",
+      "low": "Prioritate Scăzută"
+    },
+    "details": {
+      "createdOn": "Creat la",
+      "requestedBy": "Solicitat de",
+      "property": "Proprietate",
+      "viewImages": "Vezi Imaginile",
+      "viewHistory": "Vezi Istoricul",
+      "edit": "Editează"
     }
-  },
-  "utilities": {
-    "title": "Utilități",
-    "noUtilities": "Nu s-au găsit utilități",
-    "type": "Tip",
-    "amount": "Sumă",
-    "dueDate": "Data Scadentă"
   }
 }

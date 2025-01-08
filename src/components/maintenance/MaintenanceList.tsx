@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { MaintenanceRequestCard } from "./MaintenanceRequestCard";
@@ -9,6 +10,8 @@ interface MaintenanceListProps {
 }
 
 export function MaintenanceList({ requests, isLoading, isLandlord }: MaintenanceListProps) {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -26,7 +29,7 @@ export function MaintenanceList({ requests, isLoading, isLandlord }: Maintenance
     return (
       <Card className="p-6">
         <div className="text-center text-gray-500">
-          No maintenance requests found.
+          {t('maintenance.noRequests')}
         </div>
       </Card>
     );

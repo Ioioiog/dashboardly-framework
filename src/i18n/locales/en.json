@@ -82,27 +82,44 @@
   "maintenance": {
     "title": "Maintenance Requests",
     "newRequest": "New Request",
-    "noRequests": "No maintenance requests found"
-  },
-  "documents": {
-    "title": "Documents",
-    "upload": "Upload Document",
-    "noDocuments": "No documents found"
-  },
-  "payments": {
-    "title": "Payments",
-    "noPayments": "No payments found",
+    "noRequests": "No maintenance requests found",
+    "form": {
+      "title": "Title",
+      "titlePlaceholder": "Brief description of the issue",
+      "description": "Description",
+      "descriptionPlaceholder": "Detailed description of the maintenance issue",
+      "issueType": "Issue Type",
+      "issueTypePlaceholder": "Select an issue type",
+      "priority": "Priority",
+      "priorityPlaceholder": "Select priority level",
+      "notes": "Additional Notes",
+      "notesPlaceholder": "Any additional information or special instructions",
+      "images": "Images",
+      "submit": {
+        "create": "Create Request",
+        "update": "Update Request",
+        "creating": "Creating...",
+        "updating": "Updating..."
+      }
+    },
     "status": {
-      "paid": "Paid",
       "pending": "Pending",
-      "overdue": "Overdue"
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "priority": {
+      "high": "High Priority",
+      "medium": "Medium Priority",
+      "low": "Low Priority"
+    },
+    "details": {
+      "createdOn": "Created on",
+      "requestedBy": "Requested by",
+      "property": "Property",
+      "viewImages": "View Images",
+      "viewHistory": "View History",
+      "edit": "Edit"
     }
-  },
-  "utilities": {
-    "title": "Utilities",
-    "noUtilities": "No utilities found",
-    "type": "Type",
-    "amount": "Amount",
-    "dueDate": "Due Date"
   }
 }

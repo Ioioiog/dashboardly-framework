@@ -18,6 +18,16 @@
         "currentProperty": "Votre propriété locative actuelle",
         "paymentStatus": "État de votre dernier paiement"
       }
+    },
+    "recentActivity": "Activité Récente",
+    "properties": {
+      "title": "Vos Propriétés",
+      "noProperties": "Aucune propriété trouvée",
+      "addProperty": "Ajouter une Propriété"
+    },
+    "revenue": {
+      "title": "Revenu Mensuel",
+      "noData": "Aucune donnée de revenu disponible"
     }
   },
   "navigation": {
@@ -72,27 +82,44 @@
   "maintenance": {
     "title": "Demandes de Maintenance",
     "newRequest": "Nouvelle Demande",
-    "noRequests": "Aucune demande de maintenance trouvée"
-  },
-  "documents": {
-    "title": "Documents",
-    "upload": "Télécharger un Document",
-    "noDocuments": "Aucun document trouvé"
-  },
-  "payments": {
-    "title": "Paiements",
-    "noPayments": "Aucun paiement trouvé",
+    "noRequests": "Aucune demande de maintenance trouvée",
+    "form": {
+      "title": "Titre",
+      "titlePlaceholder": "Brève description du problème",
+      "description": "Description",
+      "descriptionPlaceholder": "Description détaillée du problème de maintenance",
+      "issueType": "Type de Problème",
+      "issueTypePlaceholder": "Sélectionnez un type de problème",
+      "priority": "Priorité",
+      "priorityPlaceholder": "Sélectionnez le niveau de priorité",
+      "notes": "Notes Supplémentaires",
+      "notesPlaceholder": "Toute information supplémentaire ou instructions spéciales",
+      "images": "Images",
+      "submit": {
+        "create": "Créer la Demande",
+        "update": "Mettre à Jour la Demande",
+        "creating": "Création...",
+        "updating": "Mise à jour..."
+      }
+    },
     "status": {
-      "paid": "Payé",
       "pending": "En Attente",
-      "overdue": "En Retard"
+      "in_progress": "En Cours",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "priority": {
+      "high": "Haute Priorité",
+      "medium": "Priorité Moyenne",
+      "low": "Basse Priorité"
+    },
+    "details": {
+      "createdOn": "Créé le",
+      "requestedBy": "Demandé par",
+      "property": "Propriété",
+      "viewImages": "Voir les Images",
+      "viewHistory": "Voir l'Historique",
+      "edit": "Modifier"
     }
-  },
-  "utilities": {
-    "title": "Services",
-    "noUtilities": "Aucun service trouvé",
-    "type": "Type",
-    "amount": "Montant",
-    "dueDate": "Date d'Échéance"
   }
 }
