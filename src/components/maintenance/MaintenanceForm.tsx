@@ -1,53 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
 import { useCreateMaintenanceRequest } from "@/hooks/useCreateMaintenanceRequest";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  MaintenanceIssueType,
-  MaintenancePriority,
-  MaintenanceRequest,
-} from "@/types/maintenance";
+import { MaintenanceRequest } from "@/types/maintenance";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
-const maintenanceFormSchema = z.object({
-  title: z.string().min(2, "Title must be at least 2 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  issue_type: z.string().min(1, "Please select an issue type"),
-  priority: z.string().min(1, "Please select a priority"),
-  notes: z.string().optional(),
-});
-
-type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
-
-const ISSUE_TYPES: MaintenanceIssueType[] = [
-  "Plumbing",
-  "Electrical",
-  "HVAC",
-  "Structural",
-  "Appliance",
-  "Other",
-];
-const PRIORITIES: MaintenancePriority[] = ["Low", "Medium", "High"];
+import { MaintenanceBasicInfo } from "./form/MaintenanceBasicInfo";
+import { MaintenanceDescription } from "./form/MaintenanceDescription";
+import { maintenanceFormSchema, MaintenanceFormValues } from "./types";
 
 interface MaintenanceFormProps {
   onSuccess: () => void;
@@ -57,8 +19,7 @@ interface MaintenanceFormProps {
 export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { mutate: createRequest, isPending: isCreating } =
-    useCreateMaintenanceRequest();
+  const { mutate: createRequest, isPending: isCreating } = useCreateMaintenanceRequest();
 
   const { mutate: updateRequest, isPending: isUpdating } = useMutation({
     mutationFn: async (values: MaintenanceFormValues) => {
@@ -76,7 +37,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
           issue_type: request!.issue_type,
           priority: request!.priority,
           notes: request!.notes,
-          edited_by: currentUser.user.id, // Fixed: Access id through user object
+          edited_by: currentUser.user.id,
         });
 
       if (historyError) throw historyError;
@@ -147,7 +108,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
     const { data: tenancy, error: tenancyError } = await supabase
       .from("tenancies")
       .select("property_id")
-      .eq("tenant_id", userData.user.id) // Fixed: Access id through user object
+      .eq("tenant_id", userData.user.id)
       .eq("status", "active")
       .maybeSingle();
 
@@ -202,101 +163,8 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input placeholder="Brief description of the issue" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="issue_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Issue Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an issue type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {ISSUE_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="priority"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Priority</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select priority level" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {PRIORITIES.map((priority) => (
-                    <SelectItem key={priority} value={priority}>
-                      {priority}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Detailed description of the maintenance issue"
-                  className="min-h-[100px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Additional Notes</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Any additional information or special instructions"
-                  className="min-h-[80px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <MaintenanceBasicInfo form={form} />
+        <MaintenanceDescription form={form} />
         <Button
           type="submit"
           className="w-full"

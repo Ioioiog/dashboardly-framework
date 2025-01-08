@@ -4,13 +4,15 @@ export interface MaintenanceRequest {
   tenant_id: string;
   title: string;
   description: string;
-  status: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   created_at: string;
   updated_at: string;
   issue_type?: string;
   priority?: string;
   images?: string[];
   notes?: string;
+  assigned_to?: string;
+  service_provider_notes?: string;
   property?: {
     id: string;
     name: string;

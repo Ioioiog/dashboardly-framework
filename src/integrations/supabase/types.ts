@@ -103,6 +103,7 @@ export type Database = {
       }
       maintenance_requests: {
         Row: {
+          assigned_to: string | null
           created_at: string
           description: string
           id: string
@@ -111,12 +112,14 @@ export type Database = {
           notes: string | null
           priority: string | null
           property_id: string
-          status: string
+          service_provider_notes: string | null
+          status: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id: string
           title: string
           updated_at: string
         }
         Insert: {
+          assigned_to?: string | null
           created_at?: string
           description: string
           id?: string
@@ -125,12 +128,14 @@ export type Database = {
           notes?: string | null
           priority?: string | null
           property_id: string
-          status?: string
+          service_provider_notes?: string | null
+          status?: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id: string
           title: string
           updated_at?: string
         }
         Update: {
+          assigned_to?: string | null
           created_at?: string
           description?: string
           id?: string
@@ -139,12 +144,20 @@ export type Database = {
           notes?: string | null
           priority?: string | null
           property_id?: string
-          status?: string
+          service_provider_notes?: string | null
+          status?: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id?: string
           title?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "maintenance_requests_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "maintenance_requests_property_id_fkey"
             columns: ["property_id"]
@@ -426,6 +439,11 @@ export type Database = {
       }
     }
     Enums: {
+      maintenance_request_status:
+        | "pending"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
       property_type: "Apartment" | "House" | "Condo" | "Commercial"
     }
     CompositeTypes: {
