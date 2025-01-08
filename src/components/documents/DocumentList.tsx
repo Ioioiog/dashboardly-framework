@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { useTenants } from "@/hooks/useTenants";
 
+type DocumentType = "lease_agreement" | "invoice" | "receipt" | "other";
+
 interface DocumentListProps {
   userId: string;
   userRole: "landlord" | "tenant";
@@ -16,7 +18,7 @@ interface DocumentListProps {
 
 export function DocumentList({ userId, userRole }: DocumentListProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | DocumentType>("all");
   const [propertyFilter, setPropertyFilter] = useState<string>("all");
   const [tenantFilter, setTenantFilter] = useState<string>("all");
 
@@ -80,7 +82,7 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
 
       // Apply document type filter
       if (typeFilter !== "all") {
-        query = query.eq("document_type", typeFilter);
+        query = query.eq("document_type", typeFilter as DocumentType);
       }
 
       const { data, error } = await query;
