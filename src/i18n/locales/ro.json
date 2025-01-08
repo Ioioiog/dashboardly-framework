@@ -88,51 +88,26 @@
     }
   },
   "tenants": {
-    "title": "Chiriași",
-    "noTenants": "Nu s-au găsit chiriași",
-    "inviteTenant": "Invită Chiriaș"
-  },
-  "maintenance": {
-    "title": "Cereri de Întreținere",
-    "newRequest": "Cerere Nouă",
-    "noRequests": "Nu s-au găsit cereri de întreținere",
-    "form": {
-      "title": "Titlu",
-      "titlePlaceholder": "Scurtă descriere a problemei",
-      "description": "Descriere",
-      "descriptionPlaceholder": "Descriere detaliată a problemei de întreținere",
-      "issueType": "Tip Problemă",
-      "issueTypePlaceholder": "Selectați un tip de problemă",
-      "priority": "Prioritate",
-      "priorityPlaceholder": "Selectați nivelul de prioritate",
-      "notes": "Note Adiționale",
-      "notesPlaceholder": "Orice informații suplimentare sau instrucțiuni speciale",
-      "images": "Imagini",
-      "submit": {
-        "create": "Creează Cerere",
-        "update": "Actualizează Cerere",
-        "creating": "Se creează...",
-        "updating": "Se actualizează..."
-      }
+    "title": {
+      "landlord": "Chiriași",
+      "tenant": "Chiria Mea"
     },
-    "status": {
-      "pending": "În Așteptare",
-      "in_progress": "În Lucru",
-      "completed": "Finalizat",
-      "cancelled": "Anulat"
+    "description": {
+      "landlord": "Gestionează și vizualizează chiriașii tăi.",
+      "tenant": "Vezi detaliile chiriei tale."
     },
-    "priority": {
-      "high": "Prioritate Înaltă",
-      "medium": "Prioritate Medie",
-      "low": "Prioritate Scăzută"
-    },
-    "details": {
-      "createdOn": "Creat la",
-      "requestedBy": "Solicitat de",
+    "dashboard": {
       "property": "Proprietate",
-      "viewImages": "Vezi Imaginile",
-      "viewHistory": "Vezi Istoricul",
-      "edit": "Editează"
+      "leasePeriod": "Perioada de Închiriere",
+      "monthlyRent": "Chirie Lunară",
+      "endDate": "Până la {{date}}",
+      "noEndDate": "Fără dată de încheiere"
+    },
+    "noTenancy": {
+      "message": "Nu s-a găsit nicio chirie activă. Contactează proprietarul dacă crezi că aceasta este o eroare."
+    },
+    "error": {
+      "loading": "Eroare la încărcarea datelor chiriașilor. Te rugăm să încerci din nou mai târziu."
     }
   },
   "common": {
@@ -140,6 +115,7 @@
     "delete": "Șterge",
     "edit": "Editează",
     "save": "Salvează",
-    "loading": "Se încarcă..."
+    "loading": "Se încarcă...",
+    "error": "Eroare"
   }
 }

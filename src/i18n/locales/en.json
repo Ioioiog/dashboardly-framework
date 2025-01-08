@@ -82,51 +82,26 @@
     }
   },
   "tenants": {
-    "title": "Tenants",
-    "noTenants": "No tenants found",
-    "inviteTenant": "Invite Tenant"
-  },
-  "maintenance": {
-    "title": "Maintenance Requests",
-    "newRequest": "New Request",
-    "noRequests": "No maintenance requests found",
-    "form": {
-      "title": "Title",
-      "titlePlaceholder": "Brief description of the issue",
-      "description": "Description",
-      "descriptionPlaceholder": "Detailed description of the maintenance issue",
-      "issueType": "Issue Type",
-      "issueTypePlaceholder": "Select an issue type",
-      "priority": "Priority",
-      "priorityPlaceholder": "Select priority level",
-      "notes": "Additional Notes",
-      "notesPlaceholder": "Any additional information or special instructions",
-      "images": "Images",
-      "submit": {
-        "create": "Create Request",
-        "update": "Update Request",
-        "creating": "Creating...",
-        "updating": "Updating..."
-      }
+    "title": {
+      "landlord": "Tenants",
+      "tenant": "My Tenancy"
     },
-    "status": {
-      "pending": "Pending",
-      "in_progress": "In Progress",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
+    "description": {
+      "landlord": "Manage and view your property tenants.",
+      "tenant": "View your tenancy details."
     },
-    "priority": {
-      "high": "High Priority",
-      "medium": "Medium Priority",
-      "low": "Low Priority"
-    },
-    "details": {
-      "createdOn": "Created on",
-      "requestedBy": "Requested by",
+    "dashboard": {
       "property": "Property",
-      "viewImages": "View Images",
-      "viewHistory": "View History",
-      "edit": "Edit"
+      "leasePeriod": "Lease Period",
+      "monthlyRent": "Monthly Rent",
+      "endDate": "Until {{date}}",
+      "noEndDate": "No end date"
+    },
+    "noTenancy": {
+      "message": "No active tenancy found. Please contact your landlord if you believe this is an error."
+    },
+    "error": {
+      "loading": "Error loading tenant data. Please try again later."
     }
   },
   "common": {
@@ -135,6 +110,7 @@
     "edit": "Edit",
     "save": "Save",
     "loading": "Loading...",
-    "error": "Error"
+    "error": "Error",
+    "unexpectedError": "An unexpected error occurred"
   }
 }

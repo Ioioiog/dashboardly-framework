@@ -88,51 +88,26 @@
     }
   },
   "tenants": {
-    "title": "Inquilinos",
-    "noTenants": "No se encontraron inquilinos",
-    "inviteTenant": "Invitar Inquilino"
-  },
-  "maintenance": {
-    "title": "Solicitudes de Mantenimiento",
-    "newRequest": "Nueva Solicitud",
-    "noRequests": "No se encontraron solicitudes de mantenimiento",
-    "form": {
-      "title": "Título",
-      "titlePlaceholder": "Breve descripción del problema",
-      "description": "Descripción",
-      "descriptionPlaceholder": "Descripción detallada del problema de mantenimiento",
-      "issueType": "Tipo de Problema",
-      "issueTypePlaceholder": "Seleccione un tipo de problema",
-      "priority": "Prioridad",
-      "priorityPlaceholder": "Seleccione nivel de prioridad",
-      "notes": "Notas Adicionales",
-      "notesPlaceholder": "Cualquier información adicional o instrucciones especiales",
-      "images": "Imágenes",
-      "submit": {
-        "create": "Crear Solicitud",
-        "update": "Actualizar Solicitud",
-        "creating": "Creando...",
-        "updating": "Actualizando..."
-      }
+    "title": {
+      "landlord": "Inquilinos",
+      "tenant": "Mi Alquiler"
     },
-    "status": {
-      "pending": "Pendiente",
-      "in_progress": "En Progreso",
-      "completed": "Completado",
-      "cancelled": "Cancelado"
+    "description": {
+      "landlord": "Gestiona y visualiza tus inquilinos.",
+      "tenant": "Ver detalles de tu alquiler."
     },
-    "priority": {
-      "high": "Alta Prioridad",
-      "medium": "Prioridad Media",
-      "low": "Baja Prioridad"
-    },
-    "details": {
-      "createdOn": "Creado el",
-      "requestedBy": "Solicitado por",
+    "dashboard": {
       "property": "Propiedad",
-      "viewImages": "Ver Imágenes",
-      "viewHistory": "Ver Historial",
-      "edit": "Editar"
+      "leasePeriod": "Período de Alquiler",
+      "monthlyRent": "Alquiler Mensual",
+      "endDate": "Hasta {{date}}",
+      "noEndDate": "Sin fecha de finalización"
+    },
+    "noTenancy": {
+      "message": "No se encontró un alquiler activo. Contacta a tu propietario si crees que esto es un error."
+    },
+    "error": {
+      "loading": "Error al cargar datos de inquilinos. Por favor, inténtalo de nuevo más tarde."
     }
   },
   "common": {

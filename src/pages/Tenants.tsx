@@ -3,17 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { useToast } from "@/hooks/use-toast";
-import { TenantInviteDialog } from "@/components/tenants/TenantInviteDialog";
 import { TenantList } from "@/components/tenants/TenantList";
 import { useTenants } from "@/hooks/useTenants";
 import { Property } from "@/utils/propertyUtils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Home, DollarSign } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { TenantsHeader } from "@/components/tenants/TenantsHeader";
+import { TenantDashboard } from "@/components/tenants/TenantDashboard";
+import { NoTenancy } from "@/components/tenants/NoTenancy";
+import { useTranslation } from "react-i18next";
 
 const Tenants = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
@@ -44,7 +46,6 @@ const Tenants = () => {
         setUserId(session.user.id);
         console.log("User ID set:", session.user.id);
 
-        // Fetch profile with maybeSingle to handle missing profiles
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
@@ -82,6 +83,7 @@ const Tenants = () => {
         setIsCheckingProfile(false);
 
         // Rest of the existing code for fetching tenant info and properties
+
         if (profile?.role === "tenant") {
           const { data: tenancyData, error: tenancyError } = await supabase
             .from("tenancies")
@@ -127,8 +129,8 @@ const Tenants = () => {
       } catch (error: any) {
         console.error("Error in checkUser:", error);
         toast({
-          title: "Error",
-          description: error.message || "An unexpected error occurred",
+          title: t('common.error'),
+          description: error.message || t('common.unexpectedError'),
           variant: "destructive",
         });
       }
@@ -146,7 +148,7 @@ const Tenants = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, toast]);
+  }, [navigate, toast, t]);
 
   if (isCheckingProfile) {
     return (
@@ -174,7 +176,7 @@ const Tenants = () => {
         <main className="flex-1 ml-64 p-8">
           <Alert variant="destructive">
             <AlertDescription>
-              Error loading tenant data. Please try again later.
+              {t('tenants.error.loading')}
             </AlertDescription>
           </Alert>
         </main>
@@ -187,78 +189,14 @@ const Tenants = () => {
       <DashboardSidebar />
       <main className="flex-1 ml-64 p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto">
-          <header className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">
-                {userRole === "landlord" ? "Tenants" : "My Tenancy"}
-              </h1>
-              <p className="mt-2 text-dashboard-text">
-                {userRole === "landlord"
-                  ? "Manage and view your property tenants."
-                  : "View your tenancy details."}
-              </p>
-            </div>
-            {userRole === "landlord" && (
-              <TenantInviteDialog properties={properties} />
-            )}
-          </header>
-
+          <TenantsHeader userRole={userRole} properties={properties} />
           <div className="space-y-8">
             {userRole === "landlord" ? (
               <TenantList tenants={tenants} />
             ) : tenantInfo ? (
-              <div className="grid gap-6 md:grid-cols-3">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Property</CardTitle>
-                    <Home className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{tenantInfo.property.name}</div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {tenantInfo.property.address}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Lease Period</CardTitle>
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {new Date(tenantInfo.start_date).toLocaleDateString()}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {tenantInfo.end_date
-                        ? `Until ${new Date(tenantInfo.end_date).toLocaleDateString()}`
-                        : "No end date"}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Monthly Rent</CardTitle>
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      ${tenantInfo.property.monthly_rent}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {tenantInfo.property.type}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+              <TenantDashboard tenantInfo={tenantInfo} />
             ) : (
-              <div className="rounded-lg border bg-card text-card-foreground shadow p-6">
-                <p className="text-muted-foreground">
-                  No active tenancy found. Please contact your landlord if you believe this is an error.
-                </p>
-              </div>
+              <NoTenancy />
             )}
           </div>
         </div>

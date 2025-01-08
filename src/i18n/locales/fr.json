@@ -88,51 +88,26 @@
     }
   },
   "tenants": {
-    "title": "Locataires",
-    "noTenants": "Aucun locataire trouvé",
-    "inviteTenant": "Inviter un Locataire"
-  },
-  "maintenance": {
-    "title": "Demandes de Maintenance",
-    "newRequest": "Nouvelle Demande",
-    "noRequests": "Aucune demande de maintenance trouvée",
-    "form": {
-      "title": "Titre",
-      "titlePlaceholder": "Brève description du problème",
-      "description": "Description",
-      "descriptionPlaceholder": "Description détaillée du problème de maintenance",
-      "issueType": "Type de Problème",
-      "issueTypePlaceholder": "Sélectionnez un type de problème",
-      "priority": "Priorité",
-      "priorityPlaceholder": "Sélectionnez le niveau de priorité",
-      "notes": "Notes Supplémentaires",
-      "notesPlaceholder": "Toute information supplémentaire ou instructions spéciales",
-      "images": "Images",
-      "submit": {
-        "create": "Créer la Demande",
-        "update": "Mettre à Jour la Demande",
-        "creating": "Création...",
-        "updating": "Mise à jour..."
-      }
+    "title": {
+      "landlord": "Locataires",
+      "tenant": "Ma Location"
     },
-    "status": {
-      "pending": "En Attente",
-      "in_progress": "En Cours",
-      "completed": "Terminé",
-      "cancelled": "Annulé"
+    "description": {
+      "landlord": "Gérez et visualisez vos locataires.",
+      "tenant": "Voir les détails de votre location."
     },
-    "priority": {
-      "high": "Haute Priorité",
-      "medium": "Priorité Moyenne",
-      "low": "Basse Priorité"
-    },
-    "details": {
-      "createdOn": "Créé le",
-      "requestedBy": "Demandé par",
+    "dashboard": {
       "property": "Propriété",
-      "viewImages": "Voir les Images",
-      "viewHistory": "Voir l'Historique",
-      "edit": "Modifier"
+      "leasePeriod": "Période de Location",
+      "monthlyRent": "Loyer Mensuel",
+      "endDate": "Jusqu'au {{date}}",
+      "noEndDate": "Pas de date de fin"
+    },
+    "noTenancy": {
+      "message": "Aucune location active trouvée. Contactez votre propriétaire si vous pensez qu'il s'agit d'une erreur."
+    },
+    "error": {
+      "loading": "Erreur lors du chargement des données des locataires. Veuillez réessayer plus tard."
     }
   },
   "common": {
