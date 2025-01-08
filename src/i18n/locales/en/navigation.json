@@ -1,0 +1,11 @@
+{
+  "dashboard": "Dashboard",
+  "properties": "Properties",
+  "tenants": "Tenants",
+  "maintenance": "Maintenance",
+  "documents": "Documents",
+  "payments": "Payments",
+  "utilities": "Utilities",
+  "settings": "Settings",
+  "logout": "Logout"
+}

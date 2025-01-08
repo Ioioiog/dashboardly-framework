@@ -2,24 +2,28 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 // Import all translations
-import enTranslations from './locales/en.json';
-import esTranslations from './locales/es.json';
-import frTranslations from './locales/fr.json';
-import roTranslations from './locales/ro.json';
+import enCommon from './locales/en/common.json';
+import enDashboard from './locales/en/dashboard.json';
+import enNavigation from './locales/en/navigation.json';
+import enProperties from './locales/en/properties.json';
+import enSettings from './locales/en/settings.json';
+import enTenants from './locales/en/tenants.json';
+import enMaintenance from './locales/en/maintenance.json';
+
+// Import other language translations similarly
+// Note: You'll need to create similar JSON files for other languages
 
 const resources = {
   en: {
-    translation: enTranslations,
+    common: enCommon,
+    dashboard: enDashboard,
+    navigation: enNavigation,
+    properties: enProperties,
+    settings: enSettings,
+    tenants: enTenants,
+    maintenance: enMaintenance,
   },
-  es: {
-    translation: esTranslations,
-  },
-  fr: {
-    translation: frTranslations,
-  },
-  ro: {
-    translation: roTranslations,
-  },
+  // Add other languages similarly
 };
 
 i18n
@@ -28,6 +32,8 @@ i18n
     resources,
     lng: localStorage.getItem('language') || 'en',
     fallbackLng: 'en',
+    defaultNS: 'common',
+    ns: ['common', 'dashboard', 'navigation', 'properties', 'settings', 'tenants', 'maintenance'],
     interpolation: {
       escapeValue: false,
     },

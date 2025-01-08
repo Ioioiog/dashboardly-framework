@@ -1,0 +1,25 @@
+{
+  "title": "Maintenance Requests",
+  "newRequest": "New Request",
+  "noRequests": "No maintenance requests found",
+  "details": {
+    "imageAlt": "Request image {{number}}",
+    "createdOn": "Created on",
+    "requestedBy": "Requested by",
+    "viewImages": "View Images",
+    "viewHistory": "View History",
+    "edit": "Edit"
+  },
+  "status": {
+    "pending": "Pending",
+    "in_progress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent"
+  }
+}
