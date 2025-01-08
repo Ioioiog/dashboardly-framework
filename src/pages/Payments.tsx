@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { PaymentList } from "@/components/payments/PaymentList";
 import { PaymentWithRelations } from "@/integrations/supabase/types/payment";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 
 const Payments = () => {
   const navigate = useNavigate();
@@ -105,15 +106,18 @@ const Payments = () => {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <Card>
-        <CardHeader>
-          <CardTitle>Payments</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PaymentList payments={payments} userRole={userRole} />
-        </CardContent>
-      </Card>
+    <div className="flex h-screen bg-gray-100">
+      <DashboardSidebar />
+      <div className="flex-1 p-8 ml-64">
+        <Card>
+          <CardHeader>
+            <CardTitle>Payments</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PaymentList payments={payments} userRole={userRole} />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
