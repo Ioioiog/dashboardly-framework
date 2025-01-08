@@ -9,9 +9,6 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-      // This is for development only, it will be tree-shaken in production
-      {},
   ],
   resolve: {
     alias: {
