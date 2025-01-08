@@ -86,6 +86,7 @@ const Documents = () => {
         open={showAddModal}
         onOpenChange={setShowAddModal}
         userId={userId}
+        userRole={userRole}
       />
     </div>
   );
