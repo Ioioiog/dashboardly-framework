@@ -119,5 +119,30 @@
       "pending": "În Așteptare",
       "expired": "Expirat"
     }
+  },
+  "maintenance": {
+    "title": "Cereri de Întreținere",
+    "newRequest": "Cerere Nouă",
+    "noRequests": "Nu s-au găsit cereri de întreținere",
+    "details": {
+      "imageAlt": "Imaginea cererii {{number}}",
+      "createdOn": "Creat la",
+      "requestedBy": "Solicitat de",
+      "viewImages": "Vezi Imaginile",
+      "viewHistory": "Vezi Istoricul",
+      "edit": "Editează"
+    },
+    "status": {
+      "pending": "În Așteptare",
+      "in_progress": "În Desfășurare",
+      "completed": "Finalizat",
+      "cancelled": "Anulat"
+    },
+    "priority": {
+      "low": "Scăzută",
+      "medium": "Medie",
+      "high": "Ridicată",
+      "urgent": "Urgentă"
+    }
   }
 }

@@ -112,5 +112,30 @@
     "save": "Enregistrer",
     "loading": "Chargement...",
     "error": "Erreur"
+  },
+  "maintenance": {
+    "title": "Demandes de Maintenance",
+    "newRequest": "Nouvelle Demande",
+    "noRequests": "Aucune demande de maintenance trouvée",
+    "details": {
+      "imageAlt": "Image de la demande {{number}}",
+      "createdOn": "Créé le",
+      "requestedBy": "Demandé par",
+      "viewImages": "Voir les Images",
+      "viewHistory": "Voir l'Historique",
+      "edit": "Modifier"
+    },
+    "status": {
+      "pending": "En Attente",
+      "in_progress": "En Cours",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "priority": {
+      "low": "Faible",
+      "medium": "Moyenne",
+      "high": "Haute",
+      "urgent": "Urgente"
+    }
   }
 }
