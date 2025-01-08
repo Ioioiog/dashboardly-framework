@@ -36,16 +36,13 @@ export function StripeAccountForm() {
   const handleConnectStripe = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/stripe/connect', {
+      const { data, error } = await supabase.functions.invoke('stripe-connect', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
       
-      const data = await response.json();
+      if (error) throw error;
       
-      if (data.url) {
+      if (data?.url) {
         window.location.href = data.url;
       } else {
         throw new Error('Failed to get Stripe connect URL');

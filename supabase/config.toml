@@ -1,4 +1,4 @@
 project_id = "wecmvyohaxizmnhuvjly"
 
-[functions.send-tenant-invitation]
+[functions.stripe-connect]
 verify_jwt = false
