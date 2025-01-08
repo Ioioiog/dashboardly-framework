@@ -5,9 +5,10 @@ import { MaintenanceRequestCard } from "./MaintenanceRequestCard";
 interface MaintenanceListProps {
   requests: MaintenanceRequest[] | undefined;
   isLoading: boolean;
+  isLandlord?: boolean;
 }
 
-export function MaintenanceList({ requests, isLoading }: MaintenanceListProps) {
+export function MaintenanceList({ requests, isLoading, isLandlord }: MaintenanceListProps) {
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -34,7 +35,11 @@ export function MaintenanceList({ requests, isLoading }: MaintenanceListProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {requests.map((request) => (
-        <MaintenanceRequestCard key={request.id} request={request} />
+        <MaintenanceRequestCard 
+          key={request.id} 
+          request={request} 
+          isLandlord={isLandlord}
+        />
       ))}
     </div>
   );

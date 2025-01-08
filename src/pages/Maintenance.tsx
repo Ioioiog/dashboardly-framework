@@ -5,10 +5,30 @@ import { Plus } from "lucide-react";
 import { MaintenanceList } from "@/components/maintenance/MaintenanceList";
 import { MaintenanceDialog } from "@/components/maintenance/MaintenanceDialog";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
+import { supabase } from "@/integrations/supabase/client";
 
 const Maintenance = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: requests, isLoading } = useMaintenanceRequests();
+  const [isLandlord, setIsLandlord] = useState(false);
+
+  // Check if user is landlord when component mounts
+  useState(() => {
+    const checkUserRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      setIsLandlord(profile?.role === 'landlord');
+    };
+
+    checkUserRole();
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -22,7 +42,11 @@ const Maintenance = () => {
           </Button>
         </div>
 
-        <MaintenanceList requests={requests} isLoading={isLoading} />
+        <MaintenanceList 
+          requests={requests} 
+          isLoading={isLoading} 
+          isLandlord={isLandlord}
+        />
         <MaintenanceDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
       </main>
     </div>
