@@ -73,7 +73,7 @@ const DashboardSidebar = () => {
               <span className="text-blue-800">Chirii</span>
               <span className="text-slate-500 font-light">.ro</span>
             </h1>
-            <p className="text-sm text-slate-500 mt-2 text-center">simplificăm administrarea chiriilor</p>
+            <p className="text-xs text-slate-500 mt-2 text-center">simplificăm administrarea chiriilor</p>
           </div>
         </div>
 
