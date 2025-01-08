@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { registerTenant } from "@/utils/tenantUtils";
 
 interface TenantAssignDialogProps {
   open: boolean;
@@ -38,95 +38,14 @@ export function TenantAssignDialog({
     setIsSubmitting(true);
 
     try {
-      // First, check if a user exists in auth.users by trying to sign them up
-      console.log("Attempting to create new user account...");
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      await registerTenant({
         email,
-        password: "Schimba1!", // Default password
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            role: 'tenant'
-          }
-        }
+        firstName,
+        lastName,
+        propertyId,
+        startDate,
+        endDate
       });
-
-      let userId: string;
-
-      if (signUpError) {
-        if (signUpError.message === "User already registered") {
-          console.log("User exists in auth system, fetching their profile...");
-          // User exists in auth system, try to get their profile
-          const { data: existingProfile } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("email", email)
-            .maybeSingle();
-
-          if (existingProfile) {
-            console.log("Found existing profile:", existingProfile);
-            userId = existingProfile.id;
-          } else {
-            console.error("User exists in auth but no profile found");
-            throw new Error("Unable to process user registration. Please contact support.");
-          }
-        } else {
-          // Some other error occurred during signup
-          throw signUpError;
-        }
-      } else {
-        // New user was created successfully
-        if (!authData.user) throw new Error("Failed to create user account");
-        userId = authData.user.id;
-        
-        // Ensure profile exists for new user
-        console.log("Creating profile for new user:", userId);
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .upsert({
-            id: userId,
-            email,
-            first_name: firstName,
-            last_name: lastName,
-            role: 'tenant'
-          });
-
-        if (profileError) throw profileError;
-      }
-
-      // Generate a unique token for the invitation
-      const token = Math.random().toString(36).substring(2, 15);
-
-      // Create the invitation record
-      console.log("Creating invitation record...");
-      const { error: inviteError } = await supabase
-        .from("tenant_invitations")
-        .insert({
-          email,
-          first_name: firstName,
-          last_name: lastName,
-          property_id: propertyId,
-          token,
-          start_date: startDate,
-          end_date: endDate || null,
-        });
-
-      if (inviteError) throw inviteError;
-
-      // Create the tenancy record
-      console.log("Creating tenancy record...");
-      const { error: tenancyError } = await supabase
-        .from("tenancies")
-        .insert({
-          property_id: propertyId,
-          tenant_id: userId,
-          start_date: startDate,
-          end_date: endDate || null,
-          status: "active",
-        });
-
-      if (tenancyError) throw tenancyError;
 
       toast({
         title: "Success",

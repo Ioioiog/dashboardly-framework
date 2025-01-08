@@ -1,22 +1,24 @@
 import { supabase } from "@/integrations/supabase/client";
-import { TenantFormValues } from "@/components/tenants/TenantInviteForm";
 
-export async function createTenantInvitation(data: TenantFormValues, propertyName: string) {
-  console.log("Checking if user exists...");
-  const { data: existingUser } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('email', data.email)
-    .single();
+interface TenantRegistrationData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  propertyId: string;
+  startDate: string;
+  endDate?: string;
+}
 
+export async function registerTenant(data: TenantRegistrationData) {
+  // First check if user exists in auth
+  const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(data.email);
+  
   let userId: string;
-
-  if (existingUser) {
-    console.log("User already exists, using existing account");
-    userId = existingUser.id;
-  } else {
+  
+  if (userError) {
+    // User doesn't exist, create new account
     console.log("Creating new user account...");
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: data.email,
       password: "Schimba1!", // Default password
       options: {
@@ -28,16 +30,31 @@ export async function createTenantInvitation(data: TenantFormValues, propertyNam
       }
     });
 
-    if (authError) throw authError;
+    if (signUpError) throw signUpError;
     if (!authData.user) throw new Error("Failed to create user account");
     
     userId = authData.user.id;
+  } else {
+    userId = userData.user.id;
   }
 
-  // Generate a unique token for the invitation
-  const token = crypto.randomUUID();
+  // Ensure profile exists
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .upsert({
+      id: userId,
+      email: data.email,
+      first_name: data.firstName,
+      last_name: data.lastName,
+      role: 'tenant'
+    });
 
-  // Create the invitation record
+  if (profileError) throw profileError;
+
+  // Generate invitation token
+  const token = Math.random().toString(36).substring(2, 15);
+
+  // Create invitation record
   const { error: inviteError } = await supabase
     .from("tenant_invitations")
     .insert({
@@ -47,20 +64,23 @@ export async function createTenantInvitation(data: TenantFormValues, propertyNam
       property_id: data.propertyId,
       token,
       start_date: data.startDate,
-      end_date: data.endDate,
+      end_date: data.endDate || null,
     });
 
   if (inviteError) throw inviteError;
 
-  // Send welcome email with login instructions
-  const { error: emailError } = await supabase.functions.invoke("send-tenant-welcome", {
-    body: {
-      email: data.email,
-      firstName: data.firstName,
-      propertyName,
-      temporaryPassword: "Schimba1!"
-    },
-  });
+  // Create tenancy record
+  const { error: tenancyError } = await supabase
+    .from("tenancies")
+    .insert({
+      property_id: data.propertyId,
+      tenant_id: userId,
+      start_date: data.startDate,
+      end_date: data.endDate || null,
+      status: "active",
+    });
 
-  if (emailError) throw emailError;
+  if (tenancyError) throw tenancyError;
+
+  return { userId, token };
 }
