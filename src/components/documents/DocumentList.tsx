@@ -54,6 +54,17 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
         typeFilter
       });
 
+      // First, if we're a landlord, get the list of properties we own
+      let landlordPropertiesQuery;
+      if (userRole === "landlord") {
+        const { data: ownedProperties } = await supabase
+          .from("properties")
+          .select("id")
+          .eq("landlord_id", userId);
+        
+        landlordPropertiesQuery = ownedProperties?.map(p => p.id) || [];
+      }
+
       let query = supabase
         .from("documents")
         .select(`
@@ -67,7 +78,9 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
         query = query.eq("tenant_id", userId);
       } else {
         // For landlords, show documents they uploaded or are related to their properties
-        query = query.or(`uploaded_by.eq.${userId},property_id.in.(select id from properties where landlord_id.eq.${userId})`);
+        query = query.or(
+          `uploaded_by.eq.${userId},property_id.in.(${landlordPropertiesQuery?.join(",")})`
+        );
       }
 
       // Apply property filter
@@ -111,7 +124,6 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
   }
 
   const handleTypeFilterChange = (value: string) => {
-    // Validate that the value is either "all" or a valid DocumentType
     if (value === "all" || ["lease_agreement", "invoice", "receipt", "other"].includes(value)) {
       setTypeFilter(value as "all" | DocumentType);
     }
