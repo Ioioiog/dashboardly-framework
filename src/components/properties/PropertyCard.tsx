@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, UserPlus } from "lucide-react";
 import { Property } from "@/utils/propertyUtils";
 import { TenantAssignDialog } from "./TenantAssignDialog";
+import { useTranslation } from "react-i18next";
 
 interface PropertyCardProps {
   property: Property;
@@ -14,6 +15,7 @@ interface PropertyCardProps {
 
 export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyCardProps) {
   const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <>
@@ -23,17 +25,17 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
             <h3 className="text-xl font-semibold">{property.name}</h3>
             <p className="text-gray-500">{property.address}</p>
             <p className="text-lg font-medium">
-              ${property.monthly_rent}/month
+              ${property.monthly_rent}/{t('properties.rent.period')}
             </p>
             {property.type && (
-              <p className="text-sm text-gray-500">Type: {property.type}</p>
+              <p className="text-sm text-gray-500">{t('properties.type')}: {property.type}</p>
             )}
             {property.description && (
               <p className="text-sm text-gray-500">{property.description}</p>
             )}
             {property.available_from && (
               <p className="text-sm text-gray-500">
-                Available from: {new Date(property.available_from).toLocaleDateString()}
+                {t('properties.available_from')}: {new Date(property.available_from).toLocaleDateString()}
               </p>
             )}
           </div>
@@ -47,7 +49,7 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
               className="flex items-center gap-2"
             >
               <Edit className="h-4 w-4" />
-              Edit
+              {t('common.edit')}
             </Button>
             <Button
               variant="outline"
@@ -56,7 +58,7 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
               className="flex items-center gap-2 text-red-600 hover:text-red-700"
             >
               <Trash2 className="h-4 w-4" />
-              Delete
+              {t('common.delete')}
             </Button>
             <Button
               variant="outline"
@@ -65,7 +67,7 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
               className="flex items-center gap-2"
             >
               <UserPlus className="h-4 w-4" />
-              Assign Tenant
+              {t('properties.assign_tenant')}
             </Button>
           </CardFooter>
         )}

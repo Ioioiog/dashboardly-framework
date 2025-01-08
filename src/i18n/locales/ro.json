@@ -73,10 +73,18 @@
     "addProperty": "Adaugă Proprietate",
     "type": "Tip",
     "address": "Adresă",
-    "rent": "Chirie Lunară",
-    "deleteDialog": {
-      "title": "Ești sigur?",
-      "description": "Această acțiune nu poate fi anulată. Aceasta va șterge definitiv proprietatea și toate datele asociate."
+    "rent": {
+      "period": "lună"
+    },
+    "available_from": "Disponibil din",
+    "assign_tenant": "Atribuie Chiriaș",
+    "empty": {
+      "landlord": "Nu s-au găsit proprietăți. Adaugă prima ta proprietate pentru a începe!",
+      "tenant": "Nu s-au găsit contracte active. Proprietățile vor apărea aici odată ce ești atribuit ca chiriaș.",
+      "tenant.contact": "Contactează proprietarul dacă crezi că aceasta este o eroare."
+    },
+    "error": {
+      "fetch": "A apărut o problemă la încărcarea proprietăților. Te rugăm să încerci din nou mai târziu."
     }
   },
   "tenants": {

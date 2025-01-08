@@ -9,7 +9,7 @@
       "activeTenants": "Inquilinos Activos",
       "pendingMaintenance": "Mantenimiento Pendiente",
       "currentProperty": "Propiedad Actual",
-      "paymentStatus": "Estado del Pago",
+      "paymentStatus": "Estado de Pago",
       "description": {
         "properties": "Número de propiedades que administra",
         "revenue": "Ingreso mensual total por alquileres",
@@ -73,10 +73,18 @@
     "addProperty": "Añadir Propiedad",
     "type": "Tipo",
     "address": "Dirección",
-    "rent": "Alquiler Mensual",
-    "deleteDialog": {
-      "title": "¿Estás seguro?",
-      "description": "Esta acción no se puede deshacer. Esto eliminará permanentemente la propiedad y todos los datos asociados."
+    "rent": {
+      "period": "mes"
+    },
+    "available_from": "Disponible desde",
+    "assign_tenant": "Asignar Inquilino",
+    "empty": {
+      "landlord": "No se encontraron propiedades. ¡Añade tu primera propiedad para comenzar!",
+      "tenant": "No se encontraron arrendamientos activos. Las propiedades aparecerán aquí una vez que seas asignado como inquilino.",
+      "tenant.contact": "Contacta a tu arrendador si crees que esto es un error."
+    },
+    "error": {
+      "fetch": "Hubo un problema al obtener las propiedades. Por favor, inténtalo de nuevo más tarde."
     }
   },
   "tenants": {
@@ -132,6 +140,7 @@
     "delete": "Eliminar",
     "edit": "Editar",
     "save": "Guardar",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "error": "Error"
   }
 }

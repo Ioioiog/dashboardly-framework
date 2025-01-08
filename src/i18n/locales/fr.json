@@ -73,10 +73,18 @@
     "addProperty": "Ajouter une Propriété",
     "type": "Type",
     "address": "Adresse",
-    "rent": "Loyer Mensuel",
-    "deleteDialog": {
-      "title": "Êtes-vous sûr ?",
-      "description": "Cette action ne peut pas être annulée. Cela supprimera définitivement la propriété et toutes les données associées."
+    "rent": {
+      "period": "mois"
+    },
+    "available_from": "Disponible à partir de",
+    "assign_tenant": "Assigner un Locataire",
+    "empty": {
+      "landlord": "Aucune propriété trouvée. Ajoutez votre première propriété pour commencer !",
+      "tenant": "Aucun bail actif trouvé. Les propriétés apparaîtront ici une fois que vous serez assigné comme locataire.",
+      "tenant.contact": "Contactez votre propriétaire si vous pensez qu'il s'agit d'une erreur."
+    },
+    "error": {
+      "fetch": "Un problème est survenu lors de la récupération des propriétés. Veuillez réessayer plus tard."
     }
   },
   "tenants": {
@@ -132,6 +140,7 @@
     "delete": "Supprimer",
     "edit": "Modifier",
     "save": "Enregistrer",
-    "loading": "Chargement..."
+    "loading": "Chargement...",
+    "error": "Erreur"
   }
 }

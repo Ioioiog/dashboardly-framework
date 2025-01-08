@@ -23,7 +23,22 @@
     "properties": {
       "title": "Your Properties",
       "noProperties": "No properties found",
-      "addProperty": "Add Property"
+      "addProperty": "Add Property",
+      "type": "Type",
+      "address": "Address",
+      "rent": {
+        "period": "month"
+      },
+      "available_from": "Available from",
+      "assign_tenant": "Assign Tenant",
+      "empty": {
+        "landlord": "No properties found. Add your first property to get started!",
+        "tenant": "No active leases found. Properties will appear here once you're assigned as a tenant.",
+        "tenant.contact": "Contact your landlord if you believe this is an error."
+      },
+      "error": {
+        "fetch": "There was a problem fetching the properties. Please try again later."
+      }
     },
     "revenue": {
       "title": "Monthly Revenue",
@@ -64,19 +79,6 @@
       "new": "New Password",
       "confirm": "Confirm New Password",
       "update": "Update Password"
-    }
-  },
-  "properties": {
-    "title": "Properties",
-    "description": "Manage and view your property details.",
-    "noProperties": "No properties found",
-    "addProperty": "Add Property",
-    "type": "Type",
-    "address": "Address",
-    "rent": "Monthly Rent",
-    "deleteDialog": {
-      "title": "Are you sure?",
-      "description": "This action cannot be undone. This will permanently delete the property and remove all associated data."
     }
   },
   "tenants": {
@@ -132,6 +134,7 @@
     "delete": "Delete",
     "edit": "Edit",
     "save": "Save",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "error": "Error"
   }
 }

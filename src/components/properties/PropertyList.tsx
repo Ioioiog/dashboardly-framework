@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Property } from "@/utils/propertyUtils";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTranslation } from "react-i18next";
 
 interface PropertyListProps {
   properties: Property[] | undefined;
@@ -20,6 +21,8 @@ export function PropertyList({
   onEdit, 
   onDelete 
 }: PropertyListProps) {
+  const { t } = useTranslation();
+
   // Show loading skeleton
   if (isLoading) {
     return (
@@ -43,9 +46,9 @@ export function PropertyList({
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
+        <AlertTitle>{t('common.error')}</AlertTitle>
         <AlertDescription>
-          There was a problem fetching the properties. Please try again later.
+          {t('properties.error.fetch')}
         </AlertDescription>
       </Alert>
     );
@@ -58,12 +61,12 @@ export function PropertyList({
         <div className="text-center space-y-2">
           <p className="text-gray-500">
             {userRole === "landlord" 
-              ? "No properties found. Add your first property to get started!"
-              : "No active leases found. Properties will appear here once you're assigned as a tenant."}
+              ? t('properties.empty.landlord')
+              : t('properties.empty.tenant')}
           </p>
           {userRole === "tenant" && (
             <p className="text-sm text-gray-400">
-              Contact your landlord if you believe this is an error.
+              {t('properties.empty.tenant.contact')}
             </p>
           )}
         </div>
