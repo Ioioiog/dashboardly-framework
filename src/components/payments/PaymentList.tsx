@@ -8,7 +8,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
 import { PaymentWithRelations } from "@/integrations/supabase/types/payment";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface PaymentListProps {
   payments: PaymentWithRelations[];
@@ -29,6 +39,31 @@ const getStatusBadgeVariant = (status: string) => {
 };
 
 export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
+  const { toast } = useToast();
+
+  const updatePaymentStatus = async (paymentId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from("payments")
+        .update({ status: newStatus })
+        .eq("id", paymentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Payment status updated successfully.",
+      });
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update payment status.",
+      });
+    }
+  };
+
   if (payments.length === 0) {
     return (
       <div className="text-center py-6 text-muted-foreground">
@@ -47,6 +82,7 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
           <TableHead>Due Date</TableHead>
           <TableHead>Paid Date</TableHead>
           <TableHead>Status</TableHead>
+          {userRole === "landlord" && <TableHead className="w-[70px]"></TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -87,6 +123,35 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
                 {payment.status}
               </Badge>
             </TableCell>
+            {userRole === "landlord" && (
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => updatePaymentStatus(payment.id, "paid")}
+                    >
+                      Mark as Paid
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => updatePaymentStatus(payment.id, "pending")}
+                    >
+                      Mark as Pending
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => updatePaymentStatus(payment.id, "overdue")}
+                    >
+                      Mark as Overdue
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            )}
           </TableRow>
         ))}
       </TableBody>
