@@ -6,8 +6,27 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function StripeAccountForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isLandlord, setIsLandlord] = useState(false);
   const { toast } = useToast();
   const [stripeConnected, setStripeConnected] = useState(false);
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', (await supabase.auth.getUser()).data.user?.id)
+          .single();
+
+        setIsLandlord(profile?.role === 'landlord');
+      } catch (error) {
+        console.error('Error checking user role:', error);
+      }
+    };
+
+    checkUserRole();
+  }, []);
 
   const checkStripeConnection = async () => {
     try {
@@ -86,37 +105,64 @@ export function StripeAccountForm() {
     }
   };
 
+  if (!isLandlord) {
+    return null;
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Stripe Account Settings</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Connect your Stripe account to receive payments from tenants.
-        </p>
-        {stripeConnected ? (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Stripe API Keys</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Configure your Stripe API keys to enable payment processing.
+          </p>
           <div className="space-y-4">
-            <p className="text-sm text-green-600">
-              ✓ Your Stripe account is connected
-            </p>
             <Button
-              variant="destructive"
-              onClick={handleDisconnectStripe}
-              disabled={isLoading}
+              variant="outline"
+              onClick={() => {
+                window.open('https://dashboard.stripe.com/apikeys', '_blank');
+              }}
             >
-              {isLoading ? "Disconnecting..." : "Disconnect Stripe"}
+              Get Stripe API Keys
             </Button>
           </div>
-        ) : (
-          <Button
-            onClick={handleConnectStripe}
-            disabled={isLoading}
-          >
-            {isLoading ? "Connecting..." : "Connect Stripe Account"}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Stripe Connect</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Connect your Stripe account to receive payments from tenants.
+          </p>
+          {stripeConnected ? (
+            <div className="space-y-4">
+              <p className="text-sm text-green-600">
+                ✓ Your Stripe account is connected
+              </p>
+              <Button
+                variant="destructive"
+                onClick={handleDisconnectStripe}
+                disabled={isLoading}
+              >
+                {isLoading ? "Disconnecting..." : "Disconnect Stripe"}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={handleConnectStripe}
+              disabled={isLoading}
+            >
+              {isLoading ? "Connecting..." : "Connect Stripe Account"}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
