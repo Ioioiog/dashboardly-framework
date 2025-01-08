@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -11,10 +11,16 @@ export function StripeAccountForm() {
 
   const checkStripeConnection = async () => {
     try {
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('stripe_account_id')
+        .eq('id', (await supabase.auth.getUser()).data.user?.id)
         .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
 
       setStripeConnected(!!profile?.stripe_account_id);
     } catch (error) {
@@ -23,7 +29,7 @@ export function StripeAccountForm() {
   };
 
   // Check connection status on mount
-  useState(() => {
+  useEffect(() => {
     checkStripeConnection();
   }, []);
 
