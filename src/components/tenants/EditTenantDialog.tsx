@@ -15,7 +15,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Pencil } from "lucide-react";
 import { format } from "date-fns";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EditTenantDialogProps {
   tenant: Tenant;
@@ -25,13 +24,12 @@ interface EditTenantDialogProps {
 export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
-  const { register, handleSubmit, formState: { isSubmitting }, setValue, watch } = useForm({
+  const { register, handleSubmit, formState: { isSubmitting } } = useForm({
     defaultValues: {
       first_name: tenant.first_name || "",
       last_name: tenant.last_name || "",
       email: tenant.email || "",
       phone: tenant.phone || "",
-      role: tenant.role || "tenant",
       created_at: tenant.created_at ? format(new Date(tenant.created_at), 'yyyy-MM-dd') : "",
       updated_at: tenant.updated_at ? format(new Date(tenant.updated_at), 'yyyy-MM-dd') : "",
       start_date: tenant.tenancy.start_date ? format(new Date(tenant.tenancy.start_date), 'yyyy-MM-dd') : "",
@@ -51,7 +49,6 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
           last_name: data.last_name,
           email: data.email,
           phone: data.phone,
-          role: data.role,
         })
         .eq('id', tenant.id);
 
@@ -117,22 +114,6 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
             <Input id="phone" {...register("phone")} />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select 
-              onValueChange={(value) => setValue("role", value)} 
-              defaultValue={watch("role")}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tenant">Tenant</SelectItem>
-                <SelectItem value="landlord">Landlord</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
