@@ -53,7 +53,7 @@ const handleRecoveryToken = async () => {
   }
 };
 
-const App = () => {
+const AppContent = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -111,57 +111,63 @@ const App = () => {
   }
 
   return (
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route 
+          path="/auth" 
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />} 
+        />
+        <Route 
+          path="/tenant-registration" 
+          element={<TenantRegistration />} 
+        />
+        <Route
+          path="/dashboard"
+          element={isAuthenticated ? <Index /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/properties"
+          element={isAuthenticated ? <Properties /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/tenants"
+          element={isAuthenticated ? <Tenants /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/maintenance"
+          element={isAuthenticated ? <Maintenance /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/documents"
+          element={isAuthenticated ? <Documents /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/payments"
+          element={isAuthenticated ? <Payments /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/utilities"
+          element={isAuthenticated ? <Utilities /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/settings"
+          element={isAuthenticated ? <Settings /> : <Navigate to="/auth" replace />}
+        />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </TooltipProvider>
+  );
+};
+
+const App = () => {
+  return (
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route 
-                path="/auth" 
-                element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />} 
-              />
-              <Route 
-                path="/tenant-registration" 
-                element={<TenantRegistration />} 
-              />
-              <Route
-                path="/dashboard"
-                element={isAuthenticated ? <Index /> : <Navigate to="/auth" replace />}
-              />
-              <Route
-                path="/properties"
-                element={isAuthenticated ? <Properties /> : <Navigate to="/auth" replace />}
-              />
-              <Route
-                path="/tenants"
-                element={isAuthenticated ? <Tenants /> : <Navigate to="/auth" replace />}
-              />
-              <Route
-                path="/maintenance"
-                element={isAuthenticated ? <Maintenance /> : <Navigate to="/auth" replace />}
-              />
-              <Route
-                path="/documents"
-                element={isAuthenticated ? <Documents /> : <Navigate to="/auth" replace />}
-              />
-              <Route
-                path="/payments"
-                element={isAuthenticated ? <Payments /> : <Navigate to="/auth" replace />}
-              />
-              <Route
-                path="/utilities"
-                element={isAuthenticated ? <Utilities /> : <Navigate to="/auth" replace />}
-              />
-              <Route
-                path="/settings"
-                element={isAuthenticated ? <Settings /> : <Navigate to="/auth" replace />}
-              />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </TooltipProvider>
+          <AppContent />
         </BrowserRouter>
       </QueryClientProvider>
     </StrictMode>
