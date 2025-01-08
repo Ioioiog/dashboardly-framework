@@ -5,12 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { PersonalInfoForm } from "@/components/settings/PersonalInfoForm";
 import { PasswordForm } from "@/components/settings/PasswordForm";
 import { LanguageSelector } from "@/components/settings/LanguageSelector";
+import { StripeAccountForm } from "@/components/settings/StripeAccountForm";
 
 interface Profile {
   first_name: string | null;
   last_name: string | null;
   email: string | null;
   phone: string | null;
+  role: string | null;
 }
 
 const Settings = () => {
@@ -19,6 +21,7 @@ const Settings = () => {
     last_name: "",
     email: "",
     phone: "",
+    role: null,
   });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -44,6 +47,7 @@ const Settings = () => {
           last_name: profileData.last_name || "",
           email: profileData.email || "",
           phone: profileData.phone || "",
+          role: profileData.role || "",
         });
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -87,6 +91,8 @@ const Settings = () => {
           />
           
           <PasswordForm />
+          
+          {profile.role === 'landlord' && <StripeAccountForm />}
           
           <LanguageSelector />
         </div>
