@@ -16,7 +16,7 @@ export function useMaintenanceRequests() {
             name,
             address
           ),
-          tenant:profiles(
+          tenant:profiles!maintenance_requests_tenant_id_fkey(
             id,
             first_name,
             last_name
