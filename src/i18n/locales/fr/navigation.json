@@ -1,0 +1,11 @@
+{
+  "dashboard": "Tableau de Bord",
+  "properties": "Propriétés",
+  "tenants": "Locataires",
+  "maintenance": "Maintenance",
+  "documents": "Documents",
+  "payments": "Paiements",
+  "utilities": "Services",
+  "settings": "Paramètres",
+  "logout": "Déconnexion"
+}

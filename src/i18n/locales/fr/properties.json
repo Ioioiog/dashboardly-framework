@@ -1,0 +1,21 @@
+{
+  "title": "Propriétés",
+  "description": "Gérez et visualisez les détails de vos propriétés.",
+  "noProperties": "Aucune propriété trouvée",
+  "addProperty": "Ajouter une Propriété",
+  "type": "Type",
+  "address": "Adresse",
+  "rent": {
+    "period": "mois"
+  },
+  "available_from": "Disponible à partir de",
+  "assign_tenant": "Assigner un Locataire",
+  "empty": {
+    "landlord": "Aucune propriété trouvée. Ajoutez votre première propriété pour commencer !",
+    "tenant": "Aucun bail actif trouvé. Les propriétés apparaîtront ici une fois que vous serez assigné comme locataire.",
+    "tenant.contact": "Contactez votre propriétaire si vous pensez qu'il s'agit d'une erreur."
+  },
+  "error": {
+    "fetch": "Un problème est survenu lors de la récupération des propriétés. Veuillez réessayer plus tard."
+  }
+}

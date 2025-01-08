@@ -1,0 +1,39 @@
+{
+  "title": {
+    "landlord": "Chiriași",
+    "tenant": "Chiria Mea"
+  },
+  "description": {
+    "landlord": "Gestionează și vizualizează chiriașii tăi.",
+    "tenant": "Vezi detaliile chiriei tale."
+  },
+  "dashboard": {
+    "property": "Proprietate",
+    "leasePeriod": "Perioada de Închiriere",
+    "monthlyRent": "Chirie Lunară",
+    "endDate": "Până la {{date}}",
+    "noEndDate": "Fără dată de încheiere"
+  },
+  "noTenancy": {
+    "message": "Nu s-a găsit nicio chirie activă. Contactează proprietarul dacă crezi că aceasta este o eroare."
+  },
+  "error": {
+    "loading": "Eroare la încărcarea datelor chiriașilor. Te rugăm să încerci din nou mai târziu."
+  },
+  "list": {
+    "name": "Nume",
+    "contact": "Contact",
+    "property": "Proprietate",
+    "startDate": "Data Începerii",
+    "endDate": "Data Încheierii",
+    "status": "Stare",
+    "actions": "Acțiuni",
+    "noEndDate": "Fără dată de încheiere"
+  },
+  "status": {
+    "active": "Activ",
+    "inactive": "Inactiv",
+    "pending": "În Așteptare",
+    "expired": "Expirat"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "title": {
+    "landlord": "Inquilinos",
+    "tenant": "Mi Alquiler"
+  },
+  "description": {
+    "landlord": "Gestiona y visualiza tus inquilinos.",
+    "tenant": "Ver detalles de tu alquiler."
+  },
+  "dashboard": {
+    "property": "Propiedad",
+    "leasePeriod": "Período de Alquiler",
+    "monthlyRent": "Alquiler Mensual",
+    "endDate": "Hasta {{date}}",
+    "noEndDate": "Sin fecha de finalización"
+  },
+  "noTenancy": {
+    "message": "No se encontró un alquiler activo. Contacta a tu propietario si crees que esto es un error."
+  },
+  "error": {
+    "loading": "Error al cargar datos de inquilinos. Por favor, inténtalo de nuevo más tarde."
+  },
+  "list": {
+    "name": "Nombre",
+    "contact": "Contacto",
+    "property": "Propiedad",
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Fin",
+    "status": "Estado",
+    "actions": "Acciones",
+    "noEndDate": "Sin fecha de fin"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente",
+    "expired": "Expirado"
+  }
+}

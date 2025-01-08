@@ -1,0 +1,39 @@
+{
+  "title": {
+    "landlord": "Locataires",
+    "tenant": "Ma Location"
+  },
+  "description": {
+    "landlord": "Gérez et visualisez vos locataires.",
+    "tenant": "Voir les détails de votre location."
+  },
+  "dashboard": {
+    "property": "Propriété",
+    "leasePeriod": "Période de Location",
+    "monthlyRent": "Loyer Mensuel",
+    "endDate": "Jusqu'au {{date}}",
+    "noEndDate": "Pas de date de fin"
+  },
+  "noTenancy": {
+    "message": "Aucune location active trouvée. Contactez votre propriétaire si vous pensez qu'il s'agit d'une erreur."
+  },
+  "error": {
+    "loading": "Erreur lors du chargement des données des locataires. Veuillez réessayer plus tard."
+  },
+  "list": {
+    "name": "Nom",
+    "contact": "Contact",
+    "property": "Propriété",
+    "startDate": "Date de Début",
+    "endDate": "Date de Fin",
+    "status": "Statut",
+    "actions": "Actions",
+    "noEndDate": "Pas de date de fin"
+  },
+  "status": {
+    "active": "Actif",
+    "inactive": "Inactif",
+    "pending": "En Attente",
+    "expired": "Expiré"
+  }
+}

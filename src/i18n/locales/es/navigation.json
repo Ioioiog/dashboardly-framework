@@ -1,0 +1,11 @@
+{
+  "dashboard": "Panel",
+  "properties": "Propiedades",
+  "tenants": "Inquilinos",
+  "maintenance": "Mantenimiento",
+  "documents": "Documentos",
+  "payments": "Pagos",
+  "utilities": "Servicios",
+  "settings": "Ajustes",
+  "logout": "Cerrar Sesión"
+}

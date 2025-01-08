@@ -1,0 +1,22 @@
+{
+  "title": "Panel de Control",
+  "welcome": "Bienvenido de nuevo",
+  "overview": "Aquí tiene un resumen de su gestión inmobiliaria",
+  "metrics": {
+    "totalProperties": "Total de Propiedades",
+    "monthlyRevenue": "Ingresos Mensuales",
+    "activeTenants": "Inquilinos Activos",
+    "pendingMaintenance": "Mantenimiento Pendiente",
+    "currentProperty": "Propiedad Actual",
+    "paymentStatus": "Estado de Pago",
+    "description": {
+      "properties": "Número de propiedades que administra",
+      "revenue": "Ingreso mensual total por alquileres",
+      "tenants": "Número de inquilinos activos",
+      "maintenance": "Solicitudes de mantenimiento pendientes",
+      "currentProperty": "Su propiedad de alquiler actual",
+      "paymentStatus": "Estado de su último pago"
+    }
+  },
+  "recentActivity": "Actividad Reciente"
+}

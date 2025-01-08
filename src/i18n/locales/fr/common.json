@@ -1,0 +1,9 @@
+{
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "save": "Enregistrer",
+  "loading": "Chargement...",
+  "error": "Erreur",
+  "unexpectedError": "Une erreur inattendue s'est produite"
+}
