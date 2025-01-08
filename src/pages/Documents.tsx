@@ -14,6 +14,8 @@ const Documents = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [propertyFilter, setPropertyFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -30,7 +32,7 @@ const Documents = () => {
         .from("profiles")
         .select("role")
         .eq("id", session.user.id)
-        .single();
+        .maybeSingle();
 
       if (profile?.role) {
         setUserRole(profile.role as "landlord" | "tenant");
@@ -77,7 +79,12 @@ const Documents = () => {
           </header>
 
           <div className="space-y-8">
-            <DocumentList userId={userId} userRole={userRole} />
+            <DocumentList 
+              userId={userId} 
+              userRole={userRole}
+              propertyFilter={propertyFilter}
+              typeFilter={typeFilter}
+            />
           </div>
         </div>
       </main>

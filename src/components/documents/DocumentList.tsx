@@ -10,9 +10,10 @@ interface DocumentListProps {
   userId: string;
   propertyFilter: string;
   typeFilter: string;
+  userRole: "landlord" | "tenant";
 }
 
-export function DocumentList({ userId, propertyFilter, typeFilter }: DocumentListProps) {
+export function DocumentList({ userId, propertyFilter, typeFilter, userRole }: DocumentListProps) {
   const { toast } = useToast();
 
   const { data: documents, isLoading, error } = useQuery({
@@ -20,36 +21,6 @@ export function DocumentList({ userId, propertyFilter, typeFilter }: DocumentLis
     queryFn: async () => {
       console.log("Fetching documents with filters:", { userId, propertyFilter, typeFilter });
       
-      // First check if user profile exists
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .maybeSingle();
-
-      if (profileError) {
-        console.error("Error fetching profile:", profileError);
-        throw new Error("Failed to verify user profile");
-      }
-
-      // If no profile exists, create one
-      if (!profile) {
-        console.log("No profile found, creating one...");
-        const { error: createError } = await supabase
-          .from("profiles")
-          .insert([
-            {
-              id: userId,
-              role: "tenant", // Default role
-            },
-          ]);
-
-        if (createError) {
-          console.error("Error creating profile:", createError);
-          throw new Error("Failed to create user profile");
-        }
-      }
-
       let query = supabase
         .from("documents")
         .select(`
@@ -57,24 +28,20 @@ export function DocumentList({ userId, propertyFilter, typeFilter }: DocumentLis
           property:properties (
             name,
             address
-          ),
-          uploaded_by:profiles!documents_uploaded_by_fkey (
-            first_name,
-            last_name
           )
         `);
 
       // Apply filters
-      if (propertyFilter !== "all") {
+      if (propertyFilter && propertyFilter !== "all") {
         query = query.eq("property_id", propertyFilter);
       }
       
-      if (typeFilter !== "all") {
+      if (typeFilter && typeFilter !== "all") {
         query = query.eq("document_type", typeFilter);
       }
 
       // Apply user-specific filters based on role
-      if (profile?.role === "tenant") {
+      if (userRole === "tenant") {
         query = query.or(`tenant_id.eq.${userId},uploaded_by.eq.${userId}`);
       } else {
         query = query.eq("uploaded_by", userId);
@@ -107,13 +74,17 @@ export function DocumentList({ userId, propertyFilter, typeFilter }: DocumentLis
   }
 
   if (!documents?.length) {
-    return <EmptyDocumentState />;
+    return <EmptyDocumentState userRole={userRole} />;
   }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {documents.map((document) => (
-        <DocumentCard key={document.id} document={document} />
+        <DocumentCard 
+          key={document.id} 
+          document={document} 
+          userRole={userRole}
+        />
       ))}
     </div>
   );
