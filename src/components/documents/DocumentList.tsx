@@ -27,6 +27,7 @@ export function DocumentList({ userId, propertyFilter, typeFilter, userRole }: D
         .select(`
           *,
           property:properties (
+            id,
             name,
             address
           )
