@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -13,7 +13,7 @@ const Maintenance = () => {
   const [isLandlord, setIsLandlord] = useState(false);
 
   // Check if user is landlord when component mounts
-  useState(() => {
+  useEffect(() => {
     const checkUserRole = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
