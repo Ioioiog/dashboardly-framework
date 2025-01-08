@@ -7,7 +7,7 @@ interface DocumentListProps {
   userId: string;
   userRole: "landlord" | "tenant";
   propertyFilter: string;
-  typeFilter: string;
+  typeFilter: "all" | DocumentType;
 }
 
 export function DocumentList({ userId, userRole, propertyFilter, typeFilter }: DocumentListProps) {

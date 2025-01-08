@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { DocumentList } from "@/components/documents/DocumentList";
 import { DocumentDialog } from "@/components/documents/DocumentDialog";
+import { DocumentType } from "@/integrations/supabase/types/document-types";
 
 const Documents = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const Documents = () => {
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [propertyFilter, setPropertyFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | DocumentType>("all");
 
   useEffect(() => {
     const checkUser = async () => {
