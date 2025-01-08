@@ -1,7 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MaintenanceRequest } from "@/types/maintenance";
+import { MaintenanceRequest, MaintenanceRequestStatus } from "@/types/maintenance";
 import { format } from "date-fns";
 import { AlertTriangle, Clock, History, ImageIcon, Pencil, Wrench } from "lucide-react";
 import { useState } from "react";
@@ -38,7 +38,7 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
     }
   };
 
-  const handleStatusChange = async (newStatus: string) => {
+  const handleStatusChange = async (newStatus: MaintenanceRequestStatus) => {
     try {
       const { error } = await supabase
         .from("maintenance_requests")
