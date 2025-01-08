@@ -76,7 +76,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
           issue_type: request!.issue_type,
           priority: request!.priority,
           notes: request!.notes,
-          edited_by: currentUser.user.id,
+          edited_by: currentUser.user.id, // Fixed: Access id through user object
         });
 
       if (historyError) throw historyError;
@@ -134,8 +134,8 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       return;
     }
 
-    const { data: user } = await supabase.auth.getUser();
-    if (!user) {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
       toast({
         title: "Error",
         description: "You must be logged in to create a maintenance request",
@@ -147,7 +147,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
     const { data: tenancy, error: tenancyError } = await supabase
       .from("tenancies")
       .select("property_id")
-      .eq("tenant_id", user.id)
+      .eq("tenant_id", userData.user.id) // Fixed: Access id through user object
       .eq("status", "active")
       .maybeSingle();
 
@@ -174,7 +174,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       title: values.title,
       description: values.description,
       property_id: tenancy.property_id,
-      tenant_id: user.id,
+      tenant_id: userData.user.id,
       issue_type: values.issue_type,
       priority: values.priority,
       notes: values.notes,
