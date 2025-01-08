@@ -39,15 +39,10 @@ const DashboardSidebar = () => {
   const handleLogout = async () => {
     try {
       console.log("Starting logout process");
-      
-      // Clear any local session state first
       await supabase.auth.signOut({ scope: 'local' });
       console.log("Local session cleared");
-      
-      // Navigate to auth page immediately
       console.log("Navigating to auth page");
       navigate("/auth");
-      
     } catch (error) {
       console.error("Error during logout process:", error);
       toast({
@@ -70,13 +65,16 @@ const DashboardSidebar = () => {
     >
       <div className="flex flex-col h-full">
         <div className="p-6 border-b border-gray-100">
-          <h1
-            className={`text-xl font-semibold transition-opacity duration-200 ${
-              isCollapsed ? "opacity-0" : "opacity-100"
-            }`}
-          >
-            AdminChirii.ro
-          </h1>
+          <div className={`transition-opacity duration-200 ${
+            isCollapsed ? "opacity-0" : "opacity-100"
+          }`}>
+            <h1 className="text-xl font-bold">
+              <span className="text-blue-600">Admin</span>
+              <span className="text-blue-800">Chirii</span>
+              <span className="text-slate-500 font-light">.ro</span>
+            </h1>
+            <p className="text-xs text-slate-500 mt-1">simplificăm administrarea chiriilor</p>
+          </div>
         </div>
 
         <nav className="flex-1 py-6">
