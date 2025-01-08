@@ -15,7 +15,7 @@ interface DocumentListProps {
 
 export function DocumentList({ userId, userRole }: DocumentListProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string>("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
 
   const { data: documents, isLoading } = useQuery({
     queryKey: ["documents", userId],
@@ -41,7 +41,7 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
 
   const filteredDocuments = documents?.filter((doc) => {
     const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = !typeFilter || doc.document_type === typeFilter;
+    const matchesType = typeFilter === "all" || doc.document_type === typeFilter;
     return matchesSearch && matchesType;
   });
 
@@ -72,7 +72,7 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
               <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All types</SelectItem>
+              <SelectItem value="all">All types</SelectItem>
               <SelectItem value="lease_agreement">Lease Agreement</SelectItem>
               <SelectItem value="invoice">Invoice</SelectItem>
               <SelectItem value="receipt">Receipt</SelectItem>
