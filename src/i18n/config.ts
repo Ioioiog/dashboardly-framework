@@ -10,9 +10,6 @@ import enSettings from './locales/en/settings.json';
 import enTenants from './locales/en/tenants.json';
 import enMaintenance from './locales/en/maintenance.json';
 
-// Import other language translations similarly
-// Note: You'll need to create similar JSON files for other languages
-
 const resources = {
   en: {
     common: enCommon,
@@ -30,7 +27,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem('language') || 'en',
+    lng: 'en', // Set default language to English
     fallbackLng: 'en',
     defaultNS: 'common',
     ns: ['common', 'dashboard', 'navigation', 'properties', 'settings', 'tenants', 'maintenance'],
