@@ -263,13 +263,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "tenancies_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "tenancies_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
