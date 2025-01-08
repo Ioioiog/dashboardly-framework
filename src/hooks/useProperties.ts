@@ -21,17 +21,18 @@ export function useProperties({ userId, userRole }: UsePropertiesProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: properties, isLoading } = useQuery({
-    queryKey: ["dashboard-properties", userId, userRole],
+    queryKey: ["properties", userId, userRole],
     queryFn: () => userRole === "landlord" 
       ? fetchLandlordProperties(userId)
       : fetchTenantProperties(userId),
+    enabled: !!userId && !!userRole,
   });
 
   const handleAdd = async (data: Omit<Property, "id">) => {
     try {
       setIsSubmitting(true);
       await addProperty({ ...data, landlord_id: userId });
-      await queryClient.invalidateQueries({ queryKey: ["dashboard-properties"] });
+      await queryClient.invalidateQueries({ queryKey: ["properties"] });
       toast({
         title: "Success",
         description: "Property added successfully",
@@ -54,7 +55,7 @@ export function useProperties({ userId, userRole }: UsePropertiesProps) {
     try {
       setIsSubmitting(true);
       await updateProperty(property.id, data);
-      await queryClient.invalidateQueries({ queryKey: ["dashboard-properties"] });
+      await queryClient.invalidateQueries({ queryKey: ["properties"] });
       toast({
         title: "Success",
         description: "Property updated successfully",
@@ -77,7 +78,7 @@ export function useProperties({ userId, userRole }: UsePropertiesProps) {
     try {
       setIsSubmitting(true);
       await deleteProperty(property.id);
-      await queryClient.invalidateQueries({ queryKey: ["dashboard-properties"] });
+      await queryClient.invalidateQueries({ queryKey: ["properties"] });
       toast({
         title: "Success",
         description: "Property deleted successfully",
