@@ -68,11 +68,16 @@
   },
   "properties": {
     "title": "Proprietăți",
+    "description": "Gestionează și vizualizează detaliile proprietăților tale.",
     "noProperties": "Nu s-au găsit proprietăți",
     "addProperty": "Adaugă Proprietate",
     "type": "Tip",
     "address": "Adresă",
-    "rent": "Chirie Lunară"
+    "rent": "Chirie Lunară",
+    "deleteDialog": {
+      "title": "Ești sigur?",
+      "description": "Această acțiune nu poate fi anulată. Aceasta va șterge definitiv proprietatea și toate datele asociate."
+    }
   },
   "tenants": {
     "title": "Chiriași",
@@ -121,5 +126,12 @@
       "viewHistory": "Vezi Istoricul",
       "edit": "Editează"
     }
+  },
+  "common": {
+    "cancel": "Anulează",
+    "delete": "Șterge",
+    "edit": "Editează",
+    "save": "Salvează",
+    "loading": "Se încarcă..."
   }
 }

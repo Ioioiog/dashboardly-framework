@@ -68,11 +68,16 @@
   },
   "properties": {
     "title": "Propiedades",
+    "description": "Gestiona y visualiza los detalles de tus propiedades.",
     "noProperties": "No se encontraron propiedades",
     "addProperty": "Añadir Propiedad",
     "type": "Tipo",
     "address": "Dirección",
-    "rent": "Alquiler Mensual"
+    "rent": "Alquiler Mensual",
+    "deleteDialog": {
+      "title": "¿Estás seguro?",
+      "description": "Esta acción no se puede deshacer. Esto eliminará permanentemente la propiedad y todos los datos asociados."
+    }
   },
   "tenants": {
     "title": "Inquilinos",
@@ -121,5 +126,12 @@
       "viewHistory": "Ver Historial",
       "edit": "Editar"
     }
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "save": "Guardar",
+    "loading": "Cargando..."
   }
 }

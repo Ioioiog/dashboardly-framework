@@ -68,11 +68,16 @@
   },
   "properties": {
     "title": "Properties",
+    "description": "Manage and view your property details.",
     "noProperties": "No properties found",
     "addProperty": "Add Property",
     "type": "Type",
     "address": "Address",
-    "rent": "Monthly Rent"
+    "rent": "Monthly Rent",
+    "deleteDialog": {
+      "title": "Are you sure?",
+      "description": "This action cannot be undone. This will permanently delete the property and remove all associated data."
+    }
   },
   "tenants": {
     "title": "Tenants",
@@ -121,5 +126,12 @@
       "viewHistory": "View History",
       "edit": "Edit"
     }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "loading": "Loading..."
   }
 }

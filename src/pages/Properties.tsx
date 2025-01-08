@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { PropertyDialog } from "@/components/properties/PropertyDialog";
 import { useProperties } from "@/hooks/useProperties";
+import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,7 @@ import { Property } from "@/utils/propertyUtils";
 const Properties = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -102,9 +104,11 @@ const Properties = () => {
         <div className="max-w-7xl mx-auto">
           <header className="mb-8 flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-semibold text-gray-900">Properties</h1>
+              <h1 className="text-3xl font-semibold text-gray-900">
+                {t('properties.title')}
+              </h1>
               <p className="mt-2 text-dashboard-text">
-                Manage and view your property details.
+                {t('properties.description')}
               </p>
             </div>
             {userRole === "landlord" && (
@@ -113,7 +117,7 @@ const Properties = () => {
                 onClick={handleAddProperty}
               >
                 <Plus className="h-4 w-4" />
-                Add Property
+                {t('properties.addProperty')}
               </Button>
             )}
           </header>
@@ -167,14 +171,13 @@ const Properties = () => {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('properties.deleteDialog.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the property
-              and remove all associated data.
+              {t('properties.deleteDialog.description')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
                 if (!selectedProperty) return;
@@ -185,7 +188,7 @@ const Properties = () => {
                 }
               }}
             >
-              Delete
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

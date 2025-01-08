@@ -68,11 +68,16 @@
   },
   "properties": {
     "title": "Propriétés",
+    "description": "Gérez et consultez les détails de vos propriétés.",
     "noProperties": "Aucune propriété trouvée",
     "addProperty": "Ajouter une Propriété",
     "type": "Type",
     "address": "Adresse",
-    "rent": "Loyer Mensuel"
+    "rent": "Loyer Mensuel",
+    "deleteDialog": {
+      "title": "Êtes-vous sûr ?",
+      "description": "Cette action ne peut pas être annulée. Cela supprimera définitivement la propriété et toutes les données associées."
+    }
   },
   "tenants": {
     "title": "Locataires",
@@ -121,5 +126,12 @@
       "viewHistory": "Voir l'Historique",
       "edit": "Modifier"
     }
+  },
+  "common": {
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "loading": "Chargement..."
   }
 }
