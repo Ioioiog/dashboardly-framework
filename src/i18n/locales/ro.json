@@ -1,18 +1,19 @@
 {
   "dashboard": {
     "title": "Panou de Control",
-    "welcome": "Bun venit înapoi",
-    "overview": "Aici aveți o prezentare generală a gestionării proprietății dvs."
+    "welcome": "Bine ai revenit",
+    "overview": "Iată o prezentare generală a gestionării proprietăților tale"
   },
   "navigation": {
-    "dashboard": "Panou",
+    "dashboard": "Panou de Control",
     "properties": "Proprietăți",
     "tenants": "Chiriași",
     "maintenance": "Întreținere",
     "documents": "Documente",
     "payments": "Plăți",
     "utilities": "Utilități",
-    "settings": "Setări"
+    "settings": "Setări",
+    "logout": "Deconectare"
   },
   "metrics": {
     "totalProperties": "Total Proprietăți",
@@ -21,5 +22,61 @@
     "pendingMaintenance": "Întreținere în Așteptare",
     "currentProperty": "Proprietatea Curentă",
     "paymentStatus": "Stare Plată"
+  },
+  "settings": {
+    "title": "Setări",
+    "language": "Limbă",
+    "personalInfo": "Informații Personale",
+    "firstName": "Prenume",
+    "lastName": "Nume",
+    "email": "Email",
+    "phone": "Telefon",
+    "save": "Salvează Modificările",
+    "password": {
+      "title": "Schimbă Parola",
+      "current": "Parola Actuală",
+      "new": "Parola Nouă",
+      "confirm": "Confirmă Parola Nouă",
+      "update": "Actualizează Parola"
+    }
+  },
+  "properties": {
+    "title": "Proprietăți",
+    "noProperties": "Nu s-au găsit proprietăți",
+    "addProperty": "Adaugă Proprietate",
+    "type": "Tip",
+    "address": "Adresă",
+    "rent": "Chirie Lunară"
+  },
+  "tenants": {
+    "title": "Chiriași",
+    "noTenants": "Nu s-au găsit chiriași",
+    "inviteTenant": "Invită Chiriaș"
+  },
+  "maintenance": {
+    "title": "Cereri de Întreținere",
+    "newRequest": "Cerere Nouă",
+    "noRequests": "Nu există cereri de întreținere"
+  },
+  "documents": {
+    "title": "Documente",
+    "upload": "Încarcă Document",
+    "noDocuments": "Nu s-au găsit documente"
+  },
+  "payments": {
+    "title": "Plăți",
+    "noPayments": "Nu s-au găsit plăți",
+    "status": {
+      "paid": "Plătit",
+      "pending": "În Așteptare",
+      "overdue": "Întârziat"
+    }
+  },
+  "utilities": {
+    "title": "Utilități",
+    "noUtilities": "Nu s-au găsit utilități",
+    "type": "Tip",
+    "amount": "Sumă",
+    "dueDate": "Data Scadentă"
   }
 }

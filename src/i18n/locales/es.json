@@ -12,7 +12,8 @@
     "documents": "Documentos",
     "payments": "Pagos",
     "utilities": "Servicios",
-    "settings": "Ajustes"
+    "settings": "Ajustes",
+    "logout": "Cerrar Sesión"
   },
   "metrics": {
     "totalProperties": "Total de Propiedades",
@@ -21,5 +22,61 @@
     "pendingMaintenance": "Mantenimiento Pendiente",
     "currentProperty": "Propiedad Actual",
     "paymentStatus": "Estado de Pago"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "language": "Idioma",
+    "personalInfo": "Información Personal",
+    "firstName": "Nombre",
+    "lastName": "Apellidos",
+    "email": "Correo Electrónico",
+    "phone": "Teléfono",
+    "save": "Guardar Cambios",
+    "password": {
+      "title": "Cambiar Contraseña",
+      "current": "Contraseña Actual",
+      "new": "Nueva Contraseña",
+      "confirm": "Confirmar Nueva Contraseña",
+      "update": "Actualizar Contraseña"
+    }
+  },
+  "properties": {
+    "title": "Propiedades",
+    "noProperties": "No se encontraron propiedades",
+    "addProperty": "Añadir Propiedad",
+    "type": "Tipo",
+    "address": "Dirección",
+    "rent": "Alquiler Mensual"
+  },
+  "tenants": {
+    "title": "Inquilinos",
+    "noTenants": "No se encontraron inquilinos",
+    "inviteTenant": "Invitar Inquilino"
+  },
+  "maintenance": {
+    "title": "Solicitudes de Mantenimiento",
+    "newRequest": "Nueva Solicitud",
+    "noRequests": "No hay solicitudes de mantenimiento"
+  },
+  "documents": {
+    "title": "Documentos",
+    "upload": "Subir Documento",
+    "noDocuments": "No se encontraron documentos"
+  },
+  "payments": {
+    "title": "Pagos",
+    "noPayments": "No se encontraron pagos",
+    "status": {
+      "paid": "Pagado",
+      "pending": "Pendiente",
+      "overdue": "Vencido"
+    }
+  },
+  "utilities": {
+    "title": "Servicios",
+    "noUtilities": "No se encontraron servicios",
+    "type": "Tipo",
+    "amount": "Importe",
+    "dueDate": "Fecha de Vencimiento"
   }
 }

@@ -13,21 +13,22 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface MenuItem {
   icon: React.ElementType;
-  label: string;
+  labelKey: string;
   path: string;
 }
 
 const menuItems: MenuItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: Home, label: "Properties", path: "/properties" },
-  { icon: Users, label: "Tenants", path: "/tenants" },
-  { icon: Wrench, label: "Maintenance", path: "/maintenance" },
-  { icon: FileText, label: "Documents", path: "/documents" },
-  { icon: CreditCard, label: "Payments", path: "/payments" },
-  { icon: Zap, label: "Utilities", path: "/utilities" },
+  { icon: LayoutDashboard, labelKey: "navigation.dashboard", path: "/dashboard" },
+  { icon: Home, labelKey: "navigation.properties", path: "/properties" },
+  { icon: Users, labelKey: "navigation.tenants", path: "/tenants" },
+  { icon: Wrench, labelKey: "navigation.maintenance", path: "/maintenance" },
+  { icon: FileText, labelKey: "navigation.documents", path: "/documents" },
+  { icon: CreditCard, labelKey: "navigation.payments", path: "/payments" },
+  { icon: Zap, labelKey: "navigation.utilities", path: "/utilities" },
 ];
 
 const DashboardSidebar = () => {
@@ -35,6 +36,7 @@ const DashboardSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     try {
@@ -80,7 +82,7 @@ const DashboardSidebar = () => {
         <nav className="flex-1 py-6">
           <ul className="space-y-1">
             {menuItems.map((item) => (
-              <li key={item.label}>
+              <li key={item.labelKey}>
                 <Link
                   to={item.path}
                   className={`flex items-center px-6 py-3 text-dashboard-text hover:bg-dashboard-accent transition-colors duration-200 ${
@@ -101,7 +103,7 @@ const DashboardSidebar = () => {
                       isCollapsed ? "opacity-0 hidden" : "opacity-100"
                     }`}
                   >
-                    {item.label}
+                    {t(item.labelKey)}
                   </span>
                 </Link>
               </li>
@@ -120,7 +122,7 @@ const DashboardSidebar = () => {
                 isCollapsed ? "opacity-0 hidden" : "opacity-100"
               }`}
             >
-              Settings
+              {t('navigation.settings')}
             </span>
           </Link>
           <button
@@ -133,7 +135,7 @@ const DashboardSidebar = () => {
                 isCollapsed ? "opacity-0 hidden" : "opacity-100"
               }`}
             >
-              Logout
+              {t('navigation.logout')}
             </span>
           </button>
         </div>

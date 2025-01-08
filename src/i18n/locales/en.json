@@ -12,7 +12,8 @@
     "documents": "Documents",
     "payments": "Payments",
     "utilities": "Utilities",
-    "settings": "Settings"
+    "settings": "Settings",
+    "logout": "Logout"
   },
   "metrics": {
     "totalProperties": "Total Properties",
@@ -21,5 +22,61 @@
     "pendingMaintenance": "Pending Maintenance",
     "currentProperty": "Current Property",
     "paymentStatus": "Payment Status"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "personalInfo": "Personal Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "save": "Save Changes",
+    "password": {
+      "title": "Change Password",
+      "current": "Current Password",
+      "new": "New Password",
+      "confirm": "Confirm New Password",
+      "update": "Update Password"
+    }
+  },
+  "properties": {
+    "title": "Properties",
+    "noProperties": "No properties found",
+    "addProperty": "Add Property",
+    "type": "Type",
+    "address": "Address",
+    "rent": "Monthly Rent"
+  },
+  "tenants": {
+    "title": "Tenants",
+    "noTenants": "No tenants found",
+    "inviteTenant": "Invite Tenant"
+  },
+  "maintenance": {
+    "title": "Maintenance Requests",
+    "newRequest": "New Request",
+    "noRequests": "No maintenance requests found"
+  },
+  "documents": {
+    "title": "Documents",
+    "upload": "Upload Document",
+    "noDocuments": "No documents found"
+  },
+  "payments": {
+    "title": "Payments",
+    "noPayments": "No payments found",
+    "status": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "overdue": "Overdue"
+    }
+  },
+  "utilities": {
+    "title": "Utilities",
+    "noUtilities": "No utilities found",
+    "type": "Type",
+    "amount": "Amount",
+    "dueDate": "Due Date"
   }
 }
