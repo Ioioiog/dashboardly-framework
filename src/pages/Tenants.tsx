@@ -9,6 +9,7 @@ import { useTenants } from "@/hooks/useTenants";
 import { Property } from "@/utils/propertyUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Home, DollarSign } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Tenants = () => {
   const navigate = useNavigate();
@@ -16,8 +17,9 @@ const Tenants = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
-  const { data: tenants = [], isLoading } = useTenants();
+  const { data: tenants = [], isLoading, error: tenantsError } = useTenants();
   const [tenantInfo, setTenantInfo] = useState<any>(null);
+  const [isCheckingProfile, setIsCheckingProfile] = useState(true);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -42,7 +44,7 @@ const Tenants = () => {
         setUserId(session.user.id);
         console.log("User ID set:", session.user.id);
 
-        // Fetch profile with a direct query
+        // Fetch profile with maybeSingle to handle missing profiles
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
@@ -55,20 +57,32 @@ const Tenants = () => {
         }
 
         if (!profile) {
-          console.error("No profile found for user");
-          toast({
-            title: "Error",
-            description: "User profile not found",
-            variant: "destructive",
-          });
-          return;
+          console.log("No profile found, creating one...");
+          const { error: createError } = await supabase
+            .from("profiles")
+            .insert([
+              {
+                id: session.user.id,
+                email: session.user.email,
+                role: "tenant", // Default role
+              },
+            ]);
+
+          if (createError) {
+            console.error("Error creating profile:", createError);
+            throw createError;
+          }
+
+          setUserRole("tenant");
+        } else {
+          console.log("Profile role:", profile.role);
+          setUserRole(profile.role as "landlord" | "tenant");
         }
 
-        console.log("Profile role:", profile.role);
-        setUserRole(profile.role as "landlord" | "tenant");
+        setIsCheckingProfile(false);
 
-        // Fetch tenant information if the user is a tenant
-        if (profile.role === "tenant") {
+        // Rest of the existing code for fetching tenant info and properties
+        if (profile?.role === "tenant") {
           const { data: tenancyData, error: tenancyError } = await supabase
             .from("tenancies")
             .select(`
@@ -82,7 +96,7 @@ const Tenants = () => {
             `)
             .eq("tenant_id", session.user.id)
             .eq("status", "active")
-            .single();
+            .maybeSingle();
 
           if (tenancyError) {
             console.error("Error fetching tenancy:", tenancyError);
@@ -95,8 +109,7 @@ const Tenants = () => {
           }
         }
 
-        // Only fetch properties for landlords
-        if (profile.role === "landlord") {
+        if (profile?.role === "landlord") {
           console.log("Fetching properties for landlord");
           const { data: propertiesData, error: propertiesError } = await supabase
             .from("properties")
@@ -135,7 +148,7 @@ const Tenants = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
-  if (isLoading) {
+  if (isCheckingProfile) {
     return (
       <div className="flex bg-dashboard-background min-h-screen">
         <DashboardSidebar />
@@ -153,6 +166,21 @@ const Tenants = () => {
   }
 
   if (!userId || !userRole) return null;
+
+  if (tenantsError) {
+    return (
+      <div className="flex bg-dashboard-background min-h-screen">
+        <DashboardSidebar />
+        <main className="flex-1 ml-64 p-8">
+          <Alert variant="destructive">
+            <AlertDescription>
+              Error loading tenant data. Please try again later.
+            </AlertDescription>
+          </Alert>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex bg-dashboard-background min-h-screen">
