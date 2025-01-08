@@ -1,0 +1,25 @@
+{
+  "dashboard": {
+    "title": "Panou de Control",
+    "welcome": "Bun venit înapoi",
+    "overview": "Aici aveți o prezentare generală a gestionării proprietății dvs."
+  },
+  "navigation": {
+    "dashboard": "Panou",
+    "properties": "Proprietăți",
+    "tenants": "Chiriași",
+    "maintenance": "Întreținere",
+    "documents": "Documente",
+    "payments": "Plăți",
+    "utilities": "Utilități",
+    "settings": "Setări"
+  },
+  "metrics": {
+    "totalProperties": "Total Proprietăți",
+    "monthlyRevenue": "Venit Lunar",
+    "activeTenants": "Chiriași Activi",
+    "pendingMaintenance": "Întreținere în Așteptare",
+    "currentProperty": "Proprietatea Curentă",
+    "paymentStatus": "Stare Plată"
+  }
+}
