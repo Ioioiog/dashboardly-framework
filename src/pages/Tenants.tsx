@@ -7,6 +7,8 @@ import { TenantInviteDialog } from "@/components/tenants/TenantInviteDialog";
 import { TenantList } from "@/components/tenants/TenantList";
 import { useTenants } from "@/hooks/useTenants";
 import { Property } from "@/utils/propertyUtils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, Home, DollarSign } from "lucide-react";
 
 const Tenants = () => {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ const Tenants = () => {
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const { data: tenants = [], isLoading } = useTenants();
+  const [tenantInfo, setTenantInfo] = useState<any>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -63,6 +66,34 @@ const Tenants = () => {
 
         console.log("Profile role:", profile.role);
         setUserRole(profile.role as "landlord" | "tenant");
+
+        // Fetch tenant information if the user is a tenant
+        if (profile.role === "tenant") {
+          const { data: tenancyData, error: tenancyError } = await supabase
+            .from("tenancies")
+            .select(`
+              *,
+              property:properties (
+                name,
+                address,
+                monthly_rent,
+                type
+              )
+            `)
+            .eq("tenant_id", session.user.id)
+            .eq("status", "active")
+            .single();
+
+          if (tenancyError) {
+            console.error("Error fetching tenancy:", tenancyError);
+            return;
+          }
+
+          if (tenancyData) {
+            console.log("Tenancy data:", tenancyData);
+            setTenantInfo(tenancyData);
+          }
+        }
 
         // Only fetch properties for landlords
         if (profile.role === "landlord") {
@@ -147,10 +178,57 @@ const Tenants = () => {
           <div className="space-y-8">
             {userRole === "landlord" ? (
               <TenantList tenants={tenants} />
+            ) : tenantInfo ? (
+              <div className="grid gap-6 md:grid-cols-3">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Property</CardTitle>
+                    <Home className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{tenantInfo.property.name}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {tenantInfo.property.address}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Lease Period</CardTitle>
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {new Date(tenantInfo.start_date).toLocaleDateString()}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {tenantInfo.end_date
+                        ? `Until ${new Date(tenantInfo.end_date).toLocaleDateString()}`
+                        : "No end date"}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Monthly Rent</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      ${tenantInfo.property.monthly_rent}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {tenantInfo.property.type}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             ) : (
               <div className="rounded-lg border bg-card text-card-foreground shadow p-6">
                 <p className="text-muted-foreground">
-                  Your tenancy information will appear here.
+                  No active tenancy found. Please contact your landlord if you believe this is an error.
                 </p>
               </div>
             )}
