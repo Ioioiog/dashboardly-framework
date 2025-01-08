@@ -2,81 +2,24 @@
   "dashboard": {
     "title": "Tableau de Bord",
     "welcome": "Bon retour",
-    "overview": "Voici un aperçu de votre gestion immobilière"
-  },
-  "navigation": {
-    "dashboard": "Tableau de Bord",
-    "properties": "Propriétés",
-    "tenants": "Locataires",
-    "maintenance": "Maintenance",
-    "documents": "Documents",
-    "payments": "Paiements",
-    "utilities": "Services",
-    "settings": "Paramètres",
-    "logout": "Déconnexion"
-  },
-  "metrics": {
-    "totalProperties": "Total des Propriétés",
-    "monthlyRevenue": "Revenu Mensuel",
-    "activeTenants": "Locataires Actifs",
-    "pendingMaintenance": "Maintenance en Attente",
-    "currentProperty": "Propriété Actuelle",
-    "paymentStatus": "État des Paiements"
-  },
-  "settings": {
-    "title": "Paramètres",
-    "language": "Langue",
-    "personalInfo": "Informations Personnelles",
-    "firstName": "Prénom",
-    "lastName": "Nom",
-    "email": "Email",
-    "phone": "Téléphone",
-    "save": "Enregistrer",
-    "password": {
-      "title": "Changer le Mot de Passe",
-      "current": "Mot de Passe Actuel",
-      "new": "Nouveau Mot de Passe",
-      "confirm": "Confirmer le Nouveau Mot de Passe",
-      "update": "Mettre à Jour"
+    "overview": "Voici un aperçu de votre gestion immobilière",
+    "metrics": {
+      "totalProperties": "Total des Propriétés",
+      "monthlyRevenue": "Revenu Mensuel",
+      "activeTenants": "Locataires Actifs",
+      "pendingMaintenance": "Maintenance en Attente",
+      "currentProperty": "Propriété Actuelle",
+      "paymentStatus": "État des Paiements"
+    },
+    "recentActivity": "Activité Récente",
+    "properties": {
+      "title": "Vos Propriétés",
+      "noProperties": "Aucune propriété trouvée",
+      "addProperty": "Ajouter une Propriété"
+    },
+    "revenue": {
+      "title": "Revenu Mensuel",
+      "noData": "Aucune donnée de revenu disponible"
     }
-  },
-  "properties": {
-    "title": "Propriétés",
-    "noProperties": "Aucune propriété trouvée",
-    "addProperty": "Ajouter une Propriété",
-    "type": "Type",
-    "address": "Adresse",
-    "rent": "Loyer Mensuel"
-  },
-  "tenants": {
-    "title": "Locataires",
-    "noTenants": "Aucun locataire trouvé",
-    "inviteTenant": "Inviter un Locataire"
-  },
-  "maintenance": {
-    "title": "Demandes de Maintenance",
-    "newRequest": "Nouvelle Demande",
-    "noRequests": "Aucune demande de maintenance"
-  },
-  "documents": {
-    "title": "Documents",
-    "upload": "Télécharger un Document",
-    "noDocuments": "Aucun document trouvé"
-  },
-  "payments": {
-    "title": "Paiements",
-    "noPayments": "Aucun paiement trouvé",
-    "status": {
-      "paid": "Payé",
-      "pending": "En Attente",
-      "overdue": "En Retard"
-    }
-  },
-  "utilities": {
-    "title": "Services",
-    "noUtilities": "Aucun service trouvé",
-    "type": "Type",
-    "amount": "Montant",
-    "dueDate": "Date d'échéance"
   }
 }

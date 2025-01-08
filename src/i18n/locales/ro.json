@@ -2,7 +2,25 @@
   "dashboard": {
     "title": "Panou de Control",
     "welcome": "Bine ai revenit",
-    "overview": "Iată o prezentare generală a gestionării proprietăților tale"
+    "overview": "Iată o prezentare generală a gestionării proprietăților tale",
+    "metrics": {
+      "totalProperties": "Total Proprietăți",
+      "monthlyRevenue": "Venit Lunar",
+      "activeTenants": "Chiriași Activi",
+      "pendingMaintenance": "Întreținere în Așteptare",
+      "currentProperty": "Proprietatea Curentă",
+      "paymentStatus": "Stare Plată"
+    },
+    "recentActivity": "Activitate Recentă",
+    "properties": {
+      "title": "Proprietățile Tale",
+      "noProperties": "Nu s-au găsit proprietăți",
+      "addProperty": "Adaugă Proprietate"
+    },
+    "revenue": {
+      "title": "Venit Lunar",
+      "noData": "Nu există date despre venituri"
+    }
   },
   "navigation": {
     "dashboard": "Panou de Control",

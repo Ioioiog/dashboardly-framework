@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Home, Settings, Users, Wallet } from "lucide-react";
 import { MetricCard } from "./MetricCard";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 interface Metrics {
   totalProperties?: number;
@@ -116,6 +117,7 @@ async function fetchTenantMetrics(userId: string): Promise<Metrics> {
 }
 
 export function DashboardMetrics({ userId, userRole }: { userId: string; userRole: "landlord" | "tenant" }) {
+  const { t } = useTranslation();
   const { data: metrics, isLoading } = useQuery({
     queryKey: ["dashboard-metrics", userId, userRole],
     queryFn: () =>
@@ -146,22 +148,22 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          title="Total Properties"
+          title={t('dashboard.metrics.totalProperties')}
           value={metrics.totalProperties}
           icon={Home}
         />
         <MetricCard
-          title="Monthly Revenue"
+          title={t('dashboard.metrics.monthlyRevenue')}
           value={`$${metrics.monthlyRevenue?.toLocaleString()}`}
           icon={Wallet}
         />
         <MetricCard
-          title="Active Tenants"
+          title={t('dashboard.metrics.activeTenants')}
           value={metrics.activeTenants}
           icon={Users}
         />
         <MetricCard
-          title="Pending Maintenance"
+          title={t('dashboard.metrics.pendingMaintenance')}
           value={metrics.pendingMaintenance}
           icon={Settings}
         />
@@ -172,17 +174,17 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <MetricCard
-        title="Current Property"
-        value={metrics.currentProperty || "No active lease"}
+        title={t('dashboard.metrics.currentProperty')}
+        value={metrics.currentProperty || t('dashboard.properties.noProperties')}
         icon={Home}
       />
       <MetricCard
-        title="Pending Maintenance"
+        title={t('dashboard.metrics.pendingMaintenance')}
         value={metrics.pendingMaintenance}
         icon={Settings}
       />
       <MetricCard
-        title="Payment Status"
+        title={t('dashboard.metrics.paymentStatus')}
         value={metrics.paymentStatus}
         icon={Wallet}
       />

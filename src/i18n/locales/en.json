@@ -2,7 +2,25 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back",
-    "overview": "Here's an overview of your property management"
+    "overview": "Here's an overview of your property management",
+    "metrics": {
+      "totalProperties": "Total Properties",
+      "monthlyRevenue": "Monthly Revenue",
+      "activeTenants": "Active Tenants",
+      "pendingMaintenance": "Pending Maintenance",
+      "currentProperty": "Current Property",
+      "paymentStatus": "Payment Status"
+    },
+    "recentActivity": "Recent Activity",
+    "properties": {
+      "title": "Your Properties",
+      "noProperties": "No properties found",
+      "addProperty": "Add Property"
+    },
+    "revenue": {
+      "title": "Monthly Revenue",
+      "noData": "No revenue data available"
+    }
   },
   "navigation": {
     "dashboard": "Dashboard",

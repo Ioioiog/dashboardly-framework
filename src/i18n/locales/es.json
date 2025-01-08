@@ -2,7 +2,25 @@
   "dashboard": {
     "title": "Panel de Control",
     "welcome": "Bienvenido de nuevo",
-    "overview": "Aquí tiene una vista general de su gestión inmobiliaria"
+    "overview": "Aquí tiene un resumen de su gestión inmobiliaria",
+    "metrics": {
+      "totalProperties": "Total de Propiedades",
+      "monthlyRevenue": "Ingresos Mensuales",
+      "activeTenants": "Inquilinos Activos",
+      "pendingMaintenance": "Mantenimiento Pendiente",
+      "currentProperty": "Propiedad Actual",
+      "paymentStatus": "Estado del Pago"
+    },
+    "recentActivity": "Actividad Reciente",
+    "properties": {
+      "title": "Sus Propiedades",
+      "noProperties": "No se encontraron propiedades",
+      "addProperty": "Añadir Propiedad"
+    },
+    "revenue": {
+      "title": "Ingresos Mensuales",
+      "noData": "No hay datos de ingresos disponibles"
+    }
   },
   "navigation": {
     "dashboard": "Panel",

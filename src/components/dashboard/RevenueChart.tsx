@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 import {
   LineChart,
   Line,
@@ -72,6 +73,7 @@ async function fetchRevenueData(userId: string): Promise<MonthlyRevenue[]> {
 }
 
 export function RevenueChart({ userId }: { userId: string }) {
+  const { t } = useTranslation();
   const { data: revenueData, isLoading } = useQuery({
     queryKey: ["revenue-chart", userId],
     queryFn: () => fetchRevenueData(userId),
@@ -81,7 +83,7 @@ export function RevenueChart({ userId }: { userId: string }) {
     return (
       <Card className="col-span-4">
         <CardHeader>
-          <CardTitle>Monthly Revenue</CardTitle>
+          <CardTitle>{t('dashboard.revenue.title')}</CardTitle>
         </CardHeader>
         <CardContent className="h-[400px] animate-pulse bg-muted" />
       </Card>
@@ -93,10 +95,11 @@ export function RevenueChart({ userId }: { userId: string }) {
   return (
     <Card className="col-span-4">
       <CardHeader>
-        <CardTitle>Monthly Revenue</CardTitle>
+        <CardTitle>{t('dashboard.revenue.title')}</CardTitle>
       </CardHeader>
       <CardContent className="h-[400px]">
-        <ResponsiveContainer width="100%" height="100%">
+        {revenueData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={revenueData}
             margin={{
@@ -154,7 +157,12 @@ export function RevenueChart({ userId }: { userId: string }) {
               dot={false}
             />
           </LineChart>
-        </ResponsiveContainer>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            {t('dashboard.revenue.noData')}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
