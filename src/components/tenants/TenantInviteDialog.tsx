@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Property } from "@/utils/propertyUtils";
 import { TenantInviteForm } from "./TenantInviteForm";
-import { createTenantInvitation } from "@/utils/tenantUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TenantInviteDialogProps {
   properties: Property[];
@@ -18,22 +18,45 @@ export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
+      console.log("Creating tenant invitation with data:", data);
+      
       const property = properties.find(p => p.id === data.propertyId);
-      if (!property) throw new Error("Property not found");
+      if (!property) {
+        throw new Error("Property not found");
+      }
 
-      await createTenantInvitation(data, property.name);
+      // Generate a unique token
+      const token = crypto.randomUUID();
+
+      // Insert the invitation
+      const { error: invitationError } = await supabase
+        .from('tenant_invitations')
+        .insert({
+          email: data.email,
+          first_name: data.firstName,
+          last_name: data.lastName,
+          property_id: data.propertyId,
+          token: token,
+          start_date: data.startDate,
+          end_date: data.endDate || null,
+        });
+
+      if (invitationError) {
+        console.error("Error creating invitation:", invitationError);
+        throw new Error(invitationError.message);
+      }
 
       toast({
         title: "Success",
-        description: "Tenant account created and invitation sent successfully.",
+        description: "Tenant invitation sent successfully.",
       });
 
       setOpen(false);
     } catch (error) {
-      console.error("Error creating tenant account:", error);
+      console.error("Error creating tenant invitation:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create tenant account. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create tenant invitation. Please try again.",
         variant: "destructive",
       });
     } finally {
