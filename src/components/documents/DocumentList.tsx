@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useTenants } from "@/hooks/useTenants";
 
 interface DocumentListProps {
   userId: string;
@@ -35,36 +36,35 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
     },
   });
 
-  // Fetch tenants for the filter (only for landlords)
-  const { data: tenants } = useQuery({
-    queryKey: ["tenants"],
-    enabled: userRole === "landlord",
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("role", "tenant");
-
-      if (error) {
-        console.error("Error fetching tenants:", error);
-        throw error;
-      }
-      return data;
-    },
-  });
+  // Use the useTenants hook for tenant data
+  const { data: tenants } = useTenants();
 
   const { data: documents, isLoading } = useQuery({
-    queryKey: ["documents", userId],
+    queryKey: ["documents", userId, propertyFilter, tenantFilter],
     queryFn: async () => {
       console.log("Fetching documents for user:", userId);
-      const { data, error } = await supabase
+      let query = supabase
         .from("documents")
         .select(`
           *,
           property:properties(id, name, address),
           tenant:profiles(id, first_name, last_name)
-        `)
-        .or(`tenant_id.eq.${userId},uploaded_by.eq.${userId}`);
+        `);
+
+      // Base filter for user's documents
+      query = query.or(`tenant_id.eq.${userId},uploaded_by.eq.${userId}`);
+
+      // Apply property filter if selected
+      if (propertyFilter !== "all") {
+        query = query.eq("property_id", propertyFilter);
+      }
+
+      // Apply tenant filter if selected
+      if (tenantFilter !== "all") {
+        query = query.eq("tenant_id", tenantFilter);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching documents:", error);
@@ -79,9 +79,7 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
   const filteredDocuments = documents?.filter((doc) => {
     const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === "all" || doc.document_type === typeFilter;
-    const matchesProperty = propertyFilter === "all" || doc.property_id === propertyFilter;
-    const matchesTenant = tenantFilter === "all" || doc.tenant_id === tenantFilter;
-    return matchesSearch && matchesType && matchesProperty && matchesTenant;
+    return matchesSearch && matchesType;
   });
 
   if (isLoading) {
