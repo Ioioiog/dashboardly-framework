@@ -1,125 +1,120 @@
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DocumentCard } from "./DocumentCard";
 import { DocumentListSkeleton } from "./DocumentListSkeleton";
 import { EmptyDocumentState } from "./EmptyDocumentState";
-import { useState } from "react";
-import { DocumentFilters } from "./DocumentFilters";
-import { DocumentType } from "@/integrations/supabase/types/document-types";
+import { useToast } from "@/hooks/use-toast";
 
 interface DocumentListProps {
   userId: string;
-  userRole: "landlord" | "tenant";
+  propertyFilter: string;
+  typeFilter: string;
 }
 
-export function DocumentList({ userId, userRole }: DocumentListProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState<"all" | DocumentType>("all");
-  const [propertyFilter, setPropertyFilter] = useState<string>("all");
+export function DocumentList({ userId, propertyFilter, typeFilter }: DocumentListProps) {
+  const { toast } = useToast();
 
-  const { data: properties } = useQuery({
-    queryKey: ["properties"],
-    queryFn: async () => {
-      console.log("Fetching properties...");
-      const { data, error } = await supabase
-        .from("properties")
-        .select("*");
-
-      if (error) {
-        console.error("Error fetching properties:", error);
-        throw error;
-      }
-      console.log("Properties fetched:", data);
-      return data;
-    },
-  });
-
-  // Fetch documents with filters applied at query level
-  const { data: documents, isLoading } = useQuery({
+  const { data: documents, isLoading, error } = useQuery({
     queryKey: ["documents", userId, propertyFilter, typeFilter],
     queryFn: async () => {
-      console.log("Fetching documents with filters:", {
-        userId,
-        propertyFilter,
-        typeFilter
-      });
+      console.log("Fetching documents with filters:", { userId, propertyFilter, typeFilter });
+      
+      // First check if user profile exists
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("Error fetching profile:", profileError);
+        throw new Error("Failed to verify user profile");
+      }
+
+      // If no profile exists, create one
+      if (!profile) {
+        console.log("No profile found, creating one...");
+        const { error: createError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: userId,
+              role: "tenant", // Default role
+            },
+          ]);
+
+        if (createError) {
+          console.error("Error creating profile:", createError);
+          throw new Error("Failed to create user profile");
+        }
+      }
 
       let query = supabase
         .from("documents")
         .select(`
           *,
-          property:properties(id, name, address)
+          property:properties (
+            name,
+            address
+          ),
+          uploaded_by:profiles!documents_uploaded_by_fkey (
+            first_name,
+            last_name
+          )
         `);
 
-      // Base filter for user's documents
-      if (userRole === "tenant") {
-        query = query.eq("tenant_id", userId);
-      } else {
-        // For landlords, show documents they uploaded or are related to their properties
-        const { data: ownedProperties } = await supabase
-          .from("properties")
-          .select("id")
-          .eq("landlord_id", userId);
-        
-        const propertyIds = ownedProperties?.map(p => p.id) || [];
-        
-        query = query.or(
-          `uploaded_by.eq.${userId},property_id.in.(${propertyIds.join(",")})`
-        );
-      }
-
-      // Apply property filter
+      // Apply filters
       if (propertyFilter !== "all") {
         query = query.eq("property_id", propertyFilter);
       }
-
-      // Apply document type filter
+      
       if (typeFilter !== "all") {
         query = query.eq("document_type", typeFilter);
       }
 
-      const { data, error } = await query;
+      // Apply user-specific filters based on role
+      if (profile?.role === "tenant") {
+        query = query.or(`tenant_id.eq.${userId},uploaded_by.eq.${userId}`);
+      } else {
+        query = query.eq("uploaded_by", userId);
+      }
 
-      if (error) {
-        console.error("Error fetching documents:", error);
-        throw error;
+      const { data, error: documentsError } = await query;
+
+      if (documentsError) {
+        console.error("Error fetching documents:", documentsError);
+        throw documentsError;
       }
 
       console.log("Documents fetched:", data);
-      return data;
+      return data || [];
     },
   });
 
-  // Apply search filter on the client side
-  const filteredDocuments = documents?.filter((doc) => 
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  if (error) {
+    console.error("Error in DocumentList:", error);
+    toast({
+      title: "Error",
+      description: "Failed to load documents. Please try again.",
+      variant: "destructive",
+    });
+    return null;
+  }
 
   if (isLoading) {
     return <DocumentListSkeleton />;
   }
 
   if (!documents?.length) {
-    return <EmptyDocumentState userRole={userRole} />;
+    return <EmptyDocumentState />;
   }
 
   return (
-    <div className="space-y-6">
-      <DocumentFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        typeFilter={typeFilter}
-        setTypeFilter={setTypeFilter}
-        propertyFilter={propertyFilter}
-        setPropertyFilter={setPropertyFilter}
-        properties={properties}
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredDocuments?.map((document) => (
-          <DocumentCard key={document.id} document={document} userRole={userRole} />
-        ))}
-      </div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {documents.map((document) => (
+        <DocumentCard key={document.id} document={document} />
+      ))}
     </div>
   );
 }
