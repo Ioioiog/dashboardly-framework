@@ -5,6 +5,7 @@ import { DocumentCard } from "./DocumentCard";
 import { DocumentListSkeleton } from "./DocumentListSkeleton";
 import { EmptyDocumentState } from "./EmptyDocumentState";
 import { useToast } from "@/hooks/use-toast";
+import { DocumentType } from "@/integrations/supabase/types/document-types";
 
 interface DocumentListProps {
   userId: string;
@@ -37,13 +38,31 @@ export function DocumentList({ userId, propertyFilter, typeFilter, userRole }: D
       }
       
       if (typeFilter && typeFilter !== "all") {
-        query = query.eq("document_type", typeFilter);
+        query = query.eq("document_type", typeFilter as DocumentType);
       }
 
-      // Apply user-specific filters based on role
+      // For tenants, get documents where:
+      // 1. They are the tenant_id OR
+      // 2. They are the uploader OR
+      // 3. The document is linked to a property where they are an active tenant
       if (userRole === "tenant") {
-        query = query.or(`tenant_id.eq.${userId},uploaded_by.eq.${userId}`);
+        const { data: tenantProperties } = await supabase
+          .from("tenancies")
+          .select("property_id")
+          .eq("tenant_id", userId)
+          .eq("status", "active");
+
+        const propertyIds = tenantProperties?.map(t => t.property_id) || [];
+        
+        if (propertyIds.length > 0) {
+          query = query.or(
+            `tenant_id.eq.${userId},uploaded_by.eq.${userId},property_id.in.(${propertyIds.join(',')})`
+          );
+        } else {
+          query = query.or(`tenant_id.eq.${userId},uploaded_by.eq.${userId}`);
+        }
       } else {
+        // For landlords, only show documents they uploaded
         query = query.eq("uploaded_by", userId);
       }
 
