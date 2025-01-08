@@ -40,6 +40,7 @@ export function DocumentDialog({
   const [file, setFile] = useState<File | null>(null);
   const [documentType, setDocumentType] = useState<DocumentType>("other");
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
+  const [selectedTenantId, setSelectedTenantId] = useState<string>("");
 
   // Fetch properties for landlord
   const { data: properties } = useQuery({
@@ -54,6 +55,30 @@ export function DocumentDialog({
       return data as Property[];
     },
     enabled: userRole === "landlord",
+  });
+
+  // Fetch tenants for selected property
+  const { data: tenants } = useQuery({
+    queryKey: ["property-tenants", selectedPropertyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tenancies")
+        .select(`
+          tenant_id,
+          tenant:profiles!inner(
+            id,
+            first_name,
+            last_name,
+            email
+          )
+        `)
+        .eq("property_id", selectedPropertyId)
+        .eq("status", "active");
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedPropertyId && userRole === "landlord",
   });
 
   const handleUpload = async (e: React.FormEvent) => {
@@ -89,6 +114,7 @@ export function DocumentDialog({
           uploaded_by: userId,
           document_type: documentType,
           property_id: userRole === "landlord" ? selectedPropertyId : null,
+          tenant_id: selectedTenantId || null,
         });
 
       if (dbError) throw dbError;
@@ -127,24 +153,50 @@ export function DocumentDialog({
             />
           </div>
           {userRole === "landlord" && (
-            <div>
-              <Label htmlFor="property">Select Property</Label>
-              <Select
-                value={selectedPropertyId}
-                onValueChange={setSelectedPropertyId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select property" />
-                </SelectTrigger>
-                <SelectContent>
-                  {properties?.map((property) => (
-                    <SelectItem key={property.id} value={property.id}>
-                      {property.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <>
+              <div>
+                <Label htmlFor="property">Select Property</Label>
+                <Select
+                  value={selectedPropertyId}
+                  onValueChange={(value) => {
+                    setSelectedPropertyId(value);
+                    setSelectedTenantId(""); // Reset tenant selection when property changes
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select property" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {properties?.map((property) => (
+                      <SelectItem key={property.id} value={property.id}>
+                        {property.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {selectedPropertyId && (
+                <div>
+                  <Label htmlFor="tenant">Assign to Tenant (Optional)</Label>
+                  <Select
+                    value={selectedTenantId}
+                    onValueChange={setSelectedTenantId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select tenant" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {tenants?.map((t) => (
+                        <SelectItem key={t.tenant_id} value={t.tenant_id}>
+                          {t.tenant.first_name} {t.tenant.last_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </>
           )}
           <div>
             <Label htmlFor="type">Document Type</Label>
