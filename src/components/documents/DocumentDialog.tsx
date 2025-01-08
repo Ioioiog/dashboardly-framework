@@ -17,11 +17,14 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Property } from "@/utils/propertyUtils";
 
 interface DocumentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string;
+  userRole: "landlord" | "tenant";
 }
 
 type DocumentType = "lease_agreement" | "invoice" | "receipt" | "other";
@@ -30,15 +33,42 @@ export function DocumentDialog({
   open,
   onOpenChange,
   userId,
+  userRole,
 }: DocumentDialogProps) {
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [documentType, setDocumentType] = useState<DocumentType>("other");
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
+
+  // Fetch properties for landlord
+  const { data: properties } = useQuery({
+    queryKey: ["properties", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("landlord_id", userId);
+
+      if (error) throw error;
+      return data as Property[];
+    },
+    enabled: userRole === "landlord",
+  });
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
+
+    // For landlords, require property selection
+    if (userRole === "landlord" && !selectedPropertyId) {
+      toast({
+        title: "Error",
+        description: "Please select a property",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsUploading(true);
     try {
@@ -58,6 +88,7 @@ export function DocumentDialog({
           file_path: filePath,
           uploaded_by: userId,
           document_type: documentType,
+          property_id: userRole === "landlord" ? selectedPropertyId : null,
         });
 
       if (dbError) throw dbError;
@@ -95,6 +126,26 @@ export function DocumentDialog({
               required
             />
           </div>
+          {userRole === "landlord" && (
+            <div>
+              <Label htmlFor="property">Select Property</Label>
+              <Select
+                value={selectedPropertyId}
+                onValueChange={setSelectedPropertyId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select property" />
+                </SelectTrigger>
+                <SelectContent>
+                  {properties?.map((property) => (
+                    <SelectItem key={property.id} value={property.id}>
+                      {property.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div>
             <Label htmlFor="type">Document Type</Label>
             <Select
