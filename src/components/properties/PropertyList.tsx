@@ -2,6 +2,8 @@ import React from "react";
 import { PropertyCard } from "./PropertyCard";
 import { Card } from "@/components/ui/card";
 import { Property } from "@/utils/propertyUtils";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface PropertyListProps {
   properties: Property[] | undefined;
@@ -28,6 +30,7 @@ export function PropertyList({
               <div className="h-4 bg-gray-200 rounded w-3/4"></div>
               <div className="h-4 bg-gray-200 rounded w-1/2"></div>
               <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              <div className="h-32 bg-gray-200 rounded"></div>
             </div>
           </Card>
         ))}
@@ -35,8 +38,21 @@ export function PropertyList({
     );
   }
 
+  // Show error state if properties is undefined
+  if (properties === undefined) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          There was a problem fetching the properties. Please try again later.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   // Show empty state
-  if (!properties?.length) {
+  if (!properties.length) {
     return (
       <Card className="p-6">
         <div className="text-center space-y-2">
