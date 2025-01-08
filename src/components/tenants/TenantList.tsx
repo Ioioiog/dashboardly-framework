@@ -8,47 +8,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { Tenant } from "@/types/tenant";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { EditTenantDialog } from "./EditTenantDialog";
 
 interface TenantListProps {
   tenants: Tenant[];
 }
 
 export function TenantList({ tenants }: TenantListProps) {
-  const { toast } = useToast();
+  const [refreshKey, setRefreshKey] = React.useState(0);
 
-  const handleEdit = async (tenant: Tenant) => {
-    try {
-      console.log("Updating tenant:", tenant.id);
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          first_name: tenant.first_name,
-          last_name: tenant.last_name,
-          email: tenant.email,
-          phone: tenant.phone,
-        })
-        .eq('id', tenant.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Tenant information updated successfully",
-      });
-    } catch (error: any) {
-      console.error("Error updating tenant:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update tenant information",
-        variant: "destructive",
-      });
-    }
+  const handleUpdate = () => {
+    console.log("Tenant updated, refreshing list");
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
@@ -99,13 +72,7 @@ export function TenantList({ tenants }: TenantListProps) {
                 </Badge>
               </TableCell>
               <TableCell>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleEdit(tenant)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
+                <EditTenantDialog tenant={tenant} onUpdate={handleUpdate} />
               </TableCell>
             </TableRow>
           ))}

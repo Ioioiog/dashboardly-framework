@@ -13,6 +13,7 @@ import { Tenant } from "@/types/tenant";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Pencil } from "lucide-react";
 
 interface EditTenantDialogProps {
   tenant: Tenant;
@@ -21,7 +22,8 @@ interface EditTenantDialogProps {
 
 export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
   const { toast } = useToast();
-  const { register, handleSubmit } = useForm({
+  const [open, setOpen] = React.useState(false);
+  const { register, handleSubmit, formState: { isSubmitting } } = useForm({
     defaultValues: {
       first_name: tenant.first_name || "",
       last_name: tenant.last_name || "",
@@ -32,6 +34,8 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
 
   const onSubmit = async (data: any) => {
     try {
+      console.log("Updating tenant:", tenant.id, data);
+      
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -48,6 +52,8 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
         title: "Success",
         description: "Tenant information updated successfully",
       });
+      
+      setOpen(false);
       onUpdate();
     } catch (error: any) {
       console.error("Error updating tenant:", error);
@@ -60,10 +66,10 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm">
-          Edit
+        <Button variant="ghost" size="icon">
+          <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -87,7 +93,9 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
             <Label htmlFor="phone">Phone</Label>
             <Input id="phone" {...register("phone")} />
           </div>
-          <Button type="submit">Save Changes</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save Changes"}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
