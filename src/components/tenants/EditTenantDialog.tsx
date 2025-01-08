@@ -34,6 +34,8 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
       role: tenant.role || "tenant",
       created_at: tenant.created_at ? format(new Date(tenant.created_at), 'yyyy-MM-dd') : "",
       updated_at: tenant.updated_at ? format(new Date(tenant.updated_at), 'yyyy-MM-dd') : "",
+      start_date: tenant.tenancy.start_date ? format(new Date(tenant.tenancy.start_date), 'yyyy-MM-dd') : "",
+      end_date: tenant.tenancy.end_date ? format(new Date(tenant.tenancy.end_date), 'yyyy-MM-dd') : "",
     },
   });
 
@@ -41,7 +43,8 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
     try {
       console.log("Updating tenant:", tenant.id, data);
       
-      const { error } = await supabase
+      // Update profile information
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({
           first_name: data.first_name,
@@ -52,7 +55,19 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
         })
         .eq('id', tenant.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Update tenancy dates
+      const { error: tenancyError } = await supabase
+        .from('tenancies')
+        .update({
+          start_date: data.start_date,
+          end_date: data.end_date || null,
+        })
+        .eq('tenant_id', tenant.id)
+        .eq('property_id', tenant.property.id);
+
+      if (tenancyError) throw tenancyError;
 
       toast({
         title: "Success",
@@ -118,6 +133,17 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
                 <SelectItem value="landlord">Landlord</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="start_date">Start Date</Label>
+              <Input id="start_date" type="date" {...register("start_date")} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="end_date">End Date</Label>
+              <Input id="end_date" type="date" {...register("end_date")} />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
