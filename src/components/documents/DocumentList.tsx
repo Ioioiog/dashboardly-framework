@@ -24,6 +24,7 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
   const { data: properties } = useQuery({
     queryKey: ["properties"],
     queryFn: async () => {
+      console.log("Fetching properties...");
       const { data, error } = await supabase
         .from("properties")
         .select("*");
@@ -32,6 +33,7 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
         console.error("Error fetching properties:", error);
         throw error;
       }
+      console.log("Properties fetched:", data);
       return data;
     },
   });
@@ -39,10 +41,17 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
   // Use the useTenants hook for tenant data
   const { data: tenants } = useTenants();
 
+  // Fetch documents with filters applied at query level
   const { data: documents, isLoading } = useQuery({
-    queryKey: ["documents", userId, propertyFilter, tenantFilter],
+    queryKey: ["documents", userId, propertyFilter, tenantFilter, typeFilter],
     queryFn: async () => {
-      console.log("Fetching documents for user:", userId);
+      console.log("Fetching documents with filters:", {
+        userId,
+        propertyFilter,
+        tenantFilter,
+        typeFilter
+      });
+
       let query = supabase
         .from("documents")
         .select(`
@@ -52,16 +61,26 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
         `);
 
       // Base filter for user's documents
-      query = query.or(`tenant_id.eq.${userId},uploaded_by.eq.${userId}`);
+      if (userRole === "tenant") {
+        query = query.eq("tenant_id", userId);
+      } else {
+        // For landlords, show documents they uploaded or are related to their properties
+        query = query.or(`tenant_id.eq.${userId},uploaded_by.eq.${userId}`);
+      }
 
-      // Apply property filter if selected
+      // Apply property filter
       if (propertyFilter !== "all") {
         query = query.eq("property_id", propertyFilter);
       }
 
-      // Apply tenant filter if selected
-      if (tenantFilter !== "all") {
+      // Apply tenant filter for landlords
+      if (userRole === "landlord" && tenantFilter !== "all") {
         query = query.eq("tenant_id", tenantFilter);
+      }
+
+      // Apply document type filter
+      if (typeFilter !== "all") {
+        query = query.eq("document_type", typeFilter);
       }
 
       const { data, error } = await query;
@@ -71,16 +90,15 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
         throw error;
       }
 
-      console.log("Fetched documents:", data);
+      console.log("Documents fetched:", data);
       return data;
     },
   });
 
-  const filteredDocuments = documents?.filter((doc) => {
-    const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = typeFilter === "all" || doc.document_type === typeFilter;
-    return matchesSearch && matchesType;
-  });
+  // Apply search filter on the client side
+  const filteredDocuments = documents?.filter((doc) => 
+    doc.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return <DocumentListSkeleton />;
