@@ -57,10 +57,13 @@ export async function fetchTenantProperties(userId: string) {
       description,
       available_from
     `)
-    .eq('id', supabase.from('tenancies')
-      .select('property_id')
-      .eq('tenant_id', userId)
-      .eq('status', 'active'));
+    .in('id', (
+      await supabase
+        .from('tenancies')
+        .select('property_id')
+        .eq('tenant_id', userId)
+        .eq('status', 'active')
+    ).data?.map(row => row.property_id) || []);
 
   if (error) {
     console.error("❌ Error fetching tenant properties:", error);
