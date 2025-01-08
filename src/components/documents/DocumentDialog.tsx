@@ -24,6 +24,8 @@ interface DocumentDialogProps {
   userId: string;
 }
 
+type DocumentType = "lease_agreement" | "invoice" | "receipt" | "other";
+
 export function DocumentDialog({
   open,
   onOpenChange,
@@ -32,7 +34,7 @@ export function DocumentDialog({
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [documentType, setDocumentType] = useState<string>("other");
+  const [documentType, setDocumentType] = useState<DocumentType>("other");
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,7 +99,7 @@ export function DocumentDialog({
             <Label htmlFor="type">Document Type</Label>
             <Select
               value={documentType}
-              onValueChange={setDocumentType}
+              onValueChange={(value: DocumentType) => setDocumentType(value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select type" />
