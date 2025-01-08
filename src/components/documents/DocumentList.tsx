@@ -5,7 +5,7 @@ import { DocumentListSkeleton } from "./DocumentListSkeleton";
 import { EmptyDocumentState } from "./EmptyDocumentState";
 import { useState } from "react";
 import { DocumentFilters } from "./DocumentFilters";
-import type { DocumentType } from "@/integrations/supabase/types";
+import { DocumentType } from "@/integrations/supabase/types";
 
 interface DocumentListProps {
   userId: string;
@@ -17,7 +17,6 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
   const [typeFilter, setTypeFilter] = useState<"all" | DocumentType>("all");
   const [propertyFilter, setPropertyFilter] = useState<string>("all");
 
-  // Fetch properties for the filter
   const { data: properties } = useQuery({
     queryKey: ["properties"],
     queryFn: async () => {
@@ -45,23 +44,11 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
         typeFilter
       });
 
-      // First, if we're a landlord, get the list of properties we own
-      let landlordPropertiesQuery;
-      if (userRole === "landlord") {
-        const { data: ownedProperties } = await supabase
-          .from("properties")
-          .select("id")
-          .eq("landlord_id", userId);
-        
-        landlordPropertiesQuery = ownedProperties?.map(p => p.id) || [];
-      }
-
       let query = supabase
         .from("documents")
         .select(`
           *,
-          property:properties(id, name, address),
-          tenant:profiles(id, first_name, last_name)
+          property:properties(id, name, address)
         `);
 
       // Base filter for user's documents
@@ -69,8 +56,15 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
         query = query.eq("tenant_id", userId);
       } else {
         // For landlords, show documents they uploaded or are related to their properties
+        const { data: ownedProperties } = await supabase
+          .from("properties")
+          .select("id")
+          .eq("landlord_id", userId);
+        
+        const propertyIds = ownedProperties?.map(p => p.id) || [];
+        
         query = query.or(
-          `uploaded_by.eq.${userId},property_id.in.(${landlordPropertiesQuery?.join(",")})`
+          `uploaded_by.eq.${userId},property_id.in.(${propertyIds.join(",")})`
         );
       }
 
