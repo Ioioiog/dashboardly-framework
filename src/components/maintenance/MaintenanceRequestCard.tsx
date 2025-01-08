@@ -67,47 +67,52 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-1">
-              <CardTitle className="text-lg font-semibold">{request.title}</CardTitle>
-              <div className="text-sm text-gray-500">
-                {request.property?.name && (
-                  <span className="mr-2">Property: {request.property.name}</span>
-                )}
-                {request.property?.address && (
-                  <span className="text-gray-400">({request.property.address})</span>
-                )}
-              </div>
+      <Card className="transition-all duration-200 hover:shadow-md">
+        <CardHeader className="space-y-3">
+          <div className="flex justify-between items-start gap-4">
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg font-semibold truncate">{request.title}</CardTitle>
+              {request.property && (
+                <div className="mt-1 text-sm text-gray-500 space-x-1">
+                  <span className="font-medium">{request.property.name}</span>
+                  {request.property.address && (
+                    <span className="text-gray-400">({request.property.address})</span>
+                  )}
+                </div>
+              )}
             </div>
-            {isLandlord ? (
-              <Select
-                defaultValue={request.status}
-                onValueChange={handleStatusChange}
-              >
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      <Badge className={STATUS_COLORS[status]}>
-                        {status.replace("_", " ")}
-                      </Badge>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <Badge className={STATUS_COLORS[request.status]}>
-                {request.status.replace("_", " ")}
-              </Badge>
-            )}
+            <div className="flex-shrink-0">
+              {isLandlord ? (
+                <Select
+                  defaultValue={request.status}
+                  onValueChange={handleStatusChange}
+                >
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        <Badge className={STATUS_COLORS[status]}>
+                          {status.replace("_", " ")}
+                        </Badge>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge className={STATUS_COLORS[request.status]}>
+                  {request.status.replace("_", " ")}
+                </Badge>
+              )}
+            </div>
           </div>
-          <div className="flex gap-2 mt-2">
+          <div className="flex flex-wrap gap-2">
             {request.issue_type && (
-              <Badge variant="outline">{request.issue_type}</Badge>
+              <Badge variant="outline" className="flex items-center gap-1">
+                {getPriorityIcon(request.priority)}
+                {request.issue_type}
+              </Badge>
             )}
             {request.priority && (
               <Badge variant="outline" className="capitalize">
@@ -116,28 +121,28 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
             )}
           </div>
         </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 mb-4">{request.description}</p>
+        <CardContent className="space-y-4">
+          <p className="text-gray-600">{request.description}</p>
           {request.notes && (
-            <div className="mt-2 p-3 bg-gray-50 rounded-md">
+            <div className="p-3 bg-gray-50 rounded-md">
               <p className="text-sm text-gray-600">{request.notes}</p>
             </div>
           )}
           {request.images && request.images.length > 0 && (
-            <div className="mt-4 grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {request.images.slice(0, 4).map((image, index) => (
                 <img
                   key={index}
                   src={image}
                   alt={`Maintenance request image ${index + 1}`}
-                  className="w-full h-20 object-cover rounded-lg cursor-pointer"
+                  className="w-full h-20 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => setIsImageDialogOpen(true)}
                 />
               ))}
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex justify-between items-center">
+        <CardFooter className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex flex-col gap-1 text-sm">
             <span className="text-gray-500">
               Created {format(new Date(request.created_at), "MMM d, yyyy")}
@@ -146,12 +151,13 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
               Requested by: {request.tenant?.first_name} {request.tenant?.last_name}
             </span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {request.images && request.images.length > 0 && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsImageDialogOpen(true)}
+                className="hover:bg-gray-50"
               >
                 <ImageIcon className="w-4 h-4 mr-1" />
                 Images
@@ -161,6 +167,7 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
               variant="outline"
               size="sm"
               onClick={() => setIsHistoryDialogOpen(true)}
+              className="hover:bg-gray-50"
             >
               <History className="w-4 h-4 mr-1" />
               History
@@ -169,6 +176,7 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
               variant="outline"
               size="sm"
               onClick={() => setIsEditDialogOpen(true)}
+              className="hover:bg-gray-50"
             >
               <Pencil className="w-4 h-4 mr-1" />
               Edit
