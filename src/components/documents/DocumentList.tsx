@@ -110,6 +110,13 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
     return <EmptyDocumentState userRole={userRole} />;
   }
 
+  const handleTypeFilterChange = (value: string) => {
+    // Validate that the value is either "all" or a valid DocumentType
+    if (value === "all" || ["lease_agreement", "invoice", "receipt", "other"].includes(value)) {
+      setTypeFilter(value as "all" | DocumentType);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -124,7 +131,7 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
         </div>
         <div>
           <Label htmlFor="type">Document Type</Label>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
             <SelectTrigger>
               <SelectValue placeholder="All types" />
             </SelectTrigger>
