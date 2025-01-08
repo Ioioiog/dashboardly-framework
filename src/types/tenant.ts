@@ -4,6 +4,9 @@ export interface Tenant {
   last_name: string | null;
   email: string | null;
   phone: string | null;
+  role: string;
+  created_at: string;
+  updated_at: string;
   property: {
     id: string;
     name: string;
