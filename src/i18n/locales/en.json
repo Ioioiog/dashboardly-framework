@@ -102,6 +102,22 @@
     },
     "error": {
       "loading": "Error loading tenant data. Please try again later."
+    },
+    "list": {
+      "name": "Name",
+      "contact": "Contact",
+      "property": "Property",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "status": "Status",
+      "actions": "Actions",
+      "noEndDate": "No end date"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "expired": "Expired"
     }
   },
   "common": {

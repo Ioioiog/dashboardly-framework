@@ -23,7 +23,22 @@
     "properties": {
       "title": "Proprietățile Tale",
       "noProperties": "Nu s-au găsit proprietăți",
-      "addProperty": "Adaugă Proprietate"
+      "addProperty": "Adaugă Proprietate",
+      "type": "Tip",
+      "address": "Adresă",
+      "rent": {
+        "period": "lună"
+      },
+      "available_from": "Disponibil din",
+      "assign_tenant": "Atribuie Chiriaș",
+      "empty": {
+        "landlord": "Nu s-au găsit proprietăți. Adaugă prima ta proprietate pentru a începe!",
+        "tenant": "Nu s-au găsit contracte active. Proprietățile vor apărea aici odată ce ești atribuit ca chiriaș.",
+        "tenant.contact": "Contactează proprietarul dacă crezi că aceasta este o eroare."
+      },
+      "error": {
+        "fetch": "A apărut o problemă la încărcarea proprietăților. Te rugăm să încerci din nou mai târziu."
+      }
     },
     "revenue": {
       "title": "Venit Lunar",
@@ -66,27 +81,6 @@
       "update": "Actualizează Parola"
     }
   },
-  "properties": {
-    "title": "Proprietăți",
-    "description": "Gestionează și vizualizează detaliile proprietăților tale.",
-    "noProperties": "Nu s-au găsit proprietăți",
-    "addProperty": "Adaugă Proprietate",
-    "type": "Tip",
-    "address": "Adresă",
-    "rent": {
-      "period": "lună"
-    },
-    "available_from": "Disponibil din",
-    "assign_tenant": "Atribuie Chiriaș",
-    "empty": {
-      "landlord": "Nu s-au găsit proprietăți. Adaugă prima ta proprietate pentru a începe!",
-      "tenant": "Nu s-au găsit contracte active. Proprietățile vor apărea aici odată ce ești atribuit ca chiriaș.",
-      "tenant.contact": "Contactează proprietarul dacă crezi că aceasta este o eroare."
-    },
-    "error": {
-      "fetch": "A apărut o problemă la încărcarea proprietăților. Te rugăm să încerci din nou mai târziu."
-    }
-  },
   "tenants": {
     "title": {
       "landlord": "Chiriași",
@@ -108,14 +102,22 @@
     },
     "error": {
       "loading": "Eroare la încărcarea datelor chiriașilor. Te rugăm să încerci din nou mai târziu."
+    },
+    "list": {
+      "name": "Nume",
+      "contact": "Contact",
+      "property": "Proprietate",
+      "startDate": "Data Începerii",
+      "endDate": "Data Încheierii",
+      "status": "Stare",
+      "actions": "Acțiuni",
+      "noEndDate": "Fără dată de încheiere"
+    },
+    "status": {
+      "active": "Activ",
+      "inactive": "Inactiv",
+      "pending": "În Așteptare",
+      "expired": "Expirat"
     }
-  },
-  "common": {
-    "cancel": "Anulează",
-    "delete": "Șterge",
-    "edit": "Editează",
-    "save": "Salvează",
-    "loading": "Se încarcă...",
-    "error": "Eroare"
   }
 }

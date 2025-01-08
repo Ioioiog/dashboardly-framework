@@ -108,6 +108,22 @@
     },
     "error": {
       "loading": "Error al cargar datos de inquilinos. Por favor, inténtalo de nuevo más tarde."
+    },
+    "list": {
+      "name": "Nombre",
+      "contact": "Contacto",
+      "property": "Propiedad",
+      "startDate": "Fecha de Inicio",
+      "endDate": "Fecha de Fin",
+      "status": "Estado",
+      "actions": "Acciones",
+      "noEndDate": "Sin fecha de fin"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "pending": "Pendiente",
+      "expired": "Expirado"
     }
   },
   "common": {

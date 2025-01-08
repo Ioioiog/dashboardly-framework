@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Table,
   TableBody,
@@ -8,7 +9,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Pencil } from "lucide-react";
 import { Tenant } from "@/types/tenant";
 import { EditTenantDialog } from "./EditTenantDialog";
 
@@ -18,6 +18,7 @@ interface TenantListProps {
 
 export function TenantList({ tenants }: TenantListProps) {
   const [refreshKey, setRefreshKey] = React.useState(0);
+  const { t } = useTranslation();
 
   const handleUpdate = () => {
     console.log("Tenant updated, refreshing list");
@@ -29,13 +30,13 @@ export function TenantList({ tenants }: TenantListProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Contact</TableHead>
-            <TableHead>Property</TableHead>
-            <TableHead>Start Date</TableHead>
-            <TableHead>End Date</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>{t('tenants.list.name')}</TableHead>
+            <TableHead>{t('tenants.list.contact')}</TableHead>
+            <TableHead>{t('tenants.list.property')}</TableHead>
+            <TableHead>{t('tenants.list.startDate')}</TableHead>
+            <TableHead>{t('tenants.list.endDate')}</TableHead>
+            <TableHead>{t('tenants.list.status')}</TableHead>
+            <TableHead>{t('tenants.list.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -60,7 +61,7 @@ export function TenantList({ tenants }: TenantListProps) {
               <TableCell>
                 {tenant.tenancy.end_date
                   ? new Date(tenant.tenancy.end_date).toLocaleDateString()
-                  : "No end date"}
+                  : t('tenants.list.noEndDate')}
               </TableCell>
               <TableCell>
                 <Badge
@@ -68,7 +69,7 @@ export function TenantList({ tenants }: TenantListProps) {
                     tenant.tenancy.status === "active" ? "default" : "secondary"
                   }
                 >
-                  {tenant.tenancy.status}
+                  {t(`tenants.status.${tenant.tenancy.status}`)}
                 </Badge>
               </TableCell>
               <TableCell>
