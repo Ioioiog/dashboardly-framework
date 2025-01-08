@@ -1,13 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DocumentCard } from "./DocumentCard";
+import { DocumentType } from "@/integrations/supabase/types/document-types";
 
-export function DocumentList() {
-  const selectedPropertyId = ""; // Replace with actual state or prop
-  const selectedDocumentType = ""; // Replace with actual state or prop
+interface DocumentListProps {
+  userId: string;
+  userRole: "landlord" | "tenant";
+  propertyFilter: string;
+  typeFilter: string;
+}
 
+export function DocumentList({ userId, userRole, propertyFilter, typeFilter }: DocumentListProps) {
   const { data: documents, isLoading } = useQuery({
-    queryKey: ["documents", selectedPropertyId, selectedDocumentType],
+    queryKey: ["documents", propertyFilter, typeFilter],
     queryFn: async () => {
       let query = supabase
         .from("documents")
@@ -25,12 +30,12 @@ export function DocumentList() {
           )
         `);
 
-      if (selectedPropertyId) {
-        query = query.eq("property_id", selectedPropertyId);
+      if (propertyFilter && propertyFilter !== "all") {
+        query = query.eq("property_id", propertyFilter);
       }
 
-      if (selectedDocumentType && selectedDocumentType !== "all") {
-        query = query.eq("document_type", selectedDocumentType);
+      if (typeFilter && typeFilter !== "all") {
+        query = query.eq("document_type", typeFilter);
       }
 
       const { data, error } = await query;
@@ -48,9 +53,13 @@ export function DocumentList() {
   }
 
   return (
-    <div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {documents?.map((document) => (
-        <DocumentCard key={document.id} document={document} userRole="landlord" />
+        <DocumentCard 
+          key={document.id} 
+          document={document} 
+          userRole={userRole} 
+        />
       ))}
     </div>
   );
