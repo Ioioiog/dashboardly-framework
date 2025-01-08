@@ -1,10 +1,9 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { AuthError } from "@supabase/supabase-js";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -131,7 +130,7 @@ const AuthPage = () => {
         }
 
         // Handle auth errors
-        if (event === 'SIGNED_IN' || event === 'SIGNED_UP') {
+        if (event === 'SIGNED_IN') {
           const { error } = await supabase.auth.getSession();
           if (error) {
             console.error("Auth error:", error);
