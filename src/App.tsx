@@ -11,6 +11,7 @@ import Maintenance from "./pages/Maintenance";
 import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
 import Payments from "./pages/Payments";
+import Utilities from "./pages/Utilities";
 import TenantRegistration from "./pages/TenantRegistration";
 import { StrictMode, useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
@@ -149,6 +150,10 @@ const App = () => {
               <Route
                 path="/payments"
                 element={isAuthenticated ? <Payments /> : <Navigate to="/auth" replace />}
+              />
+              <Route
+                path="/utilities"
+                element={isAuthenticated ? <Utilities /> : <Navigate to="/auth" replace />}
               />
               <Route
                 path="/settings"
