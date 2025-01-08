@@ -75,7 +75,7 @@ const DashboardSidebar = () => {
               isCollapsed ? "opacity-0" : "opacity-100"
             }`}
           >
-            adminchirii.ro
+            AdminChirii.ro
           </h1>
         </div>
 
