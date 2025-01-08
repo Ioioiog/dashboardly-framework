@@ -67,7 +67,7 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
         query = query.eq("tenant_id", userId);
       } else {
         // For landlords, show documents they uploaded or are related to their properties
-        query = query.or(`tenant_id.eq.${userId},uploaded_by.eq.${userId}`);
+        query = query.or(`uploaded_by.eq.${userId},property_id.in.(select id from properties where landlord_id.eq.${userId})`);
       }
 
       // Apply property filter
@@ -82,7 +82,7 @@ export function DocumentList({ userId, userRole }: DocumentListProps) {
 
       // Apply document type filter
       if (typeFilter !== "all") {
-        query = query.eq("document_type", typeFilter as DocumentType);
+        query = query.eq("document_type", typeFilter);
       }
 
       const { data, error } = await query;
