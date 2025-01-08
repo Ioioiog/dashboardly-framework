@@ -131,20 +131,24 @@ const AuthPage = () => {
         }
 
         // Handle auth errors
-        const { error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Auth error:", error);
-          if (error.message.includes("User already registered")) {
-            toast({
-              title: "Account Exists",
-              description: "An account with this email already exists. Please sign in instead.",
-              variant: "destructive",
-            });
-          } else {
+        if (event === 'SIGNED_IN' || event === 'SIGNED_UP') {
+          const { error } = await supabase.auth.getSession();
+          if (error) {
+            console.error("Auth error:", error);
+            let errorMessage = "An error occurred during authentication.";
+            
+            if (error.message.includes("Email not confirmed")) {
+              errorMessage = "Please verify your email before signing in.";
+            } else if (error.message.includes("Invalid login credentials")) {
+              errorMessage = "Invalid email or password. Please try again.";
+            } else if (error.message.includes("User already registered")) {
+              errorMessage = "An account with this email already exists. Please sign in instead.";
+            }
+            
             toast({
               variant: "destructive",
               title: "Authentication Error",
-              description: error.message,
+              description: errorMessage,
             });
           }
         }
