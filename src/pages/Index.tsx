@@ -12,6 +12,7 @@ const Index = () => {
   const { toast } = useToast();
   const [userId, setUserId] = React.useState<string | null>(null);
   const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | null>(null);
+  const [userName, setUserName] = React.useState<string>("");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -37,7 +38,7 @@ const Index = () => {
         // Fetch profile with explicit filter for current user
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, first_name, last_name')
           .eq('id', currentUserId)
           .maybeSingle();
 
@@ -63,6 +64,12 @@ const Index = () => {
 
         console.log("Profile loaded successfully:", profile);
         setUserRole(profile.role as "landlord" | "tenant");
+        
+        // Set user name from profile
+        const fullName = [profile.first_name, profile.last_name]
+          .filter(Boolean)
+          .join(" ");
+        setUserName(fullName || "there");
 
       } catch (error: any) {
         console.error("Error in checkUser:", error);
@@ -96,7 +103,7 @@ const Index = () => {
           <header className="mb-8">
             <h1 className="text-3xl font-semibold text-gray-900">Dashboard</h1>
             <p className="mt-2 text-dashboard-text">
-              Welcome back! Here's an overview of your property management.
+              Welcome back, {userName}! Here's an overview of your property management.
             </p>
           </header>
 
