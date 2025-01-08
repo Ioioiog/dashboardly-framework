@@ -2,14 +2,32 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCreateMaintenanceRequest } from "@/hooks/useCreateMaintenanceRequest";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { MaintenanceIssueType, MaintenancePriority } from "@/types/maintenance";
+import {
+  MaintenanceIssueType,
+  MaintenancePriority,
+  MaintenanceRequest,
+} from "@/types/maintenance";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const maintenanceFormSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -21,30 +39,102 @@ const maintenanceFormSchema = z.object({
 
 type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
 
-const ISSUE_TYPES: MaintenanceIssueType[] = ['Plumbing', 'Electrical', 'HVAC', 'Structural', 'Appliance', 'Other'];
-const PRIORITIES: MaintenancePriority[] = ['Low', 'Medium', 'High'];
+const ISSUE_TYPES: MaintenanceIssueType[] = [
+  "Plumbing",
+  "Electrical",
+  "HVAC",
+  "Structural",
+  "Appliance",
+  "Other",
+];
+const PRIORITIES: MaintenancePriority[] = ["Low", "Medium", "High"];
 
 interface MaintenanceFormProps {
   onSuccess: () => void;
+  request?: MaintenanceRequest;
 }
 
-export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
+export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const { toast } = useToast();
-  const { mutate: createRequest, isPending } = useCreateMaintenanceRequest();
+  const queryClient = useQueryClient();
+  const { mutate: createRequest, isPending: isCreating } =
+    useCreateMaintenanceRequest();
+
+  const { mutate: updateRequest, isPending: isUpdating } = useMutation({
+    mutationFn: async (values: MaintenanceFormValues) => {
+      console.log("Updating maintenance request:", values);
+      const { data: currentUser } = await supabase.auth.getUser();
+      if (!currentUser.user) throw new Error("Not authenticated");
+
+      // First, create a history record
+      const { error: historyError } = await supabase
+        .from("maintenance_request_history")
+        .insert({
+          maintenance_request_id: request!.id,
+          title: request!.title,
+          description: request!.description,
+          issue_type: request!.issue_type,
+          priority: request!.priority,
+          notes: request!.notes,
+          edited_by: currentUser.user.id,
+        });
+
+      if (historyError) throw historyError;
+
+      // Then update the request
+      const { data, error } = await supabase
+        .from("maintenance_requests")
+        .update({
+          title: values.title,
+          description: values.description,
+          issue_type: values.issue_type,
+          priority: values.priority,
+          notes: values.notes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", request!.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maintenance-requests"] });
+      toast({
+        title: "Success",
+        description: "Maintenance request updated successfully",
+      });
+      onSuccess();
+    },
+    onError: (error) => {
+      console.error("Error updating maintenance request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update maintenance request",
+        variant: "destructive",
+      });
+    },
+  });
 
   const form = useForm<MaintenanceFormValues>({
     resolver: zodResolver(maintenanceFormSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      issue_type: "",
-      priority: "",
-      notes: "",
+      title: request?.title ?? "",
+      description: request?.description ?? "",
+      issue_type: request?.issue_type ?? "",
+      priority: request?.priority ?? "",
+      notes: request?.notes ?? "",
     },
   });
 
   const onSubmit = async (values: MaintenanceFormValues) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    if (request) {
+      updateRequest(values);
+      return;
+    }
+
+    const { data: user } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Error",
@@ -54,7 +144,6 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
       return;
     }
 
-    // Use maybeSingle() instead of single() to handle the case where no tenancy exists
     const { data: tenancy, error: tenancyError } = await supabase
       .from("tenancies")
       .select("property_id")
@@ -208,8 +297,18 @@ export function MaintenanceForm({ onSuccess }: MaintenanceFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Creating..." : "Create Request"}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isCreating || isUpdating}
+        >
+          {isCreating || isUpdating
+            ? request
+              ? "Updating..."
+              : "Creating..."
+            : request
+            ? "Update Request"
+            : "Create Request"}
         </Button>
       </form>
     </Form>

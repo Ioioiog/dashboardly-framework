@@ -57,6 +57,50 @@ export type Database = {
           },
         ]
       }
+      maintenance_request_history: {
+        Row: {
+          description: string
+          edited_at: string
+          edited_by: string
+          id: string
+          issue_type: string | null
+          maintenance_request_id: string
+          notes: string | null
+          priority: string | null
+          title: string
+        }
+        Insert: {
+          description: string
+          edited_at?: string
+          edited_by: string
+          id?: string
+          issue_type?: string | null
+          maintenance_request_id: string
+          notes?: string | null
+          priority?: string | null
+          title: string
+        }
+        Update: {
+          description?: string
+          edited_at?: string
+          edited_by?: string
+          id?: string
+          issue_type?: string | null
+          maintenance_request_id?: string
+          notes?: string | null
+          priority?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_request_history_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_requests: {
         Row: {
           created_at: string
