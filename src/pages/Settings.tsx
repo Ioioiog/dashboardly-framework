@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { PersonalInfoForm } from "@/components/settings/PersonalInfoForm";
+import { PasswordForm } from "@/components/settings/PasswordForm";
+import { LanguageSelector } from "@/components/settings/LanguageSelector";
 
 interface Profile {
   first_name: string | null;
@@ -23,9 +21,6 @@ const Settings = () => {
     phone: "",
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,98 +60,6 @@ const Settings = () => {
     fetchProfile();
   }, [toast]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          phone: profile.phone,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update profile",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 6 characters long",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUpdatingPassword(true);
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Password updated successfully",
-      });
-      
-      // Clear password fields
-      setNewPassword("");
-      setConfirmPassword("");
-      
-    } catch (error) {
-      console.error("Error updating password:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update password",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUpdatingPassword(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setProfile(prev => ({ ...prev, [name]: value }));
-  };
-
   if (isLoading) {
     return (
       <div className="flex h-screen bg-dashboard-background">
@@ -177,108 +80,15 @@ const Settings = () => {
         <div className="max-w-2xl mx-auto space-y-6">
           <h1 className="text-2xl font-semibold">Profile Settings</h1>
           
-          <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="first_name">First Name</Label>
-                    <Input
-                      id="first_name"
-                      name="first_name"
-                      value={profile.first_name || ""}
-                      onChange={handleChange}
-                      disabled={isLoading}
-                      className="font-medium"
-                      placeholder="Enter your first name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="last_name">Last Name</Label>
-                    <Input
-                      id="last_name"
-                      name="last_name"
-                      value={profile.last_name || ""}
-                      onChange={handleChange}
-                      disabled={isLoading}
-                      className="font-medium"
-                      placeholder="Enter your last name"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    value={profile.email || ""}
-                    disabled
-                    className="text-foreground font-medium"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Email cannot be changed directly. Please contact support for email updates.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    value={profile.phone || ""}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                    className="font-medium"
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-                <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading ? "Saving Changes..." : "Save Changes"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Change Password</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handlePasswordChange} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="new_password">New Password</Label>
-                  <Input
-                    id="new_password"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    disabled={isUpdatingPassword}
-                    className="font-medium"
-                    placeholder="Enter new password"
-                    minLength={6}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm_password">Confirm New Password</Label>
-                  <Input
-                    id="confirm_password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={isUpdatingPassword}
-                    className="font-medium"
-                    placeholder="Confirm new password"
-                    minLength={6}
-                  />
-                </div>
-                <Button type="submit" disabled={isUpdatingPassword} className="w-full">
-                  {isUpdatingPassword ? "Updating Password..." : "Update Password"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          <PersonalInfoForm
+            initialProfile={profile}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+          />
+          
+          <PasswordForm />
+          
+          <LanguageSelector />
         </div>
       </main>
     </div>
