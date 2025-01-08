@@ -44,7 +44,7 @@ export function TenantAssignDialog({
         .from("profiles")
         .select("id")
         .eq("email", email)
-        .single();
+        .maybeSingle();
 
       let userId: string;
 
