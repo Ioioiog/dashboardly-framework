@@ -9,17 +9,90 @@
       "activeTenants": "Locataires Actifs",
       "pendingMaintenance": "Maintenance en Attente",
       "currentProperty": "Propriété Actuelle",
-      "paymentStatus": "État des Paiements"
-    },
-    "recentActivity": "Activité Récente",
-    "properties": {
-      "title": "Vos Propriétés",
-      "noProperties": "Aucune propriété trouvée",
-      "addProperty": "Ajouter une Propriété"
-    },
-    "revenue": {
-      "title": "Revenu Mensuel",
-      "noData": "Aucune donnée de revenu disponible"
+      "paymentStatus": "État des Paiements",
+      "description": {
+        "properties": "Nombre de propriétés que vous gérez",
+        "revenue": "Revenu locatif mensuel total",
+        "tenants": "Nombre de locataires actifs",
+        "maintenance": "Demandes de maintenance en attente",
+        "currentProperty": "Votre propriété locative actuelle",
+        "paymentStatus": "État de votre dernier paiement"
+      }
     }
+  },
+  "navigation": {
+    "dashboard": "Tableau de Bord",
+    "properties": "Propriétés",
+    "tenants": "Locataires",
+    "maintenance": "Maintenance",
+    "documents": "Documents",
+    "payments": "Paiements",
+    "utilities": "Services",
+    "settings": "Paramètres",
+    "logout": "Déconnexion"
+  },
+  "metrics": {
+    "totalProperties": "Total des Propriétés",
+    "monthlyRevenue": "Revenu Mensuel",
+    "activeTenants": "Locataires Actifs",
+    "pendingMaintenance": "Maintenance en Attente",
+    "currentProperty": "Propriété Actuelle",
+    "paymentStatus": "État des Paiements"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "personalInfo": "Informations Personnelles",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Email",
+    "phone": "Téléphone",
+    "save": "Enregistrer les Modifications",
+    "password": {
+      "title": "Changer le Mot de Passe",
+      "current": "Mot de Passe Actuel",
+      "new": "Nouveau Mot de Passe",
+      "confirm": "Confirmer le Nouveau Mot de Passe",
+      "update": "Mettre à Jour le Mot de Passe"
+    }
+  },
+  "properties": {
+    "title": "Propriétés",
+    "noProperties": "Aucune propriété trouvée",
+    "addProperty": "Ajouter une Propriété",
+    "type": "Type",
+    "address": "Adresse",
+    "rent": "Loyer Mensuel"
+  },
+  "tenants": {
+    "title": "Locataires",
+    "noTenants": "Aucun locataire trouvé",
+    "inviteTenant": "Inviter un Locataire"
+  },
+  "maintenance": {
+    "title": "Demandes de Maintenance",
+    "newRequest": "Nouvelle Demande",
+    "noRequests": "Aucune demande de maintenance trouvée"
+  },
+  "documents": {
+    "title": "Documents",
+    "upload": "Télécharger un Document",
+    "noDocuments": "Aucun document trouvé"
+  },
+  "payments": {
+    "title": "Paiements",
+    "noPayments": "Aucun paiement trouvé",
+    "status": {
+      "paid": "Payé",
+      "pending": "En Attente",
+      "overdue": "En Retard"
+    }
+  },
+  "utilities": {
+    "title": "Services",
+    "noUtilities": "Aucun service trouvé",
+    "type": "Type",
+    "amount": "Montant",
+    "dueDate": "Date d'Échéance"
   }
 }

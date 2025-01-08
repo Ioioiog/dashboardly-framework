@@ -9,7 +9,15 @@
       "activeTenants": "Chiriași Activi",
       "pendingMaintenance": "Întreținere în Așteptare",
       "currentProperty": "Proprietatea Curentă",
-      "paymentStatus": "Stare Plată"
+      "paymentStatus": "Stare Plată",
+      "description": {
+        "properties": "Numărul de proprietăți pe care le gestionezi",
+        "revenue": "Venitul lunar total din chirii",
+        "tenants": "Numărul de chiriași activi",
+        "maintenance": "Cereri de întreținere în așteptare",
+        "currentProperty": "Proprietatea ta închiriată curentă",
+        "paymentStatus": "Starea ultimei tale plăți"
+      }
     },
     "recentActivity": "Activitate Recentă",
     "properties": {
