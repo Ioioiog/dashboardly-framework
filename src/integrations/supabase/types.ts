@@ -227,6 +227,7 @@ export type Database = {
           last_name: string | null
           phone: string | null
           role: string
+          stripe_account_id: string | null
           updated_at: string
         }
         Insert: {
@@ -237,6 +238,7 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           role?: string
+          stripe_account_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -247,6 +249,7 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           role?: string
+          stripe_account_id?: string | null
           updated_at?: string
         }
         Relationships: []

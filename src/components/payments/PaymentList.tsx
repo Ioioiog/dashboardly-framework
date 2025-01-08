@@ -64,6 +64,26 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
     }
   };
 
+  const handlePayment = async (paymentId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment-checkout', {
+        body: { paymentId }
+      });
+
+      if (error) throw error;
+      if (!data.url) throw new Error('No checkout URL received');
+
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('Error initiating payment:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to initiate payment. Please try again.",
+      });
+    }
+  };
+
   if (payments.length === 0) {
     return (
       <div className="text-center py-6 text-muted-foreground">
@@ -82,7 +102,7 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
           <TableHead>Due Date</TableHead>
           <TableHead>Paid Date</TableHead>
           <TableHead>Status</TableHead>
-          {userRole === "landlord" && <TableHead className="w-[70px]"></TableHead>}
+          <TableHead className="w-[100px]"></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -123,8 +143,8 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
                 {payment.status}
               </Badge>
             </TableCell>
-            {userRole === "landlord" && (
-              <TableCell>
+            <TableCell>
+              {userRole === "landlord" ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -150,8 +170,17 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </TableCell>
-            )}
+              ) : (
+                payment.status !== "paid" && (
+                  <Button
+                    onClick={() => handlePayment(payment.id)}
+                    size="sm"
+                  >
+                    Pay Now
+                  </Button>
+                )
+              )}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
