@@ -56,7 +56,7 @@ export async function fetchTenantProperties(userId: string) {
   // First, let's check if there are any active tenancies for this user
   const { data: tenancies, error: tenancyError } = await supabase
     .from('tenancies')
-    .select('property_id')
+    .select('*, property:properties(*)')
     .eq('tenant_id', userId)
     .eq('status', 'active');
 
@@ -72,28 +72,9 @@ export async function fetchTenantProperties(userId: string) {
     return [];
   }
 
-  const propertyIds = tenancies.map(t => t.property_id);
-  console.log("🏠 Fetching properties with IDs:", propertyIds);
-
-  const { data: properties, error: propertyError } = await supabase
-    .from("properties")
-    .select(`
-      id,
-      name,
-      address,
-      monthly_rent,
-      type,
-      description,
-      available_from
-    `)
-    .in('id', propertyIds);
-
-  if (propertyError) {
-    console.error("❌ Error fetching tenant properties:", propertyError);
-    throw propertyError;
-  }
-
-  console.log("✅ Fetched tenant properties:", properties);
+  // Extract and return the properties from the tenancies
+  const properties = tenancies.map(tenancy => tenancy.property);
+  console.log("✅ Extracted properties from tenancies:", properties);
   return properties;
 }
 
