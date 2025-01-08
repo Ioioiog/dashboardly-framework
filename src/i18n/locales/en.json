@@ -1,4 +1,13 @@
 {
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "loading": "Loading...",
+    "error": "Error",
+    "unexpectedError": "An unexpected error occurred"
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back",
@@ -19,31 +28,7 @@
         "paymentStatus": "Status of your latest payment"
       }
     },
-    "recentActivity": "Recent Activity",
-    "properties": {
-      "title": "Your Properties",
-      "noProperties": "No properties found",
-      "addProperty": "Add Property",
-      "type": "Type",
-      "address": "Address",
-      "rent": {
-        "period": "month"
-      },
-      "available_from": "Available from",
-      "assign_tenant": "Assign Tenant",
-      "empty": {
-        "landlord": "No properties found. Add your first property to get started!",
-        "tenant": "No active leases found. Properties will appear here once you're assigned as a tenant.",
-        "tenant.contact": "Contact your landlord if you believe this is an error."
-      },
-      "error": {
-        "fetch": "There was a problem fetching the properties. Please try again later."
-      }
-    },
-    "revenue": {
-      "title": "Monthly Revenue",
-      "noData": "No revenue data available"
-    }
+    "recentActivity": "Recent Activity"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -56,13 +41,26 @@
     "settings": "Settings",
     "logout": "Logout"
   },
-  "metrics": {
-    "totalProperties": "Total Properties",
-    "monthlyRevenue": "Monthly Revenue",
-    "activeTenants": "Active Tenants",
-    "pendingMaintenance": "Pending Maintenance",
-    "currentProperty": "Current Property",
-    "paymentStatus": "Payment Status"
+  "properties": {
+    "title": "Properties",
+    "description": "Manage and view your property details.",
+    "noProperties": "No properties found",
+    "addProperty": "Add Property",
+    "type": "Type",
+    "address": "Address",
+    "rent": {
+      "period": "month"
+    },
+    "available_from": "Available from",
+    "assign_tenant": "Assign Tenant",
+    "empty": {
+      "landlord": "No properties found. Add your first property to get started!",
+      "tenant": "No active leases found. Properties will appear here once you're assigned as a tenant.",
+      "tenant.contact": "Contact your landlord if you believe this is an error."
+    },
+    "error": {
+      "fetch": "There was a problem fetching the properties. Please try again later."
+    }
   },
   "settings": {
     "title": "Settings",
@@ -119,15 +117,6 @@
       "pending": "Pending",
       "expired": "Expired"
     }
-  },
-  "common": {
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "edit": "Edit",
-    "save": "Save",
-    "loading": "Loading...",
-    "error": "Error",
-    "unexpectedError": "An unexpected error occurred"
   },
   "maintenance": {
     "title": "Maintenance Requests",
