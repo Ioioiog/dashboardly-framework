@@ -48,6 +48,13 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "documents_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       maintenance_requests: {
@@ -99,6 +106,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

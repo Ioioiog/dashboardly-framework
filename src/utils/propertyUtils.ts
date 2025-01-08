@@ -44,19 +44,29 @@ export async function fetchTenantProperties(userId: string) {
     return [];
   }
 
-  // Validate UUID format
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  if (!uuidRegex.test(userId)) {
-    console.error("❌ Invalid UUID format for userId:", userId);
+  console.log("🔍 Starting tenant properties fetch for user:", userId);
+  
+  // First, let's check if the user exists in profiles
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (profileError) {
+    console.error("❌ Error fetching user profile:", profileError);
     return [];
   }
 
-  console.log("🔍 Fetching tenant properties for user:", userId);
+  console.log("👤 Found user profile:", profile);
   
-  // First, let's check if there are any active tenancies for this user
+  // Then, check for active tenancies
   const { data: tenancies, error: tenancyError } = await supabase
     .from('tenancies')
-    .select('*, property:properties(*)')
+    .select(`
+      *,
+      property:properties(*)
+    `)
     .eq('tenant_id', userId)
     .eq('status', 'active');
 
@@ -75,7 +85,12 @@ export async function fetchTenantProperties(userId: string) {
   // Extract and return the properties from the tenancies
   const properties = tenancies.map(tenancy => tenancy.property);
   console.log("✅ Extracted properties from tenancies:", properties);
-  return properties;
+  
+  // Additional validation to ensure we're returning valid properties
+  const validProperties = properties.filter(property => property && property.id);
+  console.log("🏠 Final properties list:", validProperties);
+  
+  return validProperties;
 }
 
 export async function addProperty(property: PropertyInput) {
