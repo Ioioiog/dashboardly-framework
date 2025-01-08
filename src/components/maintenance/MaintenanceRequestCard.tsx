@@ -3,19 +3,27 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { format } from "date-fns";
-import { AlertTriangle, Clock, History, Pencil, Wrench } from "lucide-react";
+import { AlertTriangle, Clock, History, ImageIcon, Pencil, Wrench } from "lucide-react";
 import { useState } from "react";
 import { MaintenanceDialog } from "./MaintenanceDialog";
 import { MaintenanceHistoryDialog } from "./MaintenanceHistoryDialog";
-import { STATUS_COLORS } from "./constants";
+import { STATUS_COLORS, STATUS_OPTIONS } from "./constants";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface MaintenanceRequestCardProps {
   request: MaintenanceRequest;
+  isLandlord?: boolean;
 }
 
-export function MaintenanceRequestCard({ request }: MaintenanceRequestCardProps) {
+export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceRequestCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const getPriorityIcon = (priority?: string) => {
     switch (priority) {
@@ -30,6 +38,33 @@ export function MaintenanceRequestCard({ request }: MaintenanceRequestCardProps)
     }
   };
 
+  const handleStatusChange = async (newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from("maintenance_requests")
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", request.id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["maintenance-requests"] });
+      toast({
+        title: "Success",
+        description: "Status updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update status",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <>
       <Card>
@@ -39,9 +74,29 @@ export function MaintenanceRequestCard({ request }: MaintenanceRequestCardProps)
               <CardTitle className="text-lg font-semibold">{request.title}</CardTitle>
               {getPriorityIcon(request.priority)}
             </div>
-            <Badge className={STATUS_COLORS[request.status as keyof typeof STATUS_COLORS]}>
-              {request.status.replace("_", " ")}
-            </Badge>
+            {isLandlord ? (
+              <Select
+                defaultValue={request.status}
+                onValueChange={handleStatusChange}
+              >
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      <Badge className={STATUS_COLORS[status]}>
+                        {status.replace("_", " ")}
+                      </Badge>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Badge className={STATUS_COLORS[request.status]}>
+                {request.status.replace("_", " ")}
+              </Badge>
+            )}
           </div>
           <div className="flex gap-2 mt-2">
             {request.issue_type && (
@@ -61,12 +116,35 @@ export function MaintenanceRequestCard({ request }: MaintenanceRequestCardProps)
               <p className="text-sm text-gray-600">{request.notes}</p>
             </div>
           )}
+          {request.images && request.images.length > 0 && (
+            <div className="mt-4 grid grid-cols-4 gap-2">
+              {request.images.slice(0, 4).map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Maintenance request image ${index + 1}`}
+                  className="w-full h-20 object-cover rounded-lg cursor-pointer"
+                  onClick={() => setIsImageDialogOpen(true)}
+                />
+              ))}
+            </div>
+          )}
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           <div className="text-sm text-gray-500">
             Created {format(new Date(request.created_at), "MMM d, yyyy")}
           </div>
           <div className="flex gap-2">
+            {request.images && request.images.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsImageDialogOpen(true)}
+              >
+                <ImageIcon className="w-4 h-4 mr-1" />
+                Images
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"

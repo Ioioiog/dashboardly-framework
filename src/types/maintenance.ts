@@ -4,7 +4,7 @@ export interface MaintenanceRequest {
   tenant_id: string;
   title: string;
   description: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  status: MaintenanceRequestStatus;
   created_at: string;
   updated_at: string;
   issue_type?: string;
@@ -20,5 +20,6 @@ export interface MaintenanceRequest {
   };
 }
 
+export type MaintenanceRequestStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 export type MaintenancePriority = 'Low' | 'Medium' | 'High';
 export type MaintenanceIssueType = 'Plumbing' | 'Electrical' | 'HVAC' | 'Structural' | 'Appliance' | 'Other';

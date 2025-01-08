@@ -10,6 +10,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MaintenanceBasicInfo } from "./form/MaintenanceBasicInfo";
 import { MaintenanceDescription } from "./form/MaintenanceDescription";
 import { maintenanceFormSchema, MaintenanceFormValues } from "./types";
+import { ImageUpload } from "./form/ImageUpload";
+import { useState } from "react";
 
 interface MaintenanceFormProps {
   onSuccess: () => void;
@@ -19,6 +21,7 @@ interface MaintenanceFormProps {
 export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [uploadedImages, setUploadedImages] = useState<string[]>(request?.images || []);
   const { mutate: createRequest, isPending: isCreating } = useCreateMaintenanceRequest();
 
   const { mutate: updateRequest, isPending: isUpdating } = useMutation({
@@ -51,6 +54,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
           issue_type: values.issue_type,
           priority: values.priority,
           notes: values.notes,
+          images: uploadedImages,
           updated_at: new Date().toISOString(),
         })
         .eq("id", request!.id)
@@ -139,6 +143,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       issue_type: values.issue_type,
       priority: values.priority,
       notes: values.notes,
+      images: uploadedImages,
     };
 
     createRequest(requestData, {
@@ -165,6 +170,11 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <MaintenanceBasicInfo form={form} />
         <MaintenanceDescription form={form} />
+        <ImageUpload
+          images={uploadedImages}
+          onImagesChange={setUploadedImages}
+          maxImages={5}
+        />
         <Button
           type="submit"
           className="w-full"

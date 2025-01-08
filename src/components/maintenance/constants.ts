@@ -1,4 +1,4 @@
-import { MaintenanceIssueType, MaintenancePriority } from "@/types/maintenance";
+import { MaintenanceIssueType, MaintenancePriority, MaintenanceRequestStatus } from "@/types/maintenance";
 
 export const ISSUE_TYPES: MaintenanceIssueType[] = [
   "Plumbing",
@@ -17,3 +17,10 @@ export const STATUS_COLORS = {
   completed: "bg-green-100 text-green-800",
   cancelled: "bg-gray-100 text-gray-800",
 } as const;
+
+export const STATUS_OPTIONS: MaintenanceRequestStatus[] = [
+  "pending",
+  "in_progress",
+  "completed",
+  "cancelled",
+];
