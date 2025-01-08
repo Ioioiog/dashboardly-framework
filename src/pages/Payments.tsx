@@ -1,38 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-
-interface Payment {
-  id: string;
-  amount: number;
-  due_date: string;
-  paid_date: string | null;
-  status: string;
-  tenancy: {
-    property: {
-      name: string;
-      address: string;
-    };
-    tenant: {
-      first_name: string;
-      last_name: string;
-      email: string;
-    };
-  };
-}
+import { PaymentList } from "@/components/payments/PaymentList";
+import { Payment } from "@/integrations/supabase/types/payment";
 
 const Payments = () => {
   const navigate = useNavigate();
@@ -69,7 +42,7 @@ const Payments = () => {
         }
 
         console.log("User role:", profile.role);
-        setUserRole(profile.role);
+        setUserRole(profile.role as "landlord" | "tenant");
 
         // Fetch payments based on user role
         const { data: paymentsData, error: paymentsError } = await supabase
@@ -116,20 +89,7 @@ const Payments = () => {
     checkUser();
   }, [navigate, toast]);
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "paid":
-        return "default";
-      case "pending":
-        return "secondary";
-      case "overdue":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
-  if (isLoading) {
+  if (isLoading || !userRole) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -144,62 +104,7 @@ const Payments = () => {
           <CardTitle>Payments</CardTitle>
         </CardHeader>
         <CardContent>
-          {payments.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Property</TableHead>
-                  {userRole === "landlord" && <TableHead>Tenant</TableHead>}
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Due Date</TableHead>
-                  <TableHead>Paid Date</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payments.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{payment.tenancy.property.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {payment.tenancy.property.address}
-                        </div>
-                      </div>
-                    </TableCell>
-                    {userRole === "landlord" && (
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {payment.tenancy.tenant.first_name} {payment.tenancy.tenant.last_name}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {payment.tenancy.tenant.email}
-                          </div>
-                        </div>
-                      </TableCell>
-                    )}
-                    <TableCell>${payment.amount}</TableCell>
-                    <TableCell>{format(new Date(payment.due_date), "PPP")}</TableCell>
-                    <TableCell>
-                      {payment.paid_date
-                        ? format(new Date(payment.paid_date), "PPP")
-                        : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusBadgeVariant(payment.status)}>
-                        {payment.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="text-center py-6 text-muted-foreground">
-              No payments found.
-            </div>
-          )}
+          <PaymentList payments={payments} userRole={userRole} />
         </CardContent>
       </Card>
     </div>
