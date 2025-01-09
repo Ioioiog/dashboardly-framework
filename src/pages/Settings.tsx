@@ -6,6 +6,7 @@ import { PersonalInfoForm } from "@/components/settings/PersonalInfoForm";
 import { PasswordForm } from "@/components/settings/PasswordForm";
 import { LanguageSelector } from "@/components/settings/LanguageSelector";
 import { StripeAccountForm } from "@/components/settings/StripeAccountForm";
+import { UtilityProviderForm } from "@/components/settings/UtilityProviderForm";
 
 interface Profile {
   first_name: string | null;
@@ -92,7 +93,12 @@ const Settings = () => {
           
           <PasswordForm />
           
-          {profile.role === 'landlord' && <StripeAccountForm />}
+          {profile.role === 'landlord' && (
+            <>
+              <StripeAccountForm />
+              <UtilityProviderForm />
+            </>
+          )}
           
           <LanguageSelector />
         </div>

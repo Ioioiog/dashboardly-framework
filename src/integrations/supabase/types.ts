@@ -432,6 +432,80 @@ export type Database = {
           },
         ]
       }
+      utility_invoices: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          id: string
+          invoice_number: string | null
+          pdf_path: string | null
+          status: string
+          updated_at: string
+          utility_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date: string
+          id?: string
+          invoice_number?: string | null
+          pdf_path?: string | null
+          status?: string
+          updated_at?: string
+          utility_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          id?: string
+          invoice_number?: string | null
+          pdf_path?: string | null
+          status?: string
+          updated_at?: string
+          utility_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "utility_invoices_utility_id_fkey"
+            columns: ["utility_id"]
+            isOneToOne: false
+            referencedRelation: "utilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      utility_provider_credentials: {
+        Row: {
+          created_at: string
+          encrypted_password: string
+          id: string
+          landlord_id: string
+          provider_name: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          encrypted_password: string
+          id?: string
+          landlord_id: string
+          provider_name: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          encrypted_password?: string
+          id?: string
+          landlord_id?: string
+          provider_name?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
