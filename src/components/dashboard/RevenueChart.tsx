@@ -10,7 +10,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  AnimationProps,
 } from "recharts";
 import { startOfMonth, subMonths, format } from "date-fns";
 
@@ -69,13 +68,6 @@ async function fetchRevenueData(userId: string): Promise<MonthlyRevenue[]> {
   console.log("Processed monthly revenue:", monthlyRevenue);
   return monthlyRevenue;
 }
-
-const chartAnimation: AnimationProps = {
-  appear: {
-    animation: 'fade-in',
-    duration: 1500,
-  },
-};
 
 export function RevenueChart({ userId }: { userId: string }) {
   const { t } = useTranslation();
@@ -178,7 +170,10 @@ export function RevenueChart({ userId }: { userId: string }) {
                   style: { fill: "hsl(var(--primary))", opacity: 1 }
                 }}
                 fill={`url(#${gradientId})`}
-                {...chartAnimation}
+                isAnimationActive={true}
+                animationDuration={1500}
+                animationBegin={0}
+                animationEasing="ease-in-out"
               />
             </LineChart>
           </ResponsiveContainer>
