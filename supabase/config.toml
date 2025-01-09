@@ -1,4 +1,4 @@
 project_id = "wecmvyohaxizmnhuvjly"
 
-[functions.stripe-connect]
+[functions.scrape-utility-invoices]
 verify_jwt = false

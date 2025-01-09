@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -13,89 +13,98 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
     const { providerId } = await req.json()
-    
+    console.log('Starting scraping process for provider:', providerId)
+
     if (!providerId) {
       throw new Error('Provider ID is required')
     }
 
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing environment variables')
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
     // Update job status to in_progress
     const { error: updateError } = await supabase
       .from('scraping_jobs')
-      .update({ 
+      .upsert({
+        utility_provider_id: providerId,
         status: 'in_progress',
-        last_run_at: new Date().toISOString()
+        last_run_at: new Date().toISOString(),
       })
-      .eq('utility_provider_id', providerId)
 
     if (updateError) {
       throw updateError
     }
 
-    // Get provider credentials
-    const { data: provider, error: providerError } = await supabase
-      .from('utility_provider_credentials')
-      .select('*')
-      .eq('id', providerId)
-      .single()
+    // Simulate scraping process
+    await new Promise(resolve => setTimeout(resolve, 3000))
 
-    if (providerError || !provider) {
-      throw new Error('Provider not found')
+    // Randomly succeed or fail for demonstration
+    const success = Math.random() > 0.3
+
+    if (!success) {
+      throw new Error('Failed to scrape utility invoices')
     }
 
-    // TODO: Implement actual scraping logic here
-    // This is a placeholder that simulates scraping
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
     // Update job status to completed
-    const { error: completeError } = await supabase
+    const { error: completionError } = await supabase
       .from('scraping_jobs')
-      .update({ 
+      .upsert({
+        utility_provider_id: providerId,
         status: 'completed',
-        last_run_at: new Date().toISOString()
+        last_run_at: new Date().toISOString(),
+        error_message: null,
       })
-      .eq('utility_provider_id', providerId)
 
-    if (completeError) {
-      throw completeError
+    if (completionError) {
+      throw completionError
     }
 
     return new Response(
       JSON.stringify({ message: 'Scraping completed successfully' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
     )
 
   } catch (error) {
-    console.error('Scraping error:', error)
+    console.error('Error in scraping process:', error)
 
-    // Update job status to failed
-    if (req.body) {
-      const { providerId } = await req.json()
-      const supabase = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-      )
-
-      await supabase
-        .from('scraping_jobs')
-        .update({ 
-          status: 'failed',
-          error_message: error.message,
-          last_run_at: new Date().toISOString()
-        })
-        .eq('utility_provider_id', providerId)
+    // If we have access to supabase client, update the job status
+    try {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+      
+      if (supabaseUrl && supabaseKey) {
+        const supabase = createClient(supabaseUrl, supabaseKey)
+        await supabase
+          .from('scraping_jobs')
+          .upsert({
+            utility_provider_id: (await req.json()).providerId,
+            status: 'failed',
+            last_run_at: new Date().toISOString(),
+            error_message: error.message,
+          })
+      }
+    } catch (updateError) {
+      console.error('Error updating job status:', updateError)
     }
 
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message || 'An error occurred during the scraping process' 
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
+        status: 500,
       }
     )
   }
