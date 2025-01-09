@@ -4,6 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { UtilityDialog } from "@/components/utilities/UtilityDialog";
+import { UtilityList } from "@/components/utilities/UtilityList";
+import { UtilityFilters } from "@/components/utilities/UtilityFilters";
+import { useProperties } from "@/hooks/useProperties";
+import { Loader2 } from "lucide-react";
 
 interface Utility {
   id: string;
@@ -24,6 +29,46 @@ const Utilities = () => {
   const [utilities, setUtilities] = useState<Utility[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+
+  const { properties } = useProperties({ 
+    userId: userId || "", 
+    userRole: userRole || "tenant" 
+  });
+
+  const fetchUtilities = async () => {
+    try {
+      const { data: utilitiesData, error: utilitiesError } = await supabase
+        .from('utilities')
+        .select(`
+          *,
+          property:properties (
+            name,
+            address
+          )
+        `)
+        .order('due_date', { ascending: false });
+
+      if (utilitiesError) {
+        console.error("Error fetching utilities:", utilitiesError);
+        throw utilitiesError;
+      }
+
+      console.log("Fetched utilities:", utilitiesData);
+      setUtilities(utilitiesData || []);
+      setIsLoading(false);
+    } catch (error: any) {
+      console.error("Error in utilities page:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "An unexpected error occurred",
+      });
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const checkUser = async () => {
@@ -41,6 +86,8 @@ const Utilities = () => {
           return;
         }
 
+        setUserId(session.user.id);
+
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
@@ -53,26 +100,7 @@ const Utilities = () => {
         }
 
         setUserRole(profile.role as "landlord" | "tenant");
-
-        const { data: utilitiesData, error: utilitiesError } = await supabase
-          .from('utilities')
-          .select(`
-            *,
-            property:properties (
-              name,
-              address
-            )
-          `)
-          .order('due_date', { ascending: false });
-
-        if (utilitiesError) {
-          console.error("Error fetching utilities:", utilitiesError);
-          throw utilitiesError;
-        }
-
-        console.log("Fetched utilities:", utilitiesData);
-        setUtilities(utilitiesData);
-        setIsLoading(false);
+        await fetchUtilities();
 
       } catch (error: any) {
         console.error("Error in utilities page:", error);
@@ -88,10 +116,16 @@ const Utilities = () => {
     checkUser();
   }, [navigate, toast]);
 
-  if (isLoading) {
+  const filteredUtilities = utilities.filter(utility => {
+    const matchesStatus = statusFilter === "all" || utility.status === statusFilter;
+    const matchesType = typeFilter === "all" || utility.type === typeFilter;
+    return matchesStatus && matchesType;
+  });
+
+  if (isLoading || !userRole) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-center">Loading utilities...</div>
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -101,39 +135,29 @@ const Utilities = () => {
       <DashboardSidebar />
       <div className="flex-1 p-8 ml-64">
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Utilities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4">
-              {utilities.map((utility) => (
-                <Card key={utility.id} className="p-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <div className="text-sm font-medium text-gray-500">Property</div>
-                      <div>{utility.property.name}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-500">Type</div>
-                      <div className="capitalize">{utility.type}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-500">Amount</div>
-                      <div>${utility.amount.toFixed(2)}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-500">Due Date</div>
-                      <div>{new Date(utility.due_date).toLocaleDateString()}</div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-              {utilities.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  No utilities found.
-                </div>
+            <div className="flex items-center gap-4">
+              <UtilityFilters
+                status={statusFilter}
+                onStatusChange={setStatusFilter}
+                type={typeFilter}
+                onTypeChange={setTypeFilter}
+              />
+              {userRole === "landlord" && properties && (
+                <UtilityDialog
+                  properties={properties}
+                  onUtilityCreated={fetchUtilities}
+                />
               )}
             </div>
+          </CardHeader>
+          <CardContent>
+            <UtilityList
+              utilities={filteredUtilities}
+              userRole={userRole}
+              onStatusUpdate={fetchUtilities}
+            />
           </CardContent>
         </Card>
       </div>
