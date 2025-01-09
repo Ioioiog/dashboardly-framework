@@ -40,7 +40,7 @@ const Utilities = () => {
 
   const fetchUtilities = async () => {
     try {
-      const { data: utilitiesData, error: utilitiesError } = await supabase
+      let query = supabase
         .from('utilities')
         .select(`
           *,
@@ -50,6 +50,25 @@ const Utilities = () => {
           )
         `)
         .order('due_date', { ascending: false });
+
+      if (userRole === 'tenant') {
+        // For tenants, get utilities for properties they're actively renting
+        const { data: tenantProperties } = await supabase
+          .from('tenancies')
+          .select('property_id')
+          .eq('tenant_id', userId)
+          .eq('status', 'active');
+
+        if (tenantProperties) {
+          const propertyIds = tenantProperties.map(tp => tp.property_id);
+          query = query.in('property_id', propertyIds);
+        }
+      } else if (userRole === 'landlord') {
+        // For landlords, get utilities for their properties
+        query = query.in('property_id', properties.map(p => p.id));
+      }
+
+      const { data: utilitiesData, error: utilitiesError } = await query;
 
       if (utilitiesError) {
         console.error("Error fetching utilities:", utilitiesError);
