@@ -29,6 +29,8 @@ serve(async (req) => {
         *,
         tenancy:tenancies (
           property:properties (
+            name,
+            address,
             landlord:profiles (
               stripe_account_id
             )

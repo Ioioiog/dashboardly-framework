@@ -15,10 +15,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Loader2 } from "lucide-react";
 import { PaymentWithRelations } from "@/integrations/supabase/types/payment";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface PaymentListProps {
   payments: PaymentWithRelations[];
@@ -40,6 +41,7 @@ const getStatusBadgeVariant = (status: string) => {
 
 export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
   const { toast } = useToast();
+  const [processingPaymentId, setProcessingPaymentId] = useState<string | null>(null);
 
   const updatePaymentStatus = async (paymentId: string, newStatus: string) => {
     try {
@@ -66,21 +68,34 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
 
   const handlePayment = async (paymentId: string) => {
     try {
+      setProcessingPaymentId(paymentId);
+      console.log('Initiating payment for ID:', paymentId);
+      
       const { data, error } = await supabase.functions.invoke('create-payment-checkout', {
         body: { paymentId }
       });
 
-      if (error) throw error;
-      if (!data.url) throw new Error('No checkout URL received');
+      if (error) {
+        console.error('Payment initiation error:', error);
+        throw error;
+      }
 
+      if (!data?.url) {
+        console.error('No checkout URL received');
+        throw new Error('No checkout URL received');
+      }
+
+      console.log('Redirecting to checkout URL:', data.url);
       window.location.href = data.url;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error initiating payment:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to initiate payment. Please try again.",
+        title: "Payment Error",
+        description: error.message || "Failed to initiate payment. Please try again.",
       });
+    } finally {
+      setProcessingPaymentId(null);
     }
   };
 
@@ -175,8 +190,12 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
                   <Button
                     onClick={() => handlePayment(payment.id)}
                     size="sm"
+                    disabled={processingPaymentId === payment.id}
                   >
-                    Pay Now
+                    {processingPaymentId === payment.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
+                    {processingPaymentId === payment.id ? "Processing..." : "Pay Now"}
                   </Button>
                 )
               )}
