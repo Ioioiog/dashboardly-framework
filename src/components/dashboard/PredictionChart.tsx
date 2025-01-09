@@ -9,8 +9,12 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Info } from "lucide-react";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 interface PredictionChartProps {
   predictions: MonthlyRevenue[];
@@ -23,13 +27,36 @@ export function PredictionChart({ predictions }: PredictionChartProps) {
     timeRange === "1M" ? 1 : timeRange === "6M" ? 6 : 12
   );
 
+  const averagePrediction = filteredPredictions.reduce((sum, month) => 
+    sum + month.revenue, 0) / filteredPredictions.length;
+
+  const maxPrediction = Math.max(...filteredPredictions.map(p => p.revenue));
+  const minPrediction = Math.min(...filteredPredictions.map(p => p.revenue));
+  const growthRate = ((maxPrediction - minPrediction) / minPrediction) * 100;
+
   const gradientId = "predictionGradient";
 
   return (
     <Card className="col-span-4 transition-all duration-200 hover:shadow-lg">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Revenue Predictions</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle>Revenue Predictions</CardTitle>
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">About Predictions</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Predictions are calculated based on historical revenue data and growth patterns.
+                    These are estimates and actual results may vary.
+                  </p>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
           <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Select range" />
@@ -40,6 +67,14 @@ export function PredictionChart({ predictions }: PredictionChartProps) {
               <SelectItem value="1Y">Next Year</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        <div className="flex gap-2 mt-2">
+          <Badge variant="outline" className="bg-primary/5">
+            Avg: ${averagePrediction.toLocaleString()}
+          </Badge>
+          <Badge variant="outline" className="bg-primary/5">
+            Growth: {growthRate.toFixed(1)}%
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="h-[400px]">
@@ -83,6 +118,10 @@ export function PredictionChart({ predictions }: PredictionChartProps) {
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
                     const data = payload[0].payload as MonthlyRevenue;
+                    const percentChange = data.revenue > averagePrediction
+                      ? ((data.revenue - averagePrediction) / averagePrediction) * 100
+                      : ((averagePrediction - data.revenue) / averagePrediction) * -100;
+
                     return (
                       <div className="rounded-lg border bg-background p-3 shadow-lg ring-1 ring-black/5">
                         <div className="grid gap-2">
@@ -93,12 +132,38 @@ export function PredictionChart({ predictions }: PredictionChartProps) {
                             <span className="font-bold text-lg">
                               ${data.revenue.toLocaleString()}
                             </span>
+                            <div className="mt-1 text-xs space-y-1">
+                              <div className={`flex items-center gap-1 ${
+                                percentChange >= 0 ? 'text-green-500' : 'text-red-500'
+                              }`}>
+                                {percentChange >= 0 ? '↑' : '↓'} {Math.abs(percentChange).toFixed(1)}% vs average
+                              </div>
+                              <div className="text-muted-foreground">
+                                Expected payments: {data.count}
+                              </div>
+                              {data.count > 0 && (
+                                <div className="text-muted-foreground">
+                                  Avg payment: ${data.average.toLocaleString()}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                     );
                   }
                   return null;
+                }}
+              />
+              <ReferenceLine
+                y={averagePrediction}
+                stroke="hsl(var(--muted-foreground))"
+                strokeDasharray="3 3"
+                label={{
+                  value: "Average",
+                  position: "right",
+                  fill: "hsl(var(--muted-foreground))",
+                  fontSize: 12,
                 }}
               />
               <Line
