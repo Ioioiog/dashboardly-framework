@@ -14,6 +14,7 @@ serve(async (req) => {
 
   try {
     const { paymentId } = await req.json();
+    console.log('Creating payment session for payment ID:', paymentId);
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -21,6 +22,7 @@ serve(async (req) => {
     );
 
     // Get the payment details including the landlord's Stripe account
+    console.log('Fetching payment details...');
     const { data: payment, error: paymentError } = await supabaseClient
       .from('payments')
       .select(`
@@ -36,12 +38,21 @@ serve(async (req) => {
       .eq('id', paymentId)
       .single();
 
-    if (paymentError || !payment) {
+    console.log('Payment query result:', { payment, paymentError });
+
+    if (paymentError) {
+      console.error('Error fetching payment:', paymentError);
+      throw new Error('Error fetching payment details');
+    }
+
+    if (!payment) {
+      console.error('Payment not found for ID:', paymentId);
       throw new Error('Payment not found');
     }
 
-    const stripeAccountId = payment.tenancy.property.landlord.stripe_account_id;
+    const stripeAccountId = payment.tenancy?.property?.landlord?.stripe_account_id;
     if (!stripeAccountId) {
+      console.error('Landlord has not connected Stripe account');
       throw new Error('Landlord has not connected Stripe account');
     }
 
@@ -52,6 +63,7 @@ serve(async (req) => {
     );
 
     if (userError || !user) {
+      console.error('User authentication error:', userError);
       throw new Error('Unauthorized');
     }
 
@@ -63,6 +75,7 @@ serve(async (req) => {
       .single();
 
     if (profileError || !profile?.email) {
+      console.error('Profile fetch error:', profileError);
       throw new Error('User profile not found');
     }
 
@@ -78,7 +91,7 @@ serve(async (req) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Payment',
+              name: 'Rent Payment',
               description: `Payment for ${payment.tenancy.property.address}`,
             },
             unit_amount: Math.round(payment.amount * 100), // Convert to cents
