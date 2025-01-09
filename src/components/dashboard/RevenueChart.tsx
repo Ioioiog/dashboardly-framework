@@ -11,11 +11,13 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { startOfMonth, subMonths, format } from "date-fns";
+import { startOfMonth, subMonths, format, isSameMonth } from "date-fns";
 
 interface MonthlyRevenue {
   month: string;
   revenue: number;
+  count: number;
+  average: number;
 }
 
 async function fetchRevenueData(userId: string): Promise<MonthlyRevenue[]> {
@@ -52,16 +54,23 @@ async function fetchRevenueData(userId: string): Promise<MonthlyRevenue[]> {
   console.log("Raw payment data:", payments);
 
   const monthlyRevenue = months.map(monthStart => {
-    const monthRevenue = payments?.reduce((sum, payment) => {
-      if (payment.paid_date?.startsWith(monthStart.substring(0, 7))) {
-        return sum + Number(payment.amount);
-      }
-      return sum;
-    }, 0) || 0;
+    const monthPayments = payments?.filter(payment => 
+      payment.paid_date?.startsWith(monthStart.substring(0, 7))
+    ) || [];
+
+    const totalRevenue = monthPayments.reduce((sum, payment) => 
+      sum + Number(payment.amount), 0);
+
+    const paymentCount = monthPayments.length;
+    const averagePayment = paymentCount > 0 
+      ? totalRevenue / paymentCount 
+      : 0;
 
     return {
       month: format(new Date(monthStart), "MMM yyyy"),
-      revenue: monthRevenue,
+      revenue: totalRevenue,
+      count: paymentCount,
+      average: averagePayment
     };
   });
 
@@ -90,15 +99,33 @@ export function RevenueChart({ userId }: { userId: string }) {
   if (!revenueData) return null;
 
   const gradientId = "revenueGradient";
+  const totalRevenue = revenueData.reduce((sum, month) => sum + month.revenue, 0);
+  const averageRevenue = totalRevenue / revenueData.length;
+  const maxRevenue = Math.max(...revenueData.map(d => d.revenue));
+  const currentMonthRevenue = revenueData[revenueData.length - 1].revenue;
+  const previousMonthRevenue = revenueData[revenueData.length - 2]?.revenue || 0;
+  const revenueChange = ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100;
 
   return (
     <Card className="col-span-4 transition-all duration-200 hover:shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>{t('dashboard.revenue.title')}</span>
-          <span className="text-sm font-normal text-muted-foreground">
-            Last 6 months
-          </span>
+          <div>
+            <span>{t('dashboard.revenue.title')}</span>
+            <div className="text-sm font-normal text-muted-foreground mt-1">
+              Last 6 months | Total: ${totalRevenue.toLocaleString()}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-sm font-normal">
+              Monthly Average: ${averageRevenue.toLocaleString()}
+            </div>
+            {!isNaN(revenueChange) && (
+              <div className={`text-sm ${revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                {revenueChange >= 0 ? '↑' : '↓'} {Math.abs(revenueChange).toFixed(1)}% vs last month
+              </div>
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="h-[400px]">
@@ -141,16 +168,23 @@ export function RevenueChart({ userId }: { userId: string }) {
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
+                    const data = payload[0].payload as MonthlyRevenue;
                     return (
                       <div className="rounded-lg border bg-background p-3 shadow-lg ring-1 ring-black/5">
                         <div className="grid gap-2">
                           <div className="flex flex-col">
                             <span className="text-[0.70rem] uppercase text-muted-foreground">
-                              {payload[0].payload.month}
+                              {data.month}
                             </span>
                             <span className="font-bold text-lg">
-                              ${payload[0].value.toLocaleString()}
+                              ${data.revenue.toLocaleString()}
                             </span>
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              <div>Payments: {data.count}</div>
+                              {data.count > 0 && (
+                                <div>Average: ${data.average.toLocaleString()}</div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
