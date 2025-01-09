@@ -1,5 +1,4 @@
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -8,97 +7,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Loader2 } from "lucide-react";
 import { PaymentWithRelations } from "@/integrations/supabase/types/payment";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { PaymentStatusBadge } from "./PaymentStatusBadge";
+import { PaymentActions } from "./PaymentActions";
 
 interface PaymentListProps {
   payments: PaymentWithRelations[];
   userRole: "landlord" | "tenant";
 }
 
-const getStatusBadgeVariant = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "paid":
-      return "default";
-    case "pending":
-      return "secondary";
-    case "overdue":
-      return "destructive";
-    default:
-      return "outline";
-  }
-};
-
 export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
-  const { toast } = useToast();
-  const [processingPaymentId, setProcessingPaymentId] = useState<string | null>(null);
-
-  const updatePaymentStatus = async (paymentId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from("payments")
-        .update({ status: newStatus })
-        .eq("id", paymentId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Payment status updated successfully.",
-      });
-    } catch (error) {
-      console.error("Error updating payment status:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update payment status.",
-      });
-    }
-  };
-
-  const handlePayment = async (paymentId: string) => {
-    try {
-      setProcessingPaymentId(paymentId);
-      console.log('Initiating payment for ID:', paymentId);
-      
-      const { data, error } = await supabase.functions.invoke('create-payment-checkout', {
-        body: { paymentId }
-      });
-
-      if (error) {
-        console.error('Payment initiation error:', error);
-        throw error;
-      }
-
-      if (!data?.url) {
-        console.error('No checkout URL received');
-        throw new Error('No checkout URL received');
-      }
-
-      console.log('Redirecting to checkout URL:', data.url);
-      window.location.href = data.url;
-    } catch (error: any) {
-      console.error('Error initiating payment:', error);
-      toast({
-        variant: "destructive",
-        title: "Payment Error",
-        description: error.message || "Failed to initiate payment. Please try again.",
-      });
-    } finally {
-      setProcessingPaymentId(null);
-    }
-  };
-
   if (payments.length === 0) {
     return (
       <div className="text-center py-6 text-muted-foreground">
@@ -154,51 +72,14 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
                 : "-"}
             </TableCell>
             <TableCell>
-              <Badge variant={getStatusBadgeVariant(payment.status)}>
-                {payment.status}
-              </Badge>
+              <PaymentStatusBadge status={payment.status} />
             </TableCell>
             <TableCell>
-              {userRole === "landlord" ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Open menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() => updatePaymentStatus(payment.id, "paid")}
-                    >
-                      Mark as Paid
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => updatePaymentStatus(payment.id, "pending")}
-                    >
-                      Mark as Pending
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => updatePaymentStatus(payment.id, "overdue")}
-                    >
-                      Mark as Overdue
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                payment.status !== "paid" && (
-                  <Button
-                    onClick={() => handlePayment(payment.id)}
-                    size="sm"
-                    disabled={processingPaymentId === payment.id}
-                  >
-                    {processingPaymentId === payment.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : null}
-                    {processingPaymentId === payment.id ? "Processing..." : "Pay Now"}
-                  </Button>
-                )
-              )}
+              <PaymentActions
+                paymentId={payment.id}
+                status={payment.status}
+                userRole={userRole}
+              />
             </TableCell>
           </TableRow>
         ))}
