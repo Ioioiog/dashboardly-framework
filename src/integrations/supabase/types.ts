@@ -293,6 +293,44 @@ export type Database = {
         }
         Relationships: []
       }
+      scraping_jobs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          last_run_at: string | null
+          status: Database["public"]["Enums"]["scraping_status"]
+          updated_at: string
+          utility_provider_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          last_run_at?: string | null
+          status?: Database["public"]["Enums"]["scraping_status"]
+          updated_at?: string
+          utility_provider_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          last_run_at?: string | null
+          status?: Database["public"]["Enums"]["scraping_status"]
+          updated_at?: string
+          utility_provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scraping_jobs_utility_provider_id_fkey"
+            columns: ["utility_provider_id"]
+            isOneToOne: false
+            referencedRelation: "utility_provider_credentials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenancies: {
         Row: {
           created_at: string
@@ -526,6 +564,7 @@ export type Database = {
         | "completed"
         | "cancelled"
       property_type: "Apartment" | "House" | "Condo" | "Commercial"
+      scraping_status: "pending" | "in_progress" | "completed" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
