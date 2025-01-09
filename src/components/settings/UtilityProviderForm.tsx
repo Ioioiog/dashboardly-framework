@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ProviderList } from "./utility-provider/ProviderList";
+import { ProviderForm } from "./utility-provider/ProviderForm";
 
 interface UtilityProvider {
   id: string;
@@ -14,7 +13,7 @@ interface UtilityProvider {
 
 export function UtilityProviderForm() {
   const [providers, setProviders] = useState<UtilityProvider[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [newProvider, setNewProvider] = useState({
     provider_name: "",
     username: "",
@@ -24,6 +23,10 @@ export function UtilityProviderForm() {
 
   const fetchProviders = async () => {
     try {
+      setIsLoading(true);
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("No user found");
+
       const { data, error } = await supabase
         .from("utility_provider_credentials")
         .select("id, provider_name, username");
@@ -42,7 +45,7 @@ export function UtilityProviderForm() {
     }
   };
 
-  useState(() => {
+  useEffect(() => {
     fetchProviders();
   }, []);
 
@@ -51,12 +54,16 @@ export function UtilityProviderForm() {
     setIsLoading(true);
 
     try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("No user found");
+
       const { error } = await supabase
         .from("utility_provider_credentials")
         .insert({
           provider_name: newProvider.provider_name,
           username: newProvider.username,
           encrypted_password: newProvider.password, // Note: In production, implement proper encryption
+          landlord_id: userData.user.id
         });
 
       if (error) throw error;
@@ -87,6 +94,7 @@ export function UtilityProviderForm() {
 
   const handleDelete = async (id: string) => {
     try {
+      setIsLoading(true);
       const { error } = await supabase
         .from("utility_provider_credentials")
         .delete()
@@ -107,6 +115,8 @@ export function UtilityProviderForm() {
         description: "Failed to remove utility provider",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -115,92 +125,18 @@ export function UtilityProviderForm() {
       <CardHeader>
         <CardTitle>Utility Provider Credentials</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {/* List existing providers */}
-          <div className="space-y-4">
-            {providers.map((provider) => (
-              <div
-                key={provider.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div>
-                  <p className="font-medium">{provider.provider_name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Username: {provider.username}
-                  </p>
-                </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(provider.id)}
-                  disabled={isLoading}
-                >
-                  Remove
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          {/* Add new provider form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="provider_name">Provider Name</Label>
-              <Input
-                id="provider_name"
-                value={newProvider.provider_name}
-                onChange={(e) =>
-                  setNewProvider((prev) => ({
-                    ...prev,
-                    provider_name: e.target.value,
-                  }))
-                }
-                disabled={isLoading}
-                required
-                placeholder="e.g., Electric Company"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                value={newProvider.username}
-                onChange={(e) =>
-                  setNewProvider((prev) => ({
-                    ...prev,
-                    username: e.target.value,
-                  }))
-                }
-                disabled={isLoading}
-                required
-                placeholder="Enter your username"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={newProvider.password}
-                onChange={(e) =>
-                  setNewProvider((prev) => ({
-                    ...prev,
-                    password: e.target.value,
-                  }))
-                }
-                disabled={isLoading}
-                required
-                placeholder="Enter your password"
-              />
-            </div>
-
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? "Adding Provider..." : "Add Provider"}
-            </Button>
-          </form>
-        </div>
+      <CardContent className="space-y-6">
+        <ProviderList 
+          providers={providers}
+          onDelete={handleDelete}
+          isLoading={isLoading}
+        />
+        <ProviderForm
+          data={newProvider}
+          onChange={setNewProvider}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
       </CardContent>
     </Card>
   );
