@@ -11,7 +11,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { startOfMonth, subMonths, format, isSameMonth } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TimeRange, getMonthsForRange, formatMonthDisplay } from "./utils/dateUtils";
+import { RevenueStats } from "./RevenueStats";
+import { useState } from "react";
 
 interface MonthlyRevenue {
   month: string;
@@ -20,14 +23,10 @@ interface MonthlyRevenue {
   average: number;
 }
 
-async function fetchRevenueData(userId: string): Promise<MonthlyRevenue[]> {
+async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<MonthlyRevenue[]> {
   console.log("Fetching revenue data for landlord:", userId);
   
-  const months = Array.from({ length: 6 }, (_, i) => {
-    const date = subMonths(startOfMonth(new Date()), i);
-    return format(date, "yyyy-MM-dd");
-  }).reverse();
-
+  const months = getMonthsForRange(timeRange);
   console.log("Fetching data for months:", months);
 
   const { data: payments, error } = await supabase
@@ -43,7 +42,7 @@ async function fetchRevenueData(userId: string): Promise<MonthlyRevenue[]> {
     `)
     .in("status", ["paid"])
     .gte("paid_date", months[0])
-    .lte("paid_date", format(new Date(), "yyyy-MM-dd"))
+    .lte("paid_date", new Date().toISOString().split('T')[0])
     .eq("tenancy.property.landlord_id", userId);
 
   if (error) {
@@ -67,7 +66,7 @@ async function fetchRevenueData(userId: string): Promise<MonthlyRevenue[]> {
       : 0;
 
     return {
-      month: format(new Date(monthStart), "MMM yyyy"),
+      month: formatMonthDisplay(monthStart),
       revenue: totalRevenue,
       count: paymentCount,
       average: averagePayment
@@ -80,9 +79,11 @@ async function fetchRevenueData(userId: string): Promise<MonthlyRevenue[]> {
 
 export function RevenueChart({ userId }: { userId: string }) {
   const { t } = useTranslation();
+  const [timeRange, setTimeRange] = useState<TimeRange>("6M");
+  
   const { data: revenueData, isLoading } = useQuery({
-    queryKey: ["revenue-chart", userId],
-    queryFn: () => fetchRevenueData(userId),
+    queryKey: ["revenue-chart", userId, timeRange],
+    queryFn: () => fetchRevenueData(userId, timeRange),
   });
 
   if (isLoading) {
@@ -101,7 +102,6 @@ export function RevenueChart({ userId }: { userId: string }) {
   const gradientId = "revenueGradient";
   const totalRevenue = revenueData.reduce((sum, month) => sum + month.revenue, 0);
   const averageRevenue = totalRevenue / revenueData.length;
-  const maxRevenue = Math.max(...revenueData.map(d => d.revenue));
   const currentMonthRevenue = revenueData[revenueData.length - 1].revenue;
   const previousMonthRevenue = revenueData[revenueData.length - 2]?.revenue || 0;
   const revenueChange = ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100;
@@ -109,24 +109,25 @@ export function RevenueChart({ userId }: { userId: string }) {
   return (
     <Card className="col-span-4 transition-all duration-200 hover:shadow-lg">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div>
-            <span>{t('dashboard.revenue.title')}</span>
-            <div className="text-sm font-normal text-muted-foreground mt-1">
-              Last 6 months | Total: ${totalRevenue.toLocaleString()}
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-sm font-normal">
-              Monthly Average: ${averageRevenue.toLocaleString()}
-            </div>
-            {!isNaN(revenueChange) && (
-              <div className={`text-sm ${revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {revenueChange >= 0 ? '↑' : '↓'} {Math.abs(revenueChange).toFixed(1)}% vs last month
-              </div>
-            )}
-          </div>
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            <RevenueStats 
+              totalRevenue={totalRevenue}
+              averageRevenue={averageRevenue}
+              revenueChange={revenueChange}
+            />
+          </CardTitle>
+          <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Select range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1M">Last Month</SelectItem>
+              <SelectItem value="6M">Last 6 Months</SelectItem>
+              <SelectItem value="1Y">Last Year</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent className="h-[400px]">
         {revenueData.length > 0 ? (
