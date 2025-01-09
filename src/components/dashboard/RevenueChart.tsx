@@ -14,7 +14,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TimeRange, getMonthsForRange, formatMonthDisplay } from "./utils/dateUtils";
 import { RevenueStats } from "./RevenueStats";
-import { RevenuePrediction } from "./RevenuePrediction";
+import { PredictionChart } from "./PredictionChart";
 import { calculatePredictedRevenue } from "./utils/predictionUtils";
 import { MonthlyRevenue } from "./types/revenue";
 import { useState } from "react";
@@ -96,8 +96,6 @@ export function RevenueChart({ userId }: { userId: string }) {
   if (!revenueData) return null;
 
   const predictions = calculatePredictedRevenue(revenueData);
-  const combinedData = [...revenueData, ...predictions];
-  
   const gradientId = "revenueGradient";
   const totalRevenue = revenueData.reduce((sum, month) => sum + month.revenue, 0);
   const averageRevenue = totalRevenue / revenueData.length;
@@ -130,10 +128,10 @@ export function RevenueChart({ userId }: { userId: string }) {
           </div>
         </CardHeader>
         <CardContent className="h-[400px]">
-          {combinedData.length > 0 ? (
+          {revenueData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
-                data={combinedData}
+                data={revenueData}
                 margin={{
                   top: 20,
                   right: 30,
@@ -175,7 +173,7 @@ export function RevenueChart({ userId }: { userId: string }) {
                           <div className="grid gap-2">
                             <div className="flex flex-col">
                               <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                {data.month} {data.isPrediction && '(Predicted)'}
+                                {data.month}
                               </span>
                               <span className="font-bold text-lg">
                                 ${data.revenue.toLocaleString()}
@@ -226,7 +224,7 @@ export function RevenueChart({ userId }: { userId: string }) {
           )}
         </CardContent>
       </Card>
-      <RevenuePrediction predictions={predictions} />
+      <PredictionChart predictions={predictions} />
     </>
   );
 }
