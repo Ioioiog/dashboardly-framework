@@ -22,9 +22,21 @@ export function PaymentActions({ paymentId, status, userRole }: PaymentActionsPr
 
   const updatePaymentStatus = async (newStatus: string) => {
     try {
+      console.log('Updating payment status:', { paymentId, newStatus });
+      const updateData: { status: string; paid_date?: string | null } = {
+        status: newStatus,
+      };
+
+      // Set paid_date when marking as paid, remove it otherwise
+      if (newStatus === 'paid') {
+        updateData.paid_date = new Date().toISOString();
+      } else {
+        updateData.paid_date = null;
+      }
+
       const { error } = await supabase
         .from("payments")
-        .update({ status: newStatus })
+        .update(updateData)
         .eq("id", paymentId);
 
       if (error) throw error;
