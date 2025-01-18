@@ -11,6 +11,11 @@ export interface Property {
   description?: string;
   available_from?: string;
   landlord_id?: string;
+  end_date?: string; // Added for tenant view
+  tenancy?: {
+    end_date: string | null;
+    start_date: string;
+  };
 }
 
 export interface PropertyInput extends Omit<Property, 'id' | 'landlord_id'> {
@@ -82,8 +87,15 @@ export async function fetchTenantProperties(userId: string) {
     return [];
   }
 
-  // Extract and return the properties from the tenancies
-  const properties = tenancies.map(tenancy => tenancy.property);
+  // Extract and return the properties from the tenancies, including tenancy details
+  const properties = tenancies.map(tenancy => ({
+    ...tenancy.property,
+    tenancy: {
+      end_date: tenancy.end_date,
+      start_date: tenancy.start_date
+    }
+  }));
+  
   console.log("✅ Extracted properties from tenancies:", properties);
   
   // Additional validation to ensure we're returning valid properties

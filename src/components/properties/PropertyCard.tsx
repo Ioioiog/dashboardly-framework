@@ -53,10 +53,10 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
                   <Calendar className="h-4 w-4" />
                   <span>Contract Start: {format(new Date(property.available_from || new Date()), 'PPP')}</span>
                 </div>
-                {property.end_date && (
+                {property.tenancy?.end_date && (
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
-                    <span>Contract End: {format(new Date(property.end_date), 'PPP')}</span>
+                    <span>Contract End: {format(new Date(property.tenancy.end_date), 'PPP')}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-sm text-gray-600">
