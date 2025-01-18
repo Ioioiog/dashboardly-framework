@@ -64,11 +64,11 @@ export function UtilityDialog({ properties, onUtilityCreated }: UtilityDialogPro
       // If there's a file, upload it and create an invoice record
       if (file) {
         const fileExt = file.name.split('.').pop();
-        const filePath = `${utility.id}/${crypto.randomUUID()}.${fileExt}`;
-
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        
         const { error: uploadError } = await supabase.storage
-          .from("utility-invoices")
-          .upload(filePath, file);
+          .from('utility-invoices')
+          .upload(fileName, file);
 
         if (uploadError) throw uploadError;
 
@@ -79,7 +79,7 @@ export function UtilityDialog({ properties, onUtilityCreated }: UtilityDialogPro
             amount: parseFloat(amount),
             due_date: dueDate,
             status: "pending",
-            pdf_path: filePath,
+            pdf_path: fileName,
           });
 
         if (invoiceError) throw invoiceError;
