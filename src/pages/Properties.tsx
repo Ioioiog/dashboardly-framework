@@ -14,7 +14,7 @@ export default function Properties() {
   const { toast } = useToast();
   const [showDialog, setShowDialog] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const userRole = useUserRole();
+  const { userRole } = useUserRole();
 
   const handleEdit = async (property: Property, data: any): Promise<boolean> => {
     try {
@@ -94,15 +94,13 @@ export default function Properties() {
           )}
         </header>
 
-        {userRole && (
-          <div className="space-y-8">
-            <DashboardProperties 
-              userRole={userRole}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          </div>
-        )}
+        <div className="space-y-8">
+          <DashboardProperties 
+            userRole={userRole}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
       </div>
 
       <PropertyDialog
