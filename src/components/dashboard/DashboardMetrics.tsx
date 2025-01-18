@@ -71,20 +71,19 @@ async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
 async function fetchTenantMetrics(userId: string): Promise<Metrics> {
   console.log("Fetching tenant metrics for user:", userId);
   
-  // First get the active tenancy
-  const { data: tenancy } = await supabase
+  // Get count of active tenancies for this tenant
+  const { count: propertiesCount, error: tenancyError } = await supabase
     .from("tenancies")
-    .select(`
-      id,
-      property:properties (
-        name
-      )
-    `)
+    .select("id", { count: "exact" })
     .eq("tenant_id", userId)
-    .eq("status", "active")
-    .maybeSingle();
+    .eq("status", "active");
 
-  console.log("Current tenancy:", tenancy);
+  console.log("Active tenancies count:", propertiesCount);
+
+  if (tenancyError) {
+    console.error("Error fetching tenancies:", tenancyError);
+    throw tenancyError;
+  }
 
   const [maintenanceCount, latestPayment] = await Promise.all([
     supabase
@@ -92,25 +91,23 @@ async function fetchTenantMetrics(userId: string): Promise<Metrics> {
       .select("id", { count: "exact" })
       .eq("tenant_id", userId)
       .eq("status", "pending"),
-    tenancy?.id
-      ? supabase
-          .from("payments")
-          .select("status")
-          .eq("tenancy_id", tenancy.id)
-          .order("due_date", { ascending: false })
-          .limit(1)
-          .maybeSingle()
-      : Promise.resolve({ data: null }),
+    supabase
+      .from("payments")
+      .select("status")
+      .eq("tenant_id", userId)
+      .order("due_date", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   console.log("Tenant metrics calculated:", {
-    property: tenancy?.property?.name,
+    properties: propertiesCount,
     maintenance: maintenanceCount.count,
     payment: latestPayment.data?.status,
   });
 
   return {
-    currentProperty: tenancy?.property?.name || "No active lease",
+    totalProperties: propertiesCount || 0,
     pendingMaintenance: maintenanceCount.count || 0,
     paymentStatus: latestPayment.data?.status || "No payments",
   };
@@ -174,8 +171,8 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <MetricCard
-        title={t('dashboard.metrics.currentProperty')}
-        value={metrics.currentProperty || t('dashboard.properties.noProperties')}
+        title={t('dashboard.metrics.totalProperties')}
+        value={metrics.totalProperties}
         icon={Home}
       />
       <MetricCard
