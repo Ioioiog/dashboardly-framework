@@ -26,13 +26,13 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
   const handleDownload = async () => {
     try {
-      // Remove any leading slashes and ensure correct bucket path
-      const cleanPath = doc.file_path.replace(/^\/+/, '');
-      console.log("Attempting to download file with cleaned path:", cleanPath);
+      // Extract just the filename without any path or UUIDs
+      const fileName = doc.file_path.split('/').pop();
+      console.log("Attempting to download file:", fileName);
       
       const { data, error } = await supabase.storage
         .from("documents")
-        .download(cleanPath);
+        .download(doc.file_path);
 
       if (error) {
         console.error("Storage download error:", error);
@@ -43,23 +43,23 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
         throw new Error("No data received from storage");
       }
 
+      // Create and trigger download
       const url = URL.createObjectURL(data);
       const a = document.createElement("a");
       a.href = url;
-      // Get just the filename from the path
-      const fileName = cleanPath.split('/').pop() || 'document';
-      a.download = fileName;
+      a.download = fileName || 'document';
       document.body.appendChild(a);
       a.click();
+      
+      // Cleanup
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
       console.log("File download completed successfully");
     } catch (error) {
       console.error("Error downloading document:", error);
       toast({
         title: "Error",
-        description: "Could not download the document. The file might have been moved or deleted.",
+        description: "Could not download the document. Please try again later.",
         variant: "destructive",
       });
     }
@@ -67,10 +67,9 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
   const handleDelete = async () => {
     try {
-      const cleanPath = doc.file_path.replace(/^\/+/, '');
       const { error: storageError } = await supabase.storage
         .from("documents")
-        .remove([cleanPath]);
+        .remove([doc.file_path]);
 
       if (storageError) throw storageError;
 
