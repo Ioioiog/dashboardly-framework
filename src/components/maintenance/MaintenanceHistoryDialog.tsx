@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ImageIcon } from "lucide-react";
 
 interface MaintenanceHistoryDialogProps {
   open: boolean;
@@ -18,6 +19,7 @@ interface HistoryEntry {
   issue_type: string | null;
   priority: string | null;
   notes: string | null;
+  images: string[] | null;
   edited_at: string;
 }
 
@@ -93,6 +95,15 @@ export function MaintenanceHistoryDialog({
                     {entry.notes && (
                       <div>
                         <span className="font-semibold">Notes:</span> {entry.notes}
+                      </div>
+                    )}
+                    {entry.images && entry.images.length > 0 && (
+                      <div>
+                        <span className="font-semibold">Images:</span>{" "}
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <ImageIcon className="w-4 h-4" />
+                          {entry.images.length} image{entry.images.length !== 1 ? 's' : ''} attached
+                        </div>
                       </div>
                     )}
                   </div>

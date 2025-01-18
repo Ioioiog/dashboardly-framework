@@ -40,6 +40,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
           issue_type: request!.issue_type,
           priority: request!.priority,
           notes: request!.notes,
+          images: request!.images, // Add images to history
           edited_by: currentUser.user.id,
         });
 

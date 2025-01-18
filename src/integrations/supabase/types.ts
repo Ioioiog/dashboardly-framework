@@ -66,6 +66,7 @@ export type Database = {
           edited_at: string
           edited_by: string
           id: string
+          images: string[] | null
           issue_type: string | null
           maintenance_request_id: string
           notes: string | null
@@ -77,6 +78,7 @@ export type Database = {
           edited_at?: string
           edited_by: string
           id?: string
+          images?: string[] | null
           issue_type?: string | null
           maintenance_request_id: string
           notes?: string | null
@@ -88,6 +90,7 @@ export type Database = {
           edited_at?: string
           edited_by?: string
           id?: string
+          images?: string[] | null
           issue_type?: string | null
           maintenance_request_id?: string
           notes?: string | null
