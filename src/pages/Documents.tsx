@@ -60,26 +60,28 @@ const Documents = () => {
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
       <main className="flex-1 ml-64 p-8 animate-fade-in">
-        <div className="max-w-7xl mx-auto">
-          <header className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">Documents</h1>
-              <p className="mt-2 text-dashboard-text">
-                Manage and view your property-related documents.
-              </p>
-            </div>
-            {userRole === "landlord" && (
-              <Button 
-                className="flex items-center gap-2"
-                onClick={() => setShowAddModal(true)}
-              >
-                <Plus className="h-4 w-4" />
-                Upload Document
-              </Button>
-            )}
-          </header>
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <header className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-semibold text-gray-900">Documents</h1>
+                <p className="mt-2 text-dashboard-text">
+                  Manage and view your property-related documents.
+                </p>
+              </div>
+              {userRole === "landlord" && (
+                <Button 
+                  className="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white"
+                  onClick={() => setShowAddModal(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  Upload Document
+                </Button>
+              )}
+            </header>
+          </div>
 
-          <div className="space-y-8">
+          <div className="bg-white rounded-lg shadow-sm p-6">
             <DocumentList 
               userId={userId} 
               userRole={userRole}
