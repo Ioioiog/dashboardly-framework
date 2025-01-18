@@ -30,34 +30,27 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
       const cleanPath = doc.file_path.replace(/^\/+/, '');
       console.log("Attempting to download file with clean path:", cleanPath);
       
-      // First try to get a signed URL for the file
-      const { data: { signedUrl }, error: signError } = await supabase.storage
+      // Download the file directly instead of getting a signed URL
+      const { data, error } = await supabase.storage
         .from("documents")
-        .createSignedUrl(cleanPath, 60); // 60 seconds expiry
+        .download(cleanPath);
 
-      if (signError) {
-        console.error("Error getting signed URL:", signError);
-        throw signError;
+      if (error) {
+        console.error("Storage download error:", error);
+        throw error;
       }
 
-      if (!signedUrl) {
-        throw new Error("No signed URL received");
+      if (!data) {
+        console.error("No data received from storage");
+        throw new Error("No data received from storage");
       }
 
-      // Use the signed URL to download the file
-      const response = await fetch(signedUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const blob = await response.blob();
-      
       // Extract filename from path
       const fileName = cleanPath.split('/').pop() || 'document';
       console.log("Using filename for download:", fileName);
 
       // Create a download link and trigger it
-      const url = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(data);
       const a = document.createElement("a");
       a.href = url;
       a.download = fileName;
