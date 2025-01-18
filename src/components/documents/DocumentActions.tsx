@@ -26,13 +26,9 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
   const handleDownload = async () => {
     try {
-      // Remove any leading slashes and user IDs from the path
-      const cleanPath = doc.file_path
-        .replace(/^\/+/, '')
-        .split('/')
-        .filter(part => part !== 'documents' && !part.includes('-'))
-        .join('/');
-
+      // Only remove leading slashes, keep the full path structure
+      const cleanPath = doc.file_path.replace(/^\/+/, '');
+      
       console.log("Original file path:", doc.file_path);
       console.log("Cleaned file path for download:", cleanPath);
 
