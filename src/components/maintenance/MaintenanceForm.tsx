@@ -147,12 +147,13 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
     }
 
     let propertyId = values.property_id;
+    let tenantId = userData.user.id;
     
     // If user is a tenant, get their active tenancy's property
     if (userProfile?.role === "tenant") {
       const { data: tenancy, error: tenancyError } = await supabase
         .from("tenancies")
-        .select("property_id")
+        .select("property_id, tenant_id")
         .eq("tenant_id", userData.user.id)
         .eq("status", "active")
         .maybeSingle();
@@ -177,20 +178,55 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       }
 
       propertyId = tenancy.property_id;
+      tenantId = tenancy.tenant_id;
+    } else if (userProfile?.role === "landlord") {
+      // For landlord-created requests, we need to find the current tenant of the property
+      const { data: currentTenancy, error: tenancyError } = await supabase
+        .from("tenancies")
+        .select("tenant_id")
+        .eq("property_id", propertyId)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (tenancyError) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch property tenant information",
+          variant: "destructive",
+        });
+        console.error("Error fetching tenancy:", tenancyError);
+        return;
+      }
+
+      if (!currentTenancy) {
+        toast({
+          title: "Error",
+          description: "This property doesn't have an active tenant",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      tenantId = currentTenancy.tenant_id;
     }
 
-    const requestData = {
+    console.log("Creating maintenance request:", {
+      ...values,
+      property_id: propertyId,
+      tenant_id: tenantId,
+      images: uploadedImages,
+    });
+
+    createRequest({
       title: values.title,
       description: values.description,
       property_id: propertyId,
-      tenant_id: userProfile?.role === "tenant" ? userData.user.id : null,
+      tenant_id: tenantId,
       issue_type: values.issue_type,
       priority: values.priority,
       notes: values.notes,
       images: uploadedImages,
-    };
-
-    createRequest(requestData, {
+    }, {
       onSuccess: () => {
         toast({
           title: "Success",
