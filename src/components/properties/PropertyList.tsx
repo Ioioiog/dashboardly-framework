@@ -10,7 +10,7 @@ interface PropertyListProps {
   properties: Property[] | undefined;
   isLoading: boolean;
   userRole: "landlord" | "tenant";
-  onEdit?: (property: Property, data: any) => void; // Updated signature to match usage
+  onEdit?: (property: Property, data: any) => void;
   onDelete?: (property: Property) => void;
 }
 

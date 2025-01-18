@@ -1,24 +1,21 @@
-import { useProperties } from "@/hooks/useProperties";
-import { PropertyList } from "../properties/PropertyList";
 import { Property } from "@/utils/propertyUtils";
+import { PropertyList } from "@/components/properties/PropertyList";
 
 interface DashboardPropertiesProps {
   userRole: "landlord" | "tenant";
-  onEdit?: (property: Property, data: any) => void; // Updated to match the expected signature
+  onEdit?: (property: Property, data: any) => void;
   onDelete?: (property: Property) => void;
 }
 
 export function DashboardProperties({ 
   userRole,
   onEdit,
-  onDelete,
+  onDelete 
 }: DashboardPropertiesProps) {
-  const { properties, isLoading } = useProperties({ userRole });
-
   return (
     <PropertyList
-      properties={properties}
-      isLoading={isLoading}
+      properties={[]} // This will show the loading state
+      isLoading={true}
       userRole={userRole}
       onEdit={onEdit}
       onDelete={onDelete}
