@@ -125,6 +125,7 @@ export function StripeAccountForm() {
               onClick={() => {
                 window.open('https://dashboard.stripe.com/apikeys', '_blank');
               }}
+              className="bg-blue-500 hover:bg-blue-400 text-white"
             >
               Get Stripe API Keys
             </Button>
@@ -149,6 +150,7 @@ export function StripeAccountForm() {
                 variant="destructive"
                 onClick={handleDisconnectStripe}
                 disabled={isLoading}
+                className="bg-red-500 hover:bg-red-400"
               >
                 {isLoading ? "Disconnecting..." : "Disconnect Stripe"}
               </Button>
@@ -157,6 +159,7 @@ export function StripeAccountForm() {
             <Button
               onClick={handleConnectStripe}
               disabled={isLoading}
+              className="bg-blue-500 hover:bg-blue-400 text-white"
             >
               {isLoading ? "Connecting..." : "Connect Stripe Account"}
             </Button>

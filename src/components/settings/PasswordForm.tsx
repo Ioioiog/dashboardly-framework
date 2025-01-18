@@ -95,7 +95,11 @@ export function PasswordForm() {
               minLength={6}
             />
           </div>
-          <Button type="submit" disabled={isUpdatingPassword} className="w-full">
+          <Button 
+            type="submit" 
+            disabled={isUpdatingPassword} 
+            className="w-full bg-blue-500 hover:bg-blue-400 text-white"
+          >
             {isUpdatingPassword ? "Updating Password..." : "Update Password"}
           </Button>
         </form>
