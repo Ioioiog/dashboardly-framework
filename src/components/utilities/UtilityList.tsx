@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PaymentActions } from "@/components/payments/PaymentActions";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 
 interface Utility {
   id: string;
@@ -52,6 +54,46 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
     }
   };
 
+  const handleViewInvoice = async (utilityId: string) => {
+    try {
+      // First get the invoice details
+      const { data: invoices, error: invoiceError } = await supabase
+        .from('utility_invoices')
+        .select('pdf_path')
+        .eq('utility_id', utilityId)
+        .single();
+
+      if (invoiceError) throw invoiceError;
+
+      if (!invoices?.pdf_path) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No invoice file found for this utility bill.",
+        });
+        return;
+      }
+
+      // Get the temporary URL for the file
+      const { data: { signedUrl }, error: urlError } = await supabase
+        .storage
+        .from('utility-invoices')
+        .createSignedUrl(invoices.pdf_path, 60); // URL valid for 60 seconds
+
+      if (urlError) throw urlError;
+
+      // Open the PDF in a new tab
+      window.open(signedUrl, '_blank');
+    } catch (error) {
+      console.error("Error viewing invoice:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to retrieve the invoice file.",
+      });
+    }
+  };
+
   return (
     <div className="grid gap-4">
       {utilities.map((utility) => (
@@ -77,11 +119,22 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between">
-              <Badge
-                variant={utility.status === "paid" ? "default" : "secondary"}
-              >
-                {utility.status}
-              </Badge>
+              <div className="flex items-center gap-4">
+                <Badge
+                  variant={utility.status === "paid" ? "default" : "secondary"}
+                >
+                  {utility.status}
+                </Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleViewInvoice(utility.id)}
+                  className="flex items-center gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  See Invoice
+                </Button>
+              </div>
               {userRole === "landlord" ? (
                 <div className="flex gap-2">
                   <PaymentActions
