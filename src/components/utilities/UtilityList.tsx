@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PaymentActions } from "@/components/payments/PaymentActions";
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
+import { FileText, Trash2 } from "lucide-react";
 
 interface Utility {
   id: string;
@@ -116,6 +116,38 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
     }
   };
 
+  const handleDelete = async (utilityId: string) => {
+    try {
+      console.log("Deleting utility with ID:", utilityId);
+      
+      const { error } = await supabase
+        .from('utilities')
+        .delete()
+        .eq('id', utilityId);
+
+      if (error) {
+        console.error("Error deleting utility:", error);
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Utility bill deleted successfully!",
+      });
+      
+      if (onStatusUpdate) {
+        onStatusUpdate();
+      }
+    } catch (error) {
+      console.error("Error deleting utility:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete utility bill.",
+      });
+    }
+  };
+
   return (
     <div className="grid gap-4">
       {utilities.map((utility) => (
@@ -156,6 +188,17 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
                   <FileText className="h-4 w-4" />
                   See Invoice
                 </Button>
+                {userRole === "landlord" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(utility.id)}
+                    className="flex items-center gap-2 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
+                )}
               </div>
               {userRole === "landlord" ? (
                 <div className="flex gap-2">
