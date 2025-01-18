@@ -1,197 +1,125 @@
-import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useLocation, Link } from "react-router-dom";
 import {
   LayoutDashboard,
-  Home,
+  Building2,
   Users,
   Wrench,
   FileText,
-  CreditCard,
+  Receipt,
+  DollarSign,
   Zap,
-  LogOut,
   Settings,
+  LogOut,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
-interface MenuItem {
-  icon: React.ElementType;
-  labelKey: string;
-  path: string;
-  roles?: string[];
-}
-
-const menuItems: MenuItem[] = [
-  { icon: LayoutDashboard, labelKey: "navigation.dashboard", path: "/dashboard" },
-  { icon: Home, labelKey: "navigation.properties", path: "/properties" },
-  { icon: Users, labelKey: "navigation.tenants", path: "/tenants", roles: ['landlord'] },
-  { icon: Wrench, labelKey: "navigation.maintenance", path: "/maintenance" },
-  { icon: FileText, labelKey: "navigation.documents", path: "/documents" },
-  { icon: CreditCard, labelKey: "navigation.payments", path: "/payments" },
-  { icon: Zap, labelKey: "navigation.utilities", path: "/utilities" },
+const menuItems = [
+  {
+    icon: LayoutDashboard,
+    label: "dashboard.menu.dashboard",
+    href: "/dashboard",
+  },
+  {
+    icon: Building2,
+    label: "dashboard.menu.properties",
+    href: "/properties",
+  },
+  {
+    icon: Users,
+    label: "dashboard.menu.tenants",
+    href: "/tenants",
+  },
+  {
+    icon: Wrench,
+    label: "dashboard.menu.maintenance",
+    href: "/maintenance",
+  },
+  {
+    icon: FileText,
+    label: "dashboard.menu.documents",
+    href: "/documents",
+  },
+  {
+    icon: Receipt,
+    label: "Invoices",
+    href: "/invoices",
+  },
+  {
+    icon: DollarSign,
+    label: "dashboard.menu.payments",
+    href: "/payments",
+  },
+  {
+    icon: Zap,
+    label: "dashboard.menu.utilities",
+    href: "/utilities",
+  },
+  {
+    icon: Settings,
+    label: "dashboard.menu.settings",
+    href: "/settings",
+  },
 ];
 
-const DashboardSidebar = () => {
-  const [isCollapsed, setIsCollapsed] = React.useState(false);
-  const [userRole, setUserRole] = React.useState<string | null>(null);
+export default function DashboardSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { t } = useTranslation();
+  const { toast } = useToast();
 
-  React.useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
-          
-          if (profile) {
-            setUserRole(profile.role);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching user role:', error);
-      }
-    };
-
-    fetchUserRole();
-  }, []);
-
-  const handleLogout = async () => {
+  const handleSignOut = async () => {
     try {
-      console.log("Starting logout process");
-      await supabase.auth.signOut({ scope: 'local' });
-      console.log("Local session cleared");
-      console.log("Navigating to auth page");
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       navigate("/auth");
     } catch (error) {
-      console.error("Error during logout process:", error);
+      console.error("Error signing out:", error);
       toast({
-        title: "Error logging out",
-        description: "Please try again",
         variant: "destructive",
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
       });
     }
   };
 
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
-  const filteredMenuItems = menuItems.filter(
-    item => !item.roles || (userRole && item.roles.includes(userRole))
-  );
-
   return (
-    <aside
-      className={`bg-dashboard-sidebar h-screen fixed left-0 top-0 transition-all duration-300 ease-in-out ${
-        isCollapsed ? "w-20" : "w-64"
-      } border-r border-gray-200 shadow-sm`}
-    >
-      <div className="flex flex-col h-full">
-        <div className="p-8 border-b border-gray-100">
-          <div className={`transition-opacity duration-200 ${
-            isCollapsed ? "opacity-0" : "opacity-100"
-          }`}>
-            <h1 className="text-2xl font-bold text-center">
-              <span className="text-blue-600">Admin</span>
-              <span className="text-blue-800">Chirii</span>
-              <span className="text-slate-500 font-light">.ro</span>
-            </h1>
-            <p className="text-xs text-slate-500 mt-2 text-center">simplificăm administrarea chiriilor</p>
+    <div className="fixed left-0 h-screen w-64 border-r bg-background p-6">
+      <div className="flex h-full flex-col justify-between">
+        <div className="space-y-4">
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold">Property Manager</h2>
           </div>
-        </div>
-
-        <nav className="flex-1 py-6">
-          <ul className="space-y-1">
-            {filteredMenuItems.map((item) => (
-              <li key={item.labelKey}>
-                <Link
-                  to={item.path}
-                  className={`flex items-center px-6 py-3 text-dashboard-text hover:bg-dashboard-accent transition-colors duration-200 ${
-                    location.pathname === item.path
-                      ? "bg-dashboard-accent text-gray-900 font-medium"
-                      : ""
-                  }`}
+          <nav className="space-y-2">
+            {menuItems.map((item) => (
+              <Link key={item.href} to={item.href}>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start gap-2",
+                    location.pathname === item.href && "bg-secondary"
+                  )}
                 >
-                  <item.icon
-                    className={`h-5 w-5 ${
-                      location.pathname === item.path
-                        ? "text-gray-900"
-                        : "text-dashboard-text"
-                    }`}
-                  />
-                  <span
-                    className={`ml-3 transition-opacity duration-200 ${
-                      isCollapsed ? "opacity-0 hidden" : "opacity-100"
-                    }`}
-                  >
-                    {t(item.labelKey)}
-                  </span>
-                </Link>
-              </li>
+                  <item.icon className="h-4 w-4" />
+                  {t(item.label)}
+                </Button>
+              </Link>
             ))}
-          </ul>
-        </nav>
-
-        <div className="p-6 border-t border-gray-100 space-y-2">
-          <Link
-            to="/settings"
-            className="flex items-center w-full text-dashboard-text hover:text-gray-900 transition-colors duration-200"
-          >
-            <Settings className="h-5 w-5" />
-            <span
-              className={`ml-3 transition-opacity duration-200 ${
-                isCollapsed ? "opacity-0 hidden" : "opacity-100"
-              }`}
-            >
-              {t('navigation.settings')}
-            </span>
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="flex items-center w-full text-dashboard-text hover:text-gray-900 transition-colors duration-200"
-          >
-            <LogOut className="h-5 w-5" />
-            <span
-              className={`ml-3 transition-opacity duration-200 ${
-                isCollapsed ? "opacity-0 hidden" : "opacity-100"
-              }`}
-            >
-              {t('navigation.logout')}
-            </span>
-          </button>
+          </nav>
         </div>
-
-        <button
-          onClick={toggleSidebar}
-          className="absolute -right-3 top-1/2 transform -translate-y-1/2 bg-white border border-gray-200 rounded-full p-1.5 shadow-sm hover:shadow-md transition-shadow duration-200"
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-2"
+          onClick={handleSignOut}
         >
-          <svg
-            className={`w-4 h-4 text-gray-600 transform transition-transform duration-200 ${
-              isCollapsed ? "rotate-180" : ""
-            }`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
+          <LogOut className="h-4 w-4" />
+          {t("dashboard.menu.signout")}
+        </Button>
       </div>
-    </aside>
+    </div>
   );
-};
-
-export default DashboardSidebar;
+}

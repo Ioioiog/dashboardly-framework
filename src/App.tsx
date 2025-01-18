@@ -13,6 +13,7 @@ import Settings from "./pages/Settings";
 import Payments from "./pages/Payments";
 import Utilities from "./pages/Utilities";
 import TenantRegistration from "./pages/TenantRegistration";
+import Invoices from "./pages/Invoices";
 import { StrictMode, useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { useToast } from "./hooks/use-toast";
@@ -163,6 +164,10 @@ const AppContent = () => {
         <Route
           path="/settings"
           element={isAuthenticated ? <Settings /> : <Navigate to="/auth" replace />}
+        />
+        <Route
+          path="/invoices"
+          element={isAuthenticated ? <Invoices /> : <Navigate to="/auth" replace />}
         />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

@@ -1,0 +1,135 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
+import { InvoiceList } from "@/components/invoices/InvoiceList";
+import { InvoiceDialog } from "@/components/invoices/InvoiceDialog";
+import { Invoice } from "@/types/invoice";
+
+const Invoices = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
+
+  const fetchInvoices = async () => {
+    try {
+      console.log("Fetching invoices...");
+      const { data: invoicesData, error: invoicesError } = await supabase
+        .from("invoices")
+        .select(`
+          *,
+          property:properties (
+            name,
+            address
+          ),
+          tenant:profiles (
+            first_name,
+            last_name,
+            email
+          )
+        `)
+        .order("due_date", { ascending: false });
+
+      if (invoicesError) throw invoicesError;
+
+      console.log("Fetched invoices:", invoicesData);
+      setInvoices(invoicesData || []);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not fetch invoices",
+      });
+    }
+  };
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          navigate("/auth");
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not fetch user profile",
+          });
+          return;
+        }
+
+        if (profile.role !== "landlord" && profile.role !== "tenant") {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Invalid user role",
+          });
+          return;
+        }
+
+        setUserRole(profile.role as "landlord" | "tenant");
+        await fetchInvoices();
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error in checkUser:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "An unexpected error occurred",
+        });
+      }
+    };
+
+    checkUser();
+  }, [navigate, toast]);
+
+  if (isLoading || !userRole) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen bg-gray-100">
+      <DashboardSidebar />
+      <div className="flex-1 p-8 ml-64">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Invoices</CardTitle>
+            {userRole === "landlord" && (
+              <InvoiceDialog onInvoiceCreated={fetchInvoices} />
+            )}
+          </CardHeader>
+          <CardContent>
+            <InvoiceList 
+              invoices={invoices} 
+              userRole={userRole} 
+              onStatusUpdate={fetchInvoices}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default Invoices;
