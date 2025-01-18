@@ -8,6 +8,7 @@ import { PropertyDialog } from "@/components/properties/PropertyDialog";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 
 export default function Properties() {
   const { t } = useTranslation();
@@ -74,32 +75,37 @@ export default function Properties() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl space-y-8">
-      <div className="space-y-8">
-        <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {t("properties.title")}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {t("properties.description")}
-            </p>
+    <div className="flex h-screen bg-background">
+      <DashboardSidebar />
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto p-6 max-w-7xl space-y-8">
+          <div className="space-y-8">
+            <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  {t("properties.title")}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {t("properties.description")}
+                </p>
+              </div>
+
+              {userRole === "landlord" && (
+                <Button onClick={() => setShowDialog(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t("properties.actions.add")}
+                </Button>
+              )}
+            </header>
+
+            <div className="space-y-8">
+              <DashboardProperties 
+                userRole={userRole}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            </div>
           </div>
-
-          {userRole === "landlord" && (
-            <Button onClick={() => setShowDialog(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t("properties.actions.add")}
-            </Button>
-          )}
-        </header>
-
-        <div className="space-y-8">
-          <DashboardProperties 
-            userRole={userRole}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
         </div>
       </div>
 
