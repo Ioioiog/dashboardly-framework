@@ -29,6 +29,7 @@ export function ProviderList({ providers, onDelete, isLoading }: ProviderListPro
 
   const handleScrape = async (providerId: string) => {
     try {
+      console.log('Starting scrape for provider:', providerId);
       setScrapingStates(prev => ({ ...prev, [providerId]: true }));
 
       // Create or update scraping job
@@ -39,41 +40,50 @@ export function ProviderList({ providers, onDelete, isLoading }: ProviderListPro
           status: 'pending'
         });
 
-      if (jobError) throw jobError;
+      if (jobError) {
+        console.error('Error creating scraping job:', jobError);
+        throw jobError;
+      }
 
       // Call the edge function to start scraping
       const { error } = await supabase.functions.invoke('scrape-utility-invoices', {
         body: { providerId }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error invoking edge function:', error);
+        throw error;
+      }
 
       // Start polling for status updates
       const interval = setInterval(async () => {
-        const { data: job, error: pollError } = await supabase
+        const { data: jobs, error: pollError } = await supabase
           .from('scraping_jobs')
           .select('status, last_run_at, error_message')
           .eq('utility_provider_id', providerId)
-          .single();
+          .order('created_at', { ascending: false })
+          .limit(1);
 
         if (pollError) {
           console.error('Polling error:', pollError);
           return;
         }
 
-        if (job) {
-          setScrapingJobs(prev => ({ ...prev, [providerId]: job }));
+        if (jobs && jobs.length > 0) {
+          const latestJob = jobs[0];
+          console.log('Latest job status:', latestJob);
+          setScrapingJobs(prev => ({ ...prev, [providerId]: latestJob }));
           
-          if (job.status === 'completed' || job.status === 'failed') {
+          if (latestJob.status === 'completed' || latestJob.status === 'failed') {
             clearInterval(interval);
             setScrapingStates(prev => ({ ...prev, [providerId]: false }));
             
             toast({
-              title: job.status === 'completed' ? 'Success' : 'Error',
-              description: job.status === 'completed' 
+              title: latestJob.status === 'completed' ? 'Success' : 'Error',
+              description: latestJob.status === 'completed' 
                 ? 'Utility invoices scraped successfully'
-                : `Failed to scrape invoices: ${job.error_message}`,
-              variant: job.status === 'completed' ? 'default' : 'destructive',
+                : `Failed to scrape invoices: ${latestJob.error_message}`,
+              variant: latestJob.status === 'completed' ? 'default' : 'destructive',
             });
           }
         }
@@ -82,7 +92,7 @@ export function ProviderList({ providers, onDelete, isLoading }: ProviderListPro
       // Cleanup interval after 5 minutes
       setTimeout(() => clearInterval(interval), 300000);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Scraping error:', error);
       setScrapingStates(prev => ({ ...prev, [providerId]: false }));
       toast({
