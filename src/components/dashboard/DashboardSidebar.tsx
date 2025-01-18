@@ -68,7 +68,7 @@ export default function DashboardSidebar() {
   ];
 
   const filteredMenuItems = menuItems.filter((item) =>
-    item.roles.includes(userRole || "tenant")
+    userRole ? item.roles.includes(userRole) : item.roles.includes("tenant")
   );
 
   return (
@@ -83,7 +83,7 @@ export default function DashboardSidebar() {
             />
           </div>
           <nav className="space-y-2">
-            {menuItems.map((item) => (
+            {filteredMenuItems.map((item) => (
               <button
                 key={item.href}
                 onClick={() => navigate(item.href)}

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+type UserRole = "landlord" | "tenant" | null;
+
 export function useUserRole() {
-  const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
+  const [userRole, setUserRole] = useState<UserRole>(null);
 
   useEffect(() => {
     async function getUserRole() {
@@ -10,7 +12,8 @@ export function useUserRole() {
       
       if (!user) {
         console.log("No user found");
-        return null;
+        setUserRole(null);
+        return;
       }
 
       const { data: profile } = await supabase
@@ -22,12 +25,14 @@ export function useUserRole() {
       console.log("User profile:", profile);
       
       if (profile?.role) {
-        setUserRole(profile.role as "landlord" | "tenant");
+        setUserRole(profile.role as UserRole);
+      } else {
+        setUserRole(null);
       }
     }
 
     getUserRole();
   }, []);
 
-  return userRole;
+  return { userRole };
 }
