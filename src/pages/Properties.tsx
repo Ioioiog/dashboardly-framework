@@ -77,8 +77,8 @@ export default function Properties() {
   return (
     <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="container mx-auto py-8 px-4 max-w-7xl">
+      <main className="flex-1 pl-64 overflow-auto">
+        <div className="container mx-auto py-8 px-4">
           <div className="space-y-6">
             <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
