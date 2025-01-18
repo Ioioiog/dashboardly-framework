@@ -71,43 +71,48 @@ export default function Properties() {
   };
 
   if (!userRole) {
-    return null; // Or loading state
+    return null;
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6 max-w-7xl space-y-8">
-          <div className="space-y-8">
-            <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <main className="flex-1 overflow-auto">
+        <div className="container mx-auto py-8 px-4 max-w-7xl">
+          <div className="space-y-6">
+            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight">
+                <h1 className="text-3xl font-bold tracking-tight text-gray-900">
                   {t("properties.title")}
                 </h1>
-                <p className="text-sm text-muted-foreground">
+                <p className="mt-2 text-sm text-gray-500">
                   {t("properties.description")}
                 </p>
               </div>
 
               {userRole === "landlord" && (
-                <Button onClick={() => setShowDialog(true)}>
+                <Button 
+                  onClick={() => setShowDialog(true)}
+                  className="w-full sm:w-auto"
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   {t("properties.actions.add")}
                 </Button>
               )}
             </header>
 
-            <div className="space-y-8">
-              <DashboardProperties 
-                userRole={userRole}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
+            <div className="rounded-lg border bg-white shadow">
+              <div className="p-6">
+                <DashboardProperties 
+                  userRole={userRole}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <PropertyDialog
         open={showDialog}
