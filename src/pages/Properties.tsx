@@ -168,10 +168,9 @@ const Properties = () => {
             )}
           </header>
 
-          {userId && userRole && (
+          {userRole && (
             <div className="space-y-8">
               <DashboardProperties 
-                userId={userId} 
                 userRole={userRole}
                 onEdit={handleEdit}
                 onDelete={handleDelete}

@@ -10,7 +10,7 @@ import { format } from "date-fns";
 interface PropertyCardProps {
   property: Property;
   userRole: "landlord" | "tenant";
-  onEdit?: (property: Property) => void;
+  onEdit?: (property: Property, data: any) => void;
   onDelete?: (property: Property) => void;
 }
 
@@ -72,7 +72,7 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onEdit?.(property)}
+              onClick={() => onEdit?.(property, {})}
               className="flex items-center gap-2"
             >
               <Edit className="h-4 w-4" />
