@@ -29,6 +29,8 @@ export default function Properties() {
         title: t("properties.toast.updated.title"),
         description: t("properties.toast.updated.description"),
       });
+      
+      return true;
     } catch (error) {
       console.error("Error updating property:", error);
       toast({
@@ -36,6 +38,7 @@ export default function Properties() {
         title: t("common.error"),
         description: t("properties.toast.error"),
       });
+      return false;
     }
   };
 
@@ -52,6 +55,8 @@ export default function Properties() {
         title: t("properties.toast.deleted.title"),
         description: t("properties.toast.deleted.description"),
       });
+      
+      return true;
     } catch (error) {
       console.error("Error deleting property:", error);
       toast({
@@ -59,8 +64,13 @@ export default function Properties() {
         title: t("common.error"),
         description: t("properties.toast.error"),
       });
+      return false;
     }
   };
+
+  if (!userRole) {
+    return null; // Or loading state
+  }
 
   return (
     <div className="container mx-auto p-6 max-w-7xl space-y-8">
@@ -98,7 +108,8 @@ export default function Properties() {
         open={showDialog}
         onOpenChange={setShowDialog}
         property={selectedProperty}
-        onClose={() => setSelectedProperty(null)}
+        onSubmit={handleEdit}
+        mode={selectedProperty ? "edit" : "add"}
       />
     </div>
   );
