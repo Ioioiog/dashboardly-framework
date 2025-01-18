@@ -26,30 +26,40 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
   const handleDownload = async () => {
     try {
-      console.log("Attempting to download file:", doc.file_path);
+      // Remove any leading slashes and ensure correct bucket path
+      const cleanPath = doc.file_path.replace(/^\/+/, '');
+      console.log("Attempting to download file with cleaned path:", cleanPath);
       
       const { data, error } = await supabase.storage
         .from("documents")
-        .download(doc.file_path);
+        .download(cleanPath);
 
       if (error) {
         console.error("Storage download error:", error);
         throw error;
       }
 
+      if (!data) {
+        throw new Error("No data received from storage");
+      }
+
       const url = URL.createObjectURL(data);
       const a = document.createElement("a");
       a.href = url;
-      a.download = doc.file_path.split("/").pop() || "document";
+      // Get just the filename from the path
+      const fileName = cleanPath.split('/').pop() || 'document';
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      console.log("File download completed successfully");
     } catch (error) {
       console.error("Error downloading document:", error);
       toast({
         title: "Error",
-        description: "Could not download the document",
+        description: "Could not download the document. The file might have been moved or deleted.",
         variant: "destructive",
       });
     }
@@ -57,9 +67,10 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
   const handleDelete = async () => {
     try {
+      const cleanPath = doc.file_path.replace(/^\/+/, '');
       const { error: storageError } = await supabase.storage
         .from("documents")
-        .remove([doc.file_path]);
+        .remove([cleanPath]);
 
       if (storageError) throw storageError;
 
