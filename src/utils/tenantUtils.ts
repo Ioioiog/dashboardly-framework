@@ -57,7 +57,7 @@ export async function registerTenant(data: TenantRegistrationData) {
         .from('profiles')
         .select('id')
         .eq('email', data.email)
-        .maybeSingle(); // Use maybeSingle instead of single to handle no results
+        .maybeSingle();
 
       if (profile) {
         console.log("Found existing profile:", profile);
@@ -72,6 +72,33 @@ export async function registerTenant(data: TenantRegistrationData) {
         userId = authData.user.id;
       }
     }
+
+    // Generate invitation token
+    const token = crypto.randomUUID();
+
+    // Create invitation record
+    console.log("Creating invitation record...");
+    const { error: inviteError } = await supabase
+      .from("tenant_invitations")
+      .insert({
+        email: data.email,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        token,
+        start_date: data.startDate,
+        end_date: data.endDate || null,
+      });
+
+    if (inviteError) {
+      console.error("Error creating invitation:", inviteError);
+      throw inviteError;
+    }
+
+    // Set the token in the database context
+    console.log("Setting token in database context");
+    await supabase.rpc('set_claim', {
+      params: { value: token }
+    });
 
     console.log("Updating/creating profile...");
     const { error: profileError } = await supabase
@@ -89,23 +116,18 @@ export async function registerTenant(data: TenantRegistrationData) {
       throw profileError;
     }
 
-    console.log("Creating invitation record...");
-    const token = crypto.randomUUID();
-    const { error: inviteError } = await supabase
-      .from("tenant_invitations")
+    // Link invitation to property
+    console.log("Creating property assignment...");
+    const { error: propertyError } = await supabase
+      .from("tenant_invitation_properties")
       .insert({
-        email: data.email,
-        first_name: data.firstName,
-        last_name: data.lastName,
+        invitation_id: token,
         property_id: data.propertyId,
-        token,
-        start_date: data.startDate,
-        end_date: data.endDate || null,
       });
 
-    if (inviteError) {
-      console.error("Error creating invitation:", inviteError);
-      throw inviteError;
+    if (propertyError) {
+      console.error("Error creating property assignment:", propertyError);
+      throw propertyError;
     }
 
     console.log("Creating tenancy record...");
