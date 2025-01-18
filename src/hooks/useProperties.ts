@@ -1,12 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Property } from "@/types/property";
+import { Property } from "@/utils/propertyUtils";
 
-interface UsePropertiesProps {
+export interface UsePropertiesProps {
   userRole: "landlord" | "tenant";
 }
 
-export function useProperties({ userRole }: UsePropertiesProps) {
+export interface UsePropertiesReturn {
+  properties: Property[];
+  isLoading: boolean;
+  handleAdd?: (data: any) => Promise<boolean>;
+  handleEdit?: (property: Property, data: any) => Promise<boolean>;
+  handleDelete?: (property: Property) => Promise<boolean>;
+  isSubmitting?: boolean;
+}
+
+export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesReturn {
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", userRole],
     queryFn: async () => {

@@ -7,7 +7,6 @@ import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { PropertyDialog } from "@/components/properties/PropertyDialog";
-import { useProperties } from "@/hooks/useProperties";
 import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
@@ -19,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Property } from "@/utils/propertyUtils";
+import { Property, addProperty, updateProperty, deleteProperty } from "@/utils/propertyUtils";
 
 const Properties = () => {
   const navigate = useNavigate();
@@ -31,6 +30,7 @@ const Properties = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -78,23 +78,69 @@ const Properties = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
-  const { handleAdd, handleEdit, handleDelete, isSubmitting } = useProperties({
-    userId: userId || "",
-    userRole: userRole || "tenant"
-  });
-
-  const handleAddProperty = () => {
-    setShowAddModal(true);
+  const handleAdd = async (data: any) => {
+    try {
+      setIsSubmitting(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No user found");
+      
+      await addProperty({ ...data, landlord_id: user.id });
+      setShowAddModal(false);
+      toast({ title: "Success", description: "Property added successfully" });
+      return true;
+    } catch (error: any) {
+      console.error("Error adding property:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Could not add property",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleEditProperty = (property: Property) => {
-    setSelectedProperty(property);
-    setShowEditModal(true);
+  const handleEdit = async (property: Property, data: any) => {
+    try {
+      setIsSubmitting(true);
+      await updateProperty(property.id, data);
+      setShowEditModal(false);
+      setSelectedProperty(null);
+      toast({ title: "Success", description: "Property updated successfully" });
+      return true;
+    } catch (error: any) {
+      console.error("Error updating property:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Could not update property",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDeleteProperty = (property: Property) => {
-    setSelectedProperty(property);
-    setShowDeleteDialog(true);
+  const handleDelete = async (property: Property) => {
+    try {
+      setIsSubmitting(true);
+      await deleteProperty(property.id);
+      setShowDeleteDialog(false);
+      setSelectedProperty(null);
+      toast({ title: "Success", description: "Property deleted successfully" });
+      return true;
+    } catch (error: any) {
+      console.error("Error deleting property:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Could not delete property",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -114,7 +160,7 @@ const Properties = () => {
             {userRole === "landlord" && (
               <Button 
                 className="flex items-center gap-2"
-                onClick={handleAddProperty}
+                onClick={() => setShowAddModal(true)}
               >
                 <Plus className="h-4 w-4" />
                 {t('properties.addProperty')}
@@ -127,8 +173,8 @@ const Properties = () => {
               <DashboardProperties 
                 userId={userId} 
                 userRole={userRole}
-                onEdit={handleEditProperty}
-                onDelete={handleDeleteProperty}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
               />
             </div>
           )}

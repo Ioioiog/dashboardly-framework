@@ -34,7 +34,6 @@ const Utilities = () => {
   const [typeFilter, setTypeFilter] = useState("all");
 
   const { properties } = useProperties({ 
-    userId: userId || "", 
     userRole: userRole || "tenant" 
   });
 
