@@ -26,16 +26,13 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
   const handleDownload = async () => {
     try {
-      // Log the full file path for debugging
-      console.log("Attempting to download file with path:", doc.file_path);
+      // Remove any leading slashes and get clean file path
+      const cleanPath = doc.file_path.replace(/^\/+/, '');
+      console.log("Attempting to download file with clean path:", cleanPath);
       
-      // Extract the file name for the download
-      const fileName = doc.file_path.split('/').pop();
-      
-      // Get the file from Supabase storage
       const { data, error } = await supabase.storage
         .from("documents")
-        .download(doc.file_path);
+        .download(cleanPath);
 
       if (error) {
         console.error("Storage download error:", error);
@@ -47,11 +44,15 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
         throw new Error("No data received from storage");
       }
 
+      // Extract filename from path
+      const fileName = cleanPath.split('/').pop() || 'document';
+      console.log("Using filename for download:", fileName);
+
       // Create a download link and trigger it
       const url = window.URL.createObjectURL(data);
       const a = document.createElement("a");
       a.href = url;
-      a.download = fileName || 'document';
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       
