@@ -26,6 +26,14 @@ export function PropertyDialog({
   isSubmitting,
   mode,
 }: PropertyDialogProps) {
+  const handleSubmit = (data: any) => {
+    if (mode === "edit" && property) {
+      onSubmit(property, data);
+    } else {
+      onSubmit(data);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -40,7 +48,7 @@ export function PropertyDialog({
           </DialogDescription>
         </DialogHeader>
         <PropertyForm
-          onSubmit={onSubmit}
+          onSubmit={handleSubmit}
           initialData={property}
           isSubmitting={isSubmitting}
         />
