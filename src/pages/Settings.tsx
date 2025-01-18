@@ -70,7 +70,7 @@ const Settings = () => {
       <div className="flex h-screen bg-dashboard-background">
         <DashboardSidebar />
         <main className="flex-1 p-8 ml-64">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <h1 className="text-2xl font-semibold mb-6">Loading...</h1>
           </div>
         </main>
@@ -81,26 +81,30 @@ const Settings = () => {
   return (
     <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
-      <main className="flex-1 p-8 ml-64">
-        <div className="max-w-2xl mx-auto space-y-6">
-          <h1 className="text-2xl font-semibold">Profile Settings</h1>
+      <main className="flex-1 p-8 ml-64 overflow-y-auto">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl font-semibold mb-6">Profile Settings</h1>
           
-          <PersonalInfoForm
-            initialProfile={profile}
-            isLoading={isLoading}
-            setIsLoading={setIsLoading}
-          />
-          
-          <PasswordForm />
-          
-          {profile.role === 'landlord' && (
-            <>
-              <StripeAccountForm />
-              <UtilityProviderForm />
-            </>
-          )}
-          
-          <LanguageSelector />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <PersonalInfoForm
+                initialProfile={profile}
+                isLoading={isLoading}
+                setIsLoading={setIsLoading}
+              />
+              <LanguageSelector />
+            </div>
+            
+            <div className="space-y-6">
+              <PasswordForm />
+              {profile.role === 'landlord' && (
+                <>
+                  <StripeAccountForm />
+                  <UtilityProviderForm />
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>
