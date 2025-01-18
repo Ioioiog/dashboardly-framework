@@ -1,108 +1,41 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  fetchLandlordProperties, 
-  fetchTenantProperties, 
-  Property,
-  addProperty,
-  updateProperty,
-  deleteProperty,
-} from "@/utils/propertyUtils";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Property } from "@/types/property";
 
 interface UsePropertiesProps {
-  userId: string;
   userRole: "landlord" | "tenant";
 }
 
-export function useProperties({ userId, userRole }: UsePropertiesProps) {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export function useProperties({ userRole }: UsePropertiesProps) {
+  const { data: properties = [], isLoading } = useQuery({
+    queryKey: ["properties", userRole],
+    queryFn: async () => {
+      console.log("Fetching properties data...");
+      const { data: user } = await supabase.auth.getUser();
+      
+      if (!user.user) {
+        throw new Error("No user found");
+      }
 
-  const { data: properties, isLoading } = useQuery({
-    queryKey: ["properties", userId, userRole],
-    queryFn: () => userRole === "landlord" 
-      ? fetchLandlordProperties(userId)
-      : fetchTenantProperties(userId),
-    enabled: !!userId && !!userRole,
+      if (userRole === "landlord") {
+        const { data, error } = await supabase
+          .from("properties")
+          .select("*")
+          .eq("landlord_id", user.user.id);
+
+        if (error) throw error;
+        return data || [];
+      } else {
+        const { data, error } = await supabase
+          .from("properties")
+          .select("*")
+          .eq("tenant_id", user.user.id);
+
+        if (error) throw error;
+        return data || [];
+      }
+    },
   });
 
-  const handleAdd = async (data: Omit<Property, "id">) => {
-    try {
-      setIsSubmitting(true);
-      await addProperty({ ...data, landlord_id: userId });
-      await queryClient.invalidateQueries({ queryKey: ["properties"] });
-      toast({
-        title: "Success",
-        description: "Property added successfully",
-      });
-      return true;
-    } catch (error) {
-      console.error("Error adding property:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add property",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEdit = async (property: Property, data: Partial<Property>) => {
-    try {
-      setIsSubmitting(true);
-      await updateProperty(property.id, data);
-      await queryClient.invalidateQueries({ queryKey: ["properties"] });
-      toast({
-        title: "Success",
-        description: "Property updated successfully",
-      });
-      return true;
-    } catch (error) {
-      console.error("Error updating property:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update property",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDelete = async (property: Property) => {
-    try {
-      setIsSubmitting(true);
-      await deleteProperty(property.id);
-      await queryClient.invalidateQueries({ queryKey: ["properties"] });
-      toast({
-        title: "Success",
-        description: "Property deleted successfully",
-      });
-      return true;
-    } catch (error) {
-      console.error("Error deleting property:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete property",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return {
-    properties,
-    isLoading,
-    isSubmitting,
-    handleAdd,
-    handleEdit,
-    handleDelete,
-  };
+  return { properties: properties as Property[], isLoading };
 }

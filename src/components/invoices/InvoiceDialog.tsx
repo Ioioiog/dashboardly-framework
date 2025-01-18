@@ -25,7 +25,7 @@ export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
   const { toast } = useToast();
   const [propertyId, setPropertyId] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const { properties } = useProperties({ userRole: "landlord" });
+  const { properties, isLoading } = useProperties({ userRole: "landlord" });
 
   const handleSubmit = async () => {
     if (!propertyId || !dueDate) {
@@ -39,6 +39,11 @@ export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
 
     try {
       setIsSubmitting(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("No user found");
+      }
 
       // Get property details
       const { data: property, error: propertyError } = await supabase
@@ -69,7 +74,7 @@ export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
       if (utilitiesError) throw utilitiesError;
 
       // Calculate total amount
-      const utilitiesTotal = utilities.reduce((sum, utility) => sum + utility.amount, 0);
+      const utilitiesTotal = utilities?.reduce((sum, utility) => sum + utility.amount, 0) || 0;
       const totalAmount = property.monthly_rent + utilitiesTotal;
 
       // Create invoice
@@ -78,7 +83,7 @@ export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
         .insert({
           property_id: propertyId,
           tenant_id: tenancy.tenant_id,
-          landlord_id: (await supabase.auth.getUser()).data.user?.id,
+          landlord_id: user.id,
           amount: totalAmount,
           due_date: dueDate,
           status: "pending",
@@ -96,7 +101,7 @@ export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
           amount: property.monthly_rent,
           type: "rent",
         },
-        ...utilities.map((utility: any) => ({
+        ...(utilities || []).map((utility: any) => ({
           invoice_id: invoice.id,
           description: `Utility Bill`,
           amount: utility.amount,
@@ -128,6 +133,10 @@ export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
     }
   };
 
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -148,7 +157,7 @@ export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
                 <SelectValue placeholder="Select property" />
               </SelectTrigger>
               <SelectContent>
-                {properties.map((property) => (
+                {properties?.map((property) => (
                   <SelectItem key={property.id} value={property.id}>
                     {property.name}
                   </SelectItem>

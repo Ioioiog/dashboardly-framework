@@ -19,7 +19,13 @@ const Invoices = () => {
   const fetchInvoices = async () => {
     try {
       console.log("Fetching invoices...");
-      const { data: invoicesData, error: invoicesError } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("No user found");
+      }
+
+      const query = supabase
         .from("invoices")
         .select(`
           *,
@@ -27,7 +33,7 @@ const Invoices = () => {
             name,
             address
           ),
-          tenant:profiles (
+          tenant:profiles!invoices_tenant_id_fkey (
             first_name,
             last_name,
             email
@@ -35,10 +41,12 @@ const Invoices = () => {
         `)
         .order("due_date", { ascending: false });
 
+      const { data: invoicesData, error: invoicesError } = await query;
+
       if (invoicesError) throw invoicesError;
 
       console.log("Fetched invoices:", invoicesData);
-      setInvoices(invoicesData || []);
+      setInvoices(invoicesData as Invoice[]);
     } catch (error) {
       console.error("Error fetching invoices:", error);
       toast({
