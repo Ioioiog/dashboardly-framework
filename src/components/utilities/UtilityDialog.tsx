@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,13 +6,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/utils/propertyUtils";
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 
 interface UtilityDialogProps {
   properties: Property[];
@@ -29,6 +29,7 @@ export function UtilityDialog({ properties, onUtilityCreated }: UtilityDialogPro
   const [amount, setAmount] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
   const handleSubmit = async () => {
     if (!utilityType || !amount || !propertyId || !dueDate) {
@@ -42,17 +43,47 @@ export function UtilityDialog({ properties, onUtilityCreated }: UtilityDialogPro
 
     try {
       setIsSubmitting(true);
-      const { error } = await supabase.from("utilities").insert([
-        {
-          type: utilityType,
-          amount: parseFloat(amount),
-          property_id: propertyId,
-          due_date: dueDate,
-          status: "pending",
-        },
-      ]);
+      
+      // First create the utility record
+      const { data: utility, error: utilityError } = await supabase
+        .from("utilities")
+        .insert([
+          {
+            type: utilityType,
+            amount: parseFloat(amount),
+            property_id: propertyId,
+            due_date: dueDate,
+            status: "pending",
+          },
+        ])
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (utilityError) throw utilityError;
+
+      // If there's a file, upload it and create an invoice record
+      if (file) {
+        const fileExt = file.name.split('.').pop();
+        const filePath = `${utility.id}/${crypto.randomUUID()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("utility-invoices")
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { error: invoiceError } = await supabase
+          .from("utility_invoices")
+          .insert({
+            utility_id: utility.id,
+            amount: parseFloat(amount),
+            due_date: dueDate,
+            status: "pending",
+            pdf_path: filePath,
+          });
+
+        if (invoiceError) throw invoiceError;
+      }
 
       toast({
         title: "Success",
@@ -60,12 +91,12 @@ export function UtilityDialog({ properties, onUtilityCreated }: UtilityDialogPro
       });
       setOpen(false);
       onUtilityCreated();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error recording utility bill:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to record utility bill.",
+        description: error.message || "Failed to record utility bill.",
       });
     } finally {
       setIsSubmitting(false);
@@ -136,6 +167,28 @@ export function UtilityDialog({ properties, onUtilityCreated }: UtilityDialogPro
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
             />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="file">Upload Bill (Optional)</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="file"
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="flex-1"
+              />
+              {file && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setFile(null)}
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex justify-end gap-2">
