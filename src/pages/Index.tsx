@@ -114,7 +114,7 @@ const Index = () => {
               <DashboardMetrics userId={userId} userRole={userRole} />
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('navigation.properties')}</h2>
-                <DashboardProperties userId={userId} userRole={userRole} />
+                <DashboardProperties userRole={userRole} />
               </div>
               {userRole === "landlord" && <RevenueChart userId={userId} />}
             </div>

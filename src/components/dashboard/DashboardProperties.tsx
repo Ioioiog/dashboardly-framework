@@ -4,7 +4,7 @@ import { Property } from "@/utils/propertyUtils";
 
 interface DashboardPropertiesProps {
   userRole: "landlord" | "tenant";
-  onEdit?: (property: Property) => void;
+  onEdit?: (property: Property, data: any) => void; // Updated to match the expected signature
   onDelete?: (property: Property) => void;
 }
 
