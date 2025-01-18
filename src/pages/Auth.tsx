@@ -50,6 +50,7 @@ const AuthPage = () => {
                 params: { value: invitationToken }
               });
 
+              // Get invitation details
               const { data: invitation, error: inviteError } = await supabase
                 .from('tenant_invitations')
                 .select('*')
@@ -62,6 +63,15 @@ const AuthPage = () => {
                 throw new Error('Invalid or expired invitation');
               }
 
+              // Get property assignments for this invitation
+              const { data: propertyAssignments, error: propertyError } = await supabase
+                .from('tenant_invitation_properties')
+                .select('property_id')
+                .eq('invitation_id', invitation.id);
+
+              if (propertyError) throw propertyError;
+
+              // Update user profile
               const { error: profileError } = await supabase
                 .from('profiles')
                 .update({
@@ -74,18 +84,28 @@ const AuthPage = () => {
 
               if (profileError) throw profileError;
 
-              const { error: tenancyError } = await supabase
-                .from('tenancies')
-                .insert({
-                  property_id: invitation.property_id,
-                  tenant_id: session.user.id,
-                  start_date: invitation.start_date,
-                  end_date: invitation.end_date,
-                  status: 'active'
-                });
+              // Create tenancies for each assigned property
+              const tenancyPromises = propertyAssignments.map(assignment => 
+                supabase
+                  .from('tenancies')
+                  .insert({
+                    property_id: assignment.property_id,
+                    tenant_id: session.user.id,
+                    start_date: invitation.start_date,
+                    end_date: invitation.end_date,
+                    status: 'active'
+                  })
+              );
 
-              if (tenancyError) throw tenancyError;
+              const tenancyResults = await Promise.all(tenancyPromises);
+              const tenancyErrors = tenancyResults.filter(result => result.error);
+              
+              if (tenancyErrors.length > 0) {
+                console.error("Errors creating tenancies:", tenancyErrors);
+                throw new Error('Failed to create one or more tenancies');
+              }
 
+              // Update invitation status
               const { error: updateError } = await supabase
                 .from('tenant_invitations')
                 .update({ status: 'accepted' })
