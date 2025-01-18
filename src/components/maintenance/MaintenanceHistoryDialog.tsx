@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { MaintenanceRequest } from "@/types/maintenance";
@@ -54,6 +54,9 @@ export function MaintenanceHistoryDialog({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Edit History</DialogTitle>
+          <DialogDescription>
+            View the history of changes made to this maintenance request
+          </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[400px] pr-4">
           {isLoading ? (
