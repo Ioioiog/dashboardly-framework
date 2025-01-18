@@ -92,7 +92,11 @@ export default function DashboardSidebar() {
       <div className="flex h-full flex-col justify-between">
         <div className="space-y-4">
           <div className="mb-8">
-            <h2 className="text-lg font-semibold">AdminChirii</h2>
+            <img 
+              src="/lovable-uploads/a279fbbc-be90-4a4b-afe5-ae98a7d6c04d.png" 
+              alt="AdminChirii.ro" 
+              className="h-12 w-auto"
+            />
           </div>
           <nav className="space-y-2">
             {menuItems.map((item) => (
