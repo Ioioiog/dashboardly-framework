@@ -56,16 +56,22 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
 
   const handleViewInvoice = async (utilityId: string) => {
     try {
+      console.log("Fetching invoice for utility ID:", utilityId);
+      
       // First get the invoice details
-      const { data: invoices, error: invoiceError } = await supabase
+      const { data: invoice, error: invoiceError } = await supabase
         .from('utility_invoices')
         .select('pdf_path')
         .eq('utility_id', utilityId)
-        .single();
+        .maybeSingle();
 
-      if (invoiceError) throw invoiceError;
+      if (invoiceError) {
+        console.error("Error fetching invoice:", invoiceError);
+        throw invoiceError;
+      }
 
-      if (!invoices?.pdf_path) {
+      if (!invoice) {
+        console.log("No invoice found for utility ID:", utilityId);
         toast({
           variant: "destructive",
           title: "Error",
@@ -74,14 +80,30 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
         return;
       }
 
+      if (!invoice.pdf_path) {
+        console.log("Invoice found but no PDF path for utility ID:", utilityId);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No invoice file has been uploaded for this utility bill.",
+        });
+        return;
+      }
+
+      console.log("Creating signed URL for PDF path:", invoice.pdf_path);
+      
       // Get the temporary URL for the file
       const { data: { signedUrl }, error: urlError } = await supabase
         .storage
         .from('utility-invoices')
-        .createSignedUrl(invoices.pdf_path, 60); // URL valid for 60 seconds
+        .createSignedUrl(invoice.pdf_path, 60); // URL valid for 60 seconds
 
-      if (urlError) throw urlError;
+      if (urlError) {
+        console.error("Error creating signed URL:", urlError);
+        throw urlError;
+      }
 
+      console.log("Opening signed URL in new tab");
       // Open the PDF in a new tab
       window.open(signedUrl, '_blank');
     } catch (error) {
