@@ -26,31 +26,39 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
   const handleDownload = async () => {
     try {
-      // Remove any leading slashes and get clean file path
+      // Get the file path without any leading slashes
       const cleanPath = doc.file_path.replace(/^\/+/, '');
       console.log("Attempting to download file with clean path:", cleanPath);
-      
-      // Download the file directly instead of getting a signed URL
-      const { data, error } = await supabase.storage
+
+      // First try to get a signed URL for the file
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from("documents")
-        .download(cleanPath);
+        .createSignedUrl(cleanPath, 60); // URL valid for 60 seconds
 
-      if (error) {
-        console.error("Storage download error:", error);
-        throw error;
+      if (signedUrlError) {
+        console.error("Error getting signed URL:", signedUrlError);
+        throw signedUrlError;
       }
 
-      if (!data) {
-        console.error("No data received from storage");
-        throw new Error("No data received from storage");
+      if (!signedUrlData?.signedUrl) {
+        throw new Error("No signed URL received");
       }
+
+      // Fetch the file using the signed URL
+      const response = await fetch(signedUrlData.signedUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Get the blob from the response
+      const blob = await response.blob();
 
       // Extract filename from path
       const fileName = cleanPath.split('/').pop() || 'document';
       console.log("Using filename for download:", fileName);
 
       // Create a download link and trigger it
-      const url = window.URL.createObjectURL(data);
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = fileName;
@@ -62,6 +70,11 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
       document.body.removeChild(a);
       
       console.log("File download completed successfully");
+
+      toast({
+        title: "Success",
+        description: "Document downloaded successfully",
+      });
     } catch (error) {
       console.error("Error downloading document:", error);
       toast({
