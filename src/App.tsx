@@ -16,12 +16,19 @@ import TenantRegistration from "./pages/TenantRegistration";
 import { StrictMode, useEffect, useState } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { useToast } from "./hooks/use-toast";
-import "./i18n/config"; // Import i18n configuration
+import "./i18n/config";
 
+// Configure QueryClient with proper error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: (failureCount, error) => {
+        // Don't retry on 404s
+        if (error instanceof Error && error.message.includes('404')) {
+          return false;
+        }
+        return failureCount < 2;
+      },
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000,
     },
