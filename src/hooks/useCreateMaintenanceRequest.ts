@@ -6,6 +6,10 @@ interface CreateMaintenanceRequestData {
   description: string;
   property_id: string;
   tenant_id: string;
+  issue_type: string;
+  priority: string;
+  notes?: string;
+  images?: string[];
 }
 
 export function useCreateMaintenanceRequest() {
