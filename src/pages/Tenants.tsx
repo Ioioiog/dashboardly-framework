@@ -58,60 +58,23 @@ const Tenants = () => {
         }
 
         if (!profile) {
-          console.log("No profile found, creating one...");
-          const { error: createError } = await supabase
-            .from("profiles")
-            .insert([
-              {
-                id: session.user.id,
-                email: session.user.email,
-                role: "tenant", // Default role
-              },
-            ]);
+          console.log("No profile found");
+          return;
+        }
 
-          if (createError) {
-            console.error("Error creating profile:", createError);
-            throw createError;
-          }
+        console.log("Profile role:", profile.role);
+        setUserRole(profile.role as "landlord" | "tenant");
 
-          setUserRole("tenant");
-        } else {
-          console.log("Profile role:", profile.role);
-          setUserRole(profile.role as "landlord" | "tenant");
+        // Redirect tenants to dashboard
+        if (profile.role === "tenant") {
+          console.log("User is tenant, redirecting to dashboard");
+          navigate("/dashboard");
+          return;
         }
 
         setIsCheckingProfile(false);
 
-        // Rest of the existing code for fetching tenant info and properties
-
-        if (profile?.role === "tenant") {
-          const { data: tenancyData, error: tenancyError } = await supabase
-            .from("tenancies")
-            .select(`
-              *,
-              property:properties (
-                name,
-                address,
-                monthly_rent,
-                type
-              )
-            `)
-            .eq("tenant_id", session.user.id)
-            .eq("status", "active")
-            .maybeSingle();
-
-          if (tenancyError) {
-            console.error("Error fetching tenancy:", tenancyError);
-            return;
-          }
-
-          if (tenancyData) {
-            console.log("Tenancy data:", tenancyData);
-            setTenantInfo(tenancyData);
-          }
-        }
-
-        if (profile?.role === "landlord") {
+        if (profile.role === "landlord") {
           console.log("Fetching properties for landlord");
           const { data: propertiesData, error: propertiesError } = await supabase
             .from("properties")
@@ -184,6 +147,11 @@ const Tenants = () => {
     );
   }
 
+  // Only render for landlords
+  if (userRole !== "landlord") {
+    return null;
+  }
+
   return (
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
@@ -191,13 +159,7 @@ const Tenants = () => {
         <div className="max-w-7xl mx-auto">
           <TenantsHeader userRole={userRole} properties={properties} />
           <div className="space-y-8">
-            {userRole === "landlord" ? (
-              <TenantList tenants={tenants} />
-            ) : tenantInfo ? (
-              <TenantDashboard tenantInfo={tenantInfo} />
-            ) : (
-              <NoTenancy />
-            )}
+            <TenantList tenants={tenants} />
           </div>
         </div>
       </main>

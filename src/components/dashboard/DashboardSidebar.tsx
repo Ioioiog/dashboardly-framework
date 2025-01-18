@@ -19,12 +19,13 @@ interface MenuItem {
   icon: React.ElementType;
   labelKey: string;
   path: string;
+  roles?: string[];
 }
 
 const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, labelKey: "navigation.dashboard", path: "/dashboard" },
   { icon: Home, labelKey: "navigation.properties", path: "/properties" },
-  { icon: Users, labelKey: "navigation.tenants", path: "/tenants" },
+  { icon: Users, labelKey: "navigation.tenants", path: "/tenants", roles: ['landlord'] },
   { icon: Wrench, labelKey: "navigation.maintenance", path: "/maintenance" },
   { icon: FileText, labelKey: "navigation.documents", path: "/documents" },
   { icon: CreditCard, labelKey: "navigation.payments", path: "/payments" },
@@ -33,10 +34,34 @@ const menuItems: MenuItem[] = [
 
 const DashboardSidebar = () => {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [userRole, setUserRole] = React.useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  React.useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile) {
+            setUserRole(profile.role);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      }
+    };
+
+    fetchUserRole();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -58,6 +83,10 @@ const DashboardSidebar = () => {
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
+
+  const filteredMenuItems = menuItems.filter(
+    item => !item.roles || (userRole && item.roles.includes(userRole))
+  );
 
   return (
     <aside
@@ -81,7 +110,7 @@ const DashboardSidebar = () => {
 
         <nav className="flex-1 py-6">
           <ul className="space-y-1">
-            {menuItems.map((item) => (
+            {filteredMenuItems.map((item) => (
               <li key={item.labelKey}>
                 <Link
                   to={item.path}
