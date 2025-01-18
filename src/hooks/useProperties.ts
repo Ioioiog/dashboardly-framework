@@ -35,13 +35,21 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
         if (error) throw error;
         return data || [];
       } else {
+        // For tenants, we need to join through the tenancies table
         const { data, error } = await supabase
-          .from("properties")
-          .select("*")
-          .eq("tenant_id", user.user.id);
+          .from("tenancies")
+          .select(`
+            property:properties (*)
+          `)
+          .eq("tenant_id", user.user.id)
+          .eq("status", "active");
 
         if (error) throw error;
-        return data || [];
+        
+        // Extract the properties from the joined data
+        const properties = data?.map(item => item.property) || [];
+        console.log("Fetched tenant properties:", properties);
+        return properties;
       }
     },
   });
