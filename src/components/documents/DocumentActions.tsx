@@ -26,10 +26,15 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
   const handleDownload = async () => {
     try {
-      // Get the file path without any leading slashes and ensure correct format
-      const pathParts = doc.file_path.replace(/^\/+/, '').split('/');
-      const cleanPath = pathParts.join('/');
-      console.log("Attempting to download file with clean path:", cleanPath);
+      // Remove any leading slashes and user IDs from the path
+      const cleanPath = doc.file_path
+        .replace(/^\/+/, '')
+        .split('/')
+        .filter(part => part !== 'documents' && !part.includes('-'))
+        .join('/');
+
+      console.log("Original file path:", doc.file_path);
+      console.log("Cleaned file path for download:", cleanPath);
 
       // Try to download the file directly
       const { data, error } = await supabase.storage
@@ -46,8 +51,8 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
         throw new Error("No data received from storage");
       }
 
-      // Extract filename from path
-      const fileName = pathParts[pathParts.length - 1] || 'document';
+      // Extract filename from path, fallback to a default name if needed
+      const fileName = cleanPath.split('/').pop() || 'document.pdf';
       console.log("Using filename for download:", fileName);
 
       // Create a download link and trigger it
