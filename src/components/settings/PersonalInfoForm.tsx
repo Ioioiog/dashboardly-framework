@@ -122,7 +122,11 @@ export function PersonalInfoForm({ initialProfile, isLoading, setIsLoading }: Pe
               placeholder="Enter your phone number"
             />
           </div>
-          <Button type="submit" disabled={isLoading} className="w-full">
+          <Button 
+            type="submit" 
+            disabled={isLoading} 
+            className="w-full bg-blue-500 hover:bg-blue-400 text-white"
+          >
             {isLoading ? "Saving Changes..." : "Save Changes"}
           </Button>
         </form>
