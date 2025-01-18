@@ -92,7 +92,7 @@ export default function DashboardSidebar() {
       <div className="flex h-full flex-col justify-between">
         <div className="space-y-4">
           <div className="mb-8">
-            <h2 className="text-lg font-semibold">Property Manager</h2>
+            <h2 className="text-lg font-semibold">AdminChirii</h2>
           </div>
           <nav className="space-y-2">
             {menuItems.map((item) => (
