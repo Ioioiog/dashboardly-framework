@@ -12,7 +12,7 @@ import { Property } from "@/utils/propertyUtils";
 interface PropertyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => void | ((property: Property, data: any) => void);
   property?: Property;
   isSubmitting?: boolean;
   mode: "add" | "edit";
@@ -28,9 +28,9 @@ export function PropertyDialog({
 }: PropertyDialogProps) {
   const handleSubmit = (data: any) => {
     if (mode === "edit" && property) {
-      onSubmit(property, data);
+      (onSubmit as (property: Property, data: any) => void)(property, data);
     } else {
-      onSubmit(data);
+      (onSubmit as (data: any) => void)(data);
     }
   };
 

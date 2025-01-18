@@ -30,6 +30,7 @@ export default function Properties() {
         description: t("properties.toast.updated.description"),
       });
       
+      setShowDialog(false);
       return true;
     } catch (error) {
       console.error("Error updating property:", error);
