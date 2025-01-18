@@ -16,13 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface EditTenantDialogProps {
   tenant: Tenant;
@@ -32,7 +27,7 @@ interface EditTenantDialogProps {
 export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
-  const { register, handleSubmit, formState: { isSubmitting } } = useForm({
+  const { register, handleSubmit, setValue, watch, formState: { isSubmitting } } = useForm({
     defaultValues: {
       first_name: tenant.first_name || "",
       last_name: tenant.last_name || "",
@@ -42,7 +37,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
       updated_at: tenant.updated_at ? format(new Date(tenant.updated_at), 'yyyy-MM-dd') : "",
       start_date: tenant.tenancy.start_date ? format(new Date(tenant.tenancy.start_date), 'yyyy-MM-dd') : "",
       end_date: tenant.tenancy.end_date ? format(new Date(tenant.tenancy.end_date), 'yyyy-MM-dd') : "",
-      property_id: tenant.property.id,
+      propertyIds: [tenant.property.id],
     },
   });
 
@@ -82,18 +77,35 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
 
       if (profileError) throw profileError;
 
-      // Update tenancy dates and property
-      const { error: tenancyError } = await supabase
+      // Update existing tenancy
+      const { error: updateTenancyError } = await supabase
         .from('tenancies')
         .update({
           start_date: data.start_date,
           end_date: data.end_date || null,
-          property_id: data.property_id,
         })
         .eq('tenant_id', tenant.id)
         .eq('property_id', tenant.property.id);
 
-      if (tenancyError) throw tenancyError;
+      if (updateTenancyError) throw updateTenancyError;
+
+      // Add new tenancies for additional properties
+      const newProperties = data.propertyIds.filter((id: string) => id !== tenant.property.id);
+      if (newProperties.length > 0) {
+        const newTenancies = newProperties.map((propertyId: string) => ({
+          tenant_id: tenant.id,
+          property_id: propertyId,
+          start_date: data.start_date,
+          end_date: data.end_date || null,
+          status: 'active',
+        }));
+
+        const { error: newTenancyError } = await supabase
+          .from('tenancies')
+          .insert(newTenancies);
+
+        if (newTenancyError) throw newTenancyError;
+      }
 
       toast({
         title: "Success",
@@ -111,6 +123,8 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
       });
     }
   };
+
+  const propertyIds = watch('propertyIds');
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -146,25 +160,32 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="property_id">Property</Label>
-            <Select 
-              onValueChange={(value) => {
-                const event = { target: { name: "property_id", value } };
-                register("property_id").onChange(event);
-              }}
-              defaultValue={tenant.property.id}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select property" />
-              </SelectTrigger>
-              <SelectContent>
-                {properties.map((property) => (
-                  <SelectItem key={property.id} value={property.id}>
-                    {property.name} - {property.address}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Properties</Label>
+            <ScrollArea className="h-[200px] border rounded-md p-4">
+              {properties.map((property) => (
+                <div key={property.id} className="flex items-start space-x-3 py-2">
+                  <Checkbox
+                    id={`property-${property.id}`}
+                    checked={propertyIds?.includes(property.id)}
+                    onCheckedChange={(checked) => {
+                      const currentIds = propertyIds || [];
+                      const newIds = checked
+                        ? [...currentIds, property.id]
+                        : currentIds.filter(id => id !== property.id);
+                      setValue('propertyIds', newIds);
+                    }}
+                  />
+                  <div className="space-y-1 leading-none">
+                    <Label htmlFor={`property-${property.id}`} className="text-sm font-medium leading-none">
+                      {property.name}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      {property.address}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </ScrollArea>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
