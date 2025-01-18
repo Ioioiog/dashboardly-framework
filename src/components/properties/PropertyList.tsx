@@ -26,7 +26,7 @@ export function PropertyList({
   // Show loading skeleton
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-7xl mx-auto">
         {[...Array(3)].map((_, i) => (
           <Card key={i} className="p-6 animate-pulse">
             <div className="space-y-3">
@@ -44,39 +44,43 @@ export function PropertyList({
   // Show error state if properties is undefined
   if (properties === undefined) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>{t('common.error')}</AlertTitle>
-        <AlertDescription>
-          {t('properties.error.fetch')}
-        </AlertDescription>
-      </Alert>
+      <div className="max-w-7xl mx-auto">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>{t('common.error')}</AlertTitle>
+          <AlertDescription>
+            {t('properties.error.fetch')}
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
   // Show empty state
   if (!properties.length) {
     return (
-      <Card className="p-6">
-        <div className="text-center space-y-2">
-          <p className="text-gray-500">
-            {userRole === "landlord" 
-              ? t('properties.empty.landlord')
-              : t('properties.empty.tenant')}
-          </p>
-          {userRole === "tenant" && (
-            <p className="text-sm text-gray-400">
-              {t('properties.empty.tenant.contact')}
+      <div className="max-w-7xl mx-auto">
+        <Card className="p-6">
+          <div className="text-center space-y-2">
+            <p className="text-gray-500">
+              {userRole === "landlord" 
+                ? t('properties.empty.landlord')
+                : t('properties.empty.tenant')}
             </p>
-          )}
-        </div>
-      </Card>
+            {userRole === "tenant" && (
+              <p className="text-sm text-gray-400">
+                {t('properties.empty.tenant.contact')}
+              </p>
+            )}
+          </div>
+        </Card>
+      </div>
     );
   }
 
   // Show property grid
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-7xl mx-auto">
       {properties.map((property) => (
         <PropertyCard
           key={property.id}
