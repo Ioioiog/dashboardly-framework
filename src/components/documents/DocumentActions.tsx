@@ -26,10 +26,13 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
   const handleDownload = async () => {
     try {
-      // Extract just the filename without any path or UUIDs
-      const fileName = doc.file_path.split('/').pop();
-      console.log("Attempting to download file:", fileName);
+      // Log the full file path for debugging
+      console.log("Attempting to download file with path:", doc.file_path);
       
+      // Extract the file name for the download
+      const fileName = doc.file_path.split('/').pop();
+      
+      // Get the file from Supabase storage
       const { data, error } = await supabase.storage
         .from("documents")
         .download(doc.file_path);
@@ -40,20 +43,22 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
       }
 
       if (!data) {
+        console.error("No data received from storage");
         throw new Error("No data received from storage");
       }
 
-      // Create and trigger download
-      const url = URL.createObjectURL(data);
+      // Create a download link and trigger it
+      const url = window.URL.createObjectURL(data);
       const a = document.createElement("a");
       a.href = url;
       a.download = fileName || 'document';
       document.body.appendChild(a);
       a.click();
       
-      // Cleanup
+      // Clean up
+      window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      
       console.log("File download completed successfully");
     } catch (error) {
       console.error("Error downloading document:", error);
