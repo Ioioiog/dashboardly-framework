@@ -8,7 +8,6 @@ interface Metrics {
   totalProperties?: number;
   monthlyRevenue?: number;
   activeTenants?: number;
-  currentProperty?: string;
   pendingMaintenance: number;
   paymentStatus?: string;
 }
@@ -85,6 +84,15 @@ async function fetchTenantMetrics(userId: string): Promise<Metrics> {
     throw tenancyError;
   }
 
+  // Get the latest payment by joining through tenancies
+  const { data: tenancies } = await supabase
+    .from("tenancies")
+    .select("id")
+    .eq("tenant_id", userId)
+    .eq("status", "active");
+
+  const tenancyIds = tenancies?.map(t => t.id) || [];
+
   const [maintenanceCount, latestPayment] = await Promise.all([
     supabase
       .from("maintenance_requests")
@@ -94,7 +102,7 @@ async function fetchTenantMetrics(userId: string): Promise<Metrics> {
     supabase
       .from("payments")
       .select("status")
-      .eq("tenant_id", userId)
+      .in("tenancy_id", tenancyIds)
       .order("due_date", { ascending: false })
       .limit(1)
       .maybeSingle(),
