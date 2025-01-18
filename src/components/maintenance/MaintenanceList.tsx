@@ -14,7 +14,7 @@ export function MaintenanceList({ requests, isLoading, isLandlord }: Maintenance
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-col space-y-4 max-w-4xl mx-auto">
         {[...Array(3)].map((_, i) => (
           <Card key={i} className="p-6 animate-pulse">
             <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
@@ -27,16 +27,18 @@ export function MaintenanceList({ requests, isLoading, isLandlord }: Maintenance
 
   if (!requests?.length) {
     return (
-      <Card className="p-6">
-        <div className="text-center text-gray-500">
-          {t('maintenance.noRequests')}
-        </div>
-      </Card>
+      <div className="max-w-4xl mx-auto">
+        <Card className="p-6">
+          <div className="text-center text-gray-500">
+            {t('maintenance.noRequests')}
+          </div>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="flex flex-col space-y-4 max-w-4xl mx-auto">
       {requests.map((request) => (
         <MaintenanceRequestCard 
           key={request.id} 
