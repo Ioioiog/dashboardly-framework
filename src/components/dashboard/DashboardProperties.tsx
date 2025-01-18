@@ -1,5 +1,6 @@
 import { Property } from "@/utils/propertyUtils";
 import { PropertyList } from "@/components/properties/PropertyList";
+import { useProperties } from "@/hooks/useProperties";
 
 interface DashboardPropertiesProps {
   userRole: "landlord" | "tenant";
@@ -12,10 +13,15 @@ export function DashboardProperties({
   onEdit,
   onDelete 
 }: DashboardPropertiesProps) {
+  const { properties, isLoading } = useProperties({ userRole });
+
+  console.log("Properties data:", properties);
+  console.log("Loading state:", isLoading);
+
   return (
     <PropertyList
-      properties={[]} // This will show the loading state
-      isLoading={true}
+      properties={properties}
+      isLoading={isLoading}
       userRole={userRole}
       onEdit={onEdit}
       onDelete={onDelete}
