@@ -15,6 +15,14 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Pencil } from "lucide-react";
 import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface EditTenantDialogProps {
   tenant: Tenant;
@@ -34,6 +42,26 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
       updated_at: tenant.updated_at ? format(new Date(tenant.updated_at), 'yyyy-MM-dd') : "",
       start_date: tenant.tenancy.start_date ? format(new Date(tenant.tenancy.start_date), 'yyyy-MM-dd') : "",
       end_date: tenant.tenancy.end_date ? format(new Date(tenant.tenancy.end_date), 'yyyy-MM-dd') : "",
+      property_id: tenant.property.id,
+    },
+  });
+
+  // Fetch available properties
+  const { data: properties = [] } = useQuery({
+    queryKey: ["properties"],
+    queryFn: async () => {
+      console.log("Fetching properties for tenant edit...");
+      const { data, error } = await supabase
+        .from("properties")
+        .select("id, name, address");
+
+      if (error) {
+        console.error("Error fetching properties:", error);
+        throw error;
+      }
+
+      console.log("Properties fetched:", data);
+      return data;
     },
   });
 
@@ -54,12 +82,13 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
 
       if (profileError) throw profileError;
 
-      // Update tenancy dates
+      // Update tenancy dates and property
       const { error: tenancyError } = await supabase
         .from('tenancies')
         .update({
           start_date: data.start_date,
           end_date: data.end_date || null,
+          property_id: data.property_id,
         })
         .eq('tenant_id', tenant.id)
         .eq('property_id', tenant.property.id);
@@ -114,6 +143,28 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
             <Input id="phone" {...register("phone")} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="property_id">Property</Label>
+            <Select 
+              onValueChange={(value) => {
+                const event = { target: { name: "property_id", value } };
+                register("property_id").onChange(event);
+              }}
+              defaultValue={tenant.property.id}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select property" />
+              </SelectTrigger>
+              <SelectContent>
+                {properties.map((property) => (
+                  <SelectItem key={property.id} value={property.id}>
+                    {property.name} - {property.address}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
