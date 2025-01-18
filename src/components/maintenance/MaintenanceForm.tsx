@@ -6,12 +6,14 @@ import { useCreateMaintenanceRequest } from "@/hooks/useCreateMaintenanceRequest
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MaintenanceRequest } from "@/types/maintenance";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MaintenanceBasicInfo } from "./form/MaintenanceBasicInfo";
 import { MaintenanceDescription } from "./form/MaintenanceDescription";
 import { maintenanceFormSchema, MaintenanceFormValues } from "./types";
 import { ImageUpload } from "./form/ImageUpload";
 import { useState } from "react";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface MaintenanceFormProps {
   onSuccess: () => void;
@@ -23,6 +25,39 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const queryClient = useQueryClient();
   const [uploadedImages, setUploadedImages] = useState<string[]>(request?.images || []);
   const { mutate: createRequest, isPending: isCreating } = useCreateMaintenanceRequest();
+
+  // Fetch user role
+  const { data: userProfile } = useQuery({
+    queryKey: ["user-profile"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+      
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+        
+      if (error) throw error;
+      return profile;
+    }
+  });
+
+  // Fetch properties for landlord
+  const { data: properties } = useQuery({
+    queryKey: ["landlord-properties"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("landlord_id", userProfile?.id);
+        
+      if (error) throw error;
+      return data;
+    },
+    enabled: userProfile?.role === "landlord",
+  });
 
   const { mutate: updateRequest, isPending: isUpdating } = useMutation({
     mutationFn: async (values: MaintenanceFormValues) => {
@@ -40,7 +75,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
           issue_type: request!.issue_type,
           priority: request!.priority,
           notes: request!.notes,
-          images: request!.images, // Add images to history
+          images: request!.images,
           edited_by: currentUser.user.id,
         });
 
@@ -91,6 +126,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       issue_type: request?.issue_type ?? "",
       priority: request?.priority ?? "",
       notes: request?.notes ?? "",
+      property_id: request?.property_id ?? "",
     },
   });
 
@@ -110,37 +146,44 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       return;
     }
 
-    const { data: tenancy, error: tenancyError } = await supabase
-      .from("tenancies")
-      .select("property_id")
-      .eq("tenant_id", userData.user.id)
-      .eq("status", "active")
-      .maybeSingle();
+    let propertyId = values.property_id;
+    
+    // If user is a tenant, get their active tenancy's property
+    if (userProfile?.role === "tenant") {
+      const { data: tenancy, error: tenancyError } = await supabase
+        .from("tenancies")
+        .select("property_id")
+        .eq("tenant_id", userData.user.id)
+        .eq("status", "active")
+        .maybeSingle();
 
-    if (tenancyError) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch tenancy information",
-        variant: "destructive",
-      });
-      console.error("Error fetching tenancy:", tenancyError);
-      return;
-    }
+      if (tenancyError) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch tenancy information",
+          variant: "destructive",
+        });
+        console.error("Error fetching tenancy:", tenancyError);
+        return;
+      }
 
-    if (!tenancy) {
-      toast({
-        title: "Error",
-        description: "You don't have an active tenancy. Please contact your landlord.",
-        variant: "destructive",
-      });
-      return;
+      if (!tenancy) {
+        toast({
+          title: "Error",
+          description: "You don't have an active tenancy. Please contact your landlord.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      propertyId = tenancy.property_id;
     }
 
     const requestData = {
       title: values.title,
       description: values.description,
-      property_id: tenancy.property_id,
-      tenant_id: userData.user.id,
+      property_id: propertyId,
+      tenant_id: userProfile?.role === "tenant" ? userData.user.id : null,
       issue_type: values.issue_type,
       priority: values.priority,
       notes: values.notes,
@@ -169,6 +212,32 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {userProfile?.role === "landlord" && !request && (
+          <FormField
+            control={form.control}
+            name="property_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Property</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a property" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {properties?.map((property) => (
+                      <SelectItem key={property.id} value={property.id}>
+                        {property.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <MaintenanceBasicInfo form={form} />
         <MaintenanceDescription form={form} />
         <ImageUpload

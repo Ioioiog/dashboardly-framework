@@ -6,6 +6,7 @@ export const maintenanceFormSchema = z.object({
   issue_type: z.string().min(1, "Please select an issue type"),
   priority: z.string().min(1, "Please select a priority"),
   notes: z.string().optional(),
+  property_id: z.string().min(1, "Please select a property"),
 });
 
 export type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
