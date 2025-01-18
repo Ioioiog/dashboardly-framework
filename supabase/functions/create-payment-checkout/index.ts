@@ -21,38 +21,37 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     );
 
-    // Get the payment details including the landlord's Stripe account
-    console.log('Fetching payment details...');
-    const { data: payment, error: paymentError } = await supabaseClient
-      .from('payments')
+    // Get the utility details including the property and landlord info
+    console.log('Fetching utility details...');
+    const { data: utility, error: utilityError } = await supabaseClient
+      .from('utilities')
       .select(`
         *,
-        tenancy:tenancies (
-          property:properties (
-            name,
-            address,
-            landlord:profiles (
-              stripe_account_id
-            )
+        property:properties (
+          name,
+          address,
+          landlord:profiles (
+            stripe_account_id,
+            email
           )
         )
       `)
       .eq('id', paymentId)
       .single();
 
-    console.log('Payment query result:', { payment, paymentError });
+    console.log('Utility query result:', { utility, utilityError });
 
-    if (paymentError) {
-      console.error('Error fetching payment:', paymentError);
-      throw new Error('Error fetching payment details');
+    if (utilityError) {
+      console.error('Error fetching utility:', utilityError);
+      throw new Error('Error fetching utility details');
     }
 
-    if (!payment) {
-      console.error('Payment not found for ID:', paymentId);
-      throw new Error('Payment not found');
+    if (!utility) {
+      console.error('Utility not found for ID:', paymentId);
+      throw new Error('Utility not found');
     }
 
-    const stripeAccountId = payment.tenancy?.property?.landlord?.stripe_account_id;
+    const stripeAccountId = utility.property?.landlord?.stripe_account_id;
     if (!stripeAccountId) {
       console.error('Landlord has not connected Stripe account');
       throw new Error('Landlord has not connected Stripe account');
@@ -93,20 +92,20 @@ serve(async (req) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Rent Payment',
-              description: `Payment for ${payment.tenancy.property.address}`,
+              name: `${utility.type} Bill`,
+              description: `Utility payment for ${utility.property.address}`,
             },
-            unit_amount: Math.round(payment.amount * 100), // Convert to cents
+            unit_amount: Math.round(utility.amount * 100), // Convert to cents
           },
           quantity: 1,
         },
       ],
       mode: 'payment',
-      success_url: `${req.headers.get('origin')}/payments?success=true`,
-      cancel_url: `${req.headers.get('origin')}/payments?canceled=true`,
+      success_url: `${req.headers.get('origin')}/utilities?success=true`,
+      cancel_url: `${req.headers.get('origin')}/utilities?canceled=true`,
       customer_email: profile.email,
       metadata: {
-        payment_id: payment.id,
+        utility_id: utility.id,
       },
       payment_intent_data: {
         transfer_data: {
