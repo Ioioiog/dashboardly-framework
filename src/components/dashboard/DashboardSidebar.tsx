@@ -1,128 +1,104 @@
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { useLocation, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Building2,
   Users,
-  Wrench,
   FileText,
+  Wrench,
   Receipt,
-  DollarSign,
-  Zap,
   Settings,
-  LogOut,
+  Droplets,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-
-const menuItems = [
-  {
-    icon: LayoutDashboard,
-    label: "dashboard.menu.dashboard",
-    href: "/dashboard",
-  },
-  {
-    icon: Building2,
-    label: "dashboard.menu.properties",
-    href: "/properties",
-  },
-  {
-    icon: Users,
-    label: "dashboard.menu.tenants",
-    href: "/tenants",
-  },
-  {
-    icon: Wrench,
-    label: "dashboard.menu.maintenance",
-    href: "/maintenance",
-  },
-  {
-    icon: FileText,
-    label: "dashboard.menu.documents",
-    href: "/documents",
-  },
-  {
-    icon: Receipt,
-    label: "Invoices",
-    href: "/invoices",
-  },
-  {
-    icon: DollarSign,
-    label: "dashboard.menu.payments",
-    href: "/payments",
-  },
-  {
-    icon: Zap,
-    label: "dashboard.menu.utilities",
-    href: "/utilities",
-  },
-  {
-    icon: Settings,
-    label: "dashboard.menu.settings",
-    href: "/settings",
-  },
-];
+import { cn } from "@/lib/utils";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export default function DashboardSidebar() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { t } = useTranslation();
-  const { toast } = useToast();
+  const { userRole } = useUserRole();
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      navigate("/auth");
-    } catch (error) {
-      console.error("Error signing out:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-      });
-    }
-  };
+  const menuItems = [
+    {
+      title: "Dashboard",
+      icon: LayoutDashboard,
+      href: "/",
+      roles: ["landlord", "tenant"],
+    },
+    {
+      title: "Properties",
+      icon: Building2,
+      href: "/properties",
+      roles: ["landlord", "tenant"],
+    },
+    {
+      title: "Tenants",
+      icon: Users,
+      href: "/tenants",
+      roles: ["landlord"],
+    },
+    {
+      title: "Documents",
+      icon: FileText,
+      href: "/documents",
+      roles: ["landlord", "tenant"],
+    },
+    {
+      title: "Maintenance",
+      icon: Wrench,
+      href: "/maintenance",
+      roles: ["landlord", "tenant"],
+    },
+    {
+      title: "Payments",
+      icon: Receipt,
+      href: "/payments",
+      roles: ["landlord", "tenant"],
+    },
+    {
+      title: "Utilities",
+      icon: Droplets,
+      href: "/utilities",
+      roles: ["landlord", "tenant"],
+    },
+    {
+      title: "Settings",
+      icon: Settings,
+      href: "/settings",
+      roles: ["landlord", "tenant"],
+    },
+  ];
+
+  const filteredMenuItems = menuItems.filter((item) =>
+    item.roles.includes(userRole || "tenant")
+  );
 
   return (
-    <div className="fixed left-0 h-screen w-64 border-r bg-background p-6">
+    <div className="fixed inset-y-0 left-0 w-64 bg-dashboard-sidebar border-r border-gray-200">
       <div className="flex h-full flex-col justify-between">
         <div className="space-y-4">
-          <div className="mb-8">
+          <div className="mb-8 p-4">
             <img 
               src="/lovable-uploads/a279fbbc-be90-4a4b-afe5-ae98a7d6c04d.png" 
               alt="AdminChirii.ro" 
-              className="h-12 w-auto"
+              className="h-20 w-auto"
             />
           </div>
           <nav className="space-y-2">
             {menuItems.map((item) => (
-              <Link key={item.href} to={item.href}>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start gap-2",
-                    location.pathname === item.href && "bg-secondary"
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {t(item.label)}
-                </Button>
-              </Link>
+              <button
+                key={item.href}
+                onClick={() => navigate(item.href)}
+                className={cn(
+                  "flex w-full items-center space-x-2 px-4 py-2 text-dashboard-text hover:bg-dashboard-accent hover:text-dashboard-text transition-colors",
+                  window.location.pathname === item.href &&
+                    "bg-dashboard-accent text-dashboard-text"
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                <span>{item.title}</span>
+              </button>
             ))}
           </nav>
         </div>
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-2"
-          onClick={handleSignOut}
-        >
-          <LogOut className="h-4 w-4" />
-          {t("dashboard.menu.signout")}
-        </Button>
       </div>
     </div>
   );
