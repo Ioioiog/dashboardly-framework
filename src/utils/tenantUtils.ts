@@ -13,63 +13,70 @@ interface TenantRegistrationData {
 export async function registerTenant(data: TenantRegistrationData) {
   console.log("Starting tenant registration process for:", data.email);
   
-  let userId: string;
-
   try {
-    // First check if user exists in auth.users by trying to sign in
-    console.log("Checking if user exists in auth system...");
-    const { data: authUser, error: signInError } = await supabase.auth.signInWithOtp({
-      email: data.email,
-      options: {
-        shouldCreateUser: false // Only check if user exists
-      }
-    });
+    // First, check if the user already exists by trying to get their profile
+    console.log("Checking if user exists in profiles...");
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', data.email)
+      .maybeSingle();
 
-    if (signInError && !signInError.message.includes("Email not confirmed")) {
-      // User doesn't exist in auth system, create new account
-      console.log("User doesn't exist, creating new account...");
-      const { data: newUser, error: signUpError } = await supabase.auth.signUp({
+    let userId: string;
+
+    if (existingProfile) {
+      console.log("User profile already exists, using existing ID:", existingProfile.id);
+      userId = existingProfile.id;
+    } else {
+      // Try to get the user from auth.users
+      console.log("Checking auth system for existing user...");
+      const { data: session } = await supabase.auth.signInWithOtp({
         email: data.email,
-        password: generateTempPassword(),
         options: {
-          data: {
-            first_name: data.firstName,
-            last_name: data.lastName,
-            role: 'tenant'
-          }
+          shouldCreateUser: false
         }
       });
 
-      if (signUpError) {
-        console.error("Error creating new user:", signUpError);
-        throw signUpError;
-      }
-
-      if (!newUser?.user) {
-        throw new Error("Failed to create user account");
-      }
-
-      userId = newUser.user.id;
-    } else {
-      // User exists, try to get their profile
-      console.log("User exists in auth system, fetching profile...");
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', data.email)
-        .maybeSingle();
-
-      if (profile) {
-        console.log("Found existing profile:", profile);
-        userId = profile.id;
-      } else {
-        // This case handles when user exists in auth but not in profiles
-        console.log("No profile found for existing user, creating one...");
+      if (session) {
+        console.log("User exists in auth system but no profile, creating profile...");
         const { data: authData } = await supabase.auth.getUser();
         if (!authData?.user) {
           throw new Error("Could not retrieve user data");
         }
         userId = authData.user.id;
+      } else {
+        // User doesn't exist at all, create new account
+        console.log("User doesn't exist, creating new account...");
+        const tempPassword = generateTempPassword();
+        const { data: newUser, error: signUpError } = await supabase.auth.signUp({
+          email: data.email,
+          password: tempPassword,
+          options: {
+            data: {
+              first_name: data.firstName,
+              last_name: data.lastName,
+              role: 'tenant'
+            }
+          }
+        });
+
+        if (signUpError) {
+          if (signUpError.message.includes("User already registered")) {
+            console.log("User exists but failed to get session, trying to get user data...");
+            const { data: existingUser } = await supabase.auth.getUser();
+            if (!existingUser?.user) {
+              throw new Error("Could not retrieve existing user data");
+            }
+            userId = existingUser.user.id;
+          } else {
+            console.error("Error creating new user:", signUpError);
+            throw signUpError;
+          }
+        } else if (!newUser?.user) {
+          throw new Error("Failed to create user account");
+        } else {
+          userId = newUser.user.id;
+        }
       }
     }
 
