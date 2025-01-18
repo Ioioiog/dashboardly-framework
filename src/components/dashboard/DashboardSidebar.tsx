@@ -8,6 +8,7 @@ import {
   Receipt,
   Settings,
   Droplets,
+  FileInvoice,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -57,6 +58,12 @@ export default function DashboardSidebar() {
       title: "Utilities",
       icon: Droplets,
       href: "/utilities",
+      roles: ["landlord", "tenant"],
+    },
+    {
+      title: "Invoices",
+      icon: FileInvoice,
+      href: "/invoices",
       roles: ["landlord", "tenant"],
     },
     {
