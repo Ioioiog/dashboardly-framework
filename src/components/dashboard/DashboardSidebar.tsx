@@ -8,13 +8,38 @@ import {
   Receipt,
   Settings,
   Droplets,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DashboardSidebar() {
   const navigate = useNavigate();
   const { userRole } = useUserRole();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      console.log("Signing out...");
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      console.log("Sign out successful");
+      navigate("/");
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account",
+      });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: "There was a problem signing out. Please try again.",
+      });
+    }
+  };
 
   const menuItems = [
     {
@@ -104,6 +129,15 @@ export default function DashboardSidebar() {
               </button>
             ))}
           </nav>
+        </div>
+        <div className="p-4">
+          <button
+            onClick={handleSignOut}
+            className="flex w-full items-center space-x-2 px-4 py-2 text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Sign Out</span>
+          </button>
         </div>
       </div>
     </div>
