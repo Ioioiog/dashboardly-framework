@@ -26,17 +26,24 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
   const handleDownload = async () => {
     try {
+      console.log("Attempting to download file:", doc.file_path);
+      
       const { data, error } = await supabase.storage
         .from("documents")
         .download(doc.file_path);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Storage download error:", error);
+        throw error;
+      }
 
       const url = URL.createObjectURL(data);
-      const a = window.document.createElement("a");
+      const a = document.createElement("a");
       a.href = url;
       a.download = doc.file_path.split("/").pop() || "document";
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error downloading document:", error);
