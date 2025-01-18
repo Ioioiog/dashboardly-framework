@@ -16,7 +16,7 @@ export default function Properties() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const userRole = useUserRole();
 
-  const handleEdit = async (property: Property, data: any) => {
+  const handleEdit = async (property: Property, data: any): Promise<boolean> => {
     try {
       const { error } = await supabase
         .from("properties")
