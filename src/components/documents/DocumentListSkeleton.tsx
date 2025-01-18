@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function DocumentListSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="flex flex-col space-y-4 max-w-4xl mx-auto">
       {[1, 2, 3].map((i) => (
         <Card key={i}>
           <CardHeader>

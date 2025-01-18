@@ -53,7 +53,7 @@ export function DocumentList({ userId, userRole, propertyFilter, typeFilter }: D
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="flex flex-col space-y-4 max-w-4xl mx-auto">
       {documents?.map((document) => (
         <DocumentCard 
           key={document.id} 
