@@ -3,16 +3,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Property } from "@/utils/propertyUtils";
 import { format } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const tenantFormSchema = z.object({
   email: z.string().email(),
   firstName: z.string().min(2),
   lastName: z.string().min(2),
-  propertyId: z.string().uuid(),
+  propertyIds: z.array(z.string().uuid()).min(1, "Select at least one property"),
   startDate: z.string().min(1),
   endDate: z.string().optional(),
 });
@@ -32,6 +33,7 @@ export function TenantInviteForm({ properties, onSubmit, isSubmitting }: TenantI
       email: "",
       firstName: "",
       lastName: "",
+      propertyIds: [],
       startDate: format(new Date(), "yyyy-MM-dd"),
     },
   });
@@ -80,24 +82,49 @@ export function TenantInviteForm({ properties, onSubmit, isSubmitting }: TenantI
         />
         <FormField
           control={form.control}
-          name="propertyId"
-          render={({ field }) => (
+          name="propertyIds"
+          render={() => (
             <FormItem>
-              <FormLabel>Property</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a property" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {properties.map((property) => (
-                    <SelectItem key={property.id} value={property.id}>
-                      {property.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormLabel>Properties</FormLabel>
+              <ScrollArea className="h-[200px] border rounded-md p-4">
+                {properties.map((property) => (
+                  <FormField
+                    key={property.id}
+                    control={form.control}
+                    name="propertyIds"
+                    render={({ field }) => {
+                      return (
+                        <FormItem
+                          key={property.id}
+                          className="flex flex-row items-start space-x-3 space-y-0 py-2"
+                        >
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(property.id)}
+                              onCheckedChange={(checked) => {
+                                const value = field.value || [];
+                                if (checked) {
+                                  field.onChange([...value, property.id]);
+                                } else {
+                                  field.onChange(value.filter((id) => id !== property.id));
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-sm font-medium leading-none">
+                              {property.name}
+                            </FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              {property.address}
+                            </p>
+                          </div>
+                        </FormItem>
+                      );
+                    }}
+                  />
+                ))}
+              </ScrollArea>
               <FormMessage />
             </FormItem>
           )}

@@ -379,6 +379,36 @@ export type Database = {
           },
         ]
       }
+      tenant_invitation_properties: {
+        Row: {
+          invitation_id: string
+          property_id: string
+        }
+        Insert: {
+          invitation_id: string
+          property_id: string
+        }
+        Update: {
+          invitation_id?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invitation_properties_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_invitation_properties_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_invitations: {
         Row: {
           created_at: string
@@ -387,7 +417,6 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
-          property_id: string
           start_date: string
           status: string
           token: string
@@ -400,7 +429,6 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
-          property_id: string
           start_date: string
           status?: string
           token: string
@@ -413,21 +441,12 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
-          property_id?: string
           start_date?: string
           status?: string
           token?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "tenant_invitations_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       utilities: {
         Row: {

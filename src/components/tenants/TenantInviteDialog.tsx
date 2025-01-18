@@ -20,30 +20,41 @@ export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
     try {
       console.log("Creating tenant invitation with data:", data);
       
-      const property = properties.find(p => p.id === data.propertyId);
-      if (!property) {
-        throw new Error("Property not found");
-      }
-
       // Generate a unique token
       const token = crypto.randomUUID();
 
       // Insert the invitation
-      const { error: invitationError } = await supabase
+      const { data: invitation, error: invitationError } = await supabase
         .from('tenant_invitations')
         .insert({
           email: data.email,
           first_name: data.firstName,
           last_name: data.lastName,
-          property_id: data.propertyId,
           token: token,
           start_date: data.startDate,
           end_date: data.endDate || null,
-        });
+        })
+        .select()
+        .single();
 
       if (invitationError) {
         console.error("Error creating invitation:", invitationError);
         throw new Error(invitationError.message);
+      }
+
+      // Insert property assignments
+      const propertyAssignments = data.propertyIds.map((propertyId: string) => ({
+        invitation_id: invitation.id,
+        property_id: propertyId,
+      }));
+
+      const { error: propertyAssignmentError } = await supabase
+        .from('tenant_invitation_properties')
+        .insert(propertyAssignments);
+
+      if (propertyAssignmentError) {
+        console.error("Error assigning properties:", propertyAssignmentError);
+        throw new Error(propertyAssignmentError.message);
       }
 
       toast({
