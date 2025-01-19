@@ -9,6 +9,7 @@ export interface Invoice {
   paid_at: string | null;
   created_at: string;
   updated_at: string;
+  vat_rate?: number;
   property?: {
     name: string;
     address: string;
