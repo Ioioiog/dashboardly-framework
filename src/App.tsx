@@ -34,32 +34,6 @@ const queryClient = new QueryClient({
   },
 });
 
-const handleRecoveryToken = async () => {
-  const hash = window.location.hash;
-  try {
-    if (hash && hash.includes("type=recovery")) {
-      const params = new URLSearchParams(hash.substring(1));
-      const accessToken = params.get("access_token");
-      if (accessToken) {
-        console.log("Setting session with recovery token");
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: params.get("refresh_token") || "",
-        });
-        if (error) {
-          console.error("Error setting session:", error);
-          return false;
-        }
-        return true;
-      }
-    }
-    return false;
-  } catch (error) {
-    console.error("Error handling recovery token:", error);
-    return false;
-  }
-};
-
 const AppContent = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
@@ -72,49 +46,34 @@ const AppContent = () => {
       try {
         console.log("Initializing authentication...");
 
-        // First check for recovery token
-        const hasRecoveryToken = await handleRecoveryToken();
-        if (hasRecoveryToken) {
-          console.log("Recovery token found, redirecting to update password");
-          window.location.hash = "";
-          window.location.href = "/auth?mode=update_password";
+        // Clear any existing invalid sessions
+        const { data: { session: currentSession }, error: sessionCheckError } = await supabase.auth.getSession();
+        if (sessionCheckError || !currentSession) {
+          console.log("No valid session found, clearing state");
+          await supabase.auth.signOut();
+          if (mounted) {
+            setIsAuthenticated(false);
+            setIsLoading(false);
+          }
           return;
         }
 
-        // Get the current session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (!mounted) return;
-
-        if (sessionError) {
-          console.error("Session error:", sessionError);
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          return;
-        }
-
-        if (!session) {
-          console.log("No active session");
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          return;
-        }
-
-        // Set up auth state change listener before verifying user
+        // Set up auth state change listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             console.log("Auth state changed:", event);
             
             if (event === 'SIGNED_OUT') {
               console.log("User signed out");
-              setIsAuthenticated(false);
-              queryClient.clear();
+              if (mounted) {
+                setIsAuthenticated(false);
+                queryClient.clear();
+              }
             } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
               console.log("User signed in or token refreshed");
-              setIsAuthenticated(true);
-            } else if (event === 'USER_UPDATED') {
-              console.log("User updated");
-              setIsAuthenticated(true);
+              if (mounted) {
+                setIsAuthenticated(true);
+              }
             }
           }
         );
@@ -127,19 +86,8 @@ const AppContent = () => {
           return;
         }
 
-        if (userError) {
+        if (userError || !user) {
           console.error("User verification failed:", userError);
-          if (userError.message.includes('session_not_found')) {
-            await supabase.auth.signOut();
-          }
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          subscription.unsubscribe();
-          return;
-        }
-
-        if (!user) {
-          console.log("No user found");
           await supabase.auth.signOut();
           setIsAuthenticated(false);
           setIsLoading(false);
@@ -148,11 +96,12 @@ const AppContent = () => {
         }
 
         console.log("Authentication initialized successfully");
-        setIsAuthenticated(true);
-        setIsLoading(false);
+        if (mounted) {
+          setIsAuthenticated(true);
+          setIsLoading(false);
+        }
 
         return () => {
-          mounted = false;
           subscription.unsubscribe();
         };
 
