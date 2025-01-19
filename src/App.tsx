@@ -41,16 +41,17 @@ const AppContent = () => {
 
   useEffect(() => {
     let mounted = true;
+    let authListener: any = null;
 
     const initializeAuth = async () => {
       try {
         console.log("Initializing authentication...");
 
-        // Clear any existing invalid sessions
-        const { data: { session: currentSession }, error: sessionCheckError } = await supabase.auth.getSession();
-        if (sessionCheckError || !currentSession) {
-          console.log("No valid session found, clearing state");
-          await supabase.auth.signOut();
+        // First, try to recover the session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
           if (mounted) {
             setIsAuthenticated(false);
             setIsLoading(false);
@@ -59,51 +60,48 @@ const AppContent = () => {
         }
 
         // Set up auth state change listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
-            console.log("Auth state changed:", event);
-            
-            if (event === 'SIGNED_OUT') {
-              console.log("User signed out");
-              if (mounted) {
-                setIsAuthenticated(false);
-                queryClient.clear();
-              }
-            } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-              console.log("User signed in or token refreshed");
-              if (mounted) {
+        authListener = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log("Auth state changed:", event);
+          
+          if (event === 'SIGNED_OUT') {
+            console.log("User signed out");
+            if (mounted) {
+              setIsAuthenticated(false);
+              queryClient.clear();
+            }
+          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            console.log("User signed in or token refreshed");
+            try {
+              const { data: { user }, error: userError } = await supabase.auth.getUser();
+              if (!userError && user && mounted) {
                 setIsAuthenticated(true);
               }
+            } catch (error) {
+              console.error("Error getting user after auth state change:", error);
             }
           }
-        );
+        });
 
-        // Verify the user exists
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (!mounted) {
-          subscription.unsubscribe();
-          return;
+        // If we have a session, verify the user exists
+        if (session) {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          
+          if (userError) {
+            console.error("User verification failed:", userError);
+            await supabase.auth.signOut();
+            if (mounted) {
+              setIsAuthenticated(false);
+            }
+          } else if (user) {
+            if (mounted) {
+              setIsAuthenticated(true);
+            }
+          }
         }
 
-        if (userError || !user) {
-          console.error("User verification failed:", userError);
-          await supabase.auth.signOut();
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          subscription.unsubscribe();
-          return;
-        }
-
-        console.log("Authentication initialized successfully");
         if (mounted) {
-          setIsAuthenticated(true);
           setIsLoading(false);
         }
-
-        return () => {
-          subscription.unsubscribe();
-        };
 
       } catch (error) {
         console.error("Authentication initialization error:", error);
@@ -123,6 +121,9 @@ const AppContent = () => {
 
     return () => {
       mounted = false;
+      if (authListener) {
+        authListener.subscription.unsubscribe();
+      }
     };
   }, [toast]);
 
