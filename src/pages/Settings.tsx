@@ -7,6 +7,7 @@ import { PasswordForm } from "@/components/settings/PasswordForm";
 import { LanguageSelector } from "@/components/settings/LanguageSelector";
 import { StripeAccountForm } from "@/components/settings/StripeAccountForm";
 import { UtilityProviderForm } from "@/components/settings/UtilityProviderForm";
+import { InvoiceInfoForm } from "@/components/settings/InvoiceInfoForm";
 
 interface Profile {
   first_name: string | null;
@@ -100,6 +101,7 @@ const Settings = () => {
               {profile.role === 'landlord' && (
                 <>
                   <StripeAccountForm />
+                  <InvoiceInfoForm />
                   <UtilityProviderForm />
                 </>
               )}
