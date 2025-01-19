@@ -45,8 +45,39 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
   };
 
   const handleViewInvoice = async (invoiceId: string) => {
-    // TODO: Implement invoice PDF generation and viewing
-    console.log("Viewing invoice:", invoiceId);
+    try {
+      console.log("Fetching invoice details for ID:", invoiceId);
+      
+      // First get the invoice items
+      const { data: invoiceItems, error: itemsError } = await supabase
+        .from('invoice_items')
+        .select('*')
+        .eq('invoice_id', invoiceId);
+
+      if (itemsError) {
+        console.error("Error fetching invoice items:", itemsError);
+        throw itemsError;
+      }
+
+      // For now, we'll just show the items in a toast notification
+      // In a real application, you might want to open a modal or navigate to a detailed view
+      const itemsList = invoiceItems.map(item => 
+        `${item.description}: $${item.amount}`
+      ).join('\n');
+
+      toast({
+        title: "Invoice Details",
+        description: itemsList || "No items found for this invoice",
+      });
+
+    } catch (error) {
+      console.error("Error viewing invoice:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to retrieve invoice details.",
+      });
+    }
   };
 
   return (
