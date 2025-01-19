@@ -31,18 +31,6 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
         file_path: doc.file_path
       });
 
-      // First, check if the file exists
-      const { data: fileExists } = await supabase.storage
-        .from('documents')
-        .list(doc.file_path.split('/')[0]);
-
-      console.log("File existence check result:", fileExists);
-
-      if (!fileExists || fileExists.length === 0) {
-        console.error("File not found in storage");
-        throw new Error("File not found in storage");
-      }
-
       // Get the file data from Supabase Storage
       const { data, error } = await supabase.storage
         .from('documents')
