@@ -108,6 +108,18 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
       if (invoiceError) throw invoiceError;
 
+      // Create invoice items for the amount
+      const { error: itemError } = await supabase
+        .from("invoice_items")
+        .insert({
+          invoice_id: invoice.id,
+          description: values.details || "Invoice payment",
+          amount: values.amount,
+          type: "rent"
+        });
+
+      if (itemError) throw itemError;
+
       // Upload document if selected
       if (selectedFile) {
         const fileExt = selectedFile.name.split('.').pop();
