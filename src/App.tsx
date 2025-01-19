@@ -82,8 +82,25 @@ const AppContent = () => {
         
         if (sessionError) {
           console.error("Error getting initial session:", sessionError);
-          if (sessionError.message.includes('refresh_token_not_found')) {
-            console.log("Invalid refresh token, clearing session");
+          await supabase.auth.signOut();
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+
+        if (!session) {
+          console.log("No session found");
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+
+        // Verify the session is still valid
+        const { error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error("Error getting user:", userError);
+          if (userError.message.includes('session_not_found')) {
+            console.log("Invalid session, signing out");
             await supabase.auth.signOut();
             setIsAuthenticated(false);
           }
@@ -91,7 +108,7 @@ const AppContent = () => {
           return;
         }
 
-        setIsAuthenticated(!!session);
+        setIsAuthenticated(true);
 
         // Set up auth state change listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
