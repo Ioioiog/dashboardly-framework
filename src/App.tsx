@@ -47,7 +47,10 @@ const AppContent = () => {
       try {
         console.log("Initializing authentication...");
 
-        // First, try to get the current session
+        // Clear any existing session first to ensure clean state
+        await supabase.auth.signOut();
+        
+        // Then try to get a fresh session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -59,12 +62,12 @@ const AppContent = () => {
           return;
         }
 
-        // Set up auth state change listener before checking user to avoid race conditions
+        // Set up auth state change listener
         authListener = supabase.auth.onAuthStateChange(async (event, session) => {
           console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
           
-          if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
-            console.log("User signed out or deleted");
+          if (event === 'SIGNED_OUT') {
+            console.log("User signed out");
             if (mounted) {
               setIsAuthenticated(false);
               queryClient.clear();
@@ -72,7 +75,13 @@ const AppContent = () => {
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             console.log("User signed in or token refreshed");
             if (session && mounted) {
-              setIsAuthenticated(true);
+              const { data: { user }, error: userError } = await supabase.auth.getUser();
+              if (!userError && user) {
+                setIsAuthenticated(true);
+              } else {
+                console.error("Error verifying user after sign in:", userError);
+                setIsAuthenticated(false);
+              }
             }
           }
         });
@@ -84,7 +93,6 @@ const AppContent = () => {
           
           if (userError) {
             console.error("User verification failed:", userError);
-            // Clear the invalid session
             await supabase.auth.signOut();
             if (mounted) {
               setIsAuthenticated(false);
