@@ -4,7 +4,7 @@ import { Invoice } from "@/types/invoice";
 import { format } from "date-fns";
 import { PaymentActions } from "@/components/payments/PaymentActions";
 import { Button } from "@/components/ui/button";
-import { FileText, Trash2 } from "lucide-react";
+import { FileText, Trash2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -22,6 +22,7 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [invoiceItems, setInvoiceItems] = useState<any[]>([]);
   const [companyInfo, setCompanyInfo] = useState<any>(null);
+  const [documentUrl, setDocumentUrl] = useState<string | null>(null);
 
   const handleDelete = async (invoiceId: string) => {
     try {
@@ -93,6 +94,36 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
     }
   };
 
+  const handleViewDocument = async (invoiceId: string) => {
+    try {
+      // Get the document from storage
+      const { data: documents, error: documentsError } = await supabase
+        .storage
+        .from('invoice-documents')
+        .list(invoiceId);
+
+      if (documentsError) throw documentsError;
+
+      if (documents && documents.length > 0) {
+        const { data } = await supabase
+          .storage
+          .from('invoice-documents')
+          .createSignedUrl(`${invoiceId}/${documents[0].name}`, 60);
+
+        if (data) {
+          window.open(data.signedUrl, '_blank');
+        }
+      }
+    } catch (error) {
+      console.error("Error viewing document:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to retrieve document.",
+      });
+    }
+  };
+
   return (
     <>
       <div className="grid gap-4">
@@ -138,6 +169,15 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
                   >
                     <FileText className="h-4 w-4" />
                     View Invoice
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewDocument(invoice.id)}
+                    className="flex items-center gap-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    See Details
                   </Button>
                   {userRole === "landlord" && (
                     <Button
