@@ -184,7 +184,7 @@ export function InvoiceInfoForm() {
             <div>
               <h3 className="font-medium">Invoice Generation</h3>
               <p className="text-sm text-muted-foreground">
-                Invoices are automatically generated on the 1st of each month
+                Invoices are automatically generated for each active tenancy on their monthly renewal date
               </p>
             </div>
           </div>
