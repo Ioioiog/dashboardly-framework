@@ -6,10 +6,13 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 interface InvoiceFormValues {
   amount: number;
   property_id: string;
+  details?: string;
+  document?: File;
 }
 
 interface InvoiceFormProps {
@@ -21,6 +24,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   const [properties, setProperties] = useState<Array<{ id: string; name: string }>>([]);
   const { toast } = useToast();
   const form = useForm<InvoiceFormValues>();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Fetch properties when component mounts
   useState(() => {
@@ -47,6 +51,13 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
     fetchProperties();
   }, []);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
 
   const onSubmit = async (values: InvoiceFormValues) => {
     try {
@@ -82,7 +93,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       const dueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
       // Create the invoice
-      const { error: invoiceError } = await supabase
+      const { data: invoice, error: invoiceError } = await supabase
         .from("invoices")
         .insert({
           amount: values.amount,
@@ -91,9 +102,23 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
           property_id: values.property_id,
           tenant_id: tenancy.tenant_id,
           status: "pending",
-        });
+        })
+        .select()
+        .single();
 
       if (invoiceError) throw invoiceError;
+
+      // Upload document if selected
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop();
+        const filePath = `${invoice.id}/${crypto.randomUUID()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('invoice-documents')
+          .upload(filePath, selectedFile);
+
+        if (uploadError) throw uploadError;
+      }
 
       toast({
         title: "Success",
@@ -105,6 +130,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       }
 
       form.reset();
+      setSelectedFile(null);
     } catch (error) {
       console.error("Error creating invoice:", error);
       toast({
@@ -149,6 +175,26 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
             valueAsNumber: true,
             min: 0
           })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="details">Details</Label>
+        <Textarea
+          id="details"
+          {...form.register("details")}
+          placeholder="Enter invoice details..."
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="document">Upload Document</Label>
+        <Input
+          id="document"
+          type="file"
+          accept=".pdf,.doc,.docx"
+          onChange={handleFileChange}
+          className="cursor-pointer"
         />
       </div>
 
