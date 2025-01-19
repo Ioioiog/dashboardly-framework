@@ -46,11 +46,8 @@ const AppContent = () => {
     const initializeAuth = async () => {
       try {
         console.log("Initializing authentication...");
-
-        // Clear any existing session first to ensure clean state
-        await supabase.auth.signOut();
         
-        // Then try to get a fresh session
+        // Get initial session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -75,13 +72,7 @@ const AppContent = () => {
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             console.log("User signed in or token refreshed");
             if (session && mounted) {
-              const { data: { user }, error: userError } = await supabase.auth.getUser();
-              if (!userError && user) {
-                setIsAuthenticated(true);
-              } else {
-                console.error("Error verifying user after sign in:", userError);
-                setIsAuthenticated(false);
-              }
+              setIsAuthenticated(true);
             }
           }
         });
@@ -93,7 +84,6 @@ const AppContent = () => {
           
           if (userError) {
             console.error("User verification failed:", userError);
-            await supabase.auth.signOut();
             if (mounted) {
               setIsAuthenticated(false);
             }
