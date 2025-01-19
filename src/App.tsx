@@ -47,7 +47,7 @@ const AppContent = () => {
       try {
         console.log("Initializing authentication...");
         
-        // Get initial session
+        // Get initial session and verify it
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -60,8 +60,8 @@ const AppContent = () => {
         }
 
         // Set up auth state change listener
-        authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-          console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
+        authListener = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+          console.log("Auth state changed:", event, "Session:", currentSession ? "exists" : "null");
           
           if (event === 'SIGNED_OUT') {
             console.log("User signed out");
@@ -71,8 +71,16 @@ const AppContent = () => {
             }
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             console.log("User signed in or token refreshed");
-            if (session && mounted) {
-              setIsAuthenticated(true);
+            if (currentSession && mounted) {
+              // Verify the user exists and is valid
+              const { data: { user }, error: userError } = await supabase.auth.getUser();
+              if (!userError && user) {
+                console.log("User verified after sign in:", user.id);
+                setIsAuthenticated(true);
+              } else {
+                console.error("Error verifying user after sign in:", userError);
+                setIsAuthenticated(false);
+              }
             }
           }
         });
