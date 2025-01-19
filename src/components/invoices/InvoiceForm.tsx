@@ -51,13 +51,37 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       if (profileError) throw profileError;
       if (profile.role !== "landlord") throw new Error("Only landlords can create invoices");
 
+      // Get the first property owned by the landlord
+      const { data: property, error: propertyError } = await supabase
+        .from("properties")
+        .select("id")
+        .eq("landlord_id", user.id)
+        .single();
+
+      if (propertyError) throw propertyError;
+
+      // Get the first tenant for this property
+      const { data: tenancy, error: tenancyError } = await supabase
+        .from("tenancies")
+        .select("tenant_id")
+        .eq("property_id", property.id)
+        .eq("status", "active")
+        .single();
+
+      if (tenancyError) throw tenancyError;
+
+      // Format the due date as an ISO string date
+      const dueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
       // Create the invoice
       const { error: invoiceError } = await supabase
         .from("invoices")
         .insert({
           amount: values.amount,
-          due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+          due_date: dueDate,
           landlord_id: user.id,
+          property_id: property.id,
+          tenant_id: tenancy.tenant_id,
           status: "pending",
         });
 
