@@ -11,15 +11,28 @@ export default defineConfig({
     },
   },
   server: {
-    // Add historyApiFallback to handle client-side routing
-    historyApiFallback: true,
+    port: 8080,
+    host: "::",
+    proxy: {
+      // Redirect all requests that don't match a file to index.html
+      '*': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) => '/index.html',
+      },
+    },
   },
   preview: {
-    // Also add historyApiFallback for preview/production mode
-    historyApiFallback: true,
+    port: 8080,
+    proxy: {
+      '*': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) => '/index.html',
+      },
+    },
   },
   build: {
-    // Generate a 200.html file that can be used for client-side routing
     rollupOptions: {
       output: {
         manualChunks: undefined,
