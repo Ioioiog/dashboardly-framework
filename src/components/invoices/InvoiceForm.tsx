@@ -5,9 +5,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface InvoiceFormValues {
   amount: number;
+  property_id: string;
 }
 
 interface InvoiceFormProps {
@@ -16,12 +18,40 @@ interface InvoiceFormProps {
 
 export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [properties, setProperties] = useState<Array<{ id: string; name: string }>>([]);
   const { toast } = useToast();
   const form = useForm<InvoiceFormValues>();
+
+  // Fetch properties when component mounts
+  useState(() => {
+    const fetchProperties = async () => {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error("Error getting user:", userError);
+        return;
+      }
+      if (!user) return;
+
+      const { data: properties, error: propertiesError } = await supabase
+        .from("properties")
+        .select("id, name")
+        .eq("landlord_id", user.id);
+
+      if (propertiesError) {
+        console.error("Error fetching properties:", propertiesError);
+        return;
+      }
+
+      setProperties(properties || []);
+    };
+
+    fetchProperties();
+  }, []);
 
   const onSubmit = async (values: InvoiceFormValues) => {
     try {
       setIsLoading(true);
+      console.log("Submitting invoice with values:", values);
 
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -38,20 +68,11 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       if (profileError) throw profileError;
       if (profile.role !== "landlord") throw new Error("Only landlords can create invoices");
 
-      // Get the first property owned by the landlord
-      const { data: property, error: propertyError } = await supabase
-        .from("properties")
-        .select("id")
-        .eq("landlord_id", user.id)
-        .single();
-
-      if (propertyError) throw propertyError;
-
       // Get the first tenant for this property
       const { data: tenancy, error: tenancyError } = await supabase
         .from("tenancies")
         .select("tenant_id")
-        .eq("property_id", property.id)
+        .eq("property_id", values.property_id)
         .eq("status", "active")
         .single();
 
@@ -67,7 +88,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
           amount: values.amount,
           due_date: dueDate,
           landlord_id: user.id,
-          property_id: property.id,
+          property_id: values.property_id,
           tenant_id: tenancy.tenant_id,
           status: "pending",
         });
@@ -98,6 +119,25 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="property">Property</Label>
+        <Select 
+          onValueChange={(value) => form.setValue("property_id", value)}
+          required
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a property" />
+          </SelectTrigger>
+          <SelectContent>
+            {properties.map((property) => (
+              <SelectItem key={property.id} value={property.id}>
+                {property.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="amount">Amount</Label>
         <Input
