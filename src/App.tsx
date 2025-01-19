@@ -68,6 +68,8 @@ const AppContent = () => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        console.log("Initializing authentication...");
+        
         // First check for recovery token
         const hasRecoveryToken = await handleRecoveryToken();
         if (hasRecoveryToken) {
@@ -77,11 +79,11 @@ const AppContent = () => {
           return;
         }
 
-        // Get the initial session
+        // Get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
-          console.error("Error getting initial session:", sessionError);
+          console.error("Session error:", sessionError);
           await supabase.auth.signOut();
           setIsAuthenticated(false);
           setIsLoading(false);
@@ -89,18 +91,19 @@ const AppContent = () => {
         }
 
         if (!session) {
-          console.log("No session found");
+          console.log("No active session");
           setIsAuthenticated(false);
           setIsLoading(false);
           return;
         }
 
-        // Verify the session is still valid
-        const { error: userError } = await supabase.auth.getUser();
+        // Verify session validity
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
         if (userError) {
-          console.error("Error getting user:", userError);
+          console.error("User verification error:", userError);
           if (userError.message.includes('session_not_found')) {
-            console.log("Invalid session, signing out");
+            console.log("Session invalid, signing out");
             await supabase.auth.signOut();
             setIsAuthenticated(false);
           }
@@ -108,6 +111,15 @@ const AppContent = () => {
           return;
         }
 
+        if (!user) {
+          console.log("No user found, signing out");
+          await supabase.auth.signOut();
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+
+        console.log("Session verified successfully");
         setIsAuthenticated(true);
 
         // Set up auth state change listener
@@ -135,7 +147,7 @@ const AppContent = () => {
           subscription.unsubscribe();
         };
       } catch (error) {
-        console.error("Error in auth initialization:", error);
+        console.error("Authentication initialization error:", error);
         setIsLoading(false);
         setIsAuthenticated(false);
         toast({
