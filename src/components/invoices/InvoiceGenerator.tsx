@@ -6,6 +6,7 @@ interface InvoiceItem {
   description: string;
   unitPrice: number;
   quantity: number;
+  type?: 'rent' | 'utility' | 'tax';
 }
 
 interface InvoiceGeneratorProps {
@@ -21,18 +22,27 @@ interface InvoiceGeneratorProps {
 
 export function InvoiceGenerator({ invoice, invoiceItems, companyInfo }: InvoiceGeneratorProps) {
   const calculateSubtotal = () => {
-    return invoiceItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+    // Only calculate subtotal for non-tax items
+    return invoiceItems
+      .filter(item => item.type !== 'tax')
+      .reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
   };
 
-  const calculateTax = (subtotal: number) => {
-    return invoice.vat_rate ? (subtotal * invoice.vat_rate) / 100 : 0;
+  const calculateRentVAT = () => {
+    // Find rent items and calculate VAT only for them
+    const rentItems = invoiceItems.filter(item => item.type === 'rent');
+    const rentTotal = rentItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+    return invoice.vat_rate ? (rentTotal * invoice.vat_rate) / 100 : 0;
   };
 
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
-    const tax = calculateTax(subtotal);
-    return subtotal + tax;
+    const rentVAT = calculateRentVAT();
+    return subtotal + rentVAT;
   };
+
+  // Filter out tax items as they'll be displayed separately
+  const displayItems = invoiceItems.filter(item => item.type !== 'tax');
 
   return (
     <div className="max-w-3xl mx-auto p-8 bg-white">
@@ -75,7 +85,7 @@ export function InvoiceGenerator({ invoice, invoiceItems, companyInfo }: Invoice
             </tr>
           </thead>
           <tbody>
-            {invoiceItems.map((item, index) => (
+            {displayItems.map((item, index) => (
               <tr key={index} className="border-b">
                 <td className="py-2 text-foreground">{item.description}</td>
                 <td className="py-2 text-foreground">${item.unitPrice.toFixed(2)}</td>
@@ -98,8 +108,8 @@ export function InvoiceGenerator({ invoice, invoiceItems, companyInfo }: Invoice
           </div>
           {invoice.vat_rate && (
             <div className="flex justify-between mb-2">
-              <span className="text-muted-foreground">VAT ({invoice.vat_rate}%)</span>
-              <span className="text-foreground">${calculateTax(calculateSubtotal()).toFixed(2)}</span>
+              <span className="text-muted-foreground">VAT ({invoice.vat_rate}%) on Rent</span>
+              <span className="text-foreground">${calculateRentVAT().toFixed(2)}</span>
             </div>
           )}
           <div className="flex justify-between font-bold border-t pt-2">
