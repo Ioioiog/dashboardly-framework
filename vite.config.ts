@@ -1,20 +1,29 @@
-import path from "path";
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import { componentTagger } from "lovable-tagger";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
 
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [
-    react(),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
-}));
+  server: {
+    // Add historyApiFallback to handle client-side routing
+    historyApiFallback: true,
+  },
+  preview: {
+    // Also add historyApiFallback for preview/production mode
+    historyApiFallback: true,
+  },
+  build: {
+    // Generate a 200.html file that can be used for client-side routing
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
+})
