@@ -2,36 +2,45 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { InvoiceForm } from "./InvoiceForm";
 
-export function InvoiceDialog() {
+interface InvoiceDialogProps {
+  onInvoiceCreated?: () => Promise<void>;
+}
+
+export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
+  const [open, setOpen] = useState(false);
+
+  const handleInvoiceCreated = async () => {
+    if (onInvoiceCreated) {
+      await onInvoiceCreated();
+    }
+    setOpen(false);
+  };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Create Invoice</Button>
+        <Button className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Create Invoice
+        </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Invoice Generation</DialogTitle>
-          <DialogDescription>
-            Invoices are now generated automatically
-          </DialogDescription>
+          <DialogTitle>Create Invoice</DialogTitle>
         </DialogHeader>
-        
-        <Alert>
-          <InfoIcon className="h-4 w-4" />
-          <AlertDescription>
-            Invoices are automatically generated on each tenant's monthly renewal date.
-            They include rent, VAT (if configured), and any pending utility bills.
-            To create a one-time invoice for additional charges, please use the Payments section.
-          </AlertDescription>
-        </Alert>
+        <div className="text-sm text-muted-foreground mb-4">
+          Note: Invoices are automatically generated on the monthly renewal date of each active tenancy.
+          Manual invoice creation should only be used for special cases.
+        </div>
+        <InvoiceForm onSuccess={handleInvoiceCreated} />
       </DialogContent>
     </Dialog>
   );
