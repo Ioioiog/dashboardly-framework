@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
+import { Json } from "@/integrations/supabase/types/json";
 
 interface InvoiceInfoFormValues {
   company_name: string;
@@ -37,7 +38,16 @@ export function InvoiceInfoForm() {
 
         if (error) throw error;
         if (data?.invoice_info) {
-          form.reset(data.invoice_info as InvoiceInfoFormValues);
+          // Type assertion to handle the conversion safely
+          const invoiceInfo = data.invoice_info as Record<string, string>;
+          form.reset({
+            company_name: invoiceInfo.company_name || '',
+            company_address: invoiceInfo.company_address || '',
+            bank_name: invoiceInfo.bank_name || '',
+            bank_account_number: invoiceInfo.bank_account_number || '',
+            bank_sort_code: invoiceInfo.bank_sort_code || '',
+            additional_notes: invoiceInfo.additional_notes || '',
+          });
         }
       } catch (error) {
         console.error("Error fetching invoice info:", error);
@@ -56,10 +66,20 @@ export function InvoiceInfoForm() {
         throw new Error("No user found");
       }
 
+      // Convert the form data to a plain object that matches the Json type
+      const invoiceInfo: Record<string, string> = {
+        company_name: data.company_name,
+        company_address: data.company_address,
+        bank_name: data.bank_name,
+        bank_account_number: data.bank_account_number,
+        bank_sort_code: data.bank_sort_code,
+        additional_notes: data.additional_notes,
+      };
+
       const { error } = await supabase
         .from('profiles')
         .update({
-          invoice_info: data
+          invoice_info: invoiceInfo
         })
         .eq('id', user.id);
 
