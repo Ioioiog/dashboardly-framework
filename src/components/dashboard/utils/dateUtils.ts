@@ -1,4 +1,4 @@
-import { startOfMonth, subMonths, format } from "date-fns";
+import { format, startOfMonth, subMonths } from "date-fns";
 
 export type TimeRange = "1M" | "6M" | "1Y";
 
@@ -7,10 +7,17 @@ export function getMonthsForRange(range: TimeRange): string[] {
   
   return Array.from({ length: monthCount }, (_, i) => {
     const date = subMonths(startOfMonth(new Date()), i);
-    return format(date, "yyyy-MM-dd");
+    // Ensure consistent date formatting across browsers
+    return date.toISOString().split('T')[0];
   }).reverse();
 }
 
 export function formatMonthDisplay(date: string): string {
-  return format(new Date(date), "MMM yyyy");
+  // Ensure we're parsing the date string consistently
+  const parsedDate = new Date(date + 'T00:00:00Z');
+  return format(parsedDate, "MMM yyyy");
+}
+
+export function formatDateForDB(date: Date): string {
+  return date.toISOString().split('T')[0];
 }

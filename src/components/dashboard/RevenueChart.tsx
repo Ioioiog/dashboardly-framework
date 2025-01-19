@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TimeRange, getMonthsForRange, formatMonthDisplay } from "./utils/dateUtils";
+import { TimeRange, getMonthsForRange, formatMonthDisplay, formatDateForDB } from "./utils/dateUtils";
 import { RevenueStats } from "./RevenueStats";
 import { PredictionChart } from "./PredictionChart";
 import { calculatePredictedRevenue } from "./utils/predictionUtils";
@@ -24,6 +24,9 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
   
   const months = getMonthsForRange(timeRange);
   console.log("Fetching data for months:", months);
+
+  const startDate = months[0];
+  const endDate = formatDateForDB(new Date()); // Use consistent date formatting
 
   const { data: payments, error } = await supabase
     .from("payments")
@@ -37,8 +40,8 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
       )
     `)
     .in("status", ["paid"])
-    .gte("paid_date", months[0])
-    .lte("paid_date", new Date().toISOString().split('T')[0])
+    .gte("paid_date", startDate)
+    .lte("paid_date", endDate)
     .eq("tenancy.property.landlord_id", userId);
 
   if (error) {
