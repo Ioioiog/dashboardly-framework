@@ -20,6 +20,11 @@ export function PaymentActions({ paymentId, status, userRole }: PaymentActionsPr
   const { toast } = useToast();
   const [processingPaymentId, setProcessingPaymentId] = useState<string | null>(null);
 
+  const formatDateForDB = (date: Date) => {
+    // Ensure consistent date formatting across browsers
+    return date.toISOString().split('T')[0];
+  };
+
   const updatePaymentStatus = async (newStatus: string) => {
     try {
       console.log('Updating payment status:', { paymentId, newStatus });
@@ -29,7 +34,7 @@ export function PaymentActions({ paymentId, status, userRole }: PaymentActionsPr
 
       // Set paid_date when marking as paid, remove it otherwise
       if (newStatus === 'paid') {
-        updateData.paid_date = new Date().toISOString();
+        updateData.paid_date = formatDateForDB(new Date());
       } else {
         updateData.paid_date = null;
       }
@@ -39,7 +44,10 @@ export function PaymentActions({ paymentId, status, userRole }: PaymentActionsPr
         .update(updateData)
         .eq("id", paymentId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Payment status update error:', error);
+        throw error;
+      }
 
       toast({
         title: "Success",
