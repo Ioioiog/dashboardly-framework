@@ -47,7 +47,7 @@ const AppContent = () => {
       try {
         console.log("Initializing authentication...");
 
-        // First, try to recover the session
+        // First, try to get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -59,43 +59,46 @@ const AppContent = () => {
           return;
         }
 
-        // Set up auth state change listener
+        // Set up auth state change listener before checking user to avoid race conditions
         authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-          console.log("Auth state changed:", event);
+          console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
           
-          if (event === 'SIGNED_OUT') {
-            console.log("User signed out");
+          if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+            console.log("User signed out or deleted");
             if (mounted) {
               setIsAuthenticated(false);
               queryClient.clear();
             }
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             console.log("User signed in or token refreshed");
-            try {
-              const { data: { user }, error: userError } = await supabase.auth.getUser();
-              if (!userError && user && mounted) {
-                setIsAuthenticated(true);
-              }
-            } catch (error) {
-              console.error("Error getting user after auth state change:", error);
+            if (session && mounted) {
+              setIsAuthenticated(true);
             }
           }
         });
 
-        // If we have a session, verify the user exists
+        // If we have a session, verify the user
         if (session) {
+          console.log("Session found, verifying user...");
           const { data: { user }, error: userError } = await supabase.auth.getUser();
           
           if (userError) {
             console.error("User verification failed:", userError);
+            // Clear the invalid session
             await supabase.auth.signOut();
             if (mounted) {
               setIsAuthenticated(false);
             }
           } else if (user) {
+            console.log("User verified successfully:", user.id);
             if (mounted) {
               setIsAuthenticated(true);
             }
+          }
+        } else {
+          console.log("No session found");
+          if (mounted) {
+            setIsAuthenticated(false);
           }
         }
 
