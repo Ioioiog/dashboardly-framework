@@ -66,25 +66,22 @@ const AppContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     const initializeAuth = async () => {
       try {
         console.log("Initializing authentication...");
-        
-        // First check for recovery token
-        const hasRecoveryToken = await handleRecoveryToken();
-        if (hasRecoveryToken) {
-          console.log("Recovery token found, redirecting to update password");
-          window.location.hash = "";
-          window.location.href = "/auth?mode=update_password";
-          return;
-        }
 
-        // Get the current session
+        // Clear any existing session first
+        await supabase.auth.signOut();
+        
+        // Initialize the session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
+        if (!mounted) return;
+
         if (sessionError) {
           console.error("Session error:", sessionError);
-          await supabase.auth.signOut();
           setIsAuthenticated(false);
           setIsLoading(false);
           return;
@@ -96,31 +93,6 @@ const AppContent = () => {
           setIsLoading(false);
           return;
         }
-
-        // Verify session validity
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError) {
-          console.error("User verification error:", userError);
-          if (userError.message.includes('session_not_found')) {
-            console.log("Session invalid, signing out");
-            await supabase.auth.signOut();
-            setIsAuthenticated(false);
-          }
-          setIsLoading(false);
-          return;
-        }
-
-        if (!user) {
-          console.log("No user found, signing out");
-          await supabase.auth.signOut();
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          return;
-        }
-
-        console.log("Session verified successfully");
-        setIsAuthenticated(true);
 
         // Set up auth state change listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -141,24 +113,46 @@ const AppContent = () => {
           }
         );
 
+        // Verify the user exists
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (!mounted) return;
+
+        if (userError || !user) {
+          console.error("User verification failed:", userError);
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+
+        console.log("Authentication initialized successfully");
+        setIsAuthenticated(true);
         setIsLoading(false);
+
         return () => {
-          console.log("Cleaning up auth subscription");
+          mounted = false;
           subscription.unsubscribe();
         };
+
       } catch (error) {
         console.error("Authentication initialization error:", error);
-        setIsLoading(false);
-        setIsAuthenticated(false);
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: "There was a problem with authentication. Please try logging in again.",
-        });
+        if (mounted) {
+          setIsLoading(false);
+          setIsAuthenticated(false);
+          toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "There was a problem with authentication. Please try logging in again.",
+          });
+        }
       }
     };
 
     initializeAuth();
+
+    return () => {
+      mounted = false;
+    };
   }, [toast]);
 
   if (isLoading) {
@@ -215,7 +209,6 @@ const AppContent = () => {
           path="/invoices"
           element={isAuthenticated ? <Invoices /> : <Navigate to="/auth" replace />}
         />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </TooltipProvider>
   );
