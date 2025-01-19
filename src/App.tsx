@@ -19,12 +19,10 @@ import { supabase } from "./integrations/supabase/client";
 import { useToast } from "./hooks/use-toast";
 import "./i18n/config";
 
-// Configure QueryClient with proper error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error) => {
-        // Don't retry on 404s
         if (error instanceof Error && error.message.includes('404')) {
           return false;
         }
@@ -70,6 +68,7 @@ const AppContent = () => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        // First check for recovery token
         const hasRecoveryToken = await handleRecoveryToken();
         if (hasRecoveryToken) {
           console.log("Recovery token found, redirecting to update password");
@@ -78,37 +77,55 @@ const AppContent = () => {
           return;
         }
 
+        // Get the initial session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Error getting initial session:", sessionError);
+          if (sessionError.message.includes('refresh_token_not_found')) {
+            console.log("Invalid refresh token, clearing session");
+            await supabase.auth.signOut();
+            setIsAuthenticated(false);
+          }
+          setIsLoading(false);
+          return;
+        }
+
+        setIsAuthenticated(!!session);
+
+        // Set up auth state change listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             console.log("Auth state changed:", event);
-            if (event === 'SIGNED_OUT') {
+            
+            if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+              console.log("User signed out or deleted");
               setIsAuthenticated(false);
               queryClient.clear();
             } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+              console.log("User signed in or token refreshed");
+              setIsAuthenticated(true);
+            } else if (event === 'USER_UPDATED') {
+              console.log("User updated");
               setIsAuthenticated(true);
             }
           }
         );
 
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Error checking session:", error);
-          toast({
-            variant: "destructive",
-            title: "Authentication Error",
-            description: "There was a problem checking your session. Please try logging in again.",
-          });
-          setIsAuthenticated(false);
-        } else {
-          setIsAuthenticated(!!session);
-        }
-
         setIsLoading(false);
-        return () => subscription.unsubscribe();
+        return () => {
+          console.log("Cleaning up auth subscription");
+          subscription.unsubscribe();
+        };
       } catch (error) {
         console.error("Error in auth initialization:", error);
         setIsLoading(false);
         setIsAuthenticated(false);
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: "There was a problem with authentication. Please try logging in again.",
+        });
       }
     };
 
