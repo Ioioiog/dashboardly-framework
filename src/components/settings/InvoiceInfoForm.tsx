@@ -140,24 +140,13 @@ export function InvoiceInfoForm() {
               />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="bank_account_number">Account Number</Label>
-                <Input
-                  id="bank_account_number"
-                  {...form.register("bank_account_number")}
-                  placeholder="Enter account number"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bank_sort_code">Sort Code</Label>
-                <Input
-                  id="bank_sort_code"
-                  {...form.register("bank_sort_code")}
-                  placeholder="Enter sort code"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="bank_account_number">Account Number</Label>
+              <Input
+                id="bank_account_number"
+                {...form.register("bank_account_number")}
+                placeholder="Enter account number"
+              />
             </div>
 
             <div className="space-y-2">
