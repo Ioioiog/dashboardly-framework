@@ -323,6 +323,7 @@ export type Database = {
           email: string | null
           first_name: string | null
           id: string
+          invoice_info: Json | null
           last_name: string | null
           phone: string | null
           role: string
@@ -334,6 +335,7 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           id: string
+          invoice_info?: Json | null
           last_name?: string | null
           phone?: string | null
           role?: string
@@ -345,6 +347,7 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           id?: string
+          invoice_info?: Json | null
           last_name?: string | null
           phone?: string | null
           role?: string

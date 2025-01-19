@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface InvoiceInfoFormValues {
   company_name: string;
@@ -22,6 +22,30 @@ export function InvoiceInfoForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const form = useForm<InvoiceInfoFormValues>();
+
+  useEffect(() => {
+    const fetchInvoiceInfo = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('invoice_info')
+          .eq('id', user.id)
+          .single();
+
+        if (error) throw error;
+        if (data?.invoice_info) {
+          form.reset(data.invoice_info as InvoiceInfoFormValues);
+        }
+      } catch (error) {
+        console.error("Error fetching invoice info:", error);
+      }
+    };
+
+    fetchInvoiceInfo();
+  }, [form]);
 
   const onSubmit = async (data: InvoiceInfoFormValues) => {
     try {
