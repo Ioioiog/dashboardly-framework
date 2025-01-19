@@ -1,14 +1,133 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Receipt, CreditCard } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+
+interface InvoiceInfoFormValues {
+  company_name: string;
+  company_address: string;
+  bank_name: string;
+  bank_account_number: string;
+  bank_sort_code: string;
+  additional_notes: string;
+}
 
 export function InvoiceInfoForm() {
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const form = useForm<InvoiceInfoFormValues>();
+
+  const onSubmit = async (data: InvoiceInfoFormValues) => {
+    try {
+      setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("No user found");
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          invoice_info: data
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Invoice information updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating invoice info:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update invoice information",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Invoice Information</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid gap-6">
+      <CardContent className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="company_name">Company Name</Label>
+              <Input
+                id="company_name"
+                {...form.register("company_name")}
+                placeholder="Enter your company name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="company_address">Company Address</Label>
+              <Textarea
+                id="company_address"
+                {...form.register("company_address")}
+                placeholder="Enter your company address"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bank_name">Bank Name</Label>
+              <Input
+                id="bank_name"
+                {...form.register("bank_name")}
+                placeholder="Enter your bank name"
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="bank_account_number">Account Number</Label>
+                <Input
+                  id="bank_account_number"
+                  {...form.register("bank_account_number")}
+                  placeholder="Enter account number"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bank_sort_code">Sort Code</Label>
+                <Input
+                  id="bank_sort_code"
+                  {...form.register("bank_sort_code")}
+                  placeholder="Enter sort code"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="additional_notes">Additional Notes</Label>
+              <Textarea
+                id="additional_notes"
+                {...form.register("additional_notes")}
+                placeholder="Enter any additional information to appear on invoices"
+              />
+            </div>
+          </div>
+
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Saving..." : "Save Invoice Information"}
+          </Button>
+        </form>
+
+        <div className="grid gap-6 pt-4">
           <div className="flex items-center space-x-4">
             <FileText className="h-6 w-6 text-blue-500" />
             <div>
