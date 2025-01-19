@@ -72,10 +72,16 @@ const AppContent = () => {
       try {
         console.log("Initializing authentication...");
 
-        // Clear any existing session first
-        await supabase.auth.signOut();
-        
-        // Initialize the session
+        // First check for recovery token
+        const hasRecoveryToken = await handleRecoveryToken();
+        if (hasRecoveryToken) {
+          console.log("Recovery token found, redirecting to update password");
+          window.location.hash = "";
+          window.location.href = "/auth?mode=update_password";
+          return;
+        }
+
+        // Get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (!mounted) return;
@@ -94,7 +100,7 @@ const AppContent = () => {
           return;
         }
 
-        // Set up auth state change listener
+        // Set up auth state change listener before verifying user
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             console.log("Auth state changed:", event);
@@ -116,12 +122,28 @@ const AppContent = () => {
         // Verify the user exists
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
-        if (!mounted) return;
+        if (!mounted) {
+          subscription.unsubscribe();
+          return;
+        }
 
-        if (userError || !user) {
+        if (userError) {
           console.error("User verification failed:", userError);
+          if (userError.message.includes('session_not_found')) {
+            await supabase.auth.signOut();
+          }
           setIsAuthenticated(false);
           setIsLoading(false);
+          subscription.unsubscribe();
+          return;
+        }
+
+        if (!user) {
+          console.log("No user found");
+          await supabase.auth.signOut();
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          subscription.unsubscribe();
           return;
         }
 
@@ -209,6 +231,7 @@ const AppContent = () => {
           path="/invoices"
           element={isAuthenticated ? <Invoices /> : <Navigate to="/auth" replace />}
         />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </TooltipProvider>
   );
