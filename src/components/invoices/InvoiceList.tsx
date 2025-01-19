@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { InvoiceGenerator } from "./InvoiceGenerator";
 import { useState } from "react";
 
@@ -75,7 +75,8 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
       const transformedItems = items.map(item => ({
         description: item.description,
         unitPrice: item.amount,
-        quantity: 1
+        quantity: 1,
+        type: item.type
       }));
 
       setInvoiceItems(transformedItems);
@@ -180,6 +181,7 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
 
       <Dialog open={!!selectedInvoice} onOpenChange={() => setSelectedInvoice(null)}>
         <DialogContent className="max-w-4xl">
+          <DialogTitle className="sr-only">Invoice Details</DialogTitle>
           {selectedInvoice && companyInfo && (
             <InvoiceGenerator
               invoice={selectedInvoice}
