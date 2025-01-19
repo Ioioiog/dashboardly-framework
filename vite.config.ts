@@ -16,24 +16,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 8080,
     host: "::",
-    proxy: {
-      // Redirect all requests that don't match a file to index.html
-      '*': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        rewrite: (path) => '/index.html',
-      },
-    },
   },
   preview: {
     port: 8080,
-    proxy: {
-      '*': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        rewrite: (path) => '/index.html',
-      },
-    },
   },
   build: {
     rollupOptions: {
