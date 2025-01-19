@@ -19,6 +19,16 @@ interface InvoiceDialogProps {
   onInvoiceCreated: () => void;
 }
 
+interface InvoiceInfo {
+  company_name?: string;
+  company_address?: string;
+  bank_name?: string;
+  bank_account_number?: string;
+  bank_sort_code?: string;
+  additional_notes?: string;
+  apply_vat?: boolean;
+}
+
 export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,7 +94,8 @@ export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
 
       // Calculate total amount including VAT if applicable
       const utilitiesTotal = utilities?.reduce((sum, utility) => sum + utility.amount, 0) || 0;
-      const applyVat = profile?.invoice_info?.apply_vat || false;
+      const invoiceInfo = profile?.invoice_info as InvoiceInfo | null;
+      const applyVat = invoiceInfo?.apply_vat || false;
       const rentAmount = property.monthly_rent;
       const vatAmount = applyVat ? rentAmount * 0.19 : 0;
       const totalAmount = rentAmount + vatAmount + utilitiesTotal;
