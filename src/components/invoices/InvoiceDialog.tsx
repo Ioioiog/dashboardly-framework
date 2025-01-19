@@ -73,9 +73,21 @@ export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
 
       if (utilitiesError) throw utilitiesError;
 
-      // Calculate total amount
+      // Get landlord's invoice preferences
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("invoice_info")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Calculate total amount including VAT if applicable
       const utilitiesTotal = utilities?.reduce((sum, utility) => sum + utility.amount, 0) || 0;
-      const totalAmount = property.monthly_rent + utilitiesTotal;
+      const applyVat = profile?.invoice_info?.apply_vat || false;
+      const rentAmount = property.monthly_rent;
+      const vatAmount = applyVat ? rentAmount * 0.19 : 0;
+      const totalAmount = rentAmount + vatAmount + utilitiesTotal;
 
       // Create invoice
       const { data: invoice, error: invoiceError } = await supabase
@@ -98,9 +110,16 @@ export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
         {
           invoice_id: invoice.id,
           description: "Monthly Rent",
-          amount: property.monthly_rent,
+          amount: rentAmount,
           type: "rent",
         },
+        // Add VAT as a separate item if applicable
+        ...(applyVat ? [{
+          invoice_id: invoice.id,
+          description: "VAT (19%) on Rent",
+          amount: vatAmount,
+          type: "tax",
+        }] : []),
         ...(utilities || []).map((utility: any) => ({
           invoice_id: invoice.id,
           description: `Utility Bill`,

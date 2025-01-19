@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { Json } from "@/integrations/supabase/types/json";
+import { Switch } from "@/components/ui/switch";
 
 interface InvoiceInfoFormValues {
   company_name: string;
@@ -17,6 +18,7 @@ interface InvoiceInfoFormValues {
   bank_account_number: string;
   bank_sort_code: string;
   additional_notes: string;
+  apply_vat: boolean;
 }
 
 export function InvoiceInfoForm() {
@@ -39,7 +41,7 @@ export function InvoiceInfoForm() {
         if (error) throw error;
         if (data?.invoice_info) {
           // Type assertion to handle the conversion safely
-          const invoiceInfo = data.invoice_info as Record<string, string>;
+          const invoiceInfo = data.invoice_info as Record<string, any>;
           form.reset({
             company_name: invoiceInfo.company_name || '',
             company_address: invoiceInfo.company_address || '',
@@ -47,6 +49,7 @@ export function InvoiceInfoForm() {
             bank_account_number: invoiceInfo.bank_account_number || '',
             bank_sort_code: invoiceInfo.bank_sort_code || '',
             additional_notes: invoiceInfo.additional_notes || '',
+            apply_vat: invoiceInfo.apply_vat || false,
           });
         }
       } catch (error) {
@@ -67,13 +70,14 @@ export function InvoiceInfoForm() {
       }
 
       // Convert the form data to a plain object that matches the Json type
-      const invoiceInfo: Record<string, string> = {
+      const invoiceInfo: Record<string, any> = {
         company_name: data.company_name,
         company_address: data.company_address,
         bank_name: data.bank_name,
         bank_account_number: data.bank_account_number,
         bank_sort_code: data.bank_sort_code,
         additional_notes: data.additional_notes,
+        apply_vat: data.apply_vat,
       };
 
       const { error } = await supabase
@@ -154,6 +158,20 @@ export function InvoiceInfoForm() {
                   placeholder="Enter sort code"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="apply_vat">Apply 19% VAT to Rent</Label>
+                <Switch
+                  id="apply_vat"
+                  checked={form.watch("apply_vat")}
+                  onCheckedChange={(checked) => form.setValue("apply_vat", checked)}
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                When enabled, 19% VAT will be automatically added to rent amounts on invoices
+              </p>
             </div>
 
             <div className="space-y-2">
