@@ -670,6 +670,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_monthly_invoices: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       set_claim: {
         Args: {
           params: Json
