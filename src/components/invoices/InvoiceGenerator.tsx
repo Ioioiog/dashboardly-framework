@@ -1,6 +1,5 @@
 import React from 'react';
-import { Invoice } from '@/types/invoice';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/utils';
 
 interface InvoiceItem {
   description: string;
@@ -10,17 +9,35 @@ interface InvoiceItem {
 }
 
 interface InvoiceGeneratorProps {
-  invoice: Invoice;
+  invoice: {
+    id: string;
+    due_date: string;
+    created_at: string;
+    vat_rate?: number;
+    property?: {
+      name: string;
+      address: string;
+    };
+    tenant?: {
+      first_name?: string;
+      last_name?: string;
+    };
+  };
   invoiceItems: InvoiceItem[];
   companyInfo: {
-    companyName: string;
-    companyAddress: string;
-    bankName: string;
-    bankAccountNumber: string;
+    company_name?: string;
+    company_address?: string;
+    bank_name?: string;
+    bank_account_number?: string;
   };
 }
 
 export function InvoiceGenerator({ invoice, invoiceItems, companyInfo }: InvoiceGeneratorProps) {
+  if (!invoice || !invoiceItems || !companyInfo) {
+    console.error('Missing required props:', { invoice, invoiceItems, companyInfo });
+    return <div>Unable to generate invoice. Missing required information.</div>;
+  }
+
   const calculateSubtotal = () => {
     // Only calculate subtotal for non-tax items
     return invoiceItems
@@ -44,36 +61,38 @@ export function InvoiceGenerator({ invoice, invoiceItems, companyInfo }: Invoice
   // Filter out tax items as they'll be displayed separately
   const displayItems = invoiceItems.filter(item => item.type !== 'tax');
 
+  const tenantName = invoice.tenant 
+    ? `${invoice.tenant.first_name || ''} ${invoice.tenant.last_name || ''}`.trim()
+    : 'N/A';
+
   return (
     <div className="max-w-3xl mx-auto p-8 bg-white">
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-primary">Invoice</h1>
-          <p className="text-xl text-muted-foreground mt-2">RENT INVOICE</p>
+          <h1 className="text-4xl font-bold text-primary">INVOICE</h1>
+          <p className="text-xl text-primary/80 mt-2">{invoice.property?.name || 'N/A'}</p>
         </div>
       </div>
 
-      {/* Billing Information */}
       <div className="grid grid-cols-2 gap-8 mb-8">
         <div>
           <h2 className="text-muted-foreground font-semibold mb-2">BILLED TO:</h2>
-          <p className="text-foreground">
-            {invoice.tenant?.first_name} {invoice.tenant?.last_name}
-          </p>
-          <p className="text-muted-foreground">{invoice.tenant?.email}</p>
-          <p className="text-foreground mt-2">{invoice.property?.address}</p>
+          <p className="text-foreground">{tenantName}</p>
+          <p className="text-muted-foreground">{invoice.property?.address}</p>
         </div>
         <div>
           <h2 className="text-muted-foreground font-semibold mb-2">PAY TO:</h2>
-          <p className="text-foreground">{companyInfo.companyName}</p>
-          <p className="text-foreground">{companyInfo.companyAddress}</p>
-          <p className="text-muted-foreground mt-2">Bank: {companyInfo.bankName}</p>
-          <p className="text-muted-foreground">Account No: {companyInfo.bankAccountNumber}</p>
+          <p className="text-foreground">{companyInfo.company_name || 'N/A'}</p>
+          <p className="text-muted-foreground">{companyInfo.company_address}</p>
+          {companyInfo.bank_name && (
+            <p className="text-muted-foreground mt-2">Bank: {companyInfo.bank_name}</p>
+          )}
+          {companyInfo.bank_account_number && (
+            <p className="text-muted-foreground">Account No: {companyInfo.bank_account_number}</p>
+          )}
         </div>
       </div>
 
-      {/* Invoice Items */}
       <div className="mb-8">
         <table className="w-full">
           <thead>
@@ -99,7 +118,6 @@ export function InvoiceGenerator({ invoice, invoiceItems, companyInfo }: Invoice
         </table>
       </div>
 
-      {/* Totals */}
       <div className="flex justify-end">
         <div className="w-64">
           <div className="flex justify-between mb-2">
@@ -119,16 +137,15 @@ export function InvoiceGenerator({ invoice, invoiceItems, companyInfo }: Invoice
         </div>
       </div>
 
-      {/* Footer */}
       <div className="mt-8">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-muted-foreground">INVOICE NO: {invoice.id}</p>
             <p className="text-muted-foreground">
-              DATE: {format(new Date(invoice.created_at), 'dd.MM.yyyy')}
+              DATE: {formatDate(new Date(invoice.created_at))}
             </p>
             <p className="text-muted-foreground">
-              DUE DATE: {format(new Date(invoice.due_date), 'dd.MM.yyyy')}
+              DUE DATE: {formatDate(new Date(invoice.due_date))}
             </p>
           </div>
           <div className="text-right">
