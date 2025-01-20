@@ -34,7 +34,7 @@ const Maintenance = () => {
   return (
     <div className="flex h-screen bg-gray-100">
       <DashboardSidebar />
-      <main className="flex-1 p-8 ml-64">
+      <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">
             {t('maintenance.title')}
