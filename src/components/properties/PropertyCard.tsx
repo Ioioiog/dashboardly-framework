@@ -22,6 +22,8 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
   const { t } = useTranslation();
   const { toast } = useToast();
 
+  console.log("Property data:", property); // Debug log
+
   // Calculate next payment date (1st of next month)
   const nextPaymentDate = new Date();
   nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
@@ -30,6 +32,7 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
   const handleDeleteTenancy = async () => {
     try {
       setIsDeleting(true);
+      console.log("Deleting tenancy for property:", property.id); // Debug log
       
       // Update the tenancy status to 'inactive'
       const { error } = await supabase
@@ -58,6 +61,10 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
       setIsDeleting(false);
     }
   };
+
+  // Debug log for tenant info
+  console.log("User role:", userRole);
+  console.log("Tenancy info:", property.tenancy);
 
   return (
     <>
