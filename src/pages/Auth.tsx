@@ -21,7 +21,7 @@ const AuthPage = () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
-        console.error("Error checking session:", error.message);
+        console.error("Session check error:", error);
         toast({
           variant: "destructive",
           title: "Authentication Error",
@@ -30,9 +30,14 @@ const AuthPage = () => {
         return;
       }
 
-      if (session && !isPasswordReset && !invitationToken) {
-        console.log("User is authenticated, redirecting to dashboard");
-        navigate("/dashboard");
+      if (session?.user) {
+        console.log("User session found:", session.user.id);
+        if (!isPasswordReset && !invitationToken) {
+          console.log("Redirecting to dashboard...");
+          navigate("/dashboard");
+        }
+      } else {
+        console.log("No active session found");
       }
     };
 
@@ -40,7 +45,7 @@ const AuthPage = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth state changed:", event);
+        console.log("Auth state changed:", event, "Session:", session?.user?.id);
         
         if (event === 'SIGNED_IN' && session) {
           console.log("User signed in successfully");
@@ -129,7 +134,10 @@ const AuthPage = () => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log("Cleaning up auth subscriptions");
+      subscription.unsubscribe();
+    };
   }, [navigate, toast, isPasswordReset, invitationToken]);
 
   return (
