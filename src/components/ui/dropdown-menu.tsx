@@ -3,16 +3,10 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { Check, ChevronRight, Circle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const DropdownMenu = forwardRef<
-  ElementRef<typeof DropdownMenuPrimitive.Root>,
-  ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <DropdownMenuPrimitive.Root ref={ref} className={cn("relative", className)} {...props} />
-))
-
-DropdownMenu.displayName = "DropdownMenu"
+const DropdownMenu = DropdownMenuPrimitive.Root
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+
 const DropdownMenuContent = forwardRef<
   ElementRef<typeof DropdownMenuPrimitive.Content>,
   ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
@@ -84,10 +78,12 @@ const DropdownMenuCheckboxItem = forwardRef<
     checked={checked}
     {...props}
   >
-    <span className="absolute left-0 inline-flex items-center justify-center">
-      {checked && <Check className="h-4 w-4" />}
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <DropdownMenuPrimitive.ItemIndicator>
+        <Check className="h-4 w-4" />
+      </DropdownMenuPrimitive.ItemIndicator>
     </span>
-    {children}
+    <span className="pl-6">{children}</span>
   </DropdownMenuPrimitive.CheckboxItem>
 ))
 
@@ -96,20 +92,21 @@ DropdownMenuCheckboxItem.displayName = "DropdownMenuCheckboxItem"
 const DropdownMenuRadioItem = forwardRef<
   ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
   ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>
->(({ className, children, checked, ...props }, ref) => (
+>(({ className, children, ...props }, ref) => (
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
     className={cn(
       "relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-accent-foreground",
       className
     )}
-    checked={checked}
     {...props}
   >
-    <span className="absolute left-0 inline-flex items-center justify-center">
-      {checked && <Circle className="h-4 w-4" />}
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <DropdownMenuPrimitive.ItemIndicator>
+        <Circle className="h-2 w-2 fill-current" />
+      </DropdownMenuPrimitive.ItemIndicator>
     </span>
-    {children}
+    <span className="pl-6">{children}</span>
   </DropdownMenuPrimitive.RadioItem>
 ))
 
