@@ -16,6 +16,9 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
       'X-Client-Info': 'supabase-js@2.7.1',
     },
   },
+  db: {
+    schema: 'public'
+  }
 });
 
 // Add debug logging for auth state changes
