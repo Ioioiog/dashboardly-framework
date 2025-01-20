@@ -9,20 +9,20 @@ export function useTenants() {
       console.log("Starting tenant data fetch...");
       
       try {
-        // First, let's log the current user's ID
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        // First, verify authentication
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
         
-        if (userError) {
-          console.error("Error getting current user:", userError);
-          throw userError;
+        if (authError) {
+          console.error("Auth error:", authError);
+          throw new Error("Authentication failed");
         }
 
         if (!user) {
-          console.error("No user found");
-          throw new Error("No authenticated user found");
+          console.error("No authenticated user found");
+          return [];
         }
 
-        console.log("Current user ID:", user.id);
+        console.log("Authenticated user ID:", user.id);
 
         // Get the user's profile to verify role
         const { data: profile, error: profileError } = await supabase
@@ -32,12 +32,13 @@ export function useTenants() {
           .single();
 
         if (profileError) {
-          console.error("Error fetching user profile:", profileError);
-          throw new Error(`Failed to fetch user profile: ${profileError.message}`);
+          console.error("Profile fetch error:", profileError);
+          throw new Error("Failed to fetch user profile");
         }
 
         console.log("User profile:", profile);
 
+        // Fetch tenancies with related data
         const { data: tenantsData, error: tenantsError } = await supabase
           .from('tenancies')
           .select(`
@@ -66,7 +67,7 @@ export function useTenants() {
 
         if (tenantsError) {
           console.error("Error fetching tenants:", tenantsError);
-          throw new Error(`Failed to fetch tenants: ${tenantsError.message}`);
+          throw new Error("Failed to fetch tenants");
         }
 
         if (!tenantsData) {
