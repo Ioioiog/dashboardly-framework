@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { MaintenanceForm } from "./MaintenanceForm";
 import { MaintenanceRequest } from "@/types/maintenance";
 
@@ -11,11 +11,16 @@ interface MaintenanceDialogProps {
 export function MaintenanceDialog({ open, onOpenChange, request }: MaintenanceDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent aria-describedby="maintenance-dialog-description">
         <DialogHeader>
           <DialogTitle>
             {request ? "Edit Maintenance Request" : "New Maintenance Request"}
           </DialogTitle>
+          <DialogDescription id="maintenance-dialog-description">
+            {request 
+              ? "Update the details of your maintenance request."
+              : "Submit a new maintenance request for your property. Please provide as much detail as possible."}
+          </DialogDescription>
         </DialogHeader>
         <MaintenanceForm
           onSuccess={() => onOpenChange(false)}

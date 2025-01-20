@@ -51,11 +51,11 @@ export function MaintenanceHistoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent aria-describedby="history-dialog-description">
         <DialogHeader>
           <DialogTitle>Edit History</DialogTitle>
-          <DialogDescription>
-            View the history of changes made to this maintenance request
+          <DialogDescription id="history-dialog-description">
+            View the complete history of changes made to this maintenance request, including updates to status, priority, and notes.
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[400px] pr-4">

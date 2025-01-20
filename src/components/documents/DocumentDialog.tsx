@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -139,9 +140,12 @@ export function DocumentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent aria-describedby="document-upload-description">
         <DialogHeader>
           <DialogTitle>Upload Document</DialogTitle>
+          <DialogDescription id="document-upload-description">
+            Upload a document and assign it to a property or tenant. Supported file types include PDF, images, and documents.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleUpload} className="space-y-4">
           <div>
@@ -151,6 +155,8 @@ export function DocumentDialog({
               type="file"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
               required
+              aria-required="true"
+              aria-label="Document file"
             />
           </div>
           {userRole === "landlord" && (
@@ -175,7 +181,7 @@ export function DocumentDialog({
               value={documentType}
               onValueChange={(value: DocumentType) => setDocumentType(value)}
             >
-              <SelectTrigger>
+              <SelectTrigger aria-label="Document type">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>

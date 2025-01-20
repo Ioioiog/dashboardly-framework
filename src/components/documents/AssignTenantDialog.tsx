@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +22,6 @@ export function AssignTenantDialog({
 }: AssignTenantDialogProps) {
   const { toast } = useToast();
   
-  // Fetch tenants for the property if it exists
   const { data: tenants } = useQuery({
     queryKey: ["property-tenants", propertyId],
     queryFn: async () => {
@@ -75,13 +74,16 @@ export function AssignTenantDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent aria-describedby="tenant-assignment-description">
         <DialogHeader>
           <DialogTitle>Assign Document to Tenant</DialogTitle>
+          <DialogDescription id="tenant-assignment-description">
+            Select a tenant to assign this document to. The tenant will be able to view and access the document.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <Select onValueChange={handleAssignTenant}>
-            <SelectTrigger>
+            <SelectTrigger aria-label="Select tenant">
               <SelectValue placeholder="Select a tenant" />
             </SelectTrigger>
             <SelectContent>
