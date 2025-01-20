@@ -100,7 +100,7 @@ const Index = () => {
   return (
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
-      <main className="flex-1 ml-64 p-8 animate-fade-in">
+      <main className="flex-1 p-8 animate-fade-in transition-all duration-200">
         <div className="max-w-7xl mx-auto space-y-8">
           <header className="relative pb-8 border-b border-border/10">
             <div className="flex flex-col space-y-2">
