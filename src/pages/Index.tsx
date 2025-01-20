@@ -96,10 +96,10 @@ const Index = () => {
   }, [navigate, toast]);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-dashboard-background">
       <DashboardSidebar />
-      <main className="flex-1 bg-dashboard-background">
-        <div className="h-full p-6">
+      <main className="flex-1">
+        <div className="h-full px-8 py-6">
           <div className="max-w-[1600px] mx-auto space-y-6">
             <header className="flex items-center justify-between pb-6">
               <div>
