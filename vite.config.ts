@@ -15,14 +15,16 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     sourcemap: true,
-    minify: true,
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: undefined,
+        preserveModules: true,
       },
       onwarn(warning, warn) {
         // Ignore certain warnings
         if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+        if (warning.code === 'EMPTY_BUNDLE') return;
         
         // Log all other warnings
         console.log('Build warning:', {
@@ -43,6 +45,15 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   esbuild: {
-    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+    logOverride: { 
+      'this-is-undefined-in-esm': 'silent',
+      'unsupported-jsx-comment': 'silent'
+    },
+    jsx: 'automatic',
+    jsxInject: `import React from 'react'`
   },
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
+    exclude: []
+  }
 }));
