@@ -13,18 +13,24 @@ export default defineConfig(({ mode }) => ({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+      onwarn(warning, warn) {
+        // Log warnings during build
+        console.log('Build warning:', warning);
+        warn(warning);
+      },
+    },
+  },
   server: {
     port: 8080,
     host: "::",
   },
   preview: {
     port: 8080,
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: undefined,
-      },
-    },
   },
 }));
