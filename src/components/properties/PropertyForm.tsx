@@ -41,7 +41,7 @@ export function PropertyForm({ onSubmit, initialData, isSubmitting }: PropertyFo
       monthly_rent: initialData?.monthly_rent || 0,
       type: initialData?.type || "Apartment",
       description: initialData?.description || "",
-      available_from: initialData?.available_from || "",
+      available_from: initialData?.tenancy?.end_date || initialData?.available_from || "",
     },
   });
 
@@ -139,10 +139,22 @@ export function PropertyForm({ onSubmit, initialData, isSubmitting }: PropertyFo
           name="available_from"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Available From</FormLabel>
+              <FormLabel>
+                {initialData?.tenancy ? "Contract End Date" : "Available From"}
+              </FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Input 
+                  type="date" 
+                  {...field} 
+                  disabled={!!initialData?.tenancy}
+                  title={initialData?.tenancy ? "Date is set by tenant's contract end date" : ""}
+                />
               </FormControl>
+              {initialData?.tenancy && (
+                <p className="text-sm text-muted-foreground">
+                  This date is automatically set to the tenant's contract end date
+                </p>
+              )}
               <FormMessage />
             </FormItem>
           )}
