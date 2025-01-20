@@ -37,44 +37,53 @@ supabase.auth.onAuthStateChange((event, session) => {
   }
 });
 
-// Add error handling for failed requests
-supabase.handleError = (error: any) => {
-  console.error('Supabase error:', error);
-  
-  // Check if it's a network error
-  if (error.message === 'Failed to fetch') {
-    console.error('Network error - check your internet connection');
-    return new Error('Network error - please check your internet connection');
-  }
-  
-  // Check if it's an authentication error
-  if (error.status === 401) {
-    console.error('Authentication error - user not authenticated');
-    return new Error('Authentication error - please sign in again');
-  }
-  
-  // Generic error handling
-  return new Error(error.message || 'An unexpected error occurred');
-};
-
-// Add request interceptor for debugging
-supabase.requestInterceptor = (req: Request) => {
-  console.log('Outgoing request:', {
-    url: req.url,
-    method: req.method,
-    headers: Object.fromEntries(req.headers.entries()),
-  });
-  return req;
-};
-
-// Export a helper function to check auth status
+// Helper function to check auth status with proper error handling
 export const checkAuthStatus = async () => {
   try {
     const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) throw error;
+    if (error) {
+      console.error('Auth status check failed:', error.message);
+      return { session: null, error };
+    }
     return { session, error: null };
   } catch (error) {
-    console.error('Error checking auth status:', error);
-    return { session: null, error };
+    console.error('Unexpected error checking auth status:', error);
+    return { 
+      session: null, 
+      error: new Error('Failed to check authentication status')
+    };
+  }
+};
+
+// Helper function to handle API errors
+export const handleSupabaseError = (error: any) => {
+  console.error('Supabase operation failed:', error);
+  
+  if (!navigator.onLine) {
+    return new Error('Network error - please check your internet connection');
+  }
+  
+  if (error.status === 401) {
+    return new Error('Session expired - please sign in again');
+  }
+  
+  return new Error(error.message || 'An unexpected error occurred');
+};
+
+// Helper function to refresh session
+export const refreshSession = async () => {
+  try {
+    const { data: { session }, error } = await supabase.auth.refreshSession();
+    if (error) {
+      console.error('Session refresh failed:', error.message);
+      return { session: null, error };
+    }
+    return { session, error: null };
+  } catch (error) {
+    console.error('Unexpected error refreshing session:', error);
+    return {
+      session: null,
+      error: new Error('Failed to refresh session')
+    };
   }
 };
