@@ -10,14 +10,25 @@ export function useTenants() {
       
       try {
         // First, let's log the current user's ID
-        const { data: { user } } = await supabase.auth.getUser();
-        console.log("Current user ID:", user?.id);
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          console.error("Error getting current user:", userError);
+          throw userError;
+        }
+
+        if (!user) {
+          console.error("No user found");
+          throw new Error("No authenticated user found");
+        }
+
+        console.log("Current user ID:", user.id);
 
         // Get the user's profile to verify role
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
-          .eq('id', user?.id)
+          .eq('id', user.id)
           .single();
 
         if (profileError) {
