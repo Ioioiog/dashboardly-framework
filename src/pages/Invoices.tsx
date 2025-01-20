@@ -27,16 +27,14 @@ export default function Invoices() {
         .from("invoices")
         .select(`
           *,
-          tenancy:tenancies (
-            property:properties (
-              name,
-              address
-            ),
-            tenant:profiles (
-              first_name,
-              last_name,
-              email
-            )
+          property:properties (
+            name,
+            address
+          ),
+          tenant:profiles (
+            first_name,
+            last_name,
+            email
           )
         `)
         .order("due_date", { ascending: false });
@@ -51,8 +49,24 @@ export default function Invoices() {
         throw error;
       }
 
-      console.log("Invoices fetched:", data);
-      setInvoices(data as InvoiceWithRelations[]);
+      // Transform the data to match InvoiceWithRelations type
+      const transformedInvoices: InvoiceWithRelations[] = data.map(invoice => ({
+        ...invoice,
+        tenancy: {
+          property: {
+            name: invoice.property?.name || '',
+            address: invoice.property?.address || ''
+          },
+          tenant: {
+            first_name: invoice.tenant?.first_name || '',
+            last_name: invoice.tenant?.last_name || '',
+            email: invoice.tenant?.email || ''
+          }
+        }
+      }));
+
+      console.log("Invoices fetched:", transformedInvoices);
+      setInvoices(transformedInvoices);
     } catch (error) {
       console.error("Error fetching invoices:", error);
     } finally {
@@ -87,7 +101,11 @@ export default function Invoices() {
           {isLoading ? (
             <div className="text-center py-6">Loading invoices...</div>
           ) : (
-            <InvoiceList invoices={invoices} userRole={userRole} />
+            <InvoiceList 
+              invoices={invoices} 
+              userRole={userRole} 
+              onStatusUpdate={fetchInvoices}
+            />
           )}
         </CardContent>
       </Card>
