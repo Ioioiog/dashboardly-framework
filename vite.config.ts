@@ -16,6 +16,11 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 8080,
     host: "::",
+    hmr: {
+      protocol: 'ws',
+      host: '0.0.0.0',
+      port: 8080,
+    },
   },
   preview: {
     port: 8080,
