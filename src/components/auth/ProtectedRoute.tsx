@@ -36,13 +36,35 @@ export function ProtectedRoute({
 
         if (!session) {
           console.log("No active session found");
+          // Attempt to refresh the session
+          const { error: refreshError } = await supabase.auth.refreshSession();
+          if (refreshError) {
+            console.error("Session refresh failed:", refreshError);
+          }
         }
       } catch (error) {
         console.error("Failed to check session:", error);
+        toast({
+          title: "Connection Error",
+          description: "Unable to verify authentication. Please check your connection.",
+          variant: "destructive",
+        });
       }
     };
 
     checkSession();
+
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed in ProtectedRoute:", event);
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        localStorage.removeItem('supabase.auth.token');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [toast]);
 
   if (!isAuthenticated) {
