@@ -24,7 +24,7 @@ interface DashboardSidebarProps {
   children?: React.ReactNode;
 }
 
-export default function DashboardSidebar({ children }: DashboardSidebarProps) {
+export default function DashboardSidebar({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { userRole } = useUserRole();
   const { toast } = useToast();
@@ -154,14 +154,14 @@ export default function DashboardSidebar({ children }: DashboardSidebarProps) {
   );
 
   return (
-    <div className="flex min-h-screen bg-dashboard-background">
-      <SidebarProvider defaultOpen={true}>
-        <Sidebar className="border-r border-gray-200 shadow-sm bg-white" collapsible="none">
+    <div className="flex h-screen">
+      <SidebarProvider>
+        <Sidebar className="border-r border-gray-200 bg-dashboard-sidebar">
           <SidebarContent>
             {sidebarContent}
           </SidebarContent>
         </Sidebar>
-        <main className="flex-1 p-8">
+        <main className="flex-1 px-8 py-6">
           {children}
         </main>
       </SidebarProvider>
