@@ -40,7 +40,7 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
           )
         )
       `)
-      .in("status", ["paid"])
+      .eq("status", "paid")
       .gte("paid_date", startDate)
       .lte("paid_date", endDate)
       .eq("tenancy.property.landlord_id", userId);
