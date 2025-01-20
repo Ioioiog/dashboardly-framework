@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { AuthError } from "@supabase/supabase-js";
 
 interface TenantRegistrationData {
   email: string;
@@ -83,9 +82,9 @@ export async function registerTenant(data: TenantRegistrationData) {
     // Generate invitation token
     const token = crypto.randomUUID();
 
-    // Create invitation record
+    // Create invitation record FIRST
     console.log("Creating invitation record...");
-    const { error: inviteError } = await supabase
+    const { data: invitation, error: inviteError } = await supabase
       .from("tenant_invitations")
       .insert({
         email: data.email,
@@ -94,9 +93,11 @@ export async function registerTenant(data: TenantRegistrationData) {
         token,
         start_date: data.startDate,
         end_date: data.endDate || null,
-      });
+      })
+      .select()
+      .single();
 
-    if (inviteError) {
+    if (inviteError || !invitation) {
       console.error("Error creating invitation:", inviteError);
       throw inviteError;
     }
@@ -123,12 +124,12 @@ export async function registerTenant(data: TenantRegistrationData) {
       throw profileError;
     }
 
-    // Link invitation to property
+    // Link invitation to property using the invitation.id we just created
     console.log("Creating property assignment...");
     const { error: propertyError } = await supabase
       .from("tenant_invitation_properties")
       .insert({
-        invitation_id: token,
+        invitation_id: invitation.id,
         property_id: data.propertyId,
       });
 
