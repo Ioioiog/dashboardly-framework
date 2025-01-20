@@ -162,7 +162,7 @@ export default function DashboardSidebar({ children }: DashboardSidebarProps) {
           </SidebarContent>
         </Sidebar>
       </SidebarProvider>
-      <main className="flex-1">
+      <main className="flex-1 p-8">
         {children}
       </main>
     </div>
