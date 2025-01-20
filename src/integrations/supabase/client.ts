@@ -12,16 +12,13 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      storage: window.localStorage
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      flowType: 'pkce',
+      debug: true
     },
     global: {
       headers: {
         'X-Client-Info': 'supabase-js-web'
-      }
-    },
-    realtime: {
-      params: {
-        eventsPerSecond: 10
       }
     }
   }
@@ -29,19 +26,32 @@ export const supabase = createClient<Database>(
 
 // Initialize session from localStorage if it exists
 const initSession = async () => {
-  const { data: { session }, error } = await supabase.auth.getSession();
-  if (error) {
-    console.error('Error initializing session:', error);
-    // Clear any invalid session data
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error('Error initializing session:', error);
+      await supabase.auth.signOut();
+      return;
+    }
+    
+    if (session) {
+      console.log('Session initialized successfully');
+      // Verify the session is still valid
+      const { data: { user }, error: refreshError } = await supabase.auth.getUser();
+      if (refreshError || !user) {
+        console.error('Session invalid, signing out:', refreshError);
+        await supabase.auth.signOut();
+      }
+    } else {
+      console.log('No session found');
+    }
+  } catch (err) {
+    console.error('Unexpected error during session initialization:', err);
     await supabase.auth.signOut();
-    return;
   }
-  if (!session) {
-    console.log('No session found');
-    return;
-  }
-  console.log('Session initialized successfully');
 };
 
 // Call initSession when the client is imported
-initSession();
+if (typeof window !== 'undefined') {
+  initSession();
+}
