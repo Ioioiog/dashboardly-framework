@@ -15,13 +15,22 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     sourcemap: true,
+    minify: true,
     rollupOptions: {
       output: {
         manualChunks: undefined,
       },
       onwarn(warning, warn) {
-        // Log warnings during build
-        console.log('Build warning:', warning);
+        // Ignore certain warnings
+        if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+        
+        // Log all other warnings
+        console.log('Build warning:', {
+          code: warning.code,
+          message: warning.message,
+          loc: warning.loc,
+          frame: warning.frame
+        });
         warn(warning);
       },
     },
@@ -32,5 +41,8 @@ export default defineConfig(({ mode }) => ({
   },
   preview: {
     port: 8080,
+  },
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
   },
 }));
