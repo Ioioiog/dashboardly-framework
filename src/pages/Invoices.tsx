@@ -11,7 +11,7 @@ import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 export default function Invoices() {
   const [invoices, setInvoices] = useState<InvoiceWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [status, setStatus] = useState("all");
+  const [status, setStatus] = useState<'all' | 'pending' | 'paid' | 'overdue'>('all');
   const { userRole } = useUserRole();
 
   useEffect(() => {
@@ -60,9 +60,8 @@ export default function Invoices() {
     }
   };
 
-  const handleStatusChange = (newStatus: string) => {
+  const handleStatusChange = (newStatus: 'all' | 'pending' | 'paid' | 'overdue') => {
     setStatus(newStatus);
-    fetchInvoices();
   };
 
   if (!userRole) return null;
