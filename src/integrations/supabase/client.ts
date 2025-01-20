@@ -14,7 +14,7 @@ export const supabase = createClient<Database>(
       detectSessionInUrl: true,
       flowType: 'pkce',
       storage: window.localStorage,
-      storageKey: 'supabase.auth.token'
+      storageKey: 'supabase.auth.token',
     },
   }
 );

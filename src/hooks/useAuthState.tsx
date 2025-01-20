@@ -9,17 +9,16 @@ export function useAuthState() {
 
   useEffect(() => {
     let mounted = true;
-    let authListener: any = null;
 
     const initializeAuth = async () => {
       try {
-        console.log("Initializing authentication...");
+        console.log("Initializing authentication state...");
         
-        // Get initial session and verify it
+        // Get initial session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
-          console.error("Session error:", sessionError);
+          console.error("Session initialization error:", sessionError);
           if (mounted) {
             setIsAuthenticated(false);
             setIsLoading(false);
@@ -28,48 +27,37 @@ export function useAuthState() {
         }
 
         // Set up auth state change listener
-        authListener = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-          console.log("Auth state changed:", event, "Session:", currentSession ? "exists" : "null");
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+          console.log("Auth state changed:", event, "Session exists:", !!currentSession);
           
-          if (event === 'SIGNED_OUT') {
-            console.log("User signed out");
+          if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
             if (mounted) {
+              console.log("User signed out or deleted");
               setIsAuthenticated(false);
             }
-          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            console.log("User signed in or token refreshed");
-            if (currentSession && mounted) {
-              // Verify the user exists and is valid
-              const { data: { user }, error: userError } = await supabase.auth.getUser();
-              if (!userError && user) {
-                console.log("User verified after sign in:", user.id);
+          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+            if (currentSession) {
+              console.log("Valid session detected");
+              if (mounted) {
                 setIsAuthenticated(true);
-              } else {
-                console.error("Error verifying user after sign in:", userError);
+              }
+            } else {
+              console.log("No valid session found after auth event");
+              if (mounted) {
                 setIsAuthenticated(false);
               }
             }
           }
         });
 
-        // If we have a session, verify the user
+        // Initialize state based on session
         if (session) {
-          console.log("Session found, verifying user...");
-          const { data: { user }, error: userError } = await supabase.auth.getUser();
-          
-          if (userError) {
-            console.error("User verification failed:", userError);
-            if (mounted) {
-              setIsAuthenticated(false);
-            }
-          } else if (user) {
-            console.log("User verified successfully:", user.id);
-            if (mounted) {
-              setIsAuthenticated(true);
-            }
+          console.log("Initial session found");
+          if (mounted) {
+            setIsAuthenticated(true);
           }
         } else {
-          console.log("No session found");
+          console.log("No initial session found");
           if (mounted) {
             setIsAuthenticated(false);
           }
@@ -78,6 +66,10 @@ export function useAuthState() {
         if (mounted) {
           setIsLoading(false);
         }
+
+        return () => {
+          subscription.unsubscribe();
+        };
 
       } catch (error) {
         console.error("Authentication initialization error:", error);
@@ -97,9 +89,6 @@ export function useAuthState() {
 
     return () => {
       mounted = false;
-      if (authListener) {
-        authListener.subscription.unsubscribe();
-      }
     };
   }, [toast]);
 
