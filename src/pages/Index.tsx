@@ -97,7 +97,7 @@ const Index = () => {
 
   return (
     <DashboardSidebar>
-      <div className="px-8 py-6">
+      <main className="flex-1 p-8">
         <div className="max-w-[1600px] mx-auto space-y-6">
           <header className="flex items-center justify-between pb-6">
             <div>
@@ -135,7 +135,7 @@ const Index = () => {
             </div>
           )}
         </div>
-      </div>
+      </main>
     </DashboardSidebar>
   );
 };
