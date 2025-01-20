@@ -98,7 +98,7 @@ const Index = () => {
   return (
     <div className="flex min-h-screen bg-dashboard-background">
       <DashboardSidebar />
-      <main className="flex-1 p-6 overflow-y-auto">
+      <main className="flex-1 max-w-[calc(100%-16rem)] p-6 overflow-y-auto">
         <div className="max-w-[1600px] mx-auto space-y-6">
           <header className="flex items-center justify-between pb-6">
             <div>
