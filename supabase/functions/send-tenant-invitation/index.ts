@@ -1,7 +1,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { corsHeaders } from '../_shared/cors.ts'
+import { Resend } from 'https://esm.sh/resend@2.0.0'
 
-console.log('Hello from send-tenant-invitation!')
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -9,89 +12,72 @@ serve(async (req) => {
   }
 
   try {
-    const { email, token, propertyId } = await req.json()
+    const { email, firstName, lastName, propertyId, token, startDate, endDate } = await req.json()
 
-    if (!email || !token || !propertyId) {
-      throw new Error('Missing required fields')
-    }
-
-    // Get property details
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing Supabase configuration')
+    if (!RESEND_API_KEY || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      throw new Error('Missing required environment variables')
     }
 
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
-    const supabaseClient = createClient(supabaseUrl, supabaseKey)
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-    const { data: property, error: propertyError } = await supabaseClient
+    // Fetch property details
+    const { data: property, error: propertyError } = await supabase
       .from('properties')
-      .select('name')
+      .select('*')
       .eq('id', propertyId)
       .single()
 
     if (propertyError || !property) {
-      console.error("Error fetching property:", propertyError)
-      throw new Error('Failed to fetch property details')
+      throw new Error('Property not found')
     }
 
-    // For development, only allow sending to the developer's email
-    const isDevelopment = true // You can make this dynamic based on environment later
-    const fromEmail = isDevelopment ? 'onboarding@resend.dev' : 'your-verified-domain@example.com'
-    
-    // In development, redirect all emails to the developer
-    const toEmail = isDevelopment ? 'ilinca.obadescu@gmail.com' : email
-    
-    console.log(`Sending email from ${fromEmail} to ${toEmail} (Development mode: ${isDevelopment})`)
+    const resend = new Resend(RESEND_API_KEY)
+    const inviteUrl = `https://www.adminchirii.ro/tenant-registration?token=${token}`
 
-    // Construct invitation URL with the production domain
-    const inviteUrl = `https://www.adminchirii.ro/tenant-registration?invitation=${token}`
+    console.log('Sending invitation email to:', email)
+    console.log('Invite URL:', inviteUrl)
 
-    // Send email using Resend
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    const { data: emailResponse, error: emailError } = await resend.emails.send({
+      from: 'onboarding@resend.dev',
+      to: process.env.NODE_ENV === 'development' ? 'ilinca.obadescu@gmail.com' : email,
+      subject: 'Invitation to Join Property Management Platform',
+      html: `
+        <p>Hello ${firstName} ${lastName},</p>
+        <p>You have been invited to join our property management platform for the property: ${property.name}</p>
+        <p>Please click the link below to complete your registration:</p>
+        <p><a href="${inviteUrl}">Complete Registration</a></p>
+        ${process.env.NODE_ENV === 'development' ? 
+          `<p style="color: red;">DEVELOPMENT MODE: Original recipient was ${email}</p>` : 
+          ''
+        }
+        <p>This invitation will expire in 7 days.</p>
+      `
+    })
+
+    if (emailError) {
+      console.error('Error sending email:', emailError)
+      throw new Error('Failed to send invitation email')
+    }
+
+    console.log('Email sent successfully:', emailResponse)
+
+    return new Response(JSON.stringify({ success: true }), {
       headers: {
-        Authorization: `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
-        'Content-Type': 'application/json',
+        ...corsHeaders,
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        from: `PropertyHub <${fromEmail}>`,
-        to: [toEmail],
-        subject: 'Invitation to Join PropertyHub',
-        html: `
-          <h2>Welcome to PropertyHub!</h2>
-          <p>You have been invited to join ${property.name} on PropertyHub.</p>
-          <p>Click the link below to create your account and accept the invitation:</p>
-          <p><a href="${inviteUrl}">Accept Invitation</a></p>
-          <p>If you didn't expect this invitation, you can ignore this email.</p>
-          ${isDevelopment ? `<p>Development Mode: Original recipient was ${email}</p>` : ''}
-        `,
-      }),
+      status: 200
     })
 
-    const data = await res.json()
-
-    if (!res.ok) {
-      console.error('Error sending email:', data)
-      throw new Error(data.message || 'Failed to send email')
-    }
-
-    return new Response(JSON.stringify({ 
-      success: true,
-      development: isDevelopment,
-      originalEmail: email,
-      sentTo: toEmail 
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in send-tenant-invitation function:', error)
     return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      },
+      status: 500
     })
   }
 })
