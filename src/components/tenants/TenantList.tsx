@@ -48,6 +48,19 @@ export function TenantList({ tenants }: TenantListProps) {
     );
   }
 
+  // Filter out any duplicate tenants based on the combination of tenant ID and property ID
+  const uniqueTenants = tenants.reduce((acc: Tenant[], current) => {
+    const isDuplicate = acc.find(
+      (item) => 
+        item.id === current.id && 
+        item.property.id === current.property.id
+    );
+    if (!isDuplicate) {
+      acc.push(current);
+    }
+    return acc;
+  }, []);
+
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow">
       <Table>
@@ -63,8 +76,8 @@ export function TenantList({ tenants }: TenantListProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tenants.map((tenant) => (
-            <TableRow key={tenant.id}>
+          {uniqueTenants.map((tenant) => (
+            <TableRow key={`${tenant.id}-${tenant.property.id}-${tenant.tenancy.start_date}`}>
               <TableCell>
                 {tenant.first_name} {tenant.last_name}
               </TableCell>
