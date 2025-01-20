@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, UserPlus, Calendar, DollarSign } from "lucide-react";
+import { Edit, Trash2, UserPlus, Calendar, DollarSign, UserMinus } from "lucide-react";
 import { Property } from "@/utils/propertyUtils";
 import { TenantAssignDialog } from "./TenantAssignDialog";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyCardProps {
   property: Property;
@@ -16,12 +18,46 @@ interface PropertyCardProps {
 
 export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyCardProps) {
   const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { t } = useTranslation();
+  const { toast } = useToast();
 
   // Calculate next payment date (1st of next month)
   const nextPaymentDate = new Date();
   nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
   nextPaymentDate.setDate(1);
+
+  const handleDeleteTenancy = async () => {
+    try {
+      setIsDeleting(true);
+      
+      // Update the tenancy status to 'inactive'
+      const { error } = await supabase
+        .from('tenancies')
+        .update({ status: 'inactive', end_date: new Date().toISOString() })
+        .eq('property_id', property.id)
+        .eq('status', 'active');
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Tenant has been removed from the property",
+      });
+
+      // Refresh the page to show updated data
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error deleting tenancy:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove tenant from property",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <>
@@ -62,6 +98,35 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <DollarSign className="h-4 w-4" />
                   <span>Next Payment Due: {format(nextPaymentDate, 'PPP')}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Show current tenant info for landlords */}
+            {userRole === "landlord" && property.tenancy && (
+              <div className="space-y-2 pt-4 border-t">
+                <h4 className="font-medium">Current Tenant</h4>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm text-gray-600">
+                      Start Date: {format(new Date(property.tenancy.start_date), 'PPP')}
+                    </p>
+                    {property.tenancy.end_date && (
+                      <p className="text-sm text-gray-600">
+                        End Date: {format(new Date(property.tenancy.end_date), 'PPP')}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDeleteTenancy}
+                    disabled={isDeleting}
+                    className="flex items-center gap-2"
+                  >
+                    <UserMinus className="h-4 w-4" />
+                    {isDeleting ? "Removing..." : "Remove Tenant"}
+                  </Button>
                 </div>
               </div>
             )}
