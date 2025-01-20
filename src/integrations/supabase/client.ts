@@ -10,9 +10,10 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    storageKey: 'supabase.auth.token',
   },
-  headers: {
-    'X-Client-Info': 'supabase-js-web',
+  global: {
+    headers: {
+      'X-Client-Info': 'supabase-js@2.7.1',
+    },
   },
 });
