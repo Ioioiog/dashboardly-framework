@@ -12,9 +12,6 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     storage: localStorage,
     storageKey: 'supabase.auth.token',
   },
-  db: {
-    schema: 'public'
-  },
   global: {
     headers: {
       'X-Client-Info': 'supabase-js-web'
