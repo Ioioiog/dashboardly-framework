@@ -27,15 +27,21 @@ const AppContent = () => {
   const { isLoading, isAuthenticated } = useAuthState();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-foreground">Loading...</div>
+      </div>
+    );
   }
 
   return (
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AppRoutes isAuthenticated={isAuthenticated} />
-    </TooltipProvider>
+    <div className="min-h-screen bg-background">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AppRoutes isAuthenticated={isAuthenticated} />
+      </TooltipProvider>
+    </div>
   );
 };
 
