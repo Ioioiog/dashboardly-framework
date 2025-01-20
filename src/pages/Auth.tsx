@@ -18,26 +18,36 @@ const AuthPage = () => {
   useEffect(() => {
     const checkUser = async () => {
       console.log("Checking user session...");
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("Session check error:", error);
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: error.message,
-        });
-        return;
-      }
-
-      if (session?.user) {
-        console.log("User session found:", session.user.id);
-        if (!isPasswordReset && !invitationToken) {
-          console.log("Redirecting to dashboard...");
-          navigate("/dashboard");
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session check error:", error);
+          // Clear any existing auth data
+          await supabase.auth.signOut();
+          localStorage.removeItem('supabase.auth.token');
+          toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: error.message,
+          });
+          return;
         }
-      } else {
-        console.log("No active session found");
+
+        if (session?.user) {
+          console.log("User session found:", session.user.id);
+          if (!isPasswordReset && !invitationToken) {
+            console.log("Redirecting to dashboard...");
+            navigate("/dashboard");
+          }
+        } else {
+          console.log("No active session found");
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
+        // Clear any existing auth data
+        await supabase.auth.signOut();
+        localStorage.removeItem('supabase.auth.token');
       }
     };
 
@@ -51,8 +61,8 @@ const AuthPage = () => {
           console.log("User signed in successfully");
           
           if (invitationToken) {
-            console.log("Processing invitation token:", invitationToken);
             try {
+              console.log("Processing invitation token:", invitationToken);
               const { error: claimError } = await supabase.rpc('set_claim', {
                 params: { value: invitationToken }
               });
@@ -127,17 +137,9 @@ const AuthPage = () => {
                 description: errorMessage,
               });
             }
+          } else {
+            navigate("/dashboard");
           }
-          
-          navigate("/dashboard");
-        } else if (event === 'SIGNED_OUT') {
-          console.log("User signed out");
-        } else if (event === 'USER_UPDATED') {
-          console.log("User updated");
-        } else if (event === 'PASSWORD_RECOVERY') {
-          console.log("Password recovery initiated");
-        } else if (event === 'TOKEN_REFRESHED') {
-          console.log("Token refreshed");
         }
       }
     );
