@@ -18,11 +18,11 @@ serve(async (req) => {
     console.log("Processing invitation request")
     
     // Get the request body
-    const { email, propertyId, propertyName, startDate, endDate, firstName, lastName, token } = await req.json()
+    const { email, propertyId, token, startDate, endDate, firstName, lastName } = await req.json()
     
-    console.log("Request data:", { email, propertyId, propertyName, startDate, endDate, firstName, lastName })
+    console.log("Request data:", { email, propertyId, startDate, endDate, firstName, lastName })
 
-    // Create the invitation URL using the correct domain
+    // Create the invitation URL
     const inviteUrl = `${req.headers.get('origin')}/tenant-registration?invitation=${token}`
     
     console.log("Generated invite URL:", inviteUrl)
@@ -31,6 +31,23 @@ serve(async (req) => {
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
     if (!RESEND_API_KEY) {
       throw new Error('RESEND_API_KEY is not configured')
+    }
+
+    // Get property details from Supabase
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    const { data: property, error: propertyError } = await supabase
+      .from('properties')
+      .select('name')
+      .eq('id', propertyId)
+      .single()
+
+    if (propertyError || !property) {
+      throw new Error('Failed to fetch property details')
     }
 
     // Send email using Resend
@@ -46,7 +63,7 @@ serve(async (req) => {
         subject: 'Invitation to Join PropertyHub',
         html: `
           <h2>Welcome to PropertyHub!</h2>
-          <p>You've been invited to join ${propertyName} as a tenant.</p>
+          <p>You've been invited to join ${property.name} as a tenant.</p>
           <p><strong>Start Date:</strong> ${startDate}</p>
           ${endDate ? `<p><strong>End Date:</strong> ${endDate}</p>` : ''}
           <p>Click the link below to create your account and accept the invitation:</p>
