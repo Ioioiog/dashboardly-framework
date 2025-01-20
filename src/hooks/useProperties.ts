@@ -19,12 +19,14 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", userRole],
     queryFn: async () => {
-      console.log("Fetching properties data...");
+      console.log("Fetching properties data for role:", userRole);
       const { data: user } = await supabase.auth.getUser();
       
       if (!user.user) {
         throw new Error("No user found");
       }
+
+      console.log("Current user ID:", user.user.id);
 
       if (userRole === "landlord") {
         const { data, error } = await supabase
@@ -32,23 +34,42 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           .select("*")
           .eq("landlord_id", user.user.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching landlord properties:", error);
+          throw error;
+        }
+        console.log("Fetched landlord properties:", data);
         return data || [];
       } else {
         // For tenants, we need to join through the tenancies table
-        const { data, error } = await supabase
+        console.log("Fetching tenant properties through tenancies...");
+        const { data: tenanciesData, error } = await supabase
           .from("tenancies")
           .select(`
-            property:properties (*)
+            property:properties (*),
+            status,
+            start_date,
+            end_date
           `)
           .eq("tenant_id", user.user.id)
           .eq("status", "active");
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching tenant properties:", error);
+          throw error;
+        }
         
-        // Extract the properties from the joined data
-        const properties = data?.map(item => item.property) || [];
+        // Extract and enhance the properties from the joined data
+        const properties = tenanciesData?.map(item => ({
+          ...item.property,
+          tenancy: {
+            end_date: item.end_date,
+            start_date: item.start_date
+          }
+        })) || [];
+
         console.log("Fetched tenant properties:", properties);
+        console.log("Raw tenancies data:", tenanciesData);
         return properties;
       }
     },
