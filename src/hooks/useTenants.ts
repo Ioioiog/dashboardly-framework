@@ -41,7 +41,9 @@ export function useTenants() {
               last_name,
               email,
               phone,
-              role
+              role,
+              created_at,
+              updated_at
             ),
             properties (
               id,
@@ -82,6 +84,8 @@ export function useTenants() {
           email: tenancy.tenant.email,
           phone: tenancy.tenant.phone,
           role: tenancy.tenant.role,
+          created_at: tenancy.tenant.created_at,
+          updated_at: tenancy.tenant.updated_at,
           property: {
             id: tenancy.properties.id,
             name: tenancy.properties.name,
