@@ -10,7 +10,6 @@ export function PropertyProvidersSettings() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Property Providers Settings</h2>
       <UtilityProviderForm />
     </div>
   );
