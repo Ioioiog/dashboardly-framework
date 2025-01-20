@@ -9,8 +9,6 @@ import {
   Settings,
   Droplets,
   LogOut,
-  PanelLeftClose,
-  PanelLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -19,10 +17,8 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Sidebar,
   SidebarContent,
-  SidebarTrigger,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function DashboardSidebar() {
   const navigate = useNavigate();
@@ -117,35 +113,27 @@ export default function DashboardSidebar() {
         </div>
         <nav className="px-2 space-y-1.5">
           {filteredMenuItems.map((item) => (
-            <Tooltip key={item.href} delayDuration={0}>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => navigate(item.href)}
-                  className={cn(
-                    "flex w-full items-center space-x-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
-                    "hover:bg-gray-50 hover:text-primary hover:shadow-sm",
-                    "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50",
-                    "group relative",
-                    window.location.pathname === item.href
-                      ? "bg-primary/5 text-primary shadow-sm"
-                      : "text-gray-600"
-                  )}
-                >
-                  <item.icon className={cn(
-                    "h-5 w-5 flex-shrink-0 transition-colors",
-                    window.location.pathname === item.href
-                      ? "text-primary"
-                      : "text-gray-400 group-hover:text-primary"
-                  )} />
-                  <span className="truncate transition-opacity duration-200">
-                    {item.title}
-                  </span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="ml-2">
-                {item.title}
-              </TooltipContent>
-            </Tooltip>
+            <button
+              key={item.href}
+              onClick={() => navigate(item.href)}
+              className={cn(
+                "flex w-full items-center space-x-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
+                "hover:bg-gray-50 hover:text-primary hover:shadow-sm",
+                "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50",
+                "group relative",
+                window.location.pathname === item.href
+                  ? "bg-primary/5 text-primary shadow-sm"
+                  : "text-gray-600"
+              )}
+            >
+              <item.icon className={cn(
+                "h-5 w-5 flex-shrink-0 transition-colors",
+                window.location.pathname === item.href
+                  ? "text-primary"
+                  : "text-gray-400 group-hover:text-primary"
+              )} />
+              <span className="truncate">{item.title}</span>
+            </button>
           ))}
         </nav>
       </div>
@@ -168,15 +156,6 @@ export default function DashboardSidebar() {
           {sidebarContent}
         </SidebarContent>
       </Sidebar>
-      <SidebarTrigger className="fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-        {({ isOpen }) => 
-          isOpen ? (
-            <PanelLeftClose className="h-5 w-5 text-gray-600" />
-          ) : (
-            <PanelLeft className="h-5 w-5 text-gray-600" />
-          )
-        }
-      </SidebarTrigger>
     </SidebarProvider>
   );
 }
