@@ -161,10 +161,10 @@ export default function DashboardSidebar({ children }: DashboardSidebarProps) {
             {sidebarContent}
           </SidebarContent>
         </Sidebar>
-        <main className="flex-1 p-8">
-          {children}
-        </main>
       </SidebarProvider>
+      <main className="flex-1 p-8">
+        {children}
+      </main>
     </div>
   );
 }
