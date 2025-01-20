@@ -16,7 +16,7 @@ export function useTenants() {
             start_date,
             end_date,
             status,
-            profiles!tenancies_tenant_id_fkey (
+            tenant:profiles!tenancies_tenant_id_fkey (
               id,
               first_name,
               last_name,
@@ -51,18 +51,21 @@ export function useTenants() {
 
         console.log("Successfully fetched tenants data:", tenantsData);
 
+        // Filter out tenancies with missing profile data
+        const validTenancies = tenantsData.filter(tenancy => tenancy.tenant && tenancy.properties);
+        
         // Transform the data to match our Tenant interface
-        const formattedTenants = tenantsData.map((tenancy) => {
+        const formattedTenants = validTenancies.map((tenancy) => {
           console.log("Processing tenancy:", tenancy);
           return {
-            id: tenancy.profiles.id,
-            first_name: tenancy.profiles.first_name,
-            last_name: tenancy.profiles.last_name,
-            email: tenancy.profiles.email,
-            phone: tenancy.profiles.phone,
-            role: tenancy.profiles.role,
-            created_at: tenancy.profiles.created_at,
-            updated_at: tenancy.profiles.updated_at,
+            id: tenancy.tenant.id,
+            first_name: tenancy.tenant.first_name,
+            last_name: tenancy.tenant.last_name,
+            email: tenancy.tenant.email,
+            phone: tenancy.tenant.phone,
+            role: tenancy.tenant.role,
+            created_at: tenancy.tenant.created_at,
+            updated_at: tenancy.tenant.updated_at,
             property: {
               id: tenancy.properties.id,
               name: tenancy.properties.name,
