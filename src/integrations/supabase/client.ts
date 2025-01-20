@@ -9,15 +9,8 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    flowType: 'pkce',
     storage: localStorage,
     storageKey: 'supabase.auth.token',
-    cookieOptions: {
-      domain: window.location.hostname,
-      sameSite: 'lax',
-      secure: window.location.protocol === 'https:',
-      path: '/'
-    }
   },
   db: {
     schema: 'public'

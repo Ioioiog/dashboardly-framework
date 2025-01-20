@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PostgrestError } from "@supabase/supabase-js";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -41,17 +42,18 @@ const AuthPage = () => {
       async (event, session) => {
         console.log("Auth state changed:", event);
         
-        if (event === 'SIGNED_IN') {
+        if (event === 'SIGNED_IN' && session) {
           console.log("User signed in successfully");
           
           if (invitationToken) {
             console.log("Processing invitation token:", invitationToken);
             try {
-              await supabase.rpc('set_claim', {
+              const { error: claimError } = await supabase.rpc('set_claim', {
                 params: { value: invitationToken }
               });
 
-              // Get invitation details
+              if (claimError) throw claimError;
+
               const { data: invitation, error: inviteError } = await supabase
                 .from('tenant_invitations')
                 .select('*')
@@ -64,15 +66,6 @@ const AuthPage = () => {
                 throw new Error('Invalid or expired invitation');
               }
 
-              // Get property assignments for this invitation
-              const { data: propertyAssignments, error: propertyError } = await supabase
-                .from('tenant_invitation_properties')
-                .select('property_id')
-                .eq('invitation_id', invitation.id);
-
-              if (propertyError) throw propertyError;
-
-              // Update user profile
               const { error: profileError } = await supabase
                 .from('profiles')
                 .update({
@@ -85,9 +78,15 @@ const AuthPage = () => {
 
               if (profileError) throw profileError;
 
-              // Create tenancies for each assigned property
-              const tenancyPromises = propertyAssignments.map(assignment => 
-                supabase
+              const { data: propertyAssignments, error: propertyError } = await supabase
+                .from('tenant_invitation_properties')
+                .select('property_id')
+                .eq('invitation_id', invitation.id);
+
+              if (propertyError) throw propertyError;
+
+              for (const assignment of propertyAssignments || []) {
+                const { error: tenancyError } = await supabase
                   .from('tenancies')
                   .insert({
                     property_id: assignment.property_id,
@@ -95,18 +94,11 @@ const AuthPage = () => {
                     start_date: invitation.start_date,
                     end_date: invitation.end_date,
                     status: 'active'
-                  })
-              );
+                  });
 
-              const tenancyResults = await Promise.all(tenancyPromises);
-              const tenancyErrors = tenancyResults.filter(result => result.error);
-              
-              if (tenancyErrors.length > 0) {
-                console.error("Errors creating tenancies:", tenancyErrors);
-                throw new Error('Failed to create one or more tenancies');
+                if (tenancyError) throw tenancyError;
               }
 
-              // Update invitation status
               const { error: updateError } = await supabase
                 .from('tenant_invitations')
                 .update({ status: 'accepted' })
@@ -118,12 +110,16 @@ const AuthPage = () => {
                 title: "Welcome!",
                 description: "Your account has been set up successfully.",
               });
-            } catch (error: any) {
+            } catch (error) {
               console.error("Error processing invitation:", error);
+              const errorMessage = error instanceof PostgrestError 
+                ? error.message 
+                : 'Failed to process invitation';
+              
               toast({
                 variant: "destructive",
                 title: "Error",
-                description: error.message || "Failed to process invitation",
+                description: errorMessage,
               });
             }
           }
