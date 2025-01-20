@@ -1,4 +1,4 @@
-import { createContext, forwardRef, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { forwardRef } from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
@@ -18,16 +18,26 @@ const sidebarVariants = cva("flex flex-col", {
 
 interface SidebarProps extends VariantProps<typeof sidebarVariants> {
   children: React.ReactNode
+  className?: string
 }
 
-const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ variant, children }, ref) => {
+const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ variant, className, children }, ref) => {
   return (
-    <div ref={ref} className={cn(sidebarVariants({ variant }))}>
+    <div ref={ref} className={cn(sidebarVariants({ variant }), className)}>
       {children}
     </div>
   )
 })
 Sidebar.displayName = "Sidebar"
+
+const SidebarContent = forwardRef<HTMLDivElement, { children: React.ReactNode }>(
+  ({ children }, ref) => (
+    <div ref={ref} className="flex-1 overflow-auto">
+      {children}
+    </div>
+  )
+)
+SidebarContent.displayName = "SidebarContent"
 
 interface SidebarContext {
   expanded: boolean
@@ -56,4 +66,4 @@ export const useSidebar = () => {
   return context
 }
 
-export { Sidebar }
+export { Sidebar, SidebarContent }

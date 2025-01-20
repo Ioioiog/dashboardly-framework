@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"
 import {
   LayoutDashboard,
   Building2,
@@ -9,25 +9,25 @@ import {
   Settings,
   Droplets,
   LogOut,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useUserRole } from "@/hooks/use-user-role";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+import { useUserRole } from "@/hooks/use-user-role"
+import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 import {
   Sidebar,
   SidebarContent,
   SidebarProvider,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/sidebar"
 
 interface DashboardSidebarProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export default function DashboardSidebar({ children }: DashboardSidebarProps) {
-  const navigate = useNavigate();
-  const { userRole } = useUserRole();
-  const { toast } = useToast();
+  const navigate = useNavigate()
+  const { userRole } = useUserRole()
+  const { toast } = useToast()
 
   const handleSignOut = async () => {
     try {
@@ -157,12 +157,12 @@ export default function DashboardSidebar({ children }: DashboardSidebarProps) {
         </button>
       </div>
     </div>
-  );
+  )
 
   return (
     <div className="flex h-screen">
       <SidebarProvider>
-        <Sidebar className="border-r border-gray-200 bg-dashboard-sidebar">
+        <Sidebar variant="default" className="border-r border-gray-200 bg-dashboard-sidebar">
           <SidebarContent>
             {sidebarContent}
           </SidebarContent>
@@ -172,5 +172,5 @@ export default function DashboardSidebar({ children }: DashboardSidebarProps) {
         </main>
       </SidebarProvider>
     </div>
-  );
+  )
 }
