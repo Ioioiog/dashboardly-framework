@@ -17,6 +17,42 @@ export default function Properties() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const { userRole } = useUserRole();
 
+  const handleAdd = async (data: any): Promise<boolean> => {
+    try {
+      console.log("Adding new property with data:", data);
+      
+      const { error } = await supabase
+        .from("properties")
+        .insert({
+          name: data.name,
+          address: data.address,
+          monthly_rent: data.monthly_rent,
+          type: data.type,
+          description: data.description,
+          available_from: data.available_from
+        })
+        .select();
+
+      if (error) throw error;
+
+      toast({
+        title: t("properties.toast.added.title"),
+        description: t("properties.toast.added.description"),
+      });
+      
+      setShowDialog(false);
+      return true;
+    } catch (error) {
+      console.error("Error adding property:", error);
+      toast({
+        variant: "destructive",
+        title: t("common.error"),
+        description: t("properties.toast.error"),
+      });
+      return false;
+    }
+  };
+
   const handleEdit = async (property: Property, data: any): Promise<boolean> => {
     try {
       console.log("Updating property:", property.id, "with data:", data);
@@ -25,7 +61,6 @@ export default function Properties() {
         throw new Error("Property ID is required for updates");
       }
 
-      // Only send fields that are actually being updated
       const updateData = {
         name: data.name,
         address: data.address,
@@ -141,7 +176,7 @@ export default function Properties() {
         open={showDialog}
         onOpenChange={setShowDialog}
         property={selectedProperty}
-        onSubmit={handleEdit}
+        onSubmit={selectedProperty ? handleEdit : handleAdd}
         mode={selectedProperty ? "edit" : "add"}
       />
     </DashboardSidebar>
