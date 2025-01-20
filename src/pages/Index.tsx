@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,9 +12,9 @@ const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [userId, setUserId] = React.useState<string | null>(null);
-  const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | null>(null);
-  const [userName, setUserName] = React.useState<string>("");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
+  const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
     const checkUser = async () => {
