@@ -23,6 +23,7 @@ serve(async (req) => {
       throw new Error('Missing Supabase configuration')
     }
 
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2')
     const supabaseClient = createClient(supabaseUrl, supabaseKey)
 
     const { data: property, error: propertyError } = await supabaseClient
@@ -94,9 +95,3 @@ serve(async (req) => {
     })
   }
 })
-
-// Helper to create Supabase client (assuming this is defined in your edge function)
-const createClient = (supabaseUrl: string, supabaseKey: string) => {
-  const { createClient } = require('@supabase/supabase-js')
-  return createClient(supabaseUrl, supabaseKey)
-}
