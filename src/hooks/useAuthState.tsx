@@ -22,6 +22,11 @@ export function useAuthState() {
           if (mounted) {
             setIsAuthenticated(false);
             setIsLoading(false);
+            toast({
+              variant: "destructive",
+              title: "Authentication Error",
+              description: "Failed to initialize session. Please try logging in again.",
+            });
           }
           return;
         }
@@ -30,16 +35,16 @@ export function useAuthState() {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           console.log("Auth state changed:", event, "Session exists:", !!currentSession);
           
-          if (event === 'SIGNED_OUT') {
+          if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
             if (mounted) {
-              console.log("User signed out");
+              console.log("User signed out or deleted");
               setIsAuthenticated(false);
+              localStorage.removeItem('supabase.auth.token');
             }
           } else if (
             event === 'SIGNED_IN' || 
             event === 'TOKEN_REFRESHED' || 
-            event === 'USER_UPDATED' ||
-            event === 'INITIAL_SESSION'
+            event === 'USER_UPDATED'
           ) {
             if (currentSession) {
               console.log("Valid session detected");
@@ -57,7 +62,7 @@ export function useAuthState() {
 
         // Initialize state based on session
         if (session) {
-          console.log("Initial session found");
+          console.log("Initial session found:", session.user.id);
           if (mounted) {
             setIsAuthenticated(true);
           }
