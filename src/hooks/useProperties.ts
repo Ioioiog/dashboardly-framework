@@ -29,17 +29,44 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
       console.log("Current user ID:", user.user.id);
 
       if (userRole === "landlord") {
+        // For landlords, fetch properties with their active tenancies
         const { data, error } = await supabase
           .from("properties")
-          .select("*")
-          .eq("landlord_id", user.user.id);
+          .select(`
+            *,
+            tenancies (
+              id,
+              start_date,
+              end_date,
+              status,
+              tenant:profiles!tenancies_tenant_id_fkey (
+                id,
+                first_name,
+                last_name,
+                email
+              )
+            )
+          `)
+          .eq("landlord_id", user.user.id)
+          .eq("tenancies.status", "active");
 
         if (error) {
           console.error("Error fetching landlord properties:", error);
           throw error;
         }
-        console.log("Fetched landlord properties:", data);
-        return data || [];
+
+        // Transform the data to match our Property interface
+        const transformedData = data?.map(property => ({
+          ...property,
+          tenancy: property.tenancies?.[0] ? {
+            start_date: property.tenancies[0].start_date,
+            end_date: property.tenancies[0].end_date,
+            tenant: property.tenancies[0].tenant
+          } : undefined
+        }));
+
+        console.log("Fetched landlord properties with tenancies:", transformedData);
+        return transformedData || [];
       } else {
         // For tenants, we need to join through the tenancies table
         console.log("Fetching tenant properties through tenancies...");
@@ -59,7 +86,6 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           throw error;
         }
         
-        // Extract and enhance the properties from the joined data
         const properties = tenanciesData?.map(item => ({
           ...item.property,
           tenancy: {
