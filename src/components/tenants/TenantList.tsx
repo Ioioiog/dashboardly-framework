@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Table,
@@ -17,7 +17,7 @@ interface TenantListProps {
 }
 
 export function TenantList({ tenants }: TenantListProps) {
-  const [refreshKey, setRefreshKey] = React.useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { t } = useTranslation();
 
   const handleUpdate = () => {
