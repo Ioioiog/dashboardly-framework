@@ -31,7 +31,7 @@ export default function Invoices() {
             name,
             address
           ),
-          tenant:profiles (
+          tenant_profile:profiles!invoices_tenant_id_fkey (
             first_name,
             last_name,
             email
@@ -58,9 +58,9 @@ export default function Invoices() {
             address: invoice.property?.address || ''
           },
           tenant: {
-            first_name: invoice.tenant?.first_name || '',
-            last_name: invoice.tenant?.last_name || '',
-            email: invoice.tenant?.email || ''
+            first_name: invoice.tenant_profile?.first_name || '',
+            last_name: invoice.tenant_profile?.last_name || '',
+            email: invoice.tenant_profile?.email || ''
           }
         }
       }));
