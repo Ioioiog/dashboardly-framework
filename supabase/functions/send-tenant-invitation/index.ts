@@ -82,7 +82,7 @@ serve(async (req) => {
     console.log('Using invite URL:', inviteUrl)
 
     const { data: emailResponse, error: emailError } = await resend.emails.send({
-      from: 'Admin Chirii <onboarding@resend.dev>',
+      from: 'Admin Chirii <noreply@adminchirii.ro>',
       to: [email],
       subject: 'Invitation to Join Property Management Platform',
       html: `
