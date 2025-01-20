@@ -4,8 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { PostgrestError } from "@supabase/supabase-js";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -18,36 +16,21 @@ const AuthPage = () => {
   useEffect(() => {
     const checkUser = async () => {
       console.log("Checking user session...");
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Session check error:", error);
-          // Clear any existing auth data
-          await supabase.auth.signOut();
-          localStorage.removeItem('supabase.auth.token');
-          toast({
-            variant: "destructive",
-            title: "Authentication Error",
-            description: error.message,
-          });
-          return;
-        }
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error("Error checking session:", error.message);
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: error.message,
+        });
+        return;
+      }
 
-        if (session?.user) {
-          console.log("User session found:", session.user.id);
-          if (!isPasswordReset && !invitationToken) {
-            console.log("Redirecting to dashboard...");
-            navigate("/dashboard");
-          }
-        } else {
-          console.log("No active session found");
-        }
-      } catch (error) {
-        console.error("Error checking session:", error);
-        // Clear any existing auth data
-        await supabase.auth.signOut();
-        localStorage.removeItem('supabase.auth.token');
+      if (session && !isPasswordReset && !invitationToken) {
+        console.log("User is authenticated, redirecting to dashboard");
+        navigate("/dashboard");
       }
     };
 
@@ -55,20 +38,19 @@ const AuthPage = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth state changed:", event, "Session:", session?.user?.id);
+        console.log("Auth state changed:", event);
         
-        if (event === 'SIGNED_IN' && session) {
+        if (event === 'SIGNED_IN') {
           console.log("User signed in successfully");
           
           if (invitationToken) {
+            console.log("Processing invitation token:", invitationToken);
             try {
-              console.log("Processing invitation token:", invitationToken);
-              const { error: claimError } = await supabase.rpc('set_claim', {
+              await supabase.rpc('set_claim', {
                 params: { value: invitationToken }
               });
 
-              if (claimError) throw claimError;
-
+              // Get invitation details
               const { data: invitation, error: inviteError } = await supabase
                 .from('tenant_invitations')
                 .select('*')
@@ -81,6 +63,15 @@ const AuthPage = () => {
                 throw new Error('Invalid or expired invitation');
               }
 
+              // Get property assignments for this invitation
+              const { data: propertyAssignments, error: propertyError } = await supabase
+                .from('tenant_invitation_properties')
+                .select('property_id')
+                .eq('invitation_id', invitation.id);
+
+              if (propertyError) throw propertyError;
+
+              // Update user profile
               const { error: profileError } = await supabase
                 .from('profiles')
                 .update({
@@ -93,15 +84,9 @@ const AuthPage = () => {
 
               if (profileError) throw profileError;
 
-              const { data: propertyAssignments, error: propertyError } = await supabase
-                .from('tenant_invitation_properties')
-                .select('property_id')
-                .eq('invitation_id', invitation.id);
-
-              if (propertyError) throw propertyError;
-
-              for (const assignment of propertyAssignments || []) {
-                const { error: tenancyError } = await supabase
+              // Create tenancies for each assigned property
+              const tenancyPromises = propertyAssignments.map(assignment => 
+                supabase
                   .from('tenancies')
                   .insert({
                     property_id: assignment.property_id,
@@ -109,11 +94,18 @@ const AuthPage = () => {
                     start_date: invitation.start_date,
                     end_date: invitation.end_date,
                     status: 'active'
-                  });
+                  })
+              );
 
-                if (tenancyError) throw tenancyError;
+              const tenancyResults = await Promise.all(tenancyPromises);
+              const tenancyErrors = tenancyResults.filter(result => result.error);
+              
+              if (tenancyErrors.length > 0) {
+                console.error("Errors creating tenancies:", tenancyErrors);
+                throw new Error('Failed to create one or more tenancies');
               }
 
+              // Update invitation status
               const { error: updateError } = await supabase
                 .from('tenant_invitations')
                 .update({ status: 'accepted' })
@@ -125,29 +117,57 @@ const AuthPage = () => {
                 title: "Welcome!",
                 description: "Your account has been set up successfully.",
               });
-            } catch (error) {
+            } catch (error: any) {
               console.error("Error processing invitation:", error);
-              const errorMessage = error instanceof PostgrestError 
-                ? error.message 
-                : 'Failed to process invitation';
-              
               toast({
                 variant: "destructive",
                 title: "Error",
-                description: errorMessage,
+                description: error.message || "Failed to process invitation",
               });
             }
-          } else {
-            navigate("/dashboard");
+          }
+          
+          navigate("/dashboard");
+        } else if (event === 'SIGNED_OUT') {
+          console.log("User signed out");
+        } else if (event === 'USER_UPDATED') {
+          console.log("User updated");
+          toast({
+            title: "Success",
+            description: "Your password has been updated successfully.",
+          });
+          navigate("/dashboard");
+        } else if (event === 'PASSWORD_RECOVERY') {
+          console.log("Password recovery requested");
+          navigate("/update-password");
+        }
+
+        // Handle auth errors
+        if (event === 'SIGNED_IN') {
+          const { error } = await supabase.auth.getSession();
+          if (error) {
+            console.error("Auth error:", error);
+            let errorMessage = "An error occurred during authentication.";
+            
+            if (error.message.includes("Email not confirmed")) {
+              errorMessage = "Please verify your email before signing in.";
+            } else if (error.message.includes("Invalid login credentials")) {
+              errorMessage = "Invalid email or password. Please try again.";
+            } else if (error.message.includes("User already registered")) {
+              errorMessage = "An account with this email already exists. Please sign in instead.";
+            }
+            
+            toast({
+              variant: "destructive",
+              title: "Authentication Error",
+              description: errorMessage,
+            });
           }
         }
       }
     );
 
-    return () => {
-      console.log("Cleaning up auth subscriptions");
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [navigate, toast, isPasswordReset, invitationToken]);
 
   return (
@@ -189,23 +209,10 @@ const AuthPage = () => {
               button: 'w-full px-4 py-2 rounded-lg',
               input: 'rounded-lg border-gray-300',
               label: 'text-sm font-medium text-gray-700',
-              message: 'text-sm text-red-600',
             },
           }}
           providers={[]}
-          redirectTo={`${window.location.origin}/auth/callback`}
-          localization={{
-            variables: {
-              sign_in: {
-                email_label: 'Email address',
-                password_label: 'Password',
-                email_input_placeholder: 'Your email address',
-                password_input_placeholder: 'Your password',
-                button_label: 'Sign in',
-                loading_button_label: 'Signing in ...',
-              },
-            },
-          }}
+          redirectTo={window.location.origin}
         />
       </div>
     </div>

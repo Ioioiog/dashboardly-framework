@@ -13,31 +13,6 @@ export default defineConfig(({ mode }) => ({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  build: {
-    sourcemap: true,
-    minify: 'esbuild',
-    rollupOptions: {
-      output: {
-        manualChunks: undefined,
-      },
-      onwarn(warning, warn) {
-        // Ignore certain warnings
-        if (warning.code === 'CIRCULAR_DEPENDENCY') return;
-        if (warning.code === 'EMPTY_BUNDLE') return;
-        if (warning.code === 'SOURCEMAP_ERROR') return;
-        if (warning.code === 'THIS_IS_UNDEFINED') return;
-        
-        // Log all other warnings
-        console.log('Build warning:', {
-          code: warning.code,
-          message: warning.message,
-          loc: warning.loc,
-          frame: warning.frame
-        });
-        warn(warning);
-      },
-    },
-  },
   server: {
     port: 8080,
     host: "::",
@@ -45,16 +20,11 @@ export default defineConfig(({ mode }) => ({
   preview: {
     port: 8080,
   },
-  esbuild: {
-    logOverride: { 
-      'this-is-undefined-in-esm': 'silent',
-      'unsupported-jsx-comment': 'silent'
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
     },
-    jsx: 'automatic',
-    jsxInject: `import React from 'react'`
   },
-  optimizeDeps: {
-    include: ['react', 'react-dom'],
-    exclude: []
-  }
 }));

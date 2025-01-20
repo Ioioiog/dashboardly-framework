@@ -12,11 +12,17 @@ export function FinancialSettings() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <h2 className="text-2xl font-semibold">Financial & Payments Settings</h2>
+      
       <InvoiceGenerationInfo />
-      <Separator />
+      
+      <Separator className="my-6" />
+      
       <InvoiceInfoForm />
-      <Separator />
+      
+      <Separator className="my-6" />
+      
       <StripeAccountForm />
     </div>
   );

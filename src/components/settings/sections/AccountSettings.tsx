@@ -49,14 +49,13 @@ export function AccountSettings() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-6">
-        <PersonalInfoForm 
-          initialProfile={profile}
-          isLoading={isLoading}
-          setIsLoading={setIsLoading}
-        />
-        <PasswordForm />
-      </div>
+      <h2 className="text-2xl font-semibold">Account Settings</h2>
+      <PersonalInfoForm 
+        initialProfile={profile}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+      />
+      <PasswordForm />
     </div>
   );
 }

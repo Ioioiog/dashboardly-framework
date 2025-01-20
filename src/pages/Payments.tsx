@@ -1,56 +1,27 @@
 import { useEffect, useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 import { PaymentList } from "@/components/payments/PaymentList";
 import { PaymentDialog } from "@/components/payments/PaymentDialog";
 import { PaymentFilters } from "@/components/payments/PaymentFilters";
-import { useUserRole } from "@/hooks/use-user-role";
-import { supabase } from "@/integrations/supabase/client";
 import { PaymentWithRelations } from "@/integrations/supabase/types/payment";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 
-export default function Payments() {
+const Payments = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [payments, setPayments] = useState<PaymentWithRelations[]>([]);
+  const [tenancies, setTenancies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [status, setStatus] = useState("all");
-  const [tenancies, setTenancies] = useState<any[]>([]);
-  const { userRole } = useUserRole();
-
-  useEffect(() => {
-    fetchPayments();
-    if (userRole === "landlord") {
-      fetchTenancies();
-    }
-  }, [userRole]);
-
-  const fetchTenancies = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("tenancies")
-        .select(`
-          id,
-          property:properties (
-            name,
-            address
-          ),
-          tenant:profiles (
-            first_name,
-            last_name
-          )
-        `);
-
-      if (error) throw error;
-      setTenancies(data || []);
-    } catch (error) {
-      console.error("Error fetching tenancies:", error);
-    }
-  };
+  const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const fetchPayments = async () => {
     try {
-      setIsLoading(true);
-      console.log("Fetching payments...");
-
-      const query = supabase
+      const { data: paymentsData, error: paymentsError } = await supabase
         .from("payments")
         .select(`
           *,
@@ -68,58 +39,134 @@ export default function Payments() {
         `)
         .order("due_date", { ascending: false });
 
-      if (status !== "all") {
-        query.eq("status", status);
-      }
+      if (paymentsError) throw paymentsError;
 
-      const { data, error } = await query;
-
-      if (error) {
-        throw error;
-      }
-
-      console.log("Payments fetched:", data);
-      setPayments(data as PaymentWithRelations[]);
+      setPayments(paymentsData || []);
     } catch (error) {
       console.error("Error fetching payments:", error);
-    } finally {
-      setIsLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not fetch payments",
+      });
     }
   };
 
-  const handleStatusChange = (newStatus: string) => {
-    setStatus(newStatus);
-    fetchPayments();
+  const fetchTenancies = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("tenancies")
+        .select(`
+          id,
+          property:properties (
+            name,
+            address
+          ),
+          tenant:profiles (
+            first_name,
+            last_name
+          )
+        `)
+        .eq("status", "active");
+
+      if (error) throw error;
+      setTenancies(data || []);
+    } catch (error) {
+      console.error("Error fetching tenancies:", error);
+    }
   };
 
-  if (!userRole) return null;
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          navigate("/auth");
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not fetch user profile",
+          });
+          return;
+        }
+
+        if (profile.role !== "landlord" && profile.role !== "tenant") {
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Invalid user role",
+          });
+          return;
+        }
+
+        setUserRole(profile.role as "landlord" | "tenant");
+
+        await Promise.all([fetchPayments(), fetchTenancies()]);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error in checkUser:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "An unexpected error occurred",
+        });
+      }
+    };
+
+    checkUser();
+  }, [navigate, toast]);
+
+  const filteredPayments = statusFilter === "all"
+    ? payments
+    : payments.filter(payment => payment.status === statusFilter);
+
+  if (isLoading || !userRole) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <DashboardSidebar>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Payments</CardTitle>
-          <div className="flex items-center gap-4">
-            <PaymentFilters 
-              status={status} 
-              onStatusChange={handleStatusChange} 
-            />
-            {userRole === "landlord" && (
-              <PaymentDialog 
-                tenancies={tenancies} 
-                onPaymentCreated={fetchPayments} 
+    <div className="flex h-screen bg-gray-100">
+      <DashboardSidebar />
+      <div className="flex-1 p-8 ml-64">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Payments</CardTitle>
+            <div className="flex items-center gap-4">
+              <PaymentFilters
+                status={statusFilter}
+                onStatusChange={setStatusFilter}
               />
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-6">Loading payments...</div>
-          ) : (
-            <PaymentList payments={payments} userRole={userRole} />
-          )}
-        </CardContent>
-      </Card>
-    </DashboardSidebar>
+              {userRole === "landlord" && (
+                <PaymentDialog
+                  tenancies={tenancies}
+                  onPaymentCreated={fetchPayments}
+                />
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <PaymentList payments={filteredPayments} userRole={userRole} />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
-}
+};
+
+export default Payments;

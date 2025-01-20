@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,9 +12,9 @@ const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [userId, setUserId] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
-  const [userName, setUserName] = useState<string>("");
+  const [userId, setUserId] = React.useState<string | null>(null);
+  const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | null>(null);
+  const [userName, setUserName] = React.useState<string>("");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -37,6 +37,7 @@ const Index = () => {
         console.log("Current user ID:", currentUserId);
         setUserId(currentUserId);
 
+        // Fetch profile with explicit filter for current user
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role, first_name, last_name')
@@ -66,6 +67,7 @@ const Index = () => {
         console.log("Profile loaded successfully:", profile);
         setUserRole(profile.role as "landlord" | "tenant");
         
+        // Set user name from profile
         const fullName = [profile.first_name, profile.last_name]
           .filter(Boolean)
           .join(" ");
@@ -96,45 +98,30 @@ const Index = () => {
   }, [navigate, toast]);
 
   return (
-    <DashboardSidebar>
-      <div className="max-w-[1600px] mx-auto space-y-6">
-        <header className="flex items-center justify-between pb-6">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              {t('dashboard.title')}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+    <div className="flex bg-dashboard-background min-h-screen">
+      <DashboardSidebar />
+      <main className="flex-1 ml-64 p-8 animate-fade-in">
+        <div className="max-w-7xl mx-auto">
+          <header className="mb-8">
+            <h1 className="text-3xl font-semibold text-gray-900">{t('dashboard.title')}</h1>
+            <p className="mt-2 text-dashboard-text">
               {t('dashboard.welcome')}, {userName}! {t('dashboard.overview')}
             </p>
-          </div>
-        </header>
+          </header>
 
-        {userId && userRole && (
-          <div className="grid gap-6">
-            <section>
+          {userId && userRole && (
+            <div className="space-y-8">
               <DashboardMetrics userId={userId} userRole={userRole} />
-            </section>
-            
-            <section className="grid gap-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold tracking-tight">
-                  {t('navigation.properties')}
-                </h2>
-              </div>
-              <div className="rounded-xl border bg-card p-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('navigation.properties')}</h2>
                 <DashboardProperties userRole={userRole} />
               </div>
-            </section>
-            
-            {userRole === "landlord" && (
-              <section className="grid gap-4">
-                <RevenueChart userId={userId} />
-              </section>
-            )}
-          </div>
-        )}
-      </div>
-    </DashboardSidebar>
+              {userRole === "landlord" && <RevenueChart userId={userId} />}
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
   );
 };
 

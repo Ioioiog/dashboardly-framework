@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TimeRange, getMonthsForRange, formatMonthDisplay, formatDateForDB } from "./utils/dateUtils";
+import { TimeRange, getMonthsForRange, formatMonthDisplay } from "./utils/dateUtils";
 import { RevenueStats } from "./RevenueStats";
 import { PredictionChart } from "./PredictionChart";
 import { calculatePredictedRevenue } from "./utils/predictionUtils";
@@ -25,60 +25,52 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
   const months = getMonthsForRange(timeRange);
   console.log("Fetching data for months:", months);
 
-  const startDate = months[0];
-  const endDate = formatDateForDB(new Date());
-
-  try {
-    const { data: payments, error } = await supabase
-      .from("payments")
-      .select(`
-        amount,
-        paid_date,
-        tenancy:tenancies(
-          property:properties(
-            landlord_id
-          )
+  const { data: payments, error } = await supabase
+    .from("payments")
+    .select(`
+      amount,
+      paid_date,
+      tenancy:tenancies(
+        property:properties(
+          landlord_id
         )
-      `)
-      .eq("status", "paid")
-      .gte("paid_date", startDate)
-      .lte("paid_date", endDate)
-      .eq("tenancy.property.landlord_id", userId);
+      )
+    `)
+    .in("status", ["paid"])
+    .gte("paid_date", months[0])
+    .lte("paid_date", new Date().toISOString().split('T')[0])
+    .eq("tenancy.property.landlord_id", userId);
 
-    if (error) {
-      console.error("Error fetching revenue data:", error);
-      throw error;
-    }
-
-    console.log("Raw payment data:", payments);
-
-    const monthlyRevenue = months.map(monthStart => {
-      const monthPayments = payments?.filter(payment => 
-        payment.paid_date?.startsWith(monthStart.substring(0, 7))
-      ) || [];
-
-      const totalRevenue = monthPayments.reduce((sum, payment) => 
-        sum + Number(payment.amount), 0);
-
-      const paymentCount = monthPayments.length;
-      const averagePayment = paymentCount > 0 
-        ? totalRevenue / paymentCount 
-        : 0;
-
-      return {
-        month: formatMonthDisplay(monthStart),
-        revenue: totalRevenue,
-        count: paymentCount,
-        average: averagePayment
-      };
-    });
-
-    console.log("Processed monthly revenue:", monthlyRevenue);
-    return monthlyRevenue;
-  } catch (error) {
-    console.error("Failed to fetch revenue data:", error);
+  if (error) {
+    console.error("Error fetching revenue data:", error);
     throw error;
   }
+
+  console.log("Raw payment data:", payments);
+
+  const monthlyRevenue = months.map(monthStart => {
+    const monthPayments = payments?.filter(payment => 
+      payment.paid_date?.startsWith(monthStart.substring(0, 7))
+    ) || [];
+
+    const totalRevenue = monthPayments.reduce((sum, payment) => 
+      sum + Number(payment.amount), 0);
+
+    const paymentCount = monthPayments.length;
+    const averagePayment = paymentCount > 0 
+      ? totalRevenue / paymentCount 
+      : 0;
+
+    return {
+      month: formatMonthDisplay(monthStart),
+      revenue: totalRevenue,
+      count: paymentCount,
+      average: averagePayment
+    };
+  });
+
+  console.log("Processed monthly revenue:", monthlyRevenue);
+  return monthlyRevenue;
 }
 
 export function RevenueChart({ userId }: { userId: string }) {

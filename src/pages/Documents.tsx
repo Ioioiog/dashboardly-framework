@@ -57,8 +57,9 @@ const Documents = () => {
   if (!userId || !userRole) return null;
 
   return (
-    <DashboardSidebar>
-      <div className="p-8">
+    <div className="flex bg-dashboard-background min-h-screen">
+      <DashboardSidebar />
+      <main className="flex-1 ml-64 p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <header className="flex justify-between items-center">
@@ -89,7 +90,7 @@ const Documents = () => {
             />
           </div>
         </div>
-      </div>
+      </main>
 
       <DocumentDialog
         open={showAddModal}
@@ -97,7 +98,7 @@ const Documents = () => {
         userId={userId}
         userRole={userRole}
       />
-    </DashboardSidebar>
+    </div>
   );
 };
 

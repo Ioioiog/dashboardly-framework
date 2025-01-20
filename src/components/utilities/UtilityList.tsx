@@ -6,9 +6,8 @@ import { PaymentActions } from "@/components/payments/PaymentActions";
 import { Button } from "@/components/ui/button";
 import { FileText, Trash2 } from "lucide-react";
 
-interface UtilityWithProperty {
+interface Utility {
   id: string;
-  property_id: string;
   type: string;
   amount: number;
   due_date: string;
@@ -20,7 +19,7 @@ interface UtilityWithProperty {
 }
 
 interface UtilityListProps {
-  utilities: UtilityWithProperty[];
+  utilities: Utility[];
   userRole: "landlord" | "tenant";
   onStatusUpdate?: () => void;
 }

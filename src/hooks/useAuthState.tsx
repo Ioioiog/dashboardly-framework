@@ -1,110 +1,93 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
-import { useNavigate } from "react-router-dom";
 
 export function useAuthState() {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     let mounted = true;
+    let authListener: any = null;
 
     const initializeAuth = async () => {
       try {
-        console.log("Initializing authentication state...");
+        console.log("Initializing authentication...");
         
-        // Get initial session
+        // Get initial session and verify it
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
-          console.error("Session initialization error:", sessionError);
+          console.error("Session error:", sessionError);
           if (mounted) {
             setIsAuthenticated(false);
             setIsLoading(false);
-            // Clear any existing auth data
-            await supabase.auth.signOut();
-            localStorage.removeItem('supabase.auth.token');
-            navigate('/auth');
-            toast({
-              variant: "destructive",
-              title: "Authentication Error",
-              description: "Your session has expired. Please sign in again.",
-            });
           }
           return;
         }
 
         // Set up auth state change listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-          console.log("Auth state changed:", event, "Session exists:", !!currentSession);
+        authListener = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+          console.log("Auth state changed:", event, "Session:", currentSession ? "exists" : "null");
           
-          if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          if (event === 'SIGNED_OUT') {
+            console.log("User signed out");
             if (mounted) {
-              console.log("User signed out or token refreshed");
-              setIsAuthenticated(!!currentSession);
-              if (!currentSession) {
-                localStorage.removeItem('supabase.auth.token');
-                navigate('/auth');
-              }
+              setIsAuthenticated(false);
             }
-          } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-            if (currentSession) {
-              console.log("Valid session detected");
-              if (mounted) {
+          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            console.log("User signed in or token refreshed");
+            if (currentSession && mounted) {
+              // Verify the user exists and is valid
+              const { data: { user }, error: userError } = await supabase.auth.getUser();
+              if (!userError && user) {
+                console.log("User verified after sign in:", user.id);
                 setIsAuthenticated(true);
-                navigate('/dashboard');
-              }
-            } else {
-              console.log("No valid session found after auth event");
-              if (mounted) {
+              } else {
+                console.error("Error verifying user after sign in:", userError);
                 setIsAuthenticated(false);
-                navigate('/auth');
               }
             }
           }
         });
 
-        // Initialize state based on session
+        // If we have a session, verify the user
         if (session) {
-          console.log("Initial session found:", session.user.id);
-          if (mounted) {
-            setIsAuthenticated(true);
-            navigate('/dashboard');
+          console.log("Session found, verifying user...");
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          
+          if (userError) {
+            console.error("User verification failed:", userError);
+            if (mounted) {
+              setIsAuthenticated(false);
+            }
+          } else if (user) {
+            console.log("User verified successfully:", user.id);
+            if (mounted) {
+              setIsAuthenticated(true);
+            }
           }
         } else {
-          console.log("No initial session found");
+          console.log("No session found");
           if (mounted) {
             setIsAuthenticated(false);
-            if (window.location.pathname !== '/auth') {
-              navigate('/auth');
-            }
           }
         }
 
         if (mounted) {
           setIsLoading(false);
         }
-
-        return () => {
-          subscription.unsubscribe();
-        };
 
       } catch (error) {
         console.error("Authentication initialization error:", error);
         if (mounted) {
           setIsLoading(false);
           setIsAuthenticated(false);
-          // Clear any existing auth data
-          await supabase.auth.signOut();
-          localStorage.removeItem('supabase.auth.token');
-          navigate('/auth');
           toast({
             variant: "destructive",
             title: "Authentication Error",
-            description: "There was a problem with authentication. Please sign in again.",
+            description: "There was a problem with authentication. Please try logging in again.",
           });
         }
       }
@@ -114,8 +97,11 @@ export function useAuthState() {
 
     return () => {
       mounted = false;
+      if (authListener) {
+        authListener.subscription.unsubscribe();
+      }
     };
-  }, [toast, navigate]);
+  }, [toast]);
 
   return { isLoading, isAuthenticated };
 }

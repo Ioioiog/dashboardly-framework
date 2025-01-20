@@ -21,17 +21,15 @@ export function MetricCard({
   const { t } = useTranslation();
 
   return (
-    <Card className={cn("transition-all duration-200 hover:shadow-lg", className)}>
+    <Card className={cn("", className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {t(title)}
-        </CardTitle>
-        <Icon className="h-4 w-4 text-primary" />
+        <CardTitle className="text-sm font-medium">{t(title)}</CardTitle>
+        <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-foreground">{value}</div>
+        <div className="text-2xl font-bold">{value}</div>
         {description && (
-          <p className="text-xs text-muted-foreground mt-1">{t(description)}</p>
+          <p className="text-xs text-muted-foreground">{t(description)}</p>
         )}
       </CardContent>
     </Card>

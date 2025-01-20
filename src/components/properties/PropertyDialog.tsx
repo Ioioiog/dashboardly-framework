@@ -12,8 +12,8 @@ import { Property } from "@/utils/propertyUtils";
 interface PropertyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: ((data: any) => Promise<boolean>) | ((property: Property, data: any) => Promise<boolean>);
-  property?: Property | null;
+  onSubmit: ((data: any) => void) | ((property: Property, data: any) => Promise<boolean>);
+  property?: Property;
   isSubmitting?: boolean;
   mode: "add" | "edit";
 }
@@ -30,7 +30,7 @@ export function PropertyDialog({
     if (mode === "edit" && property) {
       await (onSubmit as (property: Property, data: any) => Promise<boolean>)(property, data);
     } else {
-      await (onSubmit as (data: any) => Promise<boolean>)(data);
+      (onSubmit as (data: any) => void)(data);
     }
   };
 

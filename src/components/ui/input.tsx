@@ -1,7 +1,8 @@
-import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from "react"
+import * as React from "react"
+
 import { cn } from "@/lib/utils"
 
-const Input = forwardRef<HTMLInputElement, ComponentPropsWithoutRef<"input">>(
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
     return (
       <input

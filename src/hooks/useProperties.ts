@@ -2,60 +2,57 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/utils/propertyUtils";
 
-interface UsePropertiesProps {
+export interface UsePropertiesProps {
   userRole: "landlord" | "tenant";
 }
 
-export function useProperties({ userRole }: UsePropertiesProps) {
+export interface UsePropertiesReturn {
+  properties: Property[];
+  isLoading: boolean;
+  handleAdd?: (data: any) => Promise<boolean>;
+  handleEdit?: (property: Property, data: any) => Promise<boolean>;
+  handleDelete?: (property: Property) => Promise<boolean>;
+  isSubmitting?: boolean;
+}
+
+export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesReturn {
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", userRole],
     queryFn: async () => {
-      console.log("Fetching properties for", userRole);
+      console.log("Fetching properties data...");
+      const { data: user } = await supabase.auth.getUser();
       
+      if (!user.user) {
+        throw new Error("No user found");
+      }
+
       if (userRole === "landlord") {
-        const { data: properties, error } = await supabase
+        const { data, error } = await supabase
           .from("properties")
-          .select("*");
+          .select("*")
+          .eq("landlord_id", user.user.id);
 
-        if (error) {
-          console.error("Error fetching properties:", error);
-          throw error;
-        }
+        if (error) throw error;
+        return data || [];
+      } else {
+        // For tenants, we need to join through the tenancies table
+        const { data, error } = await supabase
+          .from("tenancies")
+          .select(`
+            property:properties (*)
+          `)
+          .eq("tenant_id", user.user.id)
+          .eq("status", "active");
 
-        console.log("Properties fetched:", properties);
+        if (error) throw error;
+        
+        // Extract the properties from the joined data
+        const properties = data?.map(item => item.property) || [];
+        console.log("Fetched tenant properties:", properties);
         return properties;
       }
-
-      // For tenants, fetch only properties they are assigned to
-      const { data: tenantProperties, error: tenantError } = await supabase
-        .from("tenancies")
-        .select(`
-          property:properties (
-            id,
-            name,
-            address,
-            monthly_rent,
-            type,
-            description,
-            available_from
-          )
-        `)
-        .eq("status", "active");
-
-      if (tenantError) {
-        console.error("Error fetching tenant properties:", tenantError);
-        throw tenantError;
-      }
-
-      // Extract properties from tenancies and format them
-      const properties = tenantProperties
-        .map(tp => tp.property)
-        .filter(Boolean);
-
-      console.log("Tenant properties fetched:", properties);
-      return properties;
     },
   });
 
-  return { properties, isLoading };
+  return { properties: properties as Property[], isLoading };
 }

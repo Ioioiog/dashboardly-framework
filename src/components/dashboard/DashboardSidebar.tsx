@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Building2,
@@ -9,25 +9,16 @@ import {
   Settings,
   Droplets,
   LogOut,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useUserRole } from "@/hooks/use-user-role"
-import { supabase } from "@/integrations/supabase/client"
-import { useToast } from "@/hooks/use-toast"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useUserRole } from "@/hooks/use-user-role";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-interface DashboardSidebarProps {
-  children: React.ReactNode
-}
-
-export default function DashboardSidebar({ children }: DashboardSidebarProps) {
-  const navigate = useNavigate()
-  const { userRole } = useUserRole()
-  const { toast } = useToast()
+export default function DashboardSidebar() {
+  const navigate = useNavigate();
+  const { userRole } = useUserRole();
+  const { toast } = useToast();
 
   const handleSignOut = async () => {
     try {
@@ -111,66 +102,44 @@ export default function DashboardSidebar({ children }: DashboardSidebarProps) {
     userRole ? item.roles.includes(userRole) : item.roles.includes("tenant")
   );
 
-  const sidebarContent = (
-    <div className="flex h-full flex-col justify-between bg-white">
-      <div className="space-y-6">
-        <div className="p-4 border-b border-gray-100">
-          <img 
-            src="/lovable-uploads/a279fbbc-be90-4a4b-afe5-ae98a7d6c04d.png" 
-            alt="AdminChirii.ro" 
-            className="h-16 w-auto transition-transform hover:scale-105"
-          />
-        </div>
-        <nav className="px-2 space-y-1.5">
-          {filteredMenuItems.map((item) => (
-            <button
-              key={item.href}
-              onClick={() => navigate(item.href)}
-              className={cn(
-                "flex w-full items-center space-x-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
-                "hover:bg-gray-50 hover:text-primary hover:shadow-sm",
-                "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50",
-                "group relative",
-                window.location.pathname === item.href
-                  ? "bg-primary/5 text-primary shadow-sm"
-                  : "text-gray-600"
-              )}
-            >
-              <item.icon className={cn(
-                "h-5 w-5 flex-shrink-0 transition-colors",
-                window.location.pathname === item.href
-                  ? "text-primary"
-                  : "text-gray-400 group-hover:text-primary"
-              )} />
-              <span className="truncate">{item.title}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
-      <div className="p-4 border-t border-gray-100">
-        <button
-          onClick={handleSignOut}
-          className="flex w-full items-center space-x-3 px-4 py-2.5 text-sm font-medium text-red-600 rounded-lg transition-all duration-200 hover:bg-red-50 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 group"
-        >
-          <LogOut className="h-5 w-5 flex-shrink-0 text-red-400 group-hover:text-red-600" />
-          <span>Sign Out</span>
-        </button>
-      </div>
-    </div>
-  )
-
   return (
-    <div className="flex h-screen">
-      <SidebarProvider>
-        <Sidebar variant="default" className="border-r border-gray-200 bg-dashboard-sidebar">
-          <SidebarContent>
-            {sidebarContent}
-          </SidebarContent>
-        </Sidebar>
-        <main className="flex-1 p-8 overflow-auto">
-          {children}
-        </main>
-      </SidebarProvider>
+    <div className="fixed inset-y-0 left-0 w-64 bg-dashboard-sidebar border-r border-gray-200">
+      <div className="flex h-full flex-col justify-between">
+        <div className="space-y-4">
+          <div className="mb-8 p-4">
+            <img 
+              src="/lovable-uploads/a279fbbc-be90-4a4b-afe5-ae98a7d6c04d.png" 
+              alt="AdminChirii.ro" 
+              className="h-20 w-auto"
+            />
+          </div>
+          <nav className="space-y-2">
+            {filteredMenuItems.map((item) => (
+              <button
+                key={item.href}
+                onClick={() => navigate(item.href)}
+                className={cn(
+                  "flex w-full items-center space-x-2 px-4 py-2 text-dashboard-text hover:bg-dashboard-accent hover:text-dashboard-text transition-colors",
+                  window.location.pathname === item.href &&
+                    "bg-dashboard-accent text-dashboard-text"
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                <span>{item.title}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+        <div className="p-4">
+          <button
+            onClick={handleSignOut}
+            className="flex w-full items-center space-x-2 px-4 py-2 text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
