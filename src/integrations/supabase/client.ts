@@ -14,7 +14,7 @@ export const supabase = createClient<Database>(
       detectSessionInUrl: true,
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
       flowType: 'pkce',
-      debug: true
+      debug: process.env.NODE_ENV === 'development'
     },
     global: {
       headers: {
@@ -41,6 +41,13 @@ const initSession = async () => {
       if (refreshError || !user) {
         console.error('Session invalid, signing out:', refreshError);
         await supabase.auth.signOut();
+      } else {
+        // Set up auto token refresh
+        supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'TOKEN_REFRESHED') {
+            console.log('Token refreshed successfully');
+          }
+        });
       }
     } else {
       console.log('No session found');
