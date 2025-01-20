@@ -37,7 +37,7 @@ const Settings = () => {
   return (
     <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
-      <main className="flex-1 p-8 ml-64 overflow-y-auto">
+      <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto space-y-8">
           <header className="pb-6 border-b border-border/10">
             <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
@@ -47,7 +47,6 @@ const Settings = () => {
           </header>
 
           <div className="flex flex-col lg:flex-row gap-10">
-            {/* Settings Navigation - Now styled as a card */}
             <div className="lg:w-64 shrink-0">
               <nav className="sticky top-8 space-y-1">
                 {navigationItems.map((item) => (
@@ -68,7 +67,6 @@ const Settings = () => {
               </nav>
             </div>
 
-            {/* Settings Content - Now with animation */}
             <div className="flex-1 min-w-0">
               <div className="animate-fade-in">
                 {renderSection()}
