@@ -9,6 +9,18 @@ export function useTenants() {
       console.log("Starting tenant data fetch...");
       
       try {
+        // First, let's log the current user's ID
+        const { data: { user } } = await supabase.auth.getUser();
+        console.log("Current user ID:", user?.id);
+
+        // Get the user's profile to verify role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user?.id)
+          .single();
+        console.log("User profile:", profile);
+
         const { data: tenantsData, error: tenantsError } = await supabase
           .from('tenancies')
           .select(`
@@ -49,14 +61,27 @@ export function useTenants() {
           return [];
         }
 
-        console.log("Successfully fetched tenants data:", tenantsData);
+        console.log("Raw tenants data:", tenantsData);
+        console.log("Number of tenancies found:", tenantsData.length);
 
         // Filter out tenancies with missing profile data
-        const validTenancies = tenantsData.filter(tenancy => tenancy.tenant && tenancy.properties);
+        const validTenancies = tenantsData.filter(tenancy => {
+          const isValid = tenancy.tenant && tenancy.properties;
+          if (!isValid) {
+            console.log("Found invalid tenancy:", tenancy);
+          }
+          return isValid;
+        });
+        
+        console.log("Number of valid tenancies:", validTenancies.length);
         
         // Transform the data to match our Tenant interface
         const formattedTenants = validTenancies.map((tenancy) => {
-          console.log("Processing tenancy:", tenancy);
+          console.log("Processing tenancy:", {
+            tenantId: tenancy.tenant.id,
+            tenantEmail: tenancy.tenant.email,
+            propertyName: tenancy.properties.name
+          });
           return {
             id: tenancy.tenant.id,
             first_name: tenancy.tenant.first_name,
@@ -79,7 +104,7 @@ export function useTenants() {
           };
         });
 
-        console.log("Formatted tenants data:", formattedTenants);
+        console.log("Final formatted tenants:", formattedTenants);
         return formattedTenants;
       } catch (error) {
         console.error("Unexpected error in useTenants:", error);
