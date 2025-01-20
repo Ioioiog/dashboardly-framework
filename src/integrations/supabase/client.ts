@@ -14,10 +14,7 @@ export const supabase = createClient<Database>(
       detectSessionInUrl: true,
       flowType: 'pkce',
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      storageKey: 'supabase.auth.token',
-    },
-    headers: {
-      'X-Client-Info': 'supabase-js-web'
+      storageKey: 'supabase.auth.token'
     }
   }
 );
