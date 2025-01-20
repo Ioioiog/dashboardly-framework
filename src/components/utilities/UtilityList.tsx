@@ -7,18 +7,6 @@ import { Button } from "@/components/ui/button";
 import { FileText, Trash2 } from "lucide-react";
 import { Utility } from "@/integrations/supabase/types/utility";
 
-interface Utility {
-  id: string;
-  type: string;
-  amount: number;
-  due_date: string;
-  status: string;
-  property: {
-    name: string;
-    address: string;
-  };
-}
-
 interface UtilityListProps {
   utilities: Utility[];
   userRole: "landlord" | "tenant";

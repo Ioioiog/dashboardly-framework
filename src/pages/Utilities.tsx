@@ -9,11 +9,8 @@ import { UtilityFilters } from "@/components/utilities/UtilityFilters";
 import { useToast } from "@/hooks/use-toast";
 import { Property } from "@/utils/propertyUtils";
 
-interface PropertyForUtilities {
-  id: string;
-  name: string;
-  address: string;
-}
+// Only include the fields we need for utilities
+type PropertyForUtilities = Pick<Property, 'id' | 'name' | 'address'>;
 
 export default function Utilities() {
   const [utilities, setUtilities] = useState<any[]>([]);
@@ -87,10 +84,6 @@ export default function Utilities() {
     }
   };
 
-  const handleUtilityCreated = () => {
-    fetchUtilities();
-  };
-
   const handleStatusChange = (newStatus: string) => {
     setStatus(newStatus);
   };
@@ -109,7 +102,7 @@ export default function Utilities() {
           {userRole === "landlord" && (
             <UtilityDialog
               properties={properties}
-              onUtilityCreated={handleUtilityCreated}
+              onUtilityCreated={fetchUtilities}
             />
           )}
         </CardHeader>
