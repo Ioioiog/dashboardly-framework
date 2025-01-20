@@ -25,6 +25,14 @@ export function TenantList({ tenants }: TenantListProps) {
     setRefreshKey(prev => prev + 1);
   };
 
+  if (!tenants || tenants.length === 0) {
+    return (
+      <div className="rounded-lg border bg-card text-card-foreground shadow p-6 text-center">
+        <p className="text-muted-foreground">{t('tenants.list.noTenants')}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow">
       <Table>
