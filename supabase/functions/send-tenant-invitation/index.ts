@@ -47,8 +47,18 @@ serve(async (req) => {
       .single()
 
     if (propertyError || !property) {
+      console.error("Error fetching property:", propertyError)
       throw new Error('Failed to fetch property details')
     }
+
+    // For development, only allow sending to the developer's email
+    const isDevelopment = true // You can make this dynamic based on environment later
+    const fromEmail = isDevelopment ? 'onboarding@resend.dev' : 'your-verified-domain@example.com'
+    
+    // In development, redirect all emails to the developer
+    const toEmail = isDevelopment ? 'ilinca.obadescu@gmail.com' : email
+    
+    console.log(`Sending email from ${fromEmail} to ${toEmail} (Development mode: ${isDevelopment})`)
 
     // Send email using Resend
     const res = await fetch('https://api.resend.com/emails', {
@@ -58,8 +68,8 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'PropertyHub <onboarding@resend.dev>',
-        to: email,
+        from: `PropertyHub <${fromEmail}>`,
+        to: [toEmail],
         subject: 'Invitation to Join PropertyHub',
         html: `
           <h2>Welcome to PropertyHub!</h2>
@@ -69,6 +79,7 @@ serve(async (req) => {
           <p>Click the link below to create your account and accept the invitation:</p>
           <p><a href="${inviteUrl}">Accept Invitation</a></p>
           <p>If you didn't expect this invitation, you can ignore this email.</p>
+          ${isDevelopment ? `<p>Development Mode: Original recipient was ${email}</p>` : ''}
         `,
       }),
     })
@@ -81,7 +92,12 @@ serve(async (req) => {
       throw new Error(data.message || 'Failed to send email')
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ 
+      success: true,
+      development: isDevelopment,
+      originalEmail: email,
+      sentTo: toEmail 
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
