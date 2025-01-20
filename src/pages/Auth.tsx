@@ -134,9 +134,6 @@ const AuthPage = () => {
           console.log("User signed out");
         } else if (event === 'USER_UPDATED') {
           console.log("User updated");
-        } else if (event === 'USER_DELETED') {
-          console.log("User deleted");
-          navigate("/auth");
         } else if (event === 'PASSWORD_RECOVERY') {
           console.log("Password recovery initiated");
         } else if (event === 'TOKEN_REFRESHED') {
