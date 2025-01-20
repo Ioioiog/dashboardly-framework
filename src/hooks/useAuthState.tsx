@@ -30,12 +30,17 @@ export function useAuthState() {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           console.log("Auth state changed:", event, "Session exists:", !!currentSession);
           
-          if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+          if (event === 'SIGNED_OUT') {
             if (mounted) {
-              console.log("User signed out or deleted");
+              console.log("User signed out");
               setIsAuthenticated(false);
             }
-          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+          } else if (
+            event === 'SIGNED_IN' || 
+            event === 'TOKEN_REFRESHED' || 
+            event === 'USER_UPDATED' ||
+            event === 'INITIAL_SESSION'
+          ) {
             if (currentSession) {
               console.log("Valid session detected");
               if (mounted) {
