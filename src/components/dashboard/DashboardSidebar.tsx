@@ -151,7 +151,7 @@ export default function DashboardSidebar() {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <Sidebar className="w-64 border-r border-gray-200 shadow-sm bg-white" collapsible="none">
+      <Sidebar className="border-r border-gray-200 shadow-sm bg-white" collapsible="none">
         <SidebarContent>
           {sidebarContent}
         </SidebarContent>
