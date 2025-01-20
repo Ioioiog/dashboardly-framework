@@ -96,45 +96,47 @@ const Index = () => {
   }, [navigate, toast]);
 
   return (
-    <div className="flex min-h-screen bg-dashboard-background">
+    <div className="flex min-h-screen">
       <DashboardSidebar />
-      <main className="flex-1 p-6 overflow-y-auto">
-        <div className="max-w-[1600px] mx-auto space-y-6">
-          <header className="flex items-center justify-between pb-6">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                {t('dashboard.title')}
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t('dashboard.welcome')}, {userName}! {t('dashboard.overview')}
-              </p>
-            </div>
-          </header>
+      <main className="flex-1 bg-dashboard-background">
+        <div className="h-full p-6">
+          <div className="max-w-[1600px] mx-auto space-y-6">
+            <header className="flex items-center justify-between pb-6">
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                  {t('dashboard.title')}
+                </h1>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t('dashboard.welcome')}, {userName}! {t('dashboard.overview')}
+                </p>
+              </div>
+            </header>
 
-          {userId && userRole && (
-            <div className="grid gap-6">
-              <section>
-                <DashboardMetrics userId={userId} userRole={userRole} />
-              </section>
-              
-              <section className="grid gap-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold tracking-tight">
-                    {t('navigation.properties')}
-                  </h2>
-                </div>
-                <div className="rounded-xl border bg-card p-6">
-                  <DashboardProperties userRole={userRole} />
-                </div>
-              </section>
-              
-              {userRole === "landlord" && (
-                <section className="grid gap-4">
-                  <RevenueChart userId={userId} />
+            {userId && userRole && (
+              <div className="grid gap-6">
+                <section>
+                  <DashboardMetrics userId={userId} userRole={userRole} />
                 </section>
-              )}
-            </div>
-          )}
+                
+                <section className="grid gap-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold tracking-tight">
+                      {t('navigation.properties')}
+                    </h2>
+                  </div>
+                  <div className="rounded-xl border bg-card p-6">
+                    <DashboardProperties userRole={userRole} />
+                  </div>
+                </section>
+                
+                {userRole === "landlord" && (
+                  <section className="grid gap-4">
+                    <RevenueChart userId={userId} />
+                  </section>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </div>
