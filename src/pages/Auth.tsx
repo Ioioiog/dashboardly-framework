@@ -28,7 +28,14 @@ const AuthPage = () => {
         return;
       }
 
-      if (session && !isPasswordReset && !invitationToken) {
+      // If we have an invitation token, redirect to tenant registration
+      if (invitationToken) {
+        console.log("Found invitation token, redirecting to tenant registration");
+        navigate(`/tenant-registration?invitation=${invitationToken}`);
+        return;
+      }
+
+      if (session && !isPasswordReset) {
         console.log("User is authenticated, redirecting to dashboard");
         navigate("/dashboard");
       }
@@ -45,124 +52,11 @@ const AuthPage = () => {
           
           if (invitationToken) {
             console.log("Processing invitation token:", invitationToken);
-            try {
-              await supabase.rpc('set_claim', {
-                params: { value: invitationToken }
-              });
-
-              // Get invitation details
-              const { data: invitation, error: inviteError } = await supabase
-                .from('tenant_invitations')
-                .select('*')
-                .eq('token', invitationToken)
-                .single();
-
-              if (inviteError) throw inviteError;
-
-              if (!invitation) {
-                throw new Error('Invalid or expired invitation');
-              }
-
-              // Get property assignments for this invitation
-              const { data: propertyAssignments, error: propertyError } = await supabase
-                .from('tenant_invitation_properties')
-                .select('property_id')
-                .eq('invitation_id', invitation.id);
-
-              if (propertyError) throw propertyError;
-
-              // Update user profile
-              const { error: profileError } = await supabase
-                .from('profiles')
-                .update({
-                  first_name: invitation.first_name,
-                  last_name: invitation.last_name,
-                  email: invitation.email,
-                  role: 'tenant'
-                })
-                .eq('id', session.user.id);
-
-              if (profileError) throw profileError;
-
-              // Create tenancies for each assigned property
-              const tenancyPromises = propertyAssignments.map(assignment => 
-                supabase
-                  .from('tenancies')
-                  .insert({
-                    property_id: assignment.property_id,
-                    tenant_id: session.user.id,
-                    start_date: invitation.start_date,
-                    end_date: invitation.end_date,
-                    status: 'active'
-                  })
-              );
-
-              const tenancyResults = await Promise.all(tenancyPromises);
-              const tenancyErrors = tenancyResults.filter(result => result.error);
-              
-              if (tenancyErrors.length > 0) {
-                console.error("Errors creating tenancies:", tenancyErrors);
-                throw new Error('Failed to create one or more tenancies');
-              }
-
-              // Update invitation status
-              const { error: updateError } = await supabase
-                .from('tenant_invitations')
-                .update({ status: 'accepted' })
-                .eq('token', invitationToken);
-
-              if (updateError) throw updateError;
-
-              toast({
-                title: "Welcome!",
-                description: "Your account has been set up successfully.",
-              });
-            } catch (error: any) {
-              console.error("Error processing invitation:", error);
-              toast({
-                variant: "destructive",
-                title: "Error",
-                description: error.message || "Failed to process invitation",
-              });
-            }
+            navigate(`/tenant-registration?invitation=${invitationToken}`);
+            return;
           }
           
           navigate("/dashboard");
-        } else if (event === 'SIGNED_OUT') {
-          console.log("User signed out");
-        } else if (event === 'USER_UPDATED') {
-          console.log("User updated");
-          toast({
-            title: "Success",
-            description: "Your password has been updated successfully.",
-          });
-          navigate("/dashboard");
-        } else if (event === 'PASSWORD_RECOVERY') {
-          console.log("Password recovery requested");
-          navigate("/update-password");
-        }
-
-        // Handle auth errors
-        if (event === 'SIGNED_IN') {
-          const { error } = await supabase.auth.getSession();
-          if (error) {
-            console.error("Auth error:", error);
-            let errorMessage = "An error occurred during authentication.";
-            
-            if (error.message.includes("Email not confirmed")) {
-              errorMessage = "Please verify your email before signing in.";
-            } else if (error.message.includes("Invalid login credentials")) {
-              errorMessage = "Invalid email or password. Please try again.";
-            } else if (error.message.includes("User already registered")) {
-              errorMessage = "An account with this email already exists. Please sign in instead.";
-            }
-            
-            toast({
-              variant: "destructive",
-              title: "Authentication Error",
-              description: errorMessage,
-            });
-          }
         }
       }
     );
