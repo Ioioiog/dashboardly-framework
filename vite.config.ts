@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => ({
         // Ignore certain warnings
         if (warning.code === 'CIRCULAR_DEPENDENCY') return;
         if (warning.code === 'EMPTY_BUNDLE') return;
+        if (warning.code === 'SOURCEMAP_ERROR') return; // Ignore sourcemap warnings
         
         // Log all other warnings
         console.log('Build warning:', {
