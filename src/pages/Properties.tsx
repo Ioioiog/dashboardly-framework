@@ -21,6 +21,13 @@ export default function Properties() {
     try {
       console.log("Adding new property with data:", data);
       
+      // Get the current user's ID
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error("Unable to get current user");
+      }
+
       const { error } = await supabase
         .from("properties")
         .insert({
@@ -29,7 +36,8 @@ export default function Properties() {
           monthly_rent: data.monthly_rent,
           type: data.type,
           description: data.description,
-          available_from: data.available_from
+          available_from: data.available_from,
+          landlord_id: user.id // Add the landlord_id
         })
         .select();
 
