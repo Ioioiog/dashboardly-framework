@@ -75,44 +75,41 @@ export default function Properties() {
   }
 
   return (
-    <div className="flex h-screen bg-dashboard-background">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="ml-64 p-8">
-          <div className="space-y-6">
-            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                  {t("properties.title")}
-                </h1>
-                <p className="mt-2 text-sm text-gray-500">
-                  {t("properties.description")}
-                </p>
-              </div>
+    <DashboardSidebar>
+      <div className="p-8">
+        <div className="space-y-6">
+          <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                {t("properties.title")}
+              </h1>
+              <p className="mt-2 text-sm text-gray-500">
+                {t("properties.description")}
+              </p>
+            </div>
 
-              {userRole === "landlord" && (
-                <Button 
-                  onClick={() => setShowDialog(true)}
-                  className="w-full sm:w-auto"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t("properties.addProperty")}
-                </Button>
-              )}
-            </header>
+            {userRole === "landlord" && (
+              <Button 
+                onClick={() => setShowDialog(true)}
+                className="w-full sm:w-auto"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {t("properties.addProperty")}
+              </Button>
+            )}
+          </header>
 
-            <div className="rounded-lg border bg-white shadow">
-              <div className="p-6">
-                <DashboardProperties 
-                  userRole={userRole}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              </div>
+          <div className="rounded-lg border bg-white shadow">
+            <div className="p-6">
+              <DashboardProperties 
+                userRole={userRole}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       <PropertyDialog
         open={showDialog}
@@ -121,6 +118,6 @@ export default function Properties() {
         onSubmit={handleEdit}
         mode={selectedProperty ? "edit" : "add"}
       />
-    </div>
+    </DashboardSidebar>
   );
 }
