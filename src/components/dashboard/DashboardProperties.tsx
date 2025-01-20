@@ -15,8 +15,9 @@ export function DashboardProperties({
 }: DashboardPropertiesProps) {
   const { properties, isLoading } = useProperties({ userRole });
 
-  console.log("Properties data:", properties);
-  console.log("Loading state:", isLoading);
+  console.log("DashboardProperties - userRole:", userRole);
+  console.log("DashboardProperties - properties:", properties);
+  console.log("DashboardProperties - isLoading:", isLoading);
 
   return (
     <PropertyList
