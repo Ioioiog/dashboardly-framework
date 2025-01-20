@@ -7,7 +7,7 @@ interface UsePropertiesProps {
 }
 
 export function useProperties({ userRole }: UsePropertiesProps) {
-  return useQuery({
+  const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", userRole],
     queryFn: async () => {
       console.log("Fetching properties for", userRole);
@@ -56,4 +56,6 @@ export function useProperties({ userRole }: UsePropertiesProps) {
       return properties;
     },
   });
+
+  return { properties, isLoading };
 }
