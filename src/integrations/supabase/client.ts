@@ -14,7 +14,13 @@ export const supabase = createClient<Database>(
       detectSessionInUrl: true,
       flowType: 'pkce',
       storage: localStorage,
-      storageKey: 'supabase.auth.token'
+      storageKey: 'supabase.auth.token',
+      // Add these options for CORS and credentials
+      cookieOptions: {
+        domain: window.location.hostname,
+        sameSite: 'lax',
+        secure: window.location.protocol === 'https:'
+      }
     },
     db: {
       schema: 'public'
