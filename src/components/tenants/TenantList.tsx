@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tenant } from "@/types/tenant";
 import { EditTenantDialog } from "./EditTenantDialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TenantListProps {
   tenants: Tenant[];
@@ -25,7 +26,21 @@ export function TenantList({ tenants }: TenantListProps) {
     setRefreshKey(prev => prev + 1);
   };
 
-  if (!tenants || tenants.length === 0) {
+  // Add debug logging
+  console.log("Current tenants data:", tenants);
+
+  if (!tenants) {
+    return (
+      <div className="rounded-lg border bg-card text-card-foreground shadow p-6">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-[250px]" />
+          <Skeleton className="h-4 w-[200px]" />
+        </div>
+      </div>
+    );
+  }
+
+  if (tenants.length === 0) {
     return (
       <div className="rounded-lg border bg-card text-card-foreground shadow p-6 text-center">
         <p className="text-muted-foreground">{t('tenants.list.noTenants')}</p>
