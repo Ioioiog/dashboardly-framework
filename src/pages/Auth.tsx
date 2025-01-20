@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -128,41 +129,6 @@ const AuthPage = () => {
           }
           
           navigate("/dashboard");
-        } else if (event === 'SIGNED_OUT') {
-          console.log("User signed out");
-        } else if (event === 'USER_UPDATED') {
-          console.log("User updated");
-          toast({
-            title: "Success",
-            description: "Your password has been updated successfully.",
-          });
-          navigate("/dashboard");
-        } else if (event === 'PASSWORD_RECOVERY') {
-          console.log("Password recovery requested");
-          navigate("/update-password");
-        }
-
-        // Handle auth errors
-        if (event === 'SIGNED_IN') {
-          const { error } = await supabase.auth.getSession();
-          if (error) {
-            console.error("Auth error:", error);
-            let errorMessage = "An error occurred during authentication.";
-            
-            if (error.message.includes("Email not confirmed")) {
-              errorMessage = "Please verify your email before signing in.";
-            } else if (error.message.includes("Invalid login credentials")) {
-              errorMessage = "Invalid email or password. Please try again.";
-            } else if (error.message.includes("User already registered")) {
-              errorMessage = "An account with this email already exists. Please sign in instead.";
-            }
-            
-            toast({
-              variant: "destructive",
-              title: "Authentication Error",
-              description: errorMessage,
-            });
-          }
         }
       }
     );
@@ -209,10 +175,23 @@ const AuthPage = () => {
               button: 'w-full px-4 py-2 rounded-lg',
               input: 'rounded-lg border-gray-300',
               label: 'text-sm font-medium text-gray-700',
+              message: 'text-sm text-red-600',
             },
           }}
           providers={[]}
-          redirectTo={window.location.origin}
+          redirectTo={`${window.location.origin}/auth/callback`}
+          localization={{
+            variables: {
+              sign_in: {
+                email_label: 'Email address',
+                password_label: 'Password',
+                email_input_placeholder: 'Your email address',
+                password_input_placeholder: 'Your password',
+                button_label: 'Sign in',
+                loading_button_label: 'Signing in ...',
+              },
+            },
+          }}
         />
       </div>
     </div>
