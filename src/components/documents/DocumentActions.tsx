@@ -23,13 +23,24 @@ interface DocumentActionsProps {
 export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: DocumentActionsProps) {
   const { toast } = useToast();
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
+    if (isDownloading) return;
+    
+    setIsDownloading(true);
     try {
       console.log("Starting download process for document:", {
         id: doc.id,
         file_path: doc.file_path
       });
+
+      // Verify session before download
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        console.error("Session error before download:", sessionError);
+        throw new Error("Please sign in again to download documents");
+      }
 
       // Get the file data from Supabase Storage
       const { data, error } = await supabase.storage
@@ -46,7 +57,7 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
         throw new Error("No data received from storage");
       }
 
-      // Extract filename from path
+      // Extract filename from path and sanitize it
       const fileName = doc.file_path.split('/').pop() || 'document';
       console.log("Using filename for download:", fileName);
 
@@ -68,13 +79,23 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
         title: "Success",
         description: "Document downloaded successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error downloading document:", error);
+      
+      // Check if it's an auth error
+      if (error.message?.includes("sign in")) {
+        await supabase.auth.signOut();
+        window.location.href = "/auth";
+        return;
+      }
+
       toast({
         title: "Error",
-        description: "Could not download the document. Please try again later.",
+        description: error.message || "Could not download the document. Please try again later.",
         variant: "destructive",
       });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -139,9 +160,10 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
         size="sm"
         className="flex-1"
         onClick={handleDownload}
+        disabled={isDownloading}
       >
         <Download className="h-4 w-4 mr-2" />
-        Download
+        {isDownloading ? "Downloading..." : "Download"}
       </Button>
       {userRole === "landlord" && (
         <>
