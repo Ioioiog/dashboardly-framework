@@ -46,6 +46,12 @@ const Index = () => {
 
         if (profileError) {
           console.error("Profile fetch error:", profileError);
+          // If there's an auth error, sign out and redirect
+          if (profileError.code === 'PGRST301') {
+            await supabase.auth.signOut();
+            navigate("/auth");
+            return;
+          }
           toast({
             title: "Error",
             description: "Failed to load user profile. Please try refreshing the page.",
@@ -75,6 +81,11 @@ const Index = () => {
 
       } catch (error: any) {
         console.error("Error in checkUser:", error);
+        // If there's an auth error, redirect to login
+        if (error.status === 401 || error.code === 'PGRST301') {
+          navigate("/auth");
+          return;
+        }
         toast({
           title: "Error",
           description: error.message || "An unexpected error occurred",
@@ -86,16 +97,20 @@ const Index = () => {
     checkUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log("Auth state changed:", event);
-        if (!session) {
+        if (event === 'SIGNED_OUT' || !session) {
           navigate("/auth");
+          return;
+        }
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          await checkUser();
         }
       }
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate, toast]);
+  }, [navigate, toast, t]);
 
   return (
     <div className="flex bg-dashboard-background min-h-screen">

@@ -11,12 +11,37 @@ export const supabase = createClient<Database>(
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true
+      detectSessionInUrl: true,
+      storage: window.localStorage
     },
     global: {
       headers: {
         'X-Client-Info': 'supabase-js-web'
       }
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 10
+      }
     }
   }
 );
+
+// Initialize session from localStorage if it exists
+const initSession = async () => {
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error) {
+    console.error('Error initializing session:', error);
+    // Clear any invalid session data
+    await supabase.auth.signOut();
+    return;
+  }
+  if (!session) {
+    console.log('No session found');
+    return;
+  }
+  console.log('Session initialized successfully');
+};
+
+// Call initSession when the client is imported
+initSession();
