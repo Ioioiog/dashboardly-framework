@@ -11,11 +11,39 @@ import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 export default function Payments() {
   const [payments, setPayments] = useState<PaymentWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [status, setStatus] = useState("all");
+  const [tenancies, setTenancies] = useState<any[]>([]);
   const { userRole } = useUserRole();
 
   useEffect(() => {
     fetchPayments();
-  }, []);
+    if (userRole === "landlord") {
+      fetchTenancies();
+    }
+  }, [userRole]);
+
+  const fetchTenancies = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("tenancies")
+        .select(`
+          id,
+          property:properties (
+            name,
+            address
+          ),
+          tenant:profiles (
+            first_name,
+            last_name
+          )
+        `);
+
+      if (error) throw error;
+      setTenancies(data || []);
+    } catch (error) {
+      console.error("Error fetching tenancies:", error);
+    }
+  };
 
   const fetchPayments = async () => {
     try {
@@ -40,6 +68,10 @@ export default function Payments() {
         `)
         .order("due_date", { ascending: false });
 
+      if (status !== "all") {
+        query.eq("status", status);
+      }
+
       const { data, error } = await query;
 
       if (error) {
@@ -55,6 +87,11 @@ export default function Payments() {
     }
   };
 
+  const handleStatusChange = (newStatus: string) => {
+    setStatus(newStatus);
+    fetchPayments();
+  };
+
   if (!userRole) return null;
 
   return (
@@ -65,8 +102,16 @@ export default function Payments() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Payments</CardTitle>
             <div className="flex items-center gap-4">
-              <PaymentFilters />
-              {userRole === "landlord" && <PaymentDialog />}
+              <PaymentFilters 
+                status={status} 
+                onStatusChange={handleStatusChange} 
+              />
+              {userRole === "landlord" && (
+                <PaymentDialog 
+                  tenancies={tenancies} 
+                  onPaymentCreated={fetchPayments} 
+                />
+              )}
             </div>
           </CardHeader>
           <CardContent>
