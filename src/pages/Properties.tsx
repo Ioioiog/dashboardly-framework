@@ -19,9 +19,25 @@ export default function Properties() {
 
   const handleEdit = async (property: Property, data: any): Promise<boolean> => {
     try {
+      console.log("Updating property:", property.id, "with data:", data);
+      
+      if (!property.id) {
+        throw new Error("Property ID is required for updates");
+      }
+
+      // Only send fields that are actually being updated
+      const updateData = {
+        name: data.name,
+        address: data.address,
+        monthly_rent: data.monthly_rent,
+        type: data.type,
+        description: data.description,
+        available_from: data.available_from
+      };
+
       const { error } = await supabase
         .from("properties")
-        .update(data)
+        .update(updateData)
         .eq("id", property.id);
 
       if (error) throw error;
@@ -46,6 +62,10 @@ export default function Properties() {
 
   const handleDelete = async (property: Property) => {
     try {
+      if (!property.id) {
+        throw new Error("Property ID is required for deletion");
+      }
+
       const { error } = await supabase
         .from("properties")
         .delete()
@@ -90,7 +110,10 @@ export default function Properties() {
 
             {userRole === "landlord" && (
               <Button 
-                onClick={() => setShowDialog(true)}
+                onClick={() => {
+                  setSelectedProperty(null);
+                  setShowDialog(true);
+                }}
                 className="w-full sm:w-auto"
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -103,7 +126,10 @@ export default function Properties() {
             <div className="p-6">
               <DashboardProperties 
                 userRole={userRole}
-                onEdit={handleEdit}
+                onEdit={(property, data) => {
+                  setSelectedProperty(property);
+                  return handleEdit(property, data);
+                }}
                 onDelete={handleDelete}
               />
             </div>
