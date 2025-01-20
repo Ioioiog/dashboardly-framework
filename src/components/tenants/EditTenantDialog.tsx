@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +26,7 @@ interface EditTenantDialogProps {
 
 export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
   const { toast } = useToast();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const { register, handleSubmit, setValue, watch, formState: { isSubmitting } } = useForm({
     defaultValues: {
       first_name: tenant.first_name || "",
