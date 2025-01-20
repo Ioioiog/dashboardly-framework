@@ -1,5 +1,4 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
 import {
   Table,
   TableBody,
@@ -8,108 +7,62 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Tenant } from "@/types/tenant";
 import { EditTenantDialog } from "./EditTenantDialog";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Tenant } from "@/types/tenant";
+import { format } from "date-fns";
 
 interface TenantListProps {
   tenants: Tenant[];
 }
 
 export function TenantList({ tenants }: TenantListProps) {
-  const [refreshKey, setRefreshKey] = React.useState(0);
-  const { t } = useTranslation();
+  console.log("Rendering TenantList with tenants:", tenants);
 
-  const handleUpdate = () => {
-    console.log("Tenant updated, refreshing list");
-    setRefreshKey(prev => prev + 1);
-  };
-
-  // Add debug logging
-  console.log("Current tenants data:", tenants);
-
-  if (!tenants) {
+  if (!tenants.length) {
     return (
-      <div className="rounded-lg border bg-card text-card-foreground shadow p-6">
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-[250px]" />
-          <Skeleton className="h-4 w-[200px]" />
-        </div>
+      <div className="rounded-lg border bg-card text-card-foreground shadow p-8 text-center">
+        <p className="text-muted-foreground">No tenants found</p>
       </div>
     );
   }
-
-  if (tenants.length === 0) {
-    return (
-      <div className="rounded-lg border bg-card text-card-foreground shadow p-6 text-center">
-        <p className="text-muted-foreground">{t('tenants.list.noTenants')}</p>
-      </div>
-    );
-  }
-
-  // Filter out any duplicate tenants based on the combination of tenant ID and property ID
-  const uniqueTenants = tenants.reduce((acc: Tenant[], current) => {
-    const isDuplicate = acc.find(
-      (item) => 
-        item.id === current.id && 
-        item.property.id === current.property.id
-    );
-    if (!isDuplicate) {
-      acc.push(current);
-    }
-    return acc;
-  }, []);
 
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t('tenants.list.name')}</TableHead>
-            <TableHead>{t('tenants.list.contact')}</TableHead>
-            <TableHead>{t('tenants.list.property')}</TableHead>
-            <TableHead>{t('tenants.list.startDate')}</TableHead>
-            <TableHead>{t('tenants.list.endDate')}</TableHead>
-            <TableHead>{t('tenants.list.status')}</TableHead>
-            <TableHead>{t('tenants.list.actions')}</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Phone</TableHead>
+            <TableHead>Property</TableHead>
+            <TableHead>Start Date</TableHead>
+            <TableHead>End Date</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {uniqueTenants.map((tenant) => (
+          {tenants.map((tenant) => (
             <TableRow key={`${tenant.id}-${tenant.property.id}-${tenant.tenancy.start_date}`}>
               <TableCell>
                 {tenant.first_name} {tenant.last_name}
               </TableCell>
+              <TableCell>{tenant.email}</TableCell>
+              <TableCell>{tenant.phone || "N/A"}</TableCell>
               <TableCell>
-                <div>{tenant.email}</div>
-                <div className="text-sm text-gray-500">{tenant.phone}</div>
+                {tenant.property.name} ({tenant.property.address})
               </TableCell>
               <TableCell>
-                <div>{tenant.property.name}</div>
-                <div className="text-sm text-gray-500">
-                  {tenant.property.address}
-                </div>
-              </TableCell>
-              <TableCell>
-                {new Date(tenant.tenancy.start_date).toLocaleDateString()}
+                {tenant.tenancy.start_date
+                  ? format(new Date(tenant.tenancy.start_date), "MMM d, yyyy")
+                  : "N/A"}
               </TableCell>
               <TableCell>
                 {tenant.tenancy.end_date
-                  ? new Date(tenant.tenancy.end_date).toLocaleDateString()
-                  : t('tenants.list.noEndDate')}
+                  ? format(new Date(tenant.tenancy.end_date), "MMM d, yyyy")
+                  : "Ongoing"}
               </TableCell>
-              <TableCell>
-                <Badge
-                  variant={
-                    tenant.tenancy.status === "active" ? "default" : "secondary"
-                  }
-                >
-                  {t(`tenants.status.${tenant.tenancy.status}`)}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <EditTenantDialog tenant={tenant} onUpdate={handleUpdate} />
+              <TableCell className="text-right">
+                <EditTenantDialog tenant={tenant} onUpdate={() => {}} />
               </TableCell>
             </TableRow>
           ))}
