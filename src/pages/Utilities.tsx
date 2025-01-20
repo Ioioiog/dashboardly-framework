@@ -7,8 +7,9 @@ import { UtilityDialog } from "@/components/utilities/UtilityDialog";
 import { UtilityList } from "@/components/utilities/UtilityList";
 import { UtilityFilters } from "@/components/utilities/UtilityFilters";
 import { useToast } from "@/hooks/use-toast";
+import { Property } from "@/utils/propertyUtils";
 
-interface Property {
+interface PropertyForUtilities {
   id: string;
   name: string;
   address: string;
@@ -16,7 +17,7 @@ interface Property {
 
 export default function Utilities() {
   const [utilities, setUtilities] = useState<any[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<PropertyForUtilities[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [status, setStatus] = useState("all");
   const [type, setType] = useState("all");
@@ -125,7 +126,6 @@ export default function Utilities() {
             utilities={utilities}
             userRole={userRole}
             onStatusUpdate={fetchUtilities}
-            isLoading={isLoading}
           />
         </CardContent>
       </Card>

@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PaymentActions } from "@/components/payments/PaymentActions";
 import { Button } from "@/components/ui/button";
 import { FileText, Trash2 } from "lucide-react";
+import { Utility } from "@/integrations/supabase/types/utility";
 
 interface Utility {
   id: string;
