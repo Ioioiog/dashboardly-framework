@@ -101,22 +101,38 @@ const Index = () => {
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
       <main className="flex-1 ml-64 p-8 animate-fade-in">
-        <div className="max-w-7xl mx-auto">
-          <header className="mb-8">
-            <h1 className="text-3xl font-semibold text-gray-900">{t('dashboard.title')}</h1>
-            <p className="mt-2 text-dashboard-text">
-              {t('dashboard.welcome')}, {userName}! {t('dashboard.overview')}
-            </p>
+        <div className="max-w-7xl mx-auto space-y-8">
+          <header className="relative pb-8 border-b border-border/10">
+            <div className="flex flex-col space-y-2">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                {t('dashboard.title')}
+              </h1>
+              <p className="text-muted-foreground">
+                {t('dashboard.welcome')}, {userName}! {t('dashboard.overview')}
+              </p>
+            </div>
           </header>
 
           {userId && userRole && (
-            <div className="space-y-8">
-              <DashboardMetrics userId={userId} userRole={userRole} />
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('navigation.properties')}</h2>
+            <div className="space-y-10">
+              <section>
+                <DashboardMetrics userId={userId} userRole={userRole} />
+              </section>
+              
+              <section className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-semibold tracking-tight">
+                    {t('navigation.properties')}
+                  </h2>
+                </div>
                 <DashboardProperties userRole={userRole} />
-              </div>
-              {userRole === "landlord" && <RevenueChart userId={userId} />}
+              </section>
+              
+              {userRole === "landlord" && (
+                <section className="space-y-6">
+                  <RevenueChart userId={userId} />
+                </section>
+              )}
             </div>
           )}
         </div>
