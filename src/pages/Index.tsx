@@ -37,7 +37,6 @@ const Index = () => {
         console.log("Current user ID:", currentUserId);
         setUserId(currentUserId);
 
-        // Fetch profile with explicit filter for current user
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role, first_name, last_name')
@@ -67,7 +66,6 @@ const Index = () => {
         console.log("Profile loaded successfully:", profile);
         setUserRole(profile.role as "landlord" | "tenant");
         
-        // Set user name from profile
         const fullName = [profile.first_name, profile.last_name]
           .filter(Boolean)
           .join(" ");
@@ -98,38 +96,40 @@ const Index = () => {
   }, [navigate, toast]);
 
   return (
-    <div className="flex bg-dashboard-background min-h-screen">
+    <div className="flex min-h-screen bg-dashboard-background">
       <DashboardSidebar />
-      <main className="flex-1 p-8 animate-fade-in transition-all duration-200">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <header className="relative pb-8 border-b border-border/10">
-            <div className="flex flex-col space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">
+      <main className="flex-1 p-6 overflow-y-auto">
+        <div className="max-w-[1600px] mx-auto space-y-6">
+          <header className="flex items-center justify-between pb-6">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                 {t('dashboard.title')}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {t('dashboard.welcome')}, {userName}! {t('dashboard.overview')}
               </p>
             </div>
           </header>
 
           {userId && userRole && (
-            <div className="space-y-10">
+            <div className="grid gap-6">
               <section>
                 <DashboardMetrics userId={userId} userRole={userRole} />
               </section>
               
-              <section className="space-y-6">
+              <section className="grid gap-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-semibold tracking-tight">
+                  <h2 className="text-lg font-semibold tracking-tight">
                     {t('navigation.properties')}
                   </h2>
                 </div>
-                <DashboardProperties userRole={userRole} />
+                <div className="rounded-xl border bg-card p-6">
+                  <DashboardProperties userRole={userRole} />
+                </div>
               </section>
               
               {userRole === "landlord" && (
-                <section className="space-y-6">
+                <section className="grid gap-4">
                   <RevenueChart userId={userId} />
                 </section>
               )}
