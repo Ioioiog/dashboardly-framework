@@ -95,34 +95,31 @@ export default function Payments() {
   if (!userRole) return null;
 
   return (
-    <div className="flex h-screen">
-      <DashboardSidebar />
-      <div className="flex-1 p-8 overflow-auto">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Payments</CardTitle>
-            <div className="flex items-center gap-4">
-              <PaymentFilters 
-                status={status} 
-                onStatusChange={handleStatusChange} 
+    <DashboardSidebar>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Payments</CardTitle>
+          <div className="flex items-center gap-4">
+            <PaymentFilters 
+              status={status} 
+              onStatusChange={handleStatusChange} 
+            />
+            {userRole === "landlord" && (
+              <PaymentDialog 
+                tenancies={tenancies} 
+                onPaymentCreated={fetchPayments} 
               />
-              {userRole === "landlord" && (
-                <PaymentDialog 
-                  tenancies={tenancies} 
-                  onPaymentCreated={fetchPayments} 
-                />
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-6">Loading payments...</div>
-            ) : (
-              <PaymentList payments={payments} userRole={userRole} />
             )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-6">Loading payments...</div>
+          ) : (
+            <PaymentList payments={payments} userRole={userRole} />
+          )}
+        </CardContent>
+      </Card>
+    </DashboardSidebar>
   );
 }

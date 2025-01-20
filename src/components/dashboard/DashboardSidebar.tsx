@@ -21,10 +21,10 @@ import {
 } from "@/components/ui/sidebar";
 
 interface DashboardSidebarProps {
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }
 
-export default function DashboardSidebar({ children }: { children: React.ReactNode }) {
+export default function DashboardSidebar({ children }: DashboardSidebarProps) {
   const navigate = useNavigate();
   const { userRole } = useUserRole();
   const { toast } = useToast();
@@ -161,7 +161,7 @@ export default function DashboardSidebar({ children }: { children: React.ReactNo
             {sidebarContent}
           </SidebarContent>
         </Sidebar>
-        <main className="flex-1 px-8 py-6">
+        <main className="flex-1 p-8 overflow-auto">
           {children}
         </main>
       </SidebarProvider>

@@ -1,143 +1,97 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { InvoiceList } from "@/components/invoices/InvoiceList";
 import { InvoiceDialog } from "@/components/invoices/InvoiceDialog";
-import { Invoice } from "@/types/invoice";
+import { InvoiceFilters } from "@/components/invoices/InvoiceFilters";
+import { useUserRole } from "@/hooks/use-user-role";
+import { supabase } from "@/integrations/supabase/client";
+import { InvoiceWithRelations } from "@/integrations/supabase/types/invoice";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 
-const Invoices = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+export default function Invoices() {
+  const [invoices, setInvoices] = useState<InvoiceWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
+  const [status, setStatus] = useState("all");
+  const { userRole } = useUserRole();
+
+  useEffect(() => {
+    fetchInvoices();
+  }, [userRole, status]);
 
   const fetchInvoices = async () => {
     try {
+      setIsLoading(true);
       console.log("Fetching invoices...");
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error("No user found");
-      }
 
       const query = supabase
         .from("invoices")
         .select(`
           *,
-          property:properties (
-            name,
-            address
-          ),
-          tenant:profiles!invoices_tenant_id_fkey (
-            first_name,
-            last_name,
-            email
+          tenancy:tenancies (
+            property:properties (
+              name,
+              address
+            ),
+            tenant:profiles (
+              first_name,
+              last_name,
+              email
+            )
           )
         `)
         .order("due_date", { ascending: false });
 
-      const { data: invoicesData, error: invoicesError } = await query;
+      if (status !== "all") {
+        query.eq("status", status);
+      }
 
-      if (invoicesError) throw invoicesError;
+      const { data, error } = await query;
 
-      console.log("Fetched invoices:", invoicesData);
-      setInvoices(invoicesData as Invoice[]);
+      if (error) {
+        throw error;
+      }
+
+      console.log("Invoices fetched:", data);
+      setInvoices(data as InvoiceWithRelations[]);
     } catch (error) {
       console.error("Error fetching invoices:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Could not fetch invoices",
-      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session) {
-          navigate("/auth");
-          return;
-        }
+  const handleStatusChange = (newStatus: string) => {
+    setStatus(newStatus);
+    fetchInvoices();
+  };
 
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", session.user.id)
-          .single();
-
-        if (profileError) {
-          console.error("Error fetching profile:", profileError);
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not fetch user profile",
-          });
-          return;
-        }
-
-        if (profile.role !== "landlord" && profile.role !== "tenant") {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Invalid user role",
-          });
-          return;
-        }
-
-        setUserRole(profile.role as "landlord" | "tenant");
-        await fetchInvoices();
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error in checkUser:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "An unexpected error occurred",
-        });
-      }
-    };
-
-    checkUser();
-  }, [navigate, toast]);
-
-  if (isLoading || !userRole) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
+  if (!userRole) return null;
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <DashboardSidebar />
-      <div className="flex-1 p-8 ml-64">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Invoices</CardTitle>
-            {userRole === "landlord" && (
-              <InvoiceDialog onInvoiceCreated={fetchInvoices} />
-            )}
-          </CardHeader>
-          <CardContent>
-            <InvoiceList 
-              invoices={invoices} 
-              userRole={userRole} 
-              onStatusUpdate={fetchInvoices}
+    <DashboardSidebar>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Invoices</CardTitle>
+          <div className="flex items-center gap-4">
+            <InvoiceFilters 
+              status={status} 
+              onStatusChange={handleStatusChange} 
             />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+            {userRole === "landlord" && (
+              <InvoiceDialog 
+                onInvoiceCreated={fetchInvoices} 
+              />
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-6">Loading invoices...</div>
+          ) : (
+            <InvoiceList invoices={invoices} userRole={userRole} />
+          )}
+        </CardContent>
+      </Card>
+    </DashboardSidebar>
   );
-};
-
-export default Invoices;
+}
