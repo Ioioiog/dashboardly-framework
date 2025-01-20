@@ -22,7 +22,7 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
   const { t } = useTranslation();
   const { toast } = useToast();
 
-  console.log("Property data:", property); // Debug log
+  console.log("Property data:", property);
 
   // Calculate next payment date (1st of next month)
   const nextPaymentDate = new Date();
@@ -32,9 +32,8 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
   const handleDeleteTenancy = async () => {
     try {
       setIsDeleting(true);
-      console.log("Deleting tenancy for property:", property.id); // Debug log
+      console.log("Deleting tenancy for property:", property.id);
       
-      // Update the tenancy status to 'inactive'
       const { error } = await supabase
         .from('tenancies')
         .update({ status: 'inactive', end_date: new Date().toISOString() })
@@ -48,7 +47,6 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
         description: "Tenant has been removed from the property",
       });
 
-      // Refresh the page to show updated data
       window.location.reload();
     } catch (error: any) {
       console.error('Error deleting tenancy:', error);
@@ -62,7 +60,6 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
     }
   };
 
-  // Debug log for tenant info
   console.log("User role:", userRole);
   console.log("Tenancy info:", property.tenancy);
 
@@ -82,11 +79,6 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
               )}
               {property.description && (
                 <p className="text-sm text-gray-500">{property.description}</p>
-              )}
-              {property.available_from && (
-                <p className="text-sm text-gray-500">
-                  {t('properties.available_from')}: {new Date(property.available_from).toLocaleDateString()}
-                </p>
               )}
             </div>
 
@@ -109,7 +101,6 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
               </div>
             )}
 
-            {/* Show current tenant info for landlords */}
             {userRole === "landlord" && property.tenancy && (
               <div className="space-y-2 pt-4 border-t">
                 <h4 className="font-medium">Current Tenant</h4>
