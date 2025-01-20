@@ -8,25 +8,37 @@ export function useUserRole() {
 
   useEffect(() => {
     async function getUserRole() {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        console.log("No user found");
-        setUserRole(null);
-        return;
-      }
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          console.log("No user found");
+          setUserRole(null);
+          return;
+        }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
+        console.log("Fetching profile for user:", user.id);
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
 
-      console.log("User profile:", profile);
-      
-      if (profile?.role) {
-        setUserRole(profile.role as UserRole);
-      } else {
+        if (error) {
+          console.error("Error fetching profile:", error);
+          setUserRole(null);
+          return;
+        }
+
+        console.log("Profile data:", profile);
+        
+        if (profile?.role) {
+          setUserRole(profile.role as UserRole);
+        } else {
+          setUserRole(null);
+        }
+      } catch (error) {
+        console.error("Error in getUserRole:", error);
         setUserRole(null);
       }
     }
