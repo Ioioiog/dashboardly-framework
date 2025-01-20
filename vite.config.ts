@@ -19,13 +19,13 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: undefined,
-        preserveModules: true,
       },
       onwarn(warning, warn) {
         // Ignore certain warnings
         if (warning.code === 'CIRCULAR_DEPENDENCY') return;
         if (warning.code === 'EMPTY_BUNDLE') return;
-        if (warning.code === 'SOURCEMAP_ERROR') return; // Ignore sourcemap warnings
+        if (warning.code === 'SOURCEMAP_ERROR') return;
+        if (warning.code === 'THIS_IS_UNDEFINED') return;
         
         // Log all other warnings
         console.log('Build warning:', {
