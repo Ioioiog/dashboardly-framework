@@ -20,7 +20,11 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar";
 
-export default function DashboardSidebar() {
+interface DashboardSidebarProps {
+  children?: React.ReactNode;
+}
+
+export default function DashboardSidebar({ children }: DashboardSidebarProps) {
   const navigate = useNavigate();
   const { userRole } = useUserRole();
   const { toast } = useToast();
@@ -150,12 +154,17 @@ export default function DashboardSidebar() {
   );
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <Sidebar className="border-r border-gray-200 shadow-sm bg-white" collapsible="none">
-        <SidebarContent>
-          {sidebarContent}
-        </SidebarContent>
-      </Sidebar>
-    </SidebarProvider>
+    <div className="flex min-h-screen bg-dashboard-background">
+      <SidebarProvider defaultOpen={true}>
+        <Sidebar className="border-r border-gray-200 shadow-sm bg-white" collapsible="none">
+          <SidebarContent>
+            {sidebarContent}
+          </SidebarContent>
+        </Sidebar>
+      </SidebarProvider>
+      <main className="flex-1">
+        {children}
+      </main>
+    </div>
   );
 }
