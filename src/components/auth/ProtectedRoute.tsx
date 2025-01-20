@@ -57,7 +57,7 @@ export function ProtectedRoute({
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed in ProtectedRoute:", event);
-      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+      if (event === 'SIGNED_OUT') {
         localStorage.removeItem('supabase.auth.token');
       }
     });
