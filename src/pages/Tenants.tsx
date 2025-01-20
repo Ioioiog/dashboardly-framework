@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { TenantList } from "@/components/tenants/TenantList";
 import { useUserRole } from "@/hooks/use-user-role";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
@@ -12,7 +11,7 @@ export default function Tenants() {
   const [tenants, setTenants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { userRole } = useUserRole();
-  const { data: properties = [] } = useProperties();
+  const properties = useProperties();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -59,7 +58,6 @@ export default function Tenants() {
 
       console.log("Tenants data fetched:", tenantsData);
 
-      // Transform the data to match the expected format
       const formattedTenants = tenantsData
         .filter(tenancy => tenancy.profiles && tenancy.properties)
         .map(tenancy => ({
@@ -94,20 +92,18 @@ export default function Tenants() {
     }
   };
 
-  if (!userRole) return null;
-
   return (
     <DashboardSidebar>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Tenants</CardTitle>
-          <TenantInviteDialog properties={properties} />
+          <TenantInviteDialog properties={properties.properties} />
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-6">Loading tenants...</div>
+            <div>Loading...</div>
           ) : (
-            <TenantList tenants={tenants} />
+            <div>{/* TenantList component will go here */}</div>
           )}
         </CardContent>
       </Card>

@@ -9,8 +9,13 @@ import { UtilityFilters } from "@/components/utilities/UtilityFilters";
 import { useToast } from "@/hooks/use-toast";
 import { Property } from "@/utils/propertyUtils";
 
-// Only include the fields we need for utilities
-type PropertyForUtilities = Pick<Property, 'id' | 'name' | 'address'>;
+interface PropertyForUtilities {
+  id: string;
+  name: string;
+  address: string;
+  monthly_rent: number;
+  type: "Apartment" | "House" | "Condo" | "Commercial";
+}
 
 export default function Utilities() {
   const [utilities, setUtilities] = useState<any[]>([]);
@@ -30,7 +35,7 @@ export default function Utilities() {
     try {
       const { data, error } = await supabase
         .from("properties")
-        .select("id, name, address");
+        .select("id, name, address, monthly_rent, type");
 
       if (error) throw error;
       setProperties(data || []);

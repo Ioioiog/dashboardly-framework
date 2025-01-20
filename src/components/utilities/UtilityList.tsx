@@ -5,10 +5,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { PaymentActions } from "@/components/payments/PaymentActions";
 import { Button } from "@/components/ui/button";
 import { FileText, Trash2 } from "lucide-react";
-import { Utility } from "@/integrations/supabase/types/utility";
+
+interface UtilityWithProperty {
+  id: string;
+  property_id: string;
+  type: string;
+  amount: number;
+  due_date: string;
+  status: string;
+  property: {
+    name: string;
+    address: string;
+  };
+}
 
 interface UtilityListProps {
-  utilities: Utility[];
+  utilities: UtilityWithProperty[];
   userRole: "landlord" | "tenant";
   onStatusUpdate?: () => void;
 }
