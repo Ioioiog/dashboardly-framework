@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { TenantList } from "@/components/tenants/TenantList";
 import { useUserRole } from "@/hooks/use-user-role";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
@@ -11,7 +12,7 @@ export default function Tenants() {
   const [tenants, setTenants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { userRole } = useUserRole();
-  const properties = useProperties();
+  const { properties } = useProperties({ userRole: userRole || "tenant" });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -92,18 +93,20 @@ export default function Tenants() {
     }
   };
 
+  if (!userRole) return null;
+
   return (
     <DashboardSidebar>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Tenants</CardTitle>
-          <TenantInviteDialog properties={properties.properties} />
+          {userRole === "landlord" && <TenantInviteDialog properties={properties} />}
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div>Loading...</div>
+            <div className="text-center py-6">Loading tenants...</div>
           ) : (
-            <div>{/* TenantList component will go here */}</div>
+            <TenantList tenants={tenants} />
           )}
         </CardContent>
       </Card>
