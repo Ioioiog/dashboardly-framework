@@ -65,7 +65,6 @@ const Tenants = () => {
         console.log("Profile role:", profile.role);
         setUserRole(profile.role as "landlord" | "tenant");
 
-        // Redirect tenants to dashboard
         if (profile.role === "tenant") {
           console.log("User is tenant, redirecting to dashboard");
           navigate("/dashboard");
@@ -115,7 +114,7 @@ const Tenants = () => {
 
   if (isCheckingProfile) {
     return (
-      <div className="flex bg-dashboard-background min-h-screen">
+      <div className="flex h-screen w-full bg-background">
         <DashboardSidebar />
         <main className="flex-1 ml-64 p-8">
           <div className="max-w-7xl mx-auto">
@@ -134,7 +133,7 @@ const Tenants = () => {
 
   if (tenantsError) {
     return (
-      <div className="flex bg-dashboard-background min-h-screen">
+      <div className="flex h-screen w-full bg-background">
         <DashboardSidebar />
         <main className="flex-1 ml-64 p-8">
           <Alert variant="destructive">
@@ -147,15 +146,14 @@ const Tenants = () => {
     );
   }
 
-  // Only render for landlords
   if (userRole !== "landlord") {
     return null;
   }
 
   return (
-    <div className="flex bg-dashboard-background min-h-screen">
+    <div className="flex h-screen w-full bg-background">
       <DashboardSidebar />
-      <main className="flex-1 ml-64 p-8 animate-fade-in">
+      <main className="flex-1 ml-64 p-8 overflow-auto">
         <div className="max-w-7xl mx-auto">
           <TenantsHeader userRole={userRole} properties={properties} />
           <div className="space-y-8">
