@@ -55,30 +55,28 @@ const Settings = () => {
     <div className="flex h-screen bg-background">
       <DashboardSidebar />
       <main className="flex-1 p-8 ml-64 overflow-y-auto">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Settings Navigation */}
-            <div className="lg:w-64 space-y-2 bg-card p-4 rounded-lg shadow-sm">
-              {navigationItems.map((item) => (
-                <Button
-                  key={item.id}
-                  variant={activeSection === item.id ? 'default' : 'ghost'}
-                  className={cn(
-                    "w-full justify-start gap-2",
-                    activeSection === item.id && "bg-primary text-primary-foreground"
-                  )}
-                  onClick={() => setActiveSection(item.id)}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Button>
-              ))}
-            </div>
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Settings Navigation - Now a horizontal row */}
+          <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto">
+            {navigationItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={activeSection === item.id ? 'default' : 'ghost'}
+                className={cn(
+                  "flex-shrink-0 gap-2",
+                  activeSection === item.id && "bg-primary text-primary-foreground"
+                )}
+                onClick={() => setActiveSection(item.id)}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Button>
+            ))}
+          </div>
 
-            {/* Settings Content */}
-            <div className="flex-1 bg-card p-6 rounded-lg shadow-sm">
-              {renderSection()}
-            </div>
+          {/* Settings Content */}
+          <div className="bg-card p-6 rounded-lg shadow-sm">
+            {renderSection()}
           </div>
         </div>
       </main>
