@@ -36,16 +36,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Starting invoice email process for ID:', invoiceId);
 
-    // First, get the invoice with all related data
+    // First, get the invoice details
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
       .select(`
         *,
-        tenant:profiles!invoices_tenant_id_fkey (
-          email,
-          first_name,
-          last_name
-        ),
         property:properties (
           name,
           address
@@ -77,67 +72,41 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Retrieved invoice data:', {
       invoiceId,
-      tenant_id: invoice.tenant_id,
       property_id: invoice.property_id,
-      tenant: invoice.tenant
+      tenant_id: invoice.tenant_id
     });
 
-    // Verify tenant email exists
-    if (!invoice.tenant?.email) {
-      console.log('Tenant email not found in invoice data, trying alternative sources...');
-      
-      // Try to get tenant email directly from profiles table
-      const { data: tenantProfile, error: tenantError } = await supabase
-        .from('profiles')
-        .select('email, first_name, last_name')
-        .eq('id', invoice.tenant_id)
-        .maybeSingle();
+    // Get tenant email from active tenancy
+    const { data: tenancy, error: tenancyError } = await supabase
+      .from('tenancies')
+      .select(`
+        tenant:profiles!tenancies_tenant_id_fkey (
+          email,
+          first_name,
+          last_name
+        )
+      `)
+      .eq('property_id', invoice.property_id)
+      .eq('tenant_id', invoice.tenant_id)
+      .eq('status', 'active')
+      .maybeSingle();
 
-      if (tenantError) {
-        console.error('Error fetching tenant profile:', tenantError);
-      }
-
-      if (tenantProfile?.email) {
-        console.log('Found email in profiles:', tenantProfile.email);
-        invoice.tenant = tenantProfile;
-      } else {
-        console.log('Email not found in profiles, checking tenancies...');
-        // Try to get from active tenancy
-        const { data: tenancy, error: tenancyError } = await supabase
-          .from('tenancies')
-          .select(`
-            tenant:profiles!tenancies_tenant_id_fkey (
-              email,
-              first_name,
-              last_name
-            )
-          `)
-          .eq('property_id', invoice.property_id)
-          .eq('tenant_id', invoice.tenant_id)
-          .eq('status', 'active')
-          .maybeSingle();
-
-        if (tenancyError) {
-          console.error('Error fetching tenancy:', tenancyError);
-        }
-
-        if (!tenancy?.tenant?.email) {
-          const errorDetails = {
-            tenant_id: invoice.tenant_id,
-            property_id: invoice.property_id,
-            profileFound: !!tenantProfile,
-            tenancyFound: !!tenancy,
-            tenancyError,
-            profileError: tenantError
-          };
-          console.error('Tenant email not found in any source', errorDetails);
-          throw new Error(`Tenant email not found in any source. Details: ${JSON.stringify(errorDetails)}`);
-        }
-
-        console.log('Found email in tenancies:', tenancy.tenant.email);
-        invoice.tenant = tenancy.tenant;
-      }
+    if (tenancyError) {
+      console.error('Error fetching tenancy:', tenancyError);
+      throw new Error(`Failed to fetch tenancy: ${tenancyError.message}`);
     }
+
+    if (!tenancy?.tenant?.email) {
+      const errorDetails = {
+        tenant_id: invoice.tenant_id,
+        property_id: invoice.property_id,
+        tenancyFound: !!tenancy
+      };
+      console.error('No active tenancy found with email', errorDetails);
+      throw new Error(`No active tenancy found with email. Details: ${JSON.stringify(errorDetails)}`);
+    }
+
+    console.log('Found tenant email:', tenancy.tenant.email);
 
     // Format the items for email
     const itemsList = invoice.items
@@ -153,7 +122,7 @@ const handler = async (req: Request): Promise<Response> => {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2d3748;">Invoice for ${invoice.property.name}</h2>
         
-        <p>Dear ${invoice.tenant.first_name || ''} ${invoice.tenant.last_name || ''},</p>
+        <p>Dear ${tenancy.tenant.first_name || ''} ${tenancy.tenant.last_name || ''},</p>
         
         <div style="background-color: #f7fafc; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <h3 style="margin-top: 0;">Property Details</h3>
@@ -193,7 +162,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Get sender email from landlord's profile or use default
     const fromEmail = invoice.landlord.email || 'onboarding@resend.dev';
-    console.log('Sending email from:', fromEmail, 'to:', invoice.tenant.email);
+    console.log('Sending email from:', fromEmail, 'to:', tenancy.tenant.email);
 
     // Send email using Resend
     const emailResponse = await fetch('https://api.resend.com/emails', {
@@ -204,7 +173,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: fromEmail,
-        to: [invoice.tenant.email],
+        to: [tenancy.tenant.email],
         subject: `Invoice for ${invoice.property.name}`,
         html: emailHtml,
       }),
