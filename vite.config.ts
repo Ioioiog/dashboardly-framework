@@ -18,8 +18,8 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     hmr: {
       protocol: 'wss',
-      host: process.env.VITE_HMR_HOST || 'localhost',
-      port: Number(process.env.VITE_HMR_PORT) || 8080,
+      host: process.env.VITE_HMR_HOST || process.env.VITE_HOST || 'localhost',
+      port: Number(process.env.VITE_HMR_PORT) || 443,
       clientPort: Number(process.env.VITE_HMR_CLIENT_PORT) || 443,
     },
     watch: {
