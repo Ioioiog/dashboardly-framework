@@ -11,6 +11,8 @@ import { PaymentWithRelations } from "@/integrations/supabase/types/payment";
 import { PaymentStatusBadge } from "./PaymentStatusBadge";
 import { PaymentActions } from "./PaymentActions";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PaymentListProps {
   payments: PaymentWithRelations[];
@@ -26,6 +28,32 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
     console.log("Refreshing payments data...");
     queryClient.invalidateQueries({ queryKey: ["payments"] });
   };
+
+  // Set up real-time subscription
+  useEffect(() => {
+    console.log("Setting up real-time subscription for payments...");
+    const channel = supabase
+      .channel('payments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all changes (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'payments'
+        },
+        (payload) => {
+          console.log("Received real-time update:", payload);
+          refreshPayments();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      console.log("Cleaning up real-time subscription...");
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   if (payments.length === 0) {
     return (
