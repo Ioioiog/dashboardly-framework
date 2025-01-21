@@ -58,40 +58,43 @@ export function TenantList({ tenants }: TenantListProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tenants.map((tenant) => (
-              <React.Fragment key={`${tenant.id}-${tenant.property.id}-${tenant.tenancy.start_date}`}>
-                <TableRow>
-                  <TableCell>{getTenantDisplayName(tenant)}</TableCell>
-                  <TableCell>{tenant.email || "N/A"}</TableCell>
-                  <TableCell>{tenant.phone || "N/A"}</TableCell>
-                  <TableCell>
-                    {tenant.property.name} ({tenant.property.address})
-                  </TableCell>
-                  <TableCell>
-                    {tenant.tenancy.start_date
-                      ? format(new Date(tenant.tenancy.start_date), "MMM d, yyyy")
-                      : "N/A"}
-                  </TableCell>
-                  <TableCell>
-                    {tenant.tenancy.end_date
-                      ? format(new Date(tenant.tenancy.end_date), "MMM d, yyyy")
-                      : "Ongoing"}
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <TenantObservationDialog
-                      tenantId={tenant.id}
-                      tenantName={getTenantDisplayName(tenant)}
-                    />
-                    <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell colSpan={7} className="bg-gray-50">
-                    <TenantInteractionHistory tenantId={tenant.id} />
-                  </TableCell>
-                </TableRow>
-              </React.Fragment>
-            ))}
+            {tenants.map((tenant) => {
+              console.log("Tenant data:", tenant); // Debug log
+              return (
+                <React.Fragment key={`${tenant.id}-${tenant.property.id}-${tenant.tenancy.start_date}`}>
+                  <TableRow>
+                    <TableCell>{getTenantDisplayName(tenant)}</TableCell>
+                    <TableCell>{tenant.email || "N/A"}</TableCell>
+                    <TableCell>{tenant.phone || "N/A"}</TableCell>
+                    <TableCell>
+                      {tenant.property.name} ({tenant.property.address})
+                    </TableCell>
+                    <TableCell>
+                      {tenant.tenancy.start_date
+                        ? format(new Date(tenant.tenancy.start_date), "MMM d, yyyy")
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      {tenant.tenancy.end_date
+                        ? format(new Date(tenant.tenancy.end_date), "MMM d, yyyy")
+                        : "Ongoing"}
+                    </TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <TenantObservationDialog
+                        tenantId={tenant.id}
+                        tenantName={getTenantDisplayName(tenant)}
+                      />
+                      <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={7} className="bg-gray-50">
+                      <TenantInteractionHistory tenantId={tenant.id} />
+                    </TableCell>
+                  </TableRow>
+                </React.Fragment>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
