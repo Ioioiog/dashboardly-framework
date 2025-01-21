@@ -13,8 +13,7 @@ export const supabase = createClient<Database>(
       persistSession: true,
       detectSessionInUrl: true,
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      flowType: 'pkce',
-      debug: process.env.NODE_ENV === 'development'
+      flowType: 'pkce'
     },
     global: {
       headers: {
@@ -27,7 +26,9 @@ export const supabase = createClient<Database>(
 // Initialize session from localStorage if it exists
 const initSession = async () => {
   try {
+    console.log("Initializing Supabase session...");
     const { data: { session }, error } = await supabase.auth.getSession();
+    
     if (error) {
       console.error('Error initializing session:', error);
       await supabase.auth.signOut();
@@ -35,19 +36,14 @@ const initSession = async () => {
     }
     
     if (session) {
-      console.log('Session initialized successfully');
-      // Verify the session is still valid
-      const { data: { user }, error: refreshError } = await supabase.auth.getUser();
-      if (refreshError || !user) {
-        console.error('Session invalid, signing out:', refreshError);
+      console.log('Session found, refreshing...');
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError) {
+        console.error('Session refresh failed:', refreshError);
         await supabase.auth.signOut();
       } else {
-        // Set up auto token refresh
-        supabase.auth.onAuthStateChange((event, session) => {
-          if (event === 'TOKEN_REFRESHED') {
-            console.log('Token refreshed successfully');
-          }
-        });
+        console.log('Session refreshed successfully');
       }
     } else {
       console.log('No session found');
@@ -57,6 +53,19 @@ const initSession = async () => {
     await supabase.auth.signOut();
   }
 };
+
+// Set up auth state change listener
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
+  
+  if (event === 'SIGNED_IN') {
+    console.log('User signed in');
+  } else if (event === 'SIGNED_OUT') {
+    console.log('User signed out');
+  } else if (event === 'TOKEN_REFRESHED') {
+    console.log('Token refreshed');
+  }
+});
 
 // Call initSession when the client is imported
 if (typeof window !== 'undefined') {
