@@ -79,7 +79,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: invoice.landlord.invoice_info?.email || 'onboarding@resend.dev',
-        to: [invoice.tenant.email],
+        to: invoice.tenant.email, // Changed from array to single string
         subject: `Invoice for ${invoice.property.name}`,
         html: emailHtml,
       }),
@@ -87,6 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!res.ok) {
       const error = await res.text();
+      console.error('Resend API error:', error);
       throw new Error(`Failed to send email: ${error}`);
     }
 
