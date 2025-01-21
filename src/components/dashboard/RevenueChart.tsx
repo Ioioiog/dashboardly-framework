@@ -36,12 +36,7 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
         id,
         start_date,
         end_date,
-        status,
-        tenant:profiles (
-          id,
-          first_name,
-          last_name
-        )
+        status
       )
     `)
     .eq("landlord_id", userId);
