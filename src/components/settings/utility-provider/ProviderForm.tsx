@@ -2,12 +2,15 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PropertySelect } from "@/components/documents/PropertySelect";
+import { useProperties } from "@/hooks/useProperties";
 
 interface ProviderFormProps {
   data: {
     provider_name: string;
     username: string;
     password: string;
+    property_id?: string;
   };
   onChange: (data: any) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -15,6 +18,8 @@ interface ProviderFormProps {
 }
 
 export function ProviderForm({ data, onChange, onSubmit, isLoading }: ProviderFormProps) {
+  const { properties } = useProperties({ userRole: "landlord" });
+
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
@@ -46,6 +51,13 @@ export function ProviderForm({ data, onChange, onSubmit, isLoading }: ProviderFo
           onChange={(e) => onChange({ ...data, password: e.target.value })}
           placeholder="Enter password"
           required
+        />
+      </div>
+      <div className="space-y-2">
+        <PropertySelect
+          properties={properties}
+          selectedPropertyId={data.property_id || ""}
+          onPropertyChange={(value) => onChange({ ...data, property_id: value })}
         />
       </div>
       <Button 

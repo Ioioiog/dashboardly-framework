@@ -9,6 +9,7 @@ interface UtilityProvider {
   id: string;
   provider_name: string;
   username: string;
+  property_id?: string;
 }
 
 export function UtilityProviderForm() {
@@ -18,6 +19,7 @@ export function UtilityProviderForm() {
     provider_name: "",
     username: "",
     password: "",
+    property_id: "",
   });
   const { toast } = useToast();
 
@@ -30,7 +32,7 @@ export function UtilityProviderForm() {
 
       const { data, error } = await supabase
         .from("utility_provider_credentials")
-        .select("id, provider_name, username");
+        .select("id, provider_name, username, property_id");
 
       if (error) throw error;
       console.log('Fetched providers:', data);
@@ -65,7 +67,8 @@ export function UtilityProviderForm() {
         .insert({
           provider_name: newProvider.provider_name,
           username: newProvider.username,
-          encrypted_password: newProvider.password, // Note: In production, implement proper encryption
+          encrypted_password: newProvider.password,
+          property_id: newProvider.property_id || null,
           landlord_id: userData.user.id
         });
 
@@ -80,6 +83,7 @@ export function UtilityProviderForm() {
         provider_name: "",
         username: "",
         password: "",
+        property_id: "",
       });
 
       fetchProviders();

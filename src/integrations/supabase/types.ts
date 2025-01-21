@@ -725,6 +725,7 @@ export type Database = {
           encrypted_password: string
           id: string
           landlord_id: string
+          property_id: string | null
           provider_name: string
           updated_at: string
           username: string
@@ -734,6 +735,7 @@ export type Database = {
           encrypted_password: string
           id?: string
           landlord_id: string
+          property_id?: string | null
           provider_name: string
           updated_at?: string
           username: string
@@ -743,11 +745,20 @@ export type Database = {
           encrypted_password?: string
           id?: string
           landlord_id?: string
+          property_id?: string | null
           provider_name?: string
           updated_at?: string
           username?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "utility_provider_credentials_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
