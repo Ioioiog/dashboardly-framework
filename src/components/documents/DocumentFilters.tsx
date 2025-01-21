@@ -1,8 +1,11 @@
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Property } from "@/integrations/supabase/types/property";
 import { DocumentType } from "@/integrations/supabase/types/document-types";
+
+interface FilterProperty {
+  id: string;
+  name: string;
+}
 
 interface DocumentFiltersProps {
   searchTerm: string;
@@ -11,7 +14,7 @@ interface DocumentFiltersProps {
   setTypeFilter: (value: "all" | DocumentType) => void;
   propertyFilter: string;
   setPropertyFilter: (value: string) => void;
-  properties?: Property["Row"][];
+  properties?: FilterProperty[];
 }
 
 export function DocumentFilters({
@@ -23,28 +26,20 @@ export function DocumentFilters({
   setPropertyFilter,
   properties,
 }: DocumentFiltersProps) {
-  const handleTypeFilterChange = (value: string) => {
-    if (value === "all" || ["lease_agreement", "invoice", "receipt", "other"].includes(value)) {
-      setTypeFilter(value as "all" | DocumentType);
-    }
-  };
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div>
-        <Label htmlFor="search">Search</Label>
-        <Input
-          id="search"
-          placeholder="Search documents..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-      <div>
-        <Label htmlFor="type">Document Type</Label>
-        <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
+    <div className="space-y-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <Input
+            placeholder="Search documents..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full"
+          />
+        </div>
+        <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as "all" | DocumentType)}>
           <SelectTrigger>
-            <SelectValue placeholder="All types" />
+            <SelectValue placeholder="Filter by type" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All types</SelectItem>
@@ -54,22 +49,21 @@ export function DocumentFilters({
             <SelectItem value="other">Other</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-      <div>
-        <Label htmlFor="property">Property</Label>
-        <Select value={propertyFilter} onValueChange={setPropertyFilter}>
-          <SelectTrigger>
-            <SelectValue placeholder="All properties" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All properties</SelectItem>
-            {properties?.map((property) => (
-              <SelectItem key={property.id} value={property.id}>
-                {property.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {properties && (
+          <Select value={propertyFilter} onValueChange={setPropertyFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by property" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All properties</SelectItem>
+              {properties.map((property) => (
+                <SelectItem key={property.id} value={property.id}>
+                  {property.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
     </div>
   );
