@@ -20,15 +20,10 @@ interface AppRoutesProps {
 export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
   return (
     <Routes>
+      {/* Public routes */}
       <Route 
-        path="/" 
-        element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Navigate to="/auth" replace />
-          )
-        } 
+        path="/tenant-registration" 
+        element={<TenantRegistration />} 
       />
       <Route 
         path="/auth" 
@@ -40,10 +35,20 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
           )
         } 
       />
+
+      {/* Root redirect */}
       <Route 
-        path="/tenant-registration" 
-        element={<TenantRegistration />} 
+        path="/" 
+        element={
+          isAuthenticated ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to="/auth" replace />
+          )
+        } 
       />
+
+      {/* Protected routes */}
       <Route
         path="/dashboard"
         element={
@@ -124,6 +129,8 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
           </ProtectedRoute>
         }
       />
+      
+      {/* Catch all route */}
       <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/auth"} replace />} />
     </Routes>
   );
