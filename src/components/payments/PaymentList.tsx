@@ -10,6 +10,7 @@ import {
 import { PaymentWithRelations } from "@/integrations/supabase/types/payment";
 import { PaymentStatusBadge } from "./PaymentStatusBadge";
 import { PaymentActions } from "./PaymentActions";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface PaymentListProps {
   payments: PaymentWithRelations[];
@@ -17,6 +18,15 @@ interface PaymentListProps {
 }
 
 export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
+  // Get the query client instance
+  const queryClient = useQueryClient();
+
+  // Function to refresh payments data
+  const refreshPayments = () => {
+    console.log("Refreshing payments data...");
+    queryClient.invalidateQueries({ queryKey: ["payments"] });
+  };
+
   if (payments.length === 0) {
     return (
       <div className="text-center py-6 text-muted-foreground">
@@ -79,6 +89,7 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
                 paymentId={payment.id}
                 status={payment.status}
                 userRole={userRole}
+                onStatusChange={refreshPayments}
               />
             </TableCell>
           </TableRow>

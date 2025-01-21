@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -6,126 +5,79 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { MoreHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface PaymentActionsProps {
   paymentId: string;
   status: string;
   userRole: "landlord" | "tenant";
+  onStatusChange: () => void;
 }
 
-export function PaymentActions({ paymentId, status, userRole }: PaymentActionsProps) {
+export function PaymentActions({ paymentId, status, userRole, onStatusChange }: PaymentActionsProps) {
   const { toast } = useToast();
-  const [processingPaymentId, setProcessingPaymentId] = useState<string | null>(null);
 
-  const updatePaymentStatus = async (newStatus: string) => {
+  const handleStatusChange = async (newStatus: string) => {
     try {
-      console.log('Updating payment status:', { paymentId, newStatus });
-      const updateData: { status: string; paid_date?: string | null } = {
-        status: newStatus,
-      };
-
-      // Set paid_date when marking as paid, remove it otherwise
-      if (newStatus === 'paid') {
-        updateData.paid_date = new Date().toISOString();
-      } else {
-        updateData.paid_date = null;
-      }
-
+      console.log("Updating payment status:", { paymentId, newStatus });
       const { error } = await supabase
         .from("payments")
-        .update(updateData)
+        .update({ 
+          status: newStatus,
+          paid_date: newStatus === "paid" ? new Date().toISOString() : null 
+        })
         .eq("id", paymentId);
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Payment status updated successfully.",
+        description: "Payment status updated successfully",
       });
+
+      // Call the onStatusChange callback to refresh the list
+      onStatusChange();
     } catch (error) {
       console.error("Error updating payment status:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update payment status.",
+        description: "Failed to update payment status",
       });
     }
   };
 
-  const handlePayment = async () => {
-    try {
-      setProcessingPaymentId(paymentId);
-      console.log('Initiating payment for ID:', paymentId);
-      
-      const { data, error } = await supabase.functions.invoke('create-payment-checkout', {
-        body: { paymentId }
-      });
+  if (userRole !== "landlord") {
+    return null;
+  }
 
-      if (error) {
-        console.error('Payment initiation error:', error);
-        throw error;
-      }
-
-      if (!data?.url) {
-        console.error('No checkout URL received');
-        throw new Error('No checkout URL received');
-      }
-
-      console.log('Redirecting to checkout URL:', data.url);
-      window.location.href = data.url;
-    } catch (error: any) {
-      console.error('Error initiating payment:', error);
-      toast({
-        variant: "destructive",
-        title: "Payment Error",
-        description: error.message || "Failed to initiate payment. Please try again.",
-      });
-    } finally {
-      setProcessingPaymentId(null);
-    }
-  };
-
-  if (userRole === "landlord") {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => updatePaymentStatus("paid")}>
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {status !== "paid" && (
+          <DropdownMenuItem onClick={() => handleStatusChange("paid")}>
             Mark as Paid
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => updatePaymentStatus("pending")}>
+        )}
+        {status !== "pending" && (
+          <DropdownMenuItem onClick={() => handleStatusChange("pending")}>
             Mark as Pending
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => updatePaymentStatus("overdue")}>
+        )}
+        {status !== "overdue" && (
+          <DropdownMenuItem onClick={() => handleStatusChange("overdue")}>
             Mark as Overdue
           </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  }
-
-  if (status !== "paid") {
-    return (
-      <Button
-        onClick={handlePayment}
-        size="sm"
-        disabled={processingPaymentId === paymentId}
-      >
-        {processingPaymentId === paymentId ? (
-          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-        ) : null}
-        {processingPaymentId === paymentId ? "Processing..." : "Pay Now"}
-      </Button>
-    );
-  }
-
-  return null;
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
