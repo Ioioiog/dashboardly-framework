@@ -160,8 +160,8 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Use Resend's default sending domain for development
-    const fromEmail = 'onboarding@resend.dev';
+    // Use the verified domain adminchirii.ro
+    const fromEmail = 'noreply@adminchirii.ro';
     console.log('Sending email from:', fromEmail, 'to:', tenancy.tenant.email);
 
     // Send email using Resend
@@ -172,7 +172,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: fromEmail,
+        from: `Admin Chirii <${fromEmail}>`,
         to: [tenancy.tenant.email],
         subject: `Invoice for ${invoice.property.name}`,
         html: emailHtml,
