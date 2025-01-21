@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
 
@@ -6,6 +6,7 @@ export function useAuthState() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const authCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -15,7 +16,6 @@ export function useAuthState() {
       try {
         console.log("Initializing authentication...");
         
-        // Get initial session and verify it
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -39,7 +39,6 @@ export function useAuthState() {
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             console.log("User signed in or token refreshed");
             if (currentSession && mounted) {
-              // Verify the user exists and is valid
               const { data: { user }, error: userError } = await supabase.auth.getUser();
               if (!userError && user) {
                 console.log("User verified after sign in:", user.id);
@@ -93,12 +92,36 @@ export function useAuthState() {
       }
     };
 
+    // Handle tab visibility changes
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Clear any existing timeout
+        if (authCheckTimeoutRef.current) {
+          clearTimeout(authCheckTimeoutRef.current);
+        }
+        
+        // Set a small delay before checking auth to prevent multiple rapid checks
+        authCheckTimeoutRef.current = setTimeout(() => {
+          console.log("Tab became visible, checking auth state...");
+          initializeAuth();
+        }, 1000);
+      }
+    };
+
+    // Add visibility change listener
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Initial auth check
     initializeAuth();
 
     return () => {
       mounted = false;
       if (authListener) {
         authListener.subscription.unsubscribe();
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (authCheckTimeoutRef.current) {
+        clearTimeout(authCheckTimeoutRef.current);
       }
     };
   }, [toast]);

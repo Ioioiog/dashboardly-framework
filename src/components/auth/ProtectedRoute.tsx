@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,7 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const sessionCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -74,6 +75,23 @@ export function ProtectedRoute({
       }
     };
 
+    // Handle tab visibility changes
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Clear any existing timeout
+        if (sessionCheckTimeoutRef.current) {
+          clearTimeout(sessionCheckTimeoutRef.current);
+        }
+        
+        // Set a small delay before checking session to prevent multiple rapid checks
+        sessionCheckTimeoutRef.current = setTimeout(() => {
+          if (isAuthenticated) {
+            checkSession();
+          }
+        }, 1000);
+      }
+    };
+
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
       console.log("Auth state changed:", event);
@@ -84,6 +102,10 @@ export function ProtectedRoute({
       }
     });
 
+    // Add visibility change listener
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Initial session check
     if (isAuthenticated) {
       checkSession();
     }
@@ -91,6 +113,10 @@ export function ProtectedRoute({
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (sessionCheckTimeoutRef.current) {
+        clearTimeout(sessionCheckTimeoutRef.current);
+      }
     };
   }, [isAuthenticated, toast, navigate, redirectTo]);
 
