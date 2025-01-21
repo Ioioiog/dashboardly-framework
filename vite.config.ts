@@ -14,16 +14,26 @@ export default defineConfig(({ mode }) => ({
     },
   },
   server: {
-    port: 8080,
-    host: true, // Changed from "::" to true for better compatibility
+    port: 443,
+    host: true,
+    https: true,
     hmr: {
       protocol: 'wss',
-      host: 'www.adminchirii.ro', // Updated to match the actual domain
+      host: 'www.adminchirii.ro',
       clientPort: 443,
+      path: '/hmr/',
     },
+    proxy: {
+      '/api': {
+        target: 'https://www.adminchirii.ro',
+        changeOrigin: true,
+        secure: true,
+      }
+    }
   },
   preview: {
-    port: 8080,
+    port: 443,
+    https: true,
   },
   build: {
     rollupOptions: {
