@@ -11,8 +11,6 @@ import Payments from "@/pages/Payments";
 import Utilities from "@/pages/Utilities";
 import TenantRegistration from "@/pages/TenantRegistration";
 import Invoices from "@/pages/Invoices";
-import { UpdatePassword } from "@/components/auth/UpdatePassword";
-import { ResetPassword } from "@/components/auth/ResetPassword";
 
 interface AppRoutesProps {
   isAuthenticated: boolean;
@@ -40,14 +38,6 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
             <AuthPage />
           )
         } 
-      />
-      <Route 
-        path="/update-password" 
-        element={<UpdatePassword />} 
-      />
-      <Route 
-        path="/reset-password" 
-        element={<ResetPassword />} 
       />
       <Route 
         path="/tenant-registration" 

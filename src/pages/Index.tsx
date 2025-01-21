@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
-import { supabase, checkSupabaseConnection } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { DashboardProperties } from "@/components/dashboard/DashboardProperties";
@@ -15,23 +15,6 @@ const Index = () => {
   const [userId, setUserId] = React.useState<string | null>(null);
   const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | null>(null);
   const [userName, setUserName] = React.useState<string>("");
-  const [isConnected, setIsConnected] = React.useState(false);
-
-  useEffect(() => {
-    const checkConnection = async () => {
-      const connected = await checkSupabaseConnection();
-      setIsConnected(connected);
-      if (!connected) {
-        toast({
-          variant: "destructive",
-          title: "Connection Error",
-          description: "Failed to connect to the server. Please try again later.",
-        });
-      }
-    };
-
-    checkConnection();
-  }, [toast]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -128,17 +111,6 @@ const Index = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate, toast, t]);
-
-  if (!isConnected) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-2">Connection Error</h2>
-          <p className="text-gray-600">Unable to connect to the server. Please try again later.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex bg-dashboard-background min-h-screen">

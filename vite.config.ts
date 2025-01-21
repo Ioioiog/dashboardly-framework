@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
-import path from 'path';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
@@ -14,34 +14,22 @@ export default defineConfig(({ mode }) => ({
     },
   },
   server: {
-    host: "::",
     port: 8080,
+    host: "::",
     hmr: {
-      protocol: 'wss',
-      host: process.env.VITE_HMR_HOST || process.env.VITE_HOST || 'localhost',
-      port: Number(process.env.VITE_HMR_PORT) || 443,
-      clientPort: Number(process.env.VITE_HMR_CLIENT_PORT) || 443,
-    },
-    watch: {
-      usePolling: true,
+      protocol: 'ws',
+      host: '0.0.0.0',
+      port: 8080,
     },
   },
   preview: {
     port: 8080,
-    host: true,
   },
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'supabase-vendor': ['@supabase/supabase-js'],
-        },
+        manualChunks: undefined,
       },
     },
   },
-  base: '/',
 }));

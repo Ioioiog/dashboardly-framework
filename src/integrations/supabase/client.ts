@@ -1,41 +1,64 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from './types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_URL = "https://wecmvyohaxizmnhuvjly.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlY212eW9oYXhpem1uaHV2amx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYxMjU1MzEsImV4cCI6MjA1MTcwMTUzMX0.XsX604t39-TAAotJv9qbSCfNJlVE0u02arYHtrZIgYs";
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables');
-  throw new Error('Missing required environment variables for Supabase configuration');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  },
-  global: {
-    headers: {
-      'x-application-name': 'adminchirii'
+export const supabase = createClient<Database>(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      flowType: 'pkce',
+      debug: process.env.NODE_ENV === 'development'
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'supabase-js-web'
+      }
     }
-  },
-  db: {
-    schema: 'public'
   }
-});
+);
 
-// Add health check function
-export const checkSupabaseConnection = async () => {
+// Initialize session from localStorage if it exists
+const initSession = async () => {
   try {
-    const { data, error } = await supabase.from('profiles').select('count').limit(1);
+    const { data: { session }, error } = await supabase.auth.getSession();
     if (error) {
-      console.error('Supabase connection error:', error);
-      throw error;
+      console.error('Error initializing session:', error);
+      await supabase.auth.signOut();
+      return;
     }
-    console.log('Supabase connection successful');
-    return true;
-  } catch (error) {
-    console.error('Failed to connect to Supabase:', error);
-    return false;
+    
+    if (session) {
+      console.log('Session initialized successfully');
+      // Verify the session is still valid
+      const { data: { user }, error: refreshError } = await supabase.auth.getUser();
+      if (refreshError || !user) {
+        console.error('Session invalid, signing out:', refreshError);
+        await supabase.auth.signOut();
+      } else {
+        // Set up auto token refresh
+        supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'TOKEN_REFRESHED') {
+            console.log('Token refreshed successfully');
+          }
+        });
+      }
+    } else {
+      console.log('No session found');
+    }
+  } catch (err) {
+    console.error('Unexpected error during session initialization:', err);
+    await supabase.auth.signOut();
   }
 };
+
+// Call initSession when the client is imported
+if (typeof window !== 'undefined') {
+  initSession();
+}

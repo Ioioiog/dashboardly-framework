@@ -1,7 +1,7 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -10,45 +10,34 @@ const AuthPage = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
   const isPasswordReset = location.hash.includes('type=recovery');
   const invitationToken = searchParams.get('invitation');
 
   useEffect(() => {
-    console.log("Auth page mounted");
     const checkUser = async () => {
-      try {
-        console.log("Checking user session...");
-        setIsLoading(true);
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error checking session:", error.message);
-          toast({
-            variant: "destructive",
-            title: "Authentication Error",
-            description: error.message,
-          });
-          setIsLoading(false);
-          return;
-        }
+      console.log("Checking user session...");
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error("Error checking session:", error.message);
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: error.message,
+        });
+        return;
+      }
 
-        if (invitationToken) {
-          console.log("Found invitation token, redirecting to tenant registration");
-          navigate(`/tenant-registration?invitation=${invitationToken}`);
-          return;
-        }
+      // If we have an invitation token, redirect to tenant registration
+      if (invitationToken) {
+        console.log("Found invitation token, redirecting to tenant registration");
+        navigate(`/tenant-registration?invitation=${invitationToken}`);
+        return;
+      }
 
-        if (session && !isPasswordReset) {
-          console.log("User is authenticated, redirecting to dashboard");
-          navigate("/dashboard");
-          return;
-        }
-        
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Unexpected error:", error);
-        setIsLoading(false);
+      if (session && !isPasswordReset) {
+        console.log("User is authenticated, redirecting to dashboard");
+        navigate("/dashboard");
       }
     };
 
@@ -74,17 +63,6 @@ const AuthPage = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate, toast, isPasswordReset, invitationToken]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading authentication...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">

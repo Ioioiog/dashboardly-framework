@@ -76,10 +76,9 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
         return;
       }
 
-      const tenantEmail = tenancy?.tenant?.email;
-      if (tenantEmail) {
-        setTenantEmail(tenantEmail);
-        form.setValue("tenant_email", tenantEmail);
+      if (tenancy?.tenant?.email) {
+        setTenantEmail(tenancy.tenant.email);
+        form.setValue("tenant_email", tenancy.tenant.email);
       }
     };
 

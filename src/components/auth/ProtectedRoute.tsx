@@ -23,8 +23,6 @@ export function ProtectedRoute({
     const checkSession = async () => {
       try {
         console.log("Checking session status...");
-        
-        // First check if we have a session in storage
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -43,27 +41,25 @@ export function ProtectedRoute({
             await supabase.auth.signOut();
             navigate(redirectTo);
           }
-          return;
-        }
-
-        // Refresh the session to ensure it's still valid
-        const { error: refreshError } = await supabase.auth.refreshSession();
-        if (refreshError) {
-          console.error("Session refresh failed:", refreshError);
-          if (mounted) {
-            toast({
-              title: "Session Expired",
-              description: "Your session has expired. Please sign in again.",
-              variant: "destructive",
-            });
-            await supabase.auth.signOut();
-            navigate(redirectTo);
+        } else {
+          // Verify the session is still valid
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          
+          if (userError) {
+            console.error("User verification failed:", userError);
+            if (mounted) {
+              toast({
+                title: "Authentication Error",
+                description: "Your session has expired. Please sign in again.",
+                variant: "destructive",
+              });
+              await supabase.auth.signOut();
+              navigate(redirectTo);
+            }
+          } else {
+            console.log("Valid session found:", user.id);
           }
-          return;
         }
-
-        console.log("Session is valid");
-
       } catch (error) {
         console.error("Error checking session:", error);
         if (mounted) {
@@ -79,7 +75,7 @@ export function ProtectedRoute({
     };
 
     // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
       console.log("Auth state changed:", event);
       if (event === 'SIGNED_OUT') {
         navigate(redirectTo);
