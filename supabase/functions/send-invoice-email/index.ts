@@ -77,9 +77,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Retrieved invoice data:', {
       invoiceId,
-      tenant: invoice.tenant,
-      property: invoice.property,
-      items: invoice.items
+      tenant_id: invoice.tenant_id,
+      property_id: invoice.property_id,
+      tenant: invoice.tenant
     });
 
     // Verify tenant email exists
@@ -122,13 +122,16 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         if (!tenancy?.tenant?.email) {
-          console.error('Tenant email not found in any source', {
+          const errorDetails = {
             tenant_id: invoice.tenant_id,
             property_id: invoice.property_id,
             profileFound: !!tenantProfile,
-            tenancyFound: !!tenancy
-          });
-          throw new Error('Tenant email not found in any source');
+            tenancyFound: !!tenancy,
+            tenancyError,
+            profileError: tenantError
+          };
+          console.error('Tenant email not found in any source', errorDetails);
+          throw new Error(`Tenant email not found in any source. Details: ${JSON.stringify(errorDetails)}`);
         }
 
         console.log('Found email in tenancies:', tenancy.tenant.email);
