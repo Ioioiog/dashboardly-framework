@@ -164,6 +164,10 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
                   <div>{invoice.property?.name}</div>
                   <div className="text-sm text-gray-500">{invoice.property?.address}</div>
                 </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-500">Tenant Email</div>
+                  <div className="text-sm text-gray-500">{invoice.tenant?.email || 'No email provided'}</div>
+                </div>
                 {userRole === "landlord" && (
                   <div>
                     <div className="text-sm font-medium text-gray-500">Tenant</div>
