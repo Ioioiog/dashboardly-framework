@@ -26,21 +26,24 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Fetching invoice details for ID:', invoiceId);
 
-    // Get invoice details with related data
+    // Get invoice details with related data - using explicit field selection
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
       .select(`
         *,
         tenant:profiles!invoices_tenant_id_fkey (
+          id,
           email,
           first_name,
           last_name
         ),
         property:properties (
+          id,
           name,
           address
         ),
         landlord:profiles!invoices_landlord_id_fkey (
+          id,
           email,
           first_name,
           last_name,
@@ -60,9 +63,15 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Invoice not found');
     }
 
+    console.log('Retrieved invoice data:', {
+      invoiceId,
+      tenantData: invoice.tenant,
+      propertyData: invoice.property
+    });
+
     if (!invoice.tenant?.email) {
-      console.error('Tenant email not found');
-      throw new Error('Tenant email not found');
+      console.error('Tenant email missing from data:', invoice.tenant);
+      throw new Error('Tenant email not found in profile');
     }
 
     console.log('Preparing email for invoice:', {
