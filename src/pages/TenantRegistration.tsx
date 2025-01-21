@@ -107,10 +107,14 @@ const TenantRegistration = () => {
 
             toast({
               title: "Welcome!",
-              description: "Your account has been set up successfully.",
+              description: "Your account has been set up successfully. Redirecting to your dashboard...",
             });
 
-            navigate("/dashboard");
+            // Add a small delay to ensure the toast is visible
+            setTimeout(() => {
+              navigate("/dashboard");
+            }, 1500);
+            
           } catch (error) {
             console.error("Error setting up tenant account:", error);
             toast({
