@@ -11,6 +11,7 @@ import Payments from "@/pages/Payments";
 import Utilities from "@/pages/Utilities";
 import TenantRegistration from "@/pages/TenantRegistration";
 import Invoices from "@/pages/Invoices";
+import Chat from "@/pages/Chat";
 
 interface AppRoutesProps {
   isAuthenticated: boolean;
@@ -112,6 +113,14 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <Invoices />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/chat"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Chat />
           </ProtectedRoute>
         }
       />
