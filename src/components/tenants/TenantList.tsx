@@ -27,6 +27,13 @@ export function TenantList({ tenants }: TenantListProps) {
     queryClient.invalidateQueries({ queryKey: ["tenants"] });
   };
 
+  const getTenantDisplayName = (tenant: Tenant) => {
+    if (!tenant.first_name && !tenant.last_name) {
+      return tenant.email || "No name provided";
+    }
+    return `${tenant.first_name || ''} ${tenant.last_name || ''}`.trim();
+  };
+
   if (!tenants.length) {
     return (
       <div className="rounded-lg border bg-card text-card-foreground shadow p-8 text-center">
@@ -54,10 +61,8 @@ export function TenantList({ tenants }: TenantListProps) {
             {tenants.map((tenant) => (
               <React.Fragment key={`${tenant.id}-${tenant.property.id}-${tenant.tenancy.start_date}`}>
                 <TableRow>
-                  <TableCell>
-                    {tenant.first_name} {tenant.last_name}
-                  </TableCell>
-                  <TableCell>{tenant.email}</TableCell>
+                  <TableCell>{getTenantDisplayName(tenant)}</TableCell>
+                  <TableCell>{tenant.email || "N/A"}</TableCell>
                   <TableCell>{tenant.phone || "N/A"}</TableCell>
                   <TableCell>
                     {tenant.property.name} ({tenant.property.address})
@@ -75,7 +80,7 @@ export function TenantList({ tenants }: TenantListProps) {
                   <TableCell className="text-right space-x-2">
                     <TenantObservationDialog
                       tenantId={tenant.id}
-                      tenantName={`${tenant.first_name} ${tenant.last_name}`}
+                      tenantName={getTenantDisplayName(tenant)}
                     />
                     <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
                   </TableCell>
