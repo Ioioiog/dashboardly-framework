@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -13,6 +13,8 @@ import { TenantInteractionHistory } from "./TenantInteractionHistory";
 import { Tenant } from "@/types/tenant";
 import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface TenantListProps {
   tenants: Tenant[];
@@ -20,6 +22,8 @@ interface TenantListProps {
 
 export function TenantList({ tenants }: TenantListProps) {
   const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
+  
   console.log("Rendering TenantList with tenants:", tenants);
 
   const handleTenantUpdate = () => {
@@ -34,6 +38,21 @@ export function TenantList({ tenants }: TenantListProps) {
     return `${tenant.first_name || ''} ${tenant.last_name || ''}`.trim();
   };
 
+  const filteredTenants = tenants.filter((tenant) => {
+    const searchString = searchTerm.toLowerCase();
+    const tenantName = getTenantDisplayName(tenant).toLowerCase();
+    const tenantEmail = (tenant.email || "").toLowerCase();
+    const propertyName = (tenant.property.name || "").toLowerCase();
+    const propertyAddress = (tenant.property.address || "").toLowerCase();
+
+    return (
+      tenantName.includes(searchString) ||
+      tenantEmail.includes(searchString) ||
+      propertyName.includes(searchString) ||
+      propertyAddress.includes(searchString)
+    );
+  });
+
   if (!tenants.length) {
     return (
       <div className="rounded-lg border bg-card text-card-foreground shadow p-8 text-center">
@@ -44,6 +63,16 @@ export function TenantList({ tenants }: TenantListProps) {
 
   return (
     <div className="space-y-6">
+      <div className="mb-4">
+        <Label htmlFor="search">Search Tenants</Label>
+        <Input
+          id="search"
+          placeholder="Search by name, email, or property..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-md"
+        />
+      </div>
       <div className="rounded-lg border bg-card text-card-foreground shadow">
         <Table>
           <TableHeader>
@@ -58,8 +87,8 @@ export function TenantList({ tenants }: TenantListProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tenants.map((tenant) => {
-              console.log("Tenant data:", tenant); // Debug log
+            {filteredTenants.map((tenant) => {
+              console.log("Tenant data:", tenant);
               return (
                 <React.Fragment key={`${tenant.id}-${tenant.property.id}-${tenant.tenancy.start_date}`}>
                   <TableRow>
