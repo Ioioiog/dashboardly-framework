@@ -14,6 +14,7 @@ const AuthPage = () => {
   const invitationToken = searchParams.get('invitation');
 
   useEffect(() => {
+    console.log("Auth page mounted");
     const checkUser = async () => {
       console.log("Checking user session...");
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -28,7 +29,6 @@ const AuthPage = () => {
         return;
       }
 
-      // If we have an invitation token, redirect to tenant registration
       if (invitationToken) {
         console.log("Found invitation token, redirecting to tenant registration");
         navigate(`/tenant-registration?invitation=${invitationToken}`);
