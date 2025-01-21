@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { useUserRole } from "@/hooks/use-user-role";
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
 
 interface Message {
   id: string;
@@ -13,8 +14,8 @@ interface Message {
   content: string;
   created_at: string;
   sender: {
-    first_name: string;
-    last_name: string;
+    first_name: string | null;
+    last_name: string | null;
   };
 }
 
@@ -50,7 +51,7 @@ const Chat = () => {
         return;
       }
 
-      setMessages(data || []);
+      setMessages(data as Message[]);
     };
 
     fetchMessages();
@@ -83,7 +84,7 @@ const Chat = () => {
             return;
           }
 
-          setMessages((prev) => [...prev, newMessage]);
+          setMessages((prev) => [...prev, newMessage as Message]);
         }
       )
       .subscribe();
@@ -100,10 +101,12 @@ const Chat = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { error } = await supabase.from("messages").insert({
-      content: newMessage,
-      sender_id: user.id,
-    });
+    const { error } = await supabase
+      .from("messages")
+      .insert({
+        content: newMessage,
+        sender_id: user.id,
+      });
 
     if (error) {
       console.error("Error sending message:", error);
@@ -127,29 +130,32 @@ const Chat = () => {
             
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.sender_id === supabase.auth.user()?.id
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
+                {messages.map((message) => {
+                  const { data: { user } } = supabase.auth.getUser();
+                  return (
                     <div
-                      className={`max-w-[70%] rounded-lg p-3 ${
-                        message.sender_id === supabase.auth.user()?.id
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100"
+                      key={message.id}
+                      className={`flex ${
+                        message.sender_id === user?.id
+                          ? "justify-end"
+                          : "justify-start"
                       }`}
                     >
-                      <p className="text-sm font-semibold mb-1">
-                        {message.sender.first_name} {message.sender.last_name}
-                      </p>
-                      <p>{message.content}</p>
+                      <div
+                        className={`max-w-[70%] rounded-lg p-3 ${
+                          message.sender_id === user?.id
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-100"
+                        }`}
+                      >
+                        <p className="text-sm font-semibold mb-1">
+                          {message.sender.first_name} {message.sender.last_name}
+                        </p>
+                        <p>{message.content}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </div>
             </ScrollArea>

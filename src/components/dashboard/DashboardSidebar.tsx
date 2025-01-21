@@ -9,6 +9,7 @@ import {
   Settings,
   Droplets,
   LogOut,
+  MessageCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -88,6 +89,12 @@ export default function DashboardSidebar() {
       title: "Invoices",
       icon: FileText,
       href: "/invoices",
+      roles: ["landlord", "tenant"],
+    },
+    {
+      title: "Chat",
+      icon: MessageCircle,
+      href: "/chat",
       roles: ["landlord", "tenant"],
     },
     {
