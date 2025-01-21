@@ -99,6 +99,19 @@ export function UtilityProviderForm() {
     try {
       console.log('Deleting utility provider:', id);
       setIsLoading(true);
+
+      // First, delete all associated scraping jobs
+      const { error: scrapingJobsError } = await supabase
+        .from("scraping_jobs")
+        .delete()
+        .eq("utility_provider_id", id);
+
+      if (scrapingJobsError) {
+        console.error("Error deleting scraping jobs:", scrapingJobsError);
+        throw scrapingJobsError;
+      }
+
+      // Then delete the utility provider
       const { error } = await supabase
         .from("utility_provider_credentials")
         .delete()
