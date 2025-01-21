@@ -13,6 +13,7 @@ interface InvoiceFormValues {
   property_id: string;
   details?: string;
   document?: File;
+  tenant_email?: string;
 }
 
 interface InvoiceFormProps {
@@ -25,6 +26,8 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   const { toast } = useToast();
   const form = useForm<InvoiceFormValues>();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const [tenantEmail, setTenantEmail] = useState<string | null>(null);
 
   // Fetch properties when component mounts
   useEffect(() => {
@@ -51,6 +54,36 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
     fetchProperties();
   }, []);
+
+  // Fetch tenant email when property is selected
+  useEffect(() => {
+    const fetchTenantEmail = async () => {
+      if (!selectedPropertyId) return;
+
+      const { data: tenancy, error: tenancyError } = await supabase
+        .from("tenancies")
+        .select(`
+          tenant:profiles (
+            email
+          )
+        `)
+        .eq("property_id", selectedPropertyId)
+        .eq("status", "active")
+        .single();
+
+      if (tenancyError) {
+        console.error("Error fetching tenant:", tenancyError);
+        return;
+      }
+
+      if (tenancy?.tenant?.email) {
+        setTenantEmail(tenancy.tenant.email);
+        form.setValue("tenant_email", tenancy.tenant.email);
+      }
+    };
+
+    fetchTenantEmail();
+  }, [selectedPropertyId, form]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -88,6 +121,16 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
         .single();
 
       if (tenancyError) throw tenancyError;
+
+      // Update tenant email if provided
+      if (values.tenant_email) {
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ email: values.tenant_email })
+          .eq("id", tenancy.tenant_id);
+
+        if (updateError) throw updateError;
+      }
 
       // Format the due date as an ISO string date
       const dueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -143,6 +186,8 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
       form.reset();
       setSelectedFile(null);
+      setTenantEmail(null);
+      setSelectedPropertyId(null);
     } catch (error) {
       console.error("Error creating invoice:", error);
       toast({
@@ -160,7 +205,10 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       <div className="space-y-2">
         <Label htmlFor="property">Property</Label>
         <Select 
-          onValueChange={(value) => form.setValue("property_id", value)}
+          onValueChange={(value) => {
+            form.setValue("property_id", value);
+            setSelectedPropertyId(value);
+          }}
           required
         >
           <SelectTrigger>
@@ -175,6 +223,19 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
           </SelectContent>
         </Select>
       </div>
+
+      {selectedPropertyId && (
+        <div className="space-y-2">
+          <Label htmlFor="tenant_email">Tenant Email</Label>
+          <Input
+            id="tenant_email"
+            type="email"
+            {...form.register("tenant_email")}
+            defaultValue={tenantEmail || ""}
+            placeholder="tenant@example.com"
+          />
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="amount">Amount</Label>
