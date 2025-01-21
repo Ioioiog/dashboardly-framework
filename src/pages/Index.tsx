@@ -7,7 +7,7 @@ import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { RevenuePrediction } from "@/components/dashboard/RevenuePrediction";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
-import { BarChart2, TrendingUp, LineChart } from "lucide-react";
+import { BarChart2, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
@@ -17,7 +17,7 @@ const Index = () => {
   const [userId, setUserId] = React.useState<string | null>(null);
   const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | null>(null);
   const [userName, setUserName] = React.useState<string>("");
-  const [activeView, setActiveView] = React.useState<"history" | "predictions" | "forecast">("history");
+  const [activeView, setActiveView] = React.useState<"history" | "predictions">("history");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -161,15 +161,6 @@ const Index = () => {
                           <TrendingUp className="w-4 h-4" />
                           Revenue Predictions
                         </Button>
-                        <Button
-                          variant={activeView === "forecast" ? "default" : "outline"}
-                          onClick={() => setActiveView("forecast")}
-                          className="flex items-center gap-2"
-                          size="sm"
-                        >
-                          <LineChart className="w-4 h-4" />
-                          Revenue Forecast
-                        </Button>
                       </div>
                     </div>
                     <div className="space-y-4">
@@ -200,26 +191,6 @@ const Index = () => {
                           </div>
                           <div className="bg-dashboard-accent rounded-lg p-4">
                             <RevenuePrediction userId={userId} />
-                          </div>
-                        </div>
-                      )}
-                      {activeView === "forecast" && (
-                        <div>
-                          <div className="mb-3">
-                            <h3 className="text-xl font-semibold text-gray-800">
-                              Revenue Forecast
-                            </h3>
-                            <p className="text-sm text-dashboard-text-muted">
-                              Long-term revenue projections and analysis
-                            </p>
-                          </div>
-                          <div className="bg-dashboard-accent rounded-lg p-4">
-                            {/* Forecast component will be implemented later */}
-                            <div className="h-[300px] flex items-center justify-center">
-                              <p className="text-muted-foreground">
-                                Revenue forecast coming soon
-                              </p>
-                            </div>
                           </div>
                         </div>
                       )}
