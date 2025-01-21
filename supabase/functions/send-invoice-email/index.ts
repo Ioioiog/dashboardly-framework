@@ -26,7 +26,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Starting invoice email process for ID:', invoiceId);
 
-    // Get invoice details with related data including invoice items
+    // First, get the invoice with all related data
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
       .select(`
@@ -76,11 +76,10 @@ const handler = async (req: Request): Promise<Response> => {
       items: invoice.items
     });
 
-    // Validate tenant email
+    // If no tenant email in profile, try to get it from tenancies
     if (!invoice.tenant?.email) {
-      console.error('No email found for tenant:', invoice.tenant);
+      console.log('No email in tenant profile, checking tenancies...');
       
-      // Try to get email from tenancies table as fallback
       const { data: tenancy, error: tenancyError } = await supabase
         .from('tenancies')
         .select(`
@@ -89,25 +88,33 @@ const handler = async (req: Request): Promise<Response> => {
           )
         `)
         .eq('property_id', invoice.property_id)
+        .eq('tenant_id', invoice.tenant_id)
         .eq('status', 'active')
         .single();
 
-      if (tenancyError || !tenancy?.tenant?.email) {
-        throw new Error('Tenant email not found');
+      if (tenancyError) {
+        console.error('Error fetching tenant from tenancies:', tenancyError);
+        throw new Error('Failed to fetch tenant email from tenancies');
+      }
+
+      if (!tenancy?.tenant?.email) {
+        console.error('No email found in tenancies for tenant:', invoice.tenant_id);
+        throw new Error('Tenant email not found in any source');
       }
 
       invoice.tenant.email = tenancy.tenant.email;
+      console.log('Found tenant email from tenancies:', invoice.tenant.email);
     }
 
     // Format the items for email
     const itemsList = invoice.items?.map(item => 
-      `<li><strong>${item.description}:</strong> $${item.amount}</li>`
+      `<li><strong>${item.description}:</strong> $${item.amount.toFixed(2)}</li>`
     ).join('') || '';
 
     // Format the email content
     const emailHtml = `
       <h2>Invoice for ${invoice.property.name}</h2>
-      <p>Dear ${invoice.tenant.first_name} ${invoice.tenant.last_name},</p>
+      <p>Dear ${invoice.tenant.first_name || ''} ${invoice.tenant.last_name || ''},</p>
       <p>Please find below the details of your invoice:</p>
       <ul>
         <li><strong>Property:</strong> ${invoice.property.name} (${invoice.property.address})</li>
@@ -118,14 +125,18 @@ const handler = async (req: Request): Promise<Response> => {
       <ul>
         ${itemsList}
       </ul>
-      <p><strong>Total Amount:</strong> $${invoice.amount}</p>
+      <p><strong>Total Amount:</strong> $${invoice.amount.toFixed(2)}</p>
       <p>Please ensure payment is made by the due date.</p>
-      <p>Best regards,<br>${invoice.landlord.first_name} ${invoice.landlord.last_name}</p>
+      <p>Best regards,<br>${invoice.landlord.first_name || ''} ${invoice.landlord.last_name || ''}</p>
     `;
 
     // Get sender email from landlord's invoice info or use default
     const fromEmail = invoice.landlord.invoice_info?.email || 'onboarding@resend.dev';
     console.log('Sending email from:', fromEmail);
+
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
+    }
 
     // Send email using Resend
     const emailResponse = await fetch('https://api.resend.com/emails', {
