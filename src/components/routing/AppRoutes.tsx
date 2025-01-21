@@ -20,9 +20,9 @@ interface AppRoutesProps {
 export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public routes - must be first */}
       <Route 
-        path="/tenant-registration" 
+        path="/tenant-registration"
         element={<TenantRegistration />} 
       />
       <Route 
@@ -129,9 +129,17 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
           </ProtectedRoute>
         }
       />
-      
-      {/* Catch all route */}
-      <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/auth"} replace />} />
+
+      {/* Catch all route - must be last */}
+      <Route 
+        path="*" 
+        element={
+          <Navigate 
+            to={isAuthenticated ? "/dashboard" : "/auth"} 
+            replace 
+          />
+        } 
+      />
     </Routes>
   );
 }
