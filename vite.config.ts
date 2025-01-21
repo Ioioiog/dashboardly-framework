@@ -15,13 +15,13 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => ({
     },
   },
   server: {
-    host: "0.0.0.0",
+    host: true, // Listen on all available network interfaces
     port: 8080,
     hmr: {
-      protocol: 'ws',
-      host: 'localhost',
-      port: 8080,
-      clientPort: 8080,
+      protocol: 'wss', // Use secure WebSocket
+      host: process.env.VITE_HMR_HOST || 'localhost',
+      port: Number(process.env.VITE_HMR_PORT) || 8080,
+      clientPort: Number(process.env.VITE_HMR_CLIENT_PORT) || 443,
     },
     watch: {
       usePolling: true,
@@ -30,7 +30,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => ({
   },
   preview: {
     port: 8080,
-    host: '0.0.0.0',
+    host: true,
   },
   build: {
     rollupOptions: {
