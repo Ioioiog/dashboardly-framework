@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
-import { CardTitle } from "@/components/ui/card";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STATUS_COLORS, STATUS_OPTIONS } from "./constants";
@@ -16,15 +15,15 @@ export function MaintenanceCardHeader({ request, isLandlord, onStatusChange }: M
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex justify-between items-start gap-4">
         <div className="flex-1 min-w-0">
-          <CardTitle className="text-lg font-semibold truncate">{request.title}</CardTitle>
+          <h3 className="text-sm font-medium truncate">{request.title}</h3>
           {request.property && (
-            <div className="mt-1 text-sm text-gray-500 space-x-1">
-              <span className="font-medium">{request.property.name}</span>
+            <div className="text-sm text-muted-foreground truncate">
+              {request.property.name}
               {request.property.address && (
-                <span className="text-gray-400">({request.property.address})</span>
+                <span className="text-muted-foreground/70 ml-1">({request.property.address})</span>
               )}
             </div>
           )}

@@ -40,7 +40,7 @@ export function MaintenanceList({ requests, isLoading, isLandlord }: Maintenance
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-7xl mx-auto">
+      <div className="space-y-3 max-w-5xl mx-auto">
         {[...Array(3)].map((_, i) => (
           <Card key={i} className="p-6 animate-pulse">
             <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
@@ -53,7 +53,7 @@ export function MaintenanceList({ requests, isLoading, isLandlord }: Maintenance
 
   if (!requests?.length) {
     return (
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <Card className="p-6">
           <div className="text-center text-gray-500">
             {t('maintenance.noRequests')}
@@ -64,7 +64,7 @@ export function MaintenanceList({ requests, isLoading, isLandlord }: Maintenance
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       <MaintenanceFilters
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -75,13 +75,17 @@ export function MaintenanceList({ requests, isLoading, isLandlord }: Maintenance
         issueTypeFilter={issueTypeFilter}
         setIssueTypeFilter={setIssueTypeFilter}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
         {filteredRequests.map((request) => (
-          <MaintenanceRequestCard 
-            key={request.id} 
-            request={request} 
-            isLandlord={isLandlord}
-          />
+          <div 
+            key={request.id}
+            className="bg-card hover:bg-accent/5 transition-colors rounded-lg border shadow-sm"
+          >
+            <MaintenanceRequestCard 
+              request={request} 
+              isLandlord={isLandlord}
+            />
+          </div>
         ))}
       </div>
     </div>
