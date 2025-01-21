@@ -156,7 +156,7 @@ export function TenantInviteForm({ properties, onSubmit, isSubmitting }: TenantI
           )}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Creating Account..." : "Create Account"}
+          {isSubmitting ? "Creating Tenant..." : "Create Tenant"}
         </Button>
       </form>
     </Form>

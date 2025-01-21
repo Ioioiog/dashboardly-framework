@@ -481,6 +481,48 @@ export type Database = {
           },
         ]
       }
+      tenant_interactions: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          interaction_type: string
+          landlord_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          interaction_type: string
+          landlord_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          interaction_type?: string
+          landlord_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_interactions_landlord_id_fkey"
+            columns: ["landlord_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_interactions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_invitation_properties: {
         Row: {
           invitation_id: string
@@ -549,6 +591,48 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      tenant_observations: {
+        Row: {
+          created_at: string
+          id: string
+          landlord_id: string
+          observation: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          landlord_id: string
+          observation: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          landlord_id?: string
+          observation?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_observations_landlord_id_fkey"
+            columns: ["landlord_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_observations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       utilities: {
         Row: {

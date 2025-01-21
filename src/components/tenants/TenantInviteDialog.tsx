@@ -18,7 +18,7 @@ export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
-      console.log("Creating tenant invitation with data:", data);
+      console.log("Creating tenant with data:", data);
       
       // Generate a unique token
       const token = crypto.randomUUID();
@@ -59,15 +59,15 @@ export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
 
       toast({
         title: "Success",
-        description: "Tenant invitation sent successfully.",
+        description: "Tenant created successfully.",
       });
 
       setOpen(false);
     } catch (error) {
-      console.error("Error creating tenant invitation:", error);
+      console.error("Error creating tenant:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create tenant invitation. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create tenant. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -78,7 +78,7 @@ export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Invite Tenant</Button>
+        <Button>Create Tenant</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
