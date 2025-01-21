@@ -10,14 +10,12 @@ export function RevenueStats({ totalRevenue, averageRevenue, revenueChange }: Re
   const { t } = useTranslation();
   
   return (
-    <div className="flex items-center justify-between">
-      <div className="space-y-3">
-        <span>Performance</span>
+    <div className="space-y-3">
+      <div className="flex flex-col space-y-2">
+        <span className="text-lg font-semibold">Performance</span>
         <div className="text-sm font-normal text-muted-foreground">
           Total: ${totalRevenue.toLocaleString()}
         </div>
-      </div>
-      <div className="text-right flex flex-col items-end">
         <div className="text-sm font-normal text-center">
           Monthly Average: ${averageRevenue.toLocaleString()}
         </div>
