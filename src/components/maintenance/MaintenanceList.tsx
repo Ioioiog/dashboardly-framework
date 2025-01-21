@@ -1,7 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
-import { MaintenanceRequest } from "@/types/maintenance";
+import { MaintenanceRequest, MaintenanceRequestStatus, MaintenancePriority, MaintenanceIssueType } from "@/types/maintenance";
 import { MaintenanceRequestCard } from "./MaintenanceRequestCard";
+import { MaintenanceFilters } from "./MaintenanceFilters";
+import { useState, useMemo } from "react";
 
 interface MaintenanceListProps {
   requests: MaintenanceRequest[] | undefined;
@@ -11,6 +13,30 @@ interface MaintenanceListProps {
 
 export function MaintenanceList({ requests, isLoading, isLandlord }: MaintenanceListProps) {
   const { t } = useTranslation();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | MaintenanceRequestStatus>("all");
+  const [priorityFilter, setPriorityFilter] = useState<"all" | MaintenancePriority>("all");
+  const [issueTypeFilter, setIssueTypeFilter] = useState<"all" | MaintenanceIssueType>("all");
+
+  const filteredRequests = useMemo(() => {
+    if (!requests) return [];
+
+    return requests.filter((request) => {
+      const matchesSearch = 
+        searchTerm === "" ||
+        request.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.property?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.tenant?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.tenant?.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus = statusFilter === "all" || request.status === statusFilter;
+      const matchesPriority = priorityFilter === "all" || request.priority === priorityFilter;
+      const matchesIssueType = issueTypeFilter === "all" || request.issue_type === issueTypeFilter;
+
+      return matchesSearch && matchesStatus && matchesPriority && matchesIssueType;
+    });
+  }, [requests, searchTerm, statusFilter, priorityFilter, issueTypeFilter]);
 
   if (isLoading) {
     return (
@@ -38,14 +64,26 @@ export function MaintenanceList({ requests, isLoading, isLandlord }: Maintenance
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-7xl mx-auto">
-      {requests.map((request) => (
-        <MaintenanceRequestCard 
-          key={request.id} 
-          request={request} 
-          isLandlord={isLandlord}
-        />
-      ))}
+    <div className="max-w-7xl mx-auto">
+      <MaintenanceFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        priorityFilter={priorityFilter}
+        setPriorityFilter={setPriorityFilter}
+        issueTypeFilter={issueTypeFilter}
+        setIssueTypeFilter={setIssueTypeFilter}
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {filteredRequests.map((request) => (
+          <MaintenanceRequestCard 
+            key={request.id} 
+            request={request} 
+            isLandlord={isLandlord}
+          />
+        ))}
+      </div>
     </div>
   );
 }
