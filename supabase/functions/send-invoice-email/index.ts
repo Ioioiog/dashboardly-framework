@@ -160,8 +160,8 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Get sender email from landlord's profile or use default
-    const fromEmail = invoice.landlord.email || 'onboarding@resend.dev';
+    // Use Resend's default sending domain for development
+    const fromEmail = 'onboarding@resend.dev';
     console.log('Sending email from:', fromEmail, 'to:', tenancy.tenant.email);
 
     // Send email using Resend
