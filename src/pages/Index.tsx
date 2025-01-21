@@ -7,6 +7,8 @@ import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { RevenuePrediction } from "@/components/dashboard/RevenuePrediction";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { BarChart2, TrendingUp, LineChart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ const Index = () => {
   const [userId, setUserId] = React.useState<string | null>(null);
   const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | null>(null);
   const [userName, setUserName] = React.useState<string>("");
+  const [activeView, setActiveView] = React.useState<"history" | "predictions" | "forecast">("history");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -137,39 +140,66 @@ const Index = () => {
                   <div className="space-y-10">
                     <div className="border-b pb-6">
                       <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-                        Revenue Overview
+                        Track your money
                       </h2>
-                      <p className="mt-3 text-base text-dashboard-text-muted">
-                        Track your revenue trends and future predictions with detailed insights
-                      </p>
+                      <div className="mt-6 flex gap-4 pb-4">
+                        <Button
+                          variant={activeView === "history" ? "default" : "outline"}
+                          onClick={() => setActiveView("history")}
+                          className="flex items-center gap-2"
+                        >
+                          <BarChart2 className="w-4 h-4" />
+                          Revenue History
+                        </Button>
+                        <Button
+                          variant={activeView === "predictions" ? "default" : "outline"}
+                          onClick={() => setActiveView("predictions")}
+                          className="flex items-center gap-2"
+                        >
+                          <TrendingUp className="w-4 h-4" />
+                          Revenue Predictions
+                        </Button>
+                        <Button
+                          variant={activeView === "forecast" ? "default" : "outline"}
+                          onClick={() => setActiveView("forecast")}
+                          className="flex items-center gap-2"
+                        >
+                          <LineChart className="w-4 h-4" />
+                          Revenue Forecast
+                        </Button>
+                      </div>
                     </div>
                     <div className="space-y-12">
-                      <div>
-                        <div className="mb-6">
-                          <h3 className="text-2xl font-semibold text-gray-800">
-                            Revenue History
-                          </h3>
-                          <p className="mt-2 text-sm text-dashboard-text-muted">
-                            Historical view of your monthly revenue performance
-                          </p>
+                      {activeView === "history" && (
+                        <div>
+                          <div className="mb-6">
+                            <h3 className="text-2xl font-semibold text-gray-800">
+                              Revenue History
+                            </h3>
+                            <p className="mt-2 text-sm text-dashboard-text-muted">
+                              Historical view of your monthly revenue performance
+                            </p>
+                          </div>
+                          <div className="bg-dashboard-accent rounded-lg p-6">
+                            <RevenueChart userId={userId} />
+                          </div>
                         </div>
-                        <div className="bg-dashboard-accent rounded-lg p-6">
-                          <RevenueChart userId={userId} />
+                      )}
+                      {(activeView === "predictions" || activeView === "forecast") && (
+                        <div>
+                          <div className="mb-6">
+                            <h3 className="text-2xl font-semibold text-gray-800">
+                              {activeView === "predictions" ? "Revenue Predictions" : "Revenue Forecast"}
+                            </h3>
+                            <p className="mt-2 text-sm text-dashboard-text-muted">
+                              Projected revenue based on historical data and trends
+                            </p>
+                          </div>
+                          <div className="bg-dashboard-accent rounded-lg p-6">
+                            <RevenuePrediction userId={userId} />
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <div className="mb-6">
-                          <h3 className="text-2xl font-semibold text-gray-800">
-                            Revenue Forecast
-                          </h3>
-                          <p className="mt-2 text-sm text-dashboard-text-muted">
-                            Projected revenue based on historical data and trends
-                          </p>
-                        </div>
-                        <div className="bg-dashboard-accent rounded-lg p-6">
-                          <RevenuePrediction userId={userId} />
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </section>
