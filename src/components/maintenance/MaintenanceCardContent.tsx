@@ -10,21 +10,21 @@ export function MaintenanceCardContent({ request, onImageClick }: MaintenanceCar
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-3">
+    <div className="px-4 pb-2">
       <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
       {request.notes && (
-        <div className="p-2 bg-accent/50 rounded-md">
+        <div className="mt-2 p-2 bg-accent/30 rounded-md">
           <p className="text-sm text-muted-foreground">{request.notes}</p>
         </div>
       )}
       {request.images && request.images.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex gap-2 mt-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200">
           {request.images.slice(0, 4).map((image, index) => (
             <img
               key={index}
               src={image}
               alt={t('maintenance.details.imageAlt', { number: index + 1 })}
-              className="h-16 w-16 object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
+              className="h-14 w-14 object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity flex-shrink-0"
               onClick={onImageClick}
             />
           ))}
