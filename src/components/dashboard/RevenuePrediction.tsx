@@ -24,7 +24,7 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
       console.log("Fetching revenue data for predictions, landlord:", userId);
       const months = getMonthsForRange("6M");
       
-      // Fetch payment data
+      // Fetch payment data with property information
       const { data: payments, error } = await supabase
         .from("payments")
         .select(`
@@ -32,7 +32,8 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
           paid_date,
           tenancy:tenancies(
             property:properties(
-              landlord_id
+              landlord_id,
+              monthly_rent
             )
           )
         `)
@@ -71,8 +72,9 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
       if (revenueData) {
         const predictedData = await calculatePredictedRevenue(revenueData, userId);
         setPredictions(predictedData);
-        // Calculate total based on 12 months of expected revenue (2875 per month)
-        const monthlyExpected = 2875;
+
+        // Calculate total based on the first month's predicted revenue × 12
+        const monthlyExpected = predictedData[0]?.revenue || 0;
         const total = monthlyExpected * 12;
         setTotalPredicted(total);
         setAverageMonthly(monthlyExpected);
