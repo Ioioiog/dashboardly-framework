@@ -25,7 +25,6 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
   const months = getMonthsForRange(timeRange);
   console.log("Fetching data for months:", months);
 
-  // Updated query to fetch payments across all properties owned by the landlord
   const { data: payments, error } = await supabase
     .from("payments")
     .select(`
@@ -64,7 +63,6 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
       ? totalRevenue / paymentCount 
       : 0;
 
-    // Group payments by property for the tooltip
     const propertyBreakdown = monthPayments.reduce((acc, payment) => {
       const propertyId = payment.tenancy.property.id;
       const propertyName = payment.tenancy.property.name;
@@ -117,7 +115,7 @@ export function RevenueChart({ userId }: { userId: string }) {
 
   if (!revenueData) return null;
 
-  const predictions = calculatePredictedRevenue(revenueData);
+  const predictions = await calculatePredictedRevenue(revenueData, userId);
   const gradientId = "revenueGradient";
   const totalRevenue = revenueData.reduce((sum, month) => sum + month.revenue, 0);
   const averageRevenue = totalRevenue / revenueData.length;
