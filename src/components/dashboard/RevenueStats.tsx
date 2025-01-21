@@ -11,9 +11,9 @@ export function RevenueStats({ totalRevenue, averageRevenue, revenueChange }: Re
   
   return (
     <div className="flex items-center justify-between">
-      <div>
+      <div className="space-y-3">
         <span>Performance</span>
-        <div className="text-sm font-normal text-muted-foreground mt-1">
+        <div className="text-sm font-normal text-muted-foreground">
           Total: ${totalRevenue.toLocaleString()}
         </div>
       </div>
