@@ -26,7 +26,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Starting invoice email process for ID:', invoiceId);
 
-    // Get invoice details with related data
+    // Get invoice details with related data including invoice items
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
       .select(`
@@ -48,6 +48,11 @@ const handler = async (req: Request): Promise<Response> => {
           first_name,
           last_name,
           invoice_info
+        ),
+        items:invoice_items (
+          description,
+          amount,
+          type
         )
       `)
       .eq('id', invoiceId)
@@ -67,25 +72,37 @@ const handler = async (req: Request): Promise<Response> => {
       invoiceId,
       tenant: invoice.tenant,
       property: invoice.property,
-      landlord: invoice.landlord
+      landlord: invoice.landlord,
+      items: invoice.items
     });
 
     // Validate tenant email
-    if (!invoice.tenant) {
-      console.error('No tenant data found for invoice:', invoiceId);
-      throw new Error('Tenant data not found');
-    }
-
-    if (!invoice.tenant.email) {
+    if (!invoice.tenant?.email) {
       console.error('No email found for tenant:', invoice.tenant);
-      throw new Error('Tenant email not found');
+      
+      // Try to get email from tenancies table as fallback
+      const { data: tenancy, error: tenancyError } = await supabase
+        .from('tenancies')
+        .select(`
+          tenant:profiles!tenancies_tenant_id_fkey (
+            email
+          )
+        `)
+        .eq('property_id', invoice.property_id)
+        .eq('status', 'active')
+        .single();
+
+      if (tenancyError || !tenancy?.tenant?.email) {
+        throw new Error('Tenant email not found');
+      }
+
+      invoice.tenant.email = tenancy.tenant.email;
     }
 
-    console.log('Preparing email for invoice:', {
-      invoiceId,
-      tenantEmail: invoice.tenant.email,
-      propertyName: invoice.property.name
-    });
+    // Format the items for email
+    const itemsList = invoice.items?.map(item => 
+      `<li><strong>${item.description}:</strong> $${item.amount}</li>`
+    ).join('') || '';
 
     // Format the email content
     const emailHtml = `
@@ -94,10 +111,14 @@ const handler = async (req: Request): Promise<Response> => {
       <p>Please find below the details of your invoice:</p>
       <ul>
         <li><strong>Property:</strong> ${invoice.property.name} (${invoice.property.address})</li>
-        <li><strong>Amount:</strong> $${invoice.amount}</li>
         <li><strong>Due Date:</strong> ${new Date(invoice.due_date).toLocaleDateString()}</li>
         <li><strong>Status:</strong> ${invoice.status}</li>
       </ul>
+      <h3>Invoice Items:</h3>
+      <ul>
+        ${itemsList}
+      </ul>
+      <p><strong>Total Amount:</strong> $${invoice.amount}</p>
       <p>Please ensure payment is made by the due date.</p>
       <p>Best regards,<br>${invoice.landlord.first_name} ${invoice.landlord.last_name}</p>
     `;
@@ -115,7 +136,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: fromEmail,
-        to: invoice.tenant.email,
+        to: [invoice.tenant.email],
         subject: `Invoice for ${invoice.property.name}`,
         html: emailHtml,
       }),
