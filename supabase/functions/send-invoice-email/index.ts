@@ -21,7 +21,17 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+    if (!RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not configured');
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Supabase credentials are not configured');
+      throw new Error('Supabase credentials are not configured');
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const { invoiceId }: EmailRequest = await req.json();
 
     console.log('Starting invoice email process for ID:', invoiceId);
@@ -32,19 +42,15 @@ const handler = async (req: Request): Promise<Response> => {
       .select(`
         *,
         tenant:profiles!invoices_tenant_id_fkey (
-          id,
           email,
           first_name,
           last_name
         ),
         property:properties (
-          id,
           name,
           address
         ),
         landlord:profiles!invoices_landlord_id_fkey (
-          id,
-          email,
           first_name,
           last_name,
           invoice_info
@@ -68,75 +74,74 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Invoice not found');
     }
 
+    if (!invoice.tenant?.email) {
+      console.error('No tenant email found for invoice:', invoiceId);
+      throw new Error('Tenant email not found');
+    }
+
     console.log('Retrieved invoice data:', {
       invoiceId,
       tenant: invoice.tenant,
       property: invoice.property,
-      landlord: invoice.landlord,
       items: invoice.items
     });
 
-    // If no tenant email in profile, try to get it from tenancies
-    if (!invoice.tenant?.email) {
-      console.log('No email in tenant profile, checking tenancies...');
-      
-      const { data: tenancy, error: tenancyError } = await supabase
-        .from('tenancies')
-        .select(`
-          tenant:profiles!tenancies_tenant_id_fkey (
-            email
-          )
-        `)
-        .eq('property_id', invoice.property_id)
-        .eq('tenant_id', invoice.tenant_id)
-        .eq('status', 'active')
-        .single();
-
-      if (tenancyError) {
-        console.error('Error fetching tenant from tenancies:', tenancyError);
-        throw new Error('Failed to fetch tenant email from tenancies');
-      }
-
-      if (!tenancy?.tenant?.email) {
-        console.error('No email found in tenancies for tenant:', invoice.tenant_id);
-        throw new Error('Tenant email not found in any source');
-      }
-
-      invoice.tenant.email = tenancy.tenant.email;
-      console.log('Found tenant email from tenancies:', invoice.tenant.email);
-    }
-
     // Format the items for email
-    const itemsList = invoice.items?.map(item => 
-      `<li><strong>${item.description}:</strong> $${item.amount.toFixed(2)}</li>`
-    ).join('') || '';
+    const itemsList = invoice.items
+      ?.map(item => `
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;">${item.description}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">$${item.amount.toFixed(2)}</td>
+        </tr>
+      `)
+      .join('') || '';
 
-    // Format the email content
+    // Format the email content with better styling
     const emailHtml = `
-      <h2>Invoice for ${invoice.property.name}</h2>
-      <p>Dear ${invoice.tenant.first_name || ''} ${invoice.tenant.last_name || ''},</p>
-      <p>Please find below the details of your invoice:</p>
-      <ul>
-        <li><strong>Property:</strong> ${invoice.property.name} (${invoice.property.address})</li>
-        <li><strong>Due Date:</strong> ${new Date(invoice.due_date).toLocaleDateString()}</li>
-        <li><strong>Status:</strong> ${invoice.status}</li>
-      </ul>
-      <h3>Invoice Items:</h3>
-      <ul>
-        ${itemsList}
-      </ul>
-      <p><strong>Total Amount:</strong> $${invoice.amount.toFixed(2)}</p>
-      <p>Please ensure payment is made by the due date.</p>
-      <p>Best regards,<br>${invoice.landlord.first_name || ''} ${invoice.landlord.last_name || ''}</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2d3748;">Invoice for ${invoice.property.name}</h2>
+        
+        <p>Dear ${invoice.tenant.first_name || ''} ${invoice.tenant.last_name || ''},</p>
+        
+        <div style="background-color: #f7fafc; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <h3 style="margin-top: 0;">Property Details</h3>
+          <p style="margin: 5px 0;">
+            <strong>Property:</strong> ${invoice.property.name}<br>
+            <strong>Address:</strong> ${invoice.property.address}<br>
+            <strong>Due Date:</strong> ${new Date(invoice.due_date).toLocaleDateString()}<br>
+            <strong>Status:</strong> ${invoice.status}
+          </p>
+        </div>
+
+        <h3>Invoice Items</h3>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+          <thead>
+            <tr style="background-color: #edf2f7;">
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Description</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: right;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsList}
+            <tr style="font-weight: bold; background-color: #f7fafc;">
+              <td style="padding: 8px; border: 1px solid #ddd;">Total Amount</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">$${invoice.amount.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p style="color: #e53e3e; margin: 20px 0;">Please ensure payment is made by the due date.</p>
+        
+        <p style="margin-top: 30px;">
+          Best regards,<br>
+          ${invoice.landlord.first_name || ''} ${invoice.landlord.last_name || ''}
+        </p>
+      </div>
     `;
 
     // Get sender email from landlord's invoice info or use default
     const fromEmail = invoice.landlord.invoice_info?.email || 'onboarding@resend.dev';
     console.log('Sending email from:', fromEmail);
-
-    if (!RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY is not configured');
-    }
 
     // Send email using Resend
     const emailResponse = await fetch('https://api.resend.com/emails', {
@@ -166,7 +171,7 @@ const handler = async (req: Request): Promise<Response> => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in send-invoice-email function:', error);
     return new Response(
       JSON.stringify({ 
