@@ -4,6 +4,7 @@ import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { RevenuePrediction } from "@/components/dashboard/RevenuePrediction";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 
@@ -136,11 +137,27 @@ const Index = () => {
               {userRole === "landlord" && (
                 <section className="bg-white rounded-lg shadow-sm p-6">
                   <div className="space-y-6">
-                    <h2 className="text-2xl font-semibold text-gray-900">
-                      {t('dashboard.revenue.overview')}
-                    </h2>
+                    <div className="border-b pb-4">
+                      <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+                        {t('dashboard.revenue.overview')}
+                      </h2>
+                      <p className="mt-2 text-sm text-dashboard-text-muted">
+                        Track your revenue trends and future predictions
+                      </p>
+                    </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <RevenueChart userId={userId} />
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          Revenue History
+                        </h3>
+                        <RevenueChart userId={userId} />
+                      </div>
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          Revenue Forecast
+                        </h3>
+                        <RevenuePrediction userId={userId} />
+                      </div>
                     </div>
                   </div>
                 </section>
