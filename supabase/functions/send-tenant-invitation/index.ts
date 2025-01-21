@@ -76,7 +76,8 @@ serve(async (req) => {
 
     // Initialize Resend
     const resend = new Resend(RESEND_API_KEY)
-    const inviteUrl = `https://www.adminchirii.ro/tenant-registration?invitation=${token}`
+    // Use the correct domain in the invitation URL
+    const inviteUrl = `${req.headers.get('origin')}/tenant-registration?invitation=${token}`
 
     console.log('Sending invitation email to:', email)
     console.log('Using invite URL:', inviteUrl)
@@ -121,7 +122,7 @@ serve(async (req) => {
       }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in send-tenant-invitation function:', error)
     return new Response(
       JSON.stringify({ 
