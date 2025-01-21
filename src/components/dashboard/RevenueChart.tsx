@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import {
@@ -107,9 +107,12 @@ export function RevenueChart({ userId }: { userId: string }) {
     return (
       <Card className="col-span-4">
         <CardHeader>
-          <CardTitle>{t('dashboard.revenue.title')}</CardTitle>
+          <div className="space-y-3">
+            <div className="h-6 w-1/3 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-1/4 animate-pulse rounded bg-muted" />
+          </div>
         </CardHeader>
-        <CardContent className="h-[300px] animate-pulse bg-muted" />
+        <CardContent className="h-[300px] animate-pulse bg-muted/10" />
       </Card>
     );
   }
@@ -124,21 +127,21 @@ export function RevenueChart({ userId }: { userId: string }) {
   const revenueChange = ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100;
 
   return (
-    <Card className="col-span-4 transition-all duration-200 hover:shadow-lg">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle>
+    <Card className="col-span-4 overflow-hidden bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/50">
+      <CardHeader className="pb-4">
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div className="space-y-1">
             <RevenueStats 
               totalRevenue={totalRevenue}
               averageRevenue={averageRevenue}
               revenueChange={revenueChange}
             />
-          </CardTitle>
+          </div>
           <Select 
             value={timeRange} 
             onValueChange={(value: TimeRange) => setTimeRange(value)}
           >
-            <SelectTrigger className="w-[140px] bg-background border-muted-foreground/20">
+            <SelectTrigger className="h-8 w-[140px] bg-background border-muted-foreground/20">
               <SelectValue placeholder="Select range" />
             </SelectTrigger>
             <SelectContent>
