@@ -12,16 +12,21 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => ({
   },
   server: {
     port: 8080,
-    host: true,
+    host: '0.0.0.0',
     hmr: {
       protocol: 'ws',
       host: 'localhost',
       port: 8080,
       clientPort: 8080,
     },
+    watch: {
+      usePolling: true,
+    },
+    cors: true,
   },
   preview: {
     port: 8080,
+    host: '0.0.0.0',
   },
   build: {
     rollupOptions: {
