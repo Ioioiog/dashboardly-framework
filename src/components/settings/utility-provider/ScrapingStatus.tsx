@@ -1,63 +1,63 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 interface ScrapingStatusProps {
   status: 'pending' | 'in_progress' | 'completed' | 'failed';
-  lastRunAt?: string | null;
-  errorMessage?: string | null;
+  lastRunAt: string | null;
+  errorMessage: string | null;
   onScrape: () => void;
   isLoading: boolean;
 }
 
-export function ScrapingStatus({ 
-  status, 
-  lastRunAt, 
-  errorMessage, 
+export function ScrapingStatus({
+  status,
+  lastRunAt,
+  errorMessage,
   onScrape,
-  isLoading 
+  isLoading
 }: ScrapingStatusProps) {
   const getStatusColor = () => {
     switch (status) {
       case 'completed':
-        return 'bg-green-500';
+        return 'text-green-600';
       case 'failed':
-        return 'bg-red-500';
+        return 'text-red-600';
       case 'in_progress':
-        return 'bg-yellow-500';
+        return 'text-blue-600';
       default:
-        return 'bg-gray-500';
+        return 'text-gray-600';
     }
   };
 
   return (
-    <div className="flex items-center space-x-2">
-      <Badge className={getStatusColor()}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-      {lastRunAt && (
-        <span className="text-sm text-muted-foreground">
-          Last run: {new Date(lastRunAt).toLocaleString()}
+    <div className="flex items-center justify-between mt-2 text-sm">
+      <div>
+        <span className={getStatusColor()}>
+          Status: {status.charAt(0).toUpperCase() + status.slice(1)}
         </span>
-      )}
-      {errorMessage && (
-        <span className="text-sm text-red-500">
-          Error: {errorMessage}
-        </span>
-      )}
+        {lastRunAt && (
+          <span className="text-muted-foreground ml-2">
+            (Last run: {formatDistanceToNow(new Date(lastRunAt), { addSuffix: true })})
+          </span>
+        )}
+        {errorMessage && status === 'failed' && (
+          <p className="text-red-600 mt-1">{errorMessage}</p>
+        )}
+      </div>
       <Button
+        variant="outline"
         size="sm"
         onClick={onScrape}
-        disabled={isLoading || status === 'in_progress'}
+        disabled={isLoading}
+        className="ml-2"
       >
-        {isLoading || status === 'in_progress' ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Scraping...
-          </>
+        {isLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
-          'Scrape Now'
+          <RefreshCw className="h-4 w-4" />
         )}
+        <span className="ml-2">{isLoading ? 'Fetching...' : 'Fetch Bills'}</span>
       </Button>
     </div>
   );

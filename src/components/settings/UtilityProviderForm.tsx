@@ -23,6 +23,7 @@ export function UtilityProviderForm() {
 
   const fetchProviders = async () => {
     try {
+      console.log('Fetching utility providers');
       setIsLoading(true);
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("No user found");
@@ -32,6 +33,7 @@ export function UtilityProviderForm() {
         .select("id, provider_name, username");
 
       if (error) throw error;
+      console.log('Fetched providers:', data);
       setProviders(data || []);
     } catch (error) {
       console.error("Error fetching providers:", error);
@@ -54,6 +56,7 @@ export function UtilityProviderForm() {
     setIsLoading(true);
 
     try {
+      console.log('Adding new utility provider');
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("No user found");
 
@@ -94,6 +97,7 @@ export function UtilityProviderForm() {
 
   const handleDelete = async (id: string) => {
     try {
+      console.log('Deleting utility provider:', id);
       setIsLoading(true);
       const { error } = await supabase
         .from("utility_provider_credentials")

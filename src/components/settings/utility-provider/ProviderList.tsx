@@ -37,7 +37,8 @@ export function ProviderList({ providers, onDelete, isLoading }: ProviderListPro
         .from('scraping_jobs')
         .upsert({
           utility_provider_id: providerId,
-          status: 'pending'
+          status: 'pending',
+          last_run_at: new Date().toISOString()
         });
 
       if (jobError) {
@@ -90,7 +91,17 @@ export function ProviderList({ providers, onDelete, isLoading }: ProviderListPro
       }, 2000);
 
       // Cleanup interval after 5 minutes
-      setTimeout(() => clearInterval(interval), 300000);
+      setTimeout(() => {
+        clearInterval(interval);
+        if (scrapingStates[providerId]) {
+          setScrapingStates(prev => ({ ...prev, [providerId]: false }));
+          toast({
+            title: 'Warning',
+            description: 'Scraping job timed out. Please check the status later.',
+            variant: 'destructive',
+          });
+        }
+      }, 300000);
 
     } catch (error: any) {
       console.error('Scraping error:', error);
