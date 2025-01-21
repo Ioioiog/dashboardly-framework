@@ -132,11 +132,6 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
                 <Badge variant="secondary" className="w-fit">
                   {prediction.count} payments expected
                 </Badge>
-                {prediction.count > 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    Avg. ${Math.round(prediction.average).toLocaleString()} per payment
-                  </p>
-                )}
               </div>
             </div>
           ))}
