@@ -84,40 +84,55 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Verify tenant email exists
     if (!invoice.tenant?.email) {
-      // Try to get tenant email directly from profiles table using tenant_id
+      console.log('Tenant email not found in invoice data, trying alternative sources...');
+      
+      // Try to get tenant email directly from profiles table
       const { data: tenantProfile, error: tenantError } = await supabase
         .from('profiles')
-        .select('email')
+        .select('email, first_name, last_name')
         .eq('id', invoice.tenant_id)
-        .single();
+        .maybeSingle();
 
-      if (tenantError || !tenantProfile?.email) {
-        // If still not found, try to get from active tenancy
+      if (tenantError) {
+        console.error('Error fetching tenant profile:', tenantError);
+      }
+
+      if (tenantProfile?.email) {
+        console.log('Found email in profiles:', tenantProfile.email);
+        invoice.tenant = tenantProfile;
+      } else {
+        console.log('Email not found in profiles, checking tenancies...');
+        // Try to get from active tenancy
         const { data: tenancy, error: tenancyError } = await supabase
           .from('tenancies')
           .select(`
             tenant:profiles!tenancies_tenant_id_fkey (
-              email
+              email,
+              first_name,
+              last_name
             )
           `)
           .eq('property_id', invoice.property_id)
           .eq('tenant_id', invoice.tenant_id)
           .eq('status', 'active')
-          .single();
+          .maybeSingle();
 
-        if (tenancyError || !tenancy?.tenant?.email) {
+        if (tenancyError) {
+          console.error('Error fetching tenancy:', tenancyError);
+        }
+
+        if (!tenancy?.tenant?.email) {
           console.error('Tenant email not found in any source', {
             tenant_id: invoice.tenant_id,
             property_id: invoice.property_id,
-            profileError: tenantError,
-            tenancyError
+            profileFound: !!tenantProfile,
+            tenancyFound: !!tenancy
           });
           throw new Error('Tenant email not found in any source');
         }
 
-        invoice.tenant.email = tenancy.tenant.email;
-      } else {
-        invoice.tenant.email = tenantProfile.email;
+        console.log('Found email in tenancies:', tenancy.tenant.email);
+        invoice.tenant = tenancy.tenant;
       }
     }
 
@@ -131,7 +146,6 @@ const handler = async (req: Request): Promise<Response> => {
       `)
       .join('') || '';
 
-    // Format the email content with better styling
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2d3748;">Invoice for ${invoice.property.name}</h2>
