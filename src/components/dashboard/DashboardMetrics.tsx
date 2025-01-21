@@ -15,13 +15,28 @@ interface Metrics {
 async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
   console.log("Fetching landlord metrics for user:", userId);
   
+  if (!userId) {
+    console.log("No user ID provided");
+    return {
+      totalProperties: 0,
+      monthlyRevenue: 0,
+      activeTenants: 0,
+      pendingMaintenance: 0,
+    };
+  }
+
   // First get the properties for this landlord
-  const { data: properties } = await supabase
+  const { data: properties, error: propertiesError } = await supabase
     .from("properties")
     .select("id, monthly_rent")
     .eq("landlord_id", userId);
 
-  if (!properties) {
+  if (propertiesError) {
+    console.error("Error fetching properties:", propertiesError);
+    throw propertiesError;
+  }
+
+  if (!properties || properties.length === 0) {
     console.log("No properties found for landlord");
     return {
       totalProperties: 0,
@@ -47,6 +62,16 @@ async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
       .in("property_id", propertyIds),
   ]);
 
+  if (tenantsCount.error) {
+    console.error("Error fetching tenants count:", tenantsCount.error);
+    throw tenantsCount.error;
+  }
+
+  if (maintenanceCount.error) {
+    console.error("Error fetching maintenance count:", maintenanceCount.error);
+    throw maintenanceCount.error;
+  }
+
   const totalRevenue = properties.reduce(
     (sum, property) => sum + Number(property.monthly_rent),
     0
@@ -70,6 +95,15 @@ async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
 async function fetchTenantMetrics(userId: string): Promise<Metrics> {
   console.log("Fetching tenant metrics for user:", userId);
   
+  if (!userId) {
+    console.log("No user ID provided");
+    return {
+      totalProperties: 0,
+      pendingMaintenance: 0,
+      paymentStatus: "No payments",
+    };
+  }
+
   // Get count of active tenancies for this tenant
   const { count: propertiesCount, error: tenancyError } = await supabase
     .from("tenancies")
@@ -108,6 +142,11 @@ async function fetchTenantMetrics(userId: string): Promise<Metrics> {
       .maybeSingle(),
   ]);
 
+  if (maintenanceCount.error) {
+    console.error("Error fetching maintenance count:", maintenanceCount.error);
+    throw maintenanceCount.error;
+  }
+
   console.log("Tenant metrics calculated:", {
     properties: propertiesCount,
     maintenance: maintenanceCount.count,
@@ -123,13 +162,25 @@ async function fetchTenantMetrics(userId: string): Promise<Metrics> {
 
 export function DashboardMetrics({ userId, userRole }: { userId: string; userRole: "landlord" | "tenant" }) {
   const { t } = useTranslation();
-  const { data: metrics, isLoading } = useQuery({
+  const { data: metrics, isLoading, error } = useQuery({
     queryKey: ["dashboard-metrics", userId, userRole],
     queryFn: () =>
       userRole === "landlord"
         ? fetchLandlordMetrics(userId)
         : fetchTenantMetrics(userId),
+    enabled: !!userId, // Only run the query if we have a userId
   });
+
+  console.log("DashboardMetrics render:", { userId, userRole, isLoading, error, metrics });
+
+  if (error) {
+    console.error("Error fetching metrics:", error);
+    return (
+      <div className="text-red-500 p-4 rounded-lg border border-red-200 bg-red-50">
+        {t('dashboard.metrics.error')}
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -147,7 +198,10 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
     );
   }
 
-  if (!metrics) return null;
+  if (!metrics) {
+    console.log("No metrics data available");
+    return null;
+  }
 
   if (userRole === "landlord") {
     return (
