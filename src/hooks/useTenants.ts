@@ -2,6 +2,27 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tenant } from "@/types/tenant";
 
+interface TenancyData {
+  tenant: {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string | null;
+    phone: string | null;
+    role: string;
+    created_at: string;
+    updated_at: string;
+  };
+  properties: {
+    id: string;
+    name: string;
+    address: string;
+  };
+  start_date: string;
+  end_date: string | null;
+  status: string;
+}
+
 export function useTenants() {
   return useQuery({
     queryKey: ["tenants"],
@@ -9,7 +30,6 @@ export function useTenants() {
       console.log("Starting tenant data fetch...");
       
       try {
-        // First, verify authentication
         const { data: { user }, error: authError } = await supabase.auth.getUser();
         
         if (authError) {
@@ -24,7 +44,6 @@ export function useTenants() {
 
         console.log("Authenticated user ID:", user.id);
 
-        // Get the user's profile to verify role
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
@@ -38,16 +57,10 @@ export function useTenants() {
 
         console.log("User profile:", profile);
 
-        // Fetch tenancies with related data
-        const { data: tenantsData, error: tenantsError } = await supabase
+        const { data: tenanciesData, error: tenantsError } = await supabase
           .from('tenancies')
           .select(`
-            id,
-            tenant_id,
-            start_date,
-            end_date,
-            status,
-            tenant:profiles!tenancies_tenant_id_fkey (
+            tenant:profiles!inner (
               id,
               first_name,
               last_name,
@@ -61,7 +74,10 @@ export function useTenants() {
               id,
               name,
               address
-            )
+            ),
+            start_date,
+            end_date,
+            status
           `)
           .eq('status', 'active');
 
@@ -70,26 +86,15 @@ export function useTenants() {
           throw new Error("Failed to fetch tenants");
         }
 
-        if (!tenantsData) {
+        if (!tenanciesData) {
           console.log("No tenants data returned");
           return [];
         }
 
-        console.log("Raw tenants data:", tenantsData);
-
-        // Filter out tenancies with missing tenant or property data
-        const validTenancies = tenantsData.filter(tenancy => {
-          if (!tenancy.tenant || !tenancy.properties) {
-            console.log("Found invalid tenancy:", tenancy);
-            return false;
-          }
-          return true;
-        });
-
-        console.log("Number of valid tenancies:", validTenancies.length);
+        console.log("Raw tenants data:", tenanciesData);
 
         // Transform the data to match our Tenant interface
-        const formattedTenants = validTenancies.map(tenancy => ({
+        const formattedTenants: Tenant[] = tenanciesData.map((tenancy: TenancyData) => ({
           id: tenancy.tenant.id,
           first_name: tenancy.tenant.first_name,
           last_name: tenancy.tenant.last_name,

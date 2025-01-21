@@ -13,6 +13,16 @@ interface AssignTenantDialogProps {
   onAssigned: () => void;
 }
 
+interface TenantData {
+  tenant_id: string;
+  tenant: {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string | null;
+  };
+}
+
 export function AssignTenantDialog({ 
   open, 
   onOpenChange, 
@@ -27,6 +37,7 @@ export function AssignTenantDialog({
     queryFn: async () => {
       if (!propertyId) return [];
       
+      console.log("Fetching tenants for property:", propertyId);
       const { data, error } = await supabase
         .from("tenancies")
         .select(`
@@ -41,14 +52,20 @@ export function AssignTenantDialog({
         .eq("property_id", propertyId)
         .eq("status", "active");
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("Error fetching tenants:", error);
+        throw error;
+      }
+      
+      console.log("Fetched tenants:", data);
+      return data as TenantData[];
     },
     enabled: !!propertyId,
   });
 
   const handleAssignTenant = async (tenantId: string) => {
     try {
+      console.log("Assigning document to tenant:", tenantId);
       const { error } = await supabase
         .from("documents")
         .update({ tenant_id: tenantId })
