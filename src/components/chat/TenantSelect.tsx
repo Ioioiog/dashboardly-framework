@@ -32,7 +32,17 @@ export function TenantSelect({ onTenantSelect, selectedTenantId }: TenantSelectP
         .eq("status", "active");
 
       if (error) throw error;
-      return tenancies;
+
+      // Deduplicate tenants by tenant_id
+      const uniqueTenants = tenancies.reduce((acc, current) => {
+        if (!acc.find(item => item.tenant.id === current.tenant.id)) {
+          acc.push(current);
+        }
+        return acc;
+      }, [] as typeof tenancies);
+
+      console.log("Unique tenants:", uniqueTenants);
+      return uniqueTenants;
     },
   });
 
