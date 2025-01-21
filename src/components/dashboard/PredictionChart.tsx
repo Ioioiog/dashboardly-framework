@@ -38,10 +38,10 @@ export function PredictionChart({ predictions }: PredictionChartProps) {
 
   return (
     <Card className="col-span-4 transition-all duration-200 hover:shadow-lg">
-      <CardHeader>
+      <CardHeader className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CardTitle>Revenue Predictions</CardTitle>
+            <CardTitle className="text-base">Revenue Predictions</CardTitle>
             <HoverCard>
               <HoverCardTrigger asChild>
                 <Info className="h-4 w-4 text-muted-foreground cursor-help" />
@@ -77,7 +77,7 @@ export function PredictionChart({ predictions }: PredictionChartProps) {
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="h-[400px]">
+      <CardContent className="h-[300px] p-4">
         {filteredPredictions.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart

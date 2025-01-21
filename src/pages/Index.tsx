@@ -118,35 +118,36 @@ const Index = () => {
   return (
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
-      <main className="flex-1 ml-64 p-8 animate-fade-in">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <header className="bg-white rounded-lg shadow-sm p-6">
-            <h1 className="text-3xl font-semibold text-gray-900">
+      <main className="flex-1 ml-64 p-6">
+        <div className="max-w-7xl mx-auto space-y-4">
+          <header className="bg-white rounded-lg shadow-sm p-4">
+            <h1 className="text-2xl font-semibold text-gray-900">
               {t('dashboard.title')}
             </h1>
-            <p className="mt-2 text-dashboard-text">
+            <p className="mt-1 text-dashboard-text">
               {t('dashboard.welcome')}, {userName}! {t('dashboard.overview')}
             </p>
           </header>
 
           {userId && userRole && (
-            <div className="space-y-6">
-              <section className="bg-white rounded-lg shadow-sm p-6">
+            <div className="space-y-4">
+              <section className="bg-white rounded-lg shadow-sm p-4">
                 <DashboardMetrics userId={userId} userRole={userRole} />
               </section>
 
               {userRole === "landlord" && (
-                <section className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="space-y-10">
-                    <div className="border-b pb-6">
-                      <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+                <section className="bg-white rounded-lg shadow-sm p-4">
+                  <div className="space-y-6">
+                    <div className="border-b pb-4">
+                      <h2 className="text-2xl font-bold tracking-tight text-gray-900">
                         Track your money
                       </h2>
-                      <div className="mt-6 flex gap-4 pb-4">
+                      <div className="mt-4 flex gap-2">
                         <Button
                           variant={activeView === "history" ? "default" : "outline"}
                           onClick={() => setActiveView("history")}
                           className="flex items-center gap-2"
+                          size="sm"
                         >
                           <BarChart2 className="w-4 h-4" />
                           Revenue History
@@ -155,6 +156,7 @@ const Index = () => {
                           variant={activeView === "predictions" ? "default" : "outline"}
                           onClick={() => setActiveView("predictions")}
                           className="flex items-center gap-2"
+                          size="sm"
                         >
                           <TrendingUp className="w-4 h-4" />
                           Revenue Predictions
@@ -163,39 +165,40 @@ const Index = () => {
                           variant={activeView === "forecast" ? "default" : "outline"}
                           onClick={() => setActiveView("forecast")}
                           className="flex items-center gap-2"
+                          size="sm"
                         >
                           <LineChart className="w-4 h-4" />
                           Revenue Forecast
                         </Button>
                       </div>
                     </div>
-                    <div className="space-y-12">
+                    <div className="space-y-6">
                       {activeView === "history" && (
                         <div>
-                          <div className="mb-6">
-                            <h3 className="text-2xl font-semibold text-gray-800">
+                          <div className="mb-3">
+                            <h3 className="text-xl font-semibold text-gray-800">
                               Revenue History
                             </h3>
-                            <p className="mt-2 text-sm text-dashboard-text-muted">
+                            <p className="text-sm text-dashboard-text-muted">
                               Historical view of your monthly revenue performance
                             </p>
                           </div>
-                          <div className="bg-dashboard-accent rounded-lg p-6">
+                          <div className="bg-dashboard-accent rounded-lg p-4">
                             <RevenueChart userId={userId} />
                           </div>
                         </div>
                       )}
                       {(activeView === "predictions" || activeView === "forecast") && (
                         <div>
-                          <div className="mb-6">
-                            <h3 className="text-2xl font-semibold text-gray-800">
+                          <div className="mb-3">
+                            <h3 className="text-xl font-semibold text-gray-800">
                               {activeView === "predictions" ? "Revenue Predictions" : "Revenue Forecast"}
                             </h3>
-                            <p className="mt-2 text-sm text-dashboard-text-muted">
+                            <p className="text-sm text-dashboard-text-muted">
                               Projected revenue based on historical data and trends
                             </p>
                           </div>
-                          <div className="bg-dashboard-accent rounded-lg p-6">
+                          <div className="bg-dashboard-accent rounded-lg p-4">
                             <RevenuePrediction userId={userId} />
                           </div>
                         </div>
