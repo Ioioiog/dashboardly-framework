@@ -44,6 +44,11 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
     throw propertiesError;
   }
 
+  if (!properties) {
+    console.log("No properties found for user");
+    return [];
+  }
+
   console.log("Raw properties data:", properties);
 
   const monthlyRevenue = months.map(monthStart => {
@@ -54,8 +59,12 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
     const propertyBreakdown: Record<string, { name: string; total: number; count: number }> = {};
 
     // Calculate revenue for each property based on active tenancies
-    properties?.forEach(property => {
+    properties.forEach(property => {
+      if (!property) return; // Skip if property is undefined
+      
       const activeTenantsInMonth = property.tenancies?.filter(tenancy => {
+        if (!tenancy) return false; // Skip if tenancy is undefined
+        
         const startDate = new Date(tenancy.start_date);
         const endDate = tenancy.end_date ? new Date(tenancy.end_date) : null;
         
@@ -67,11 +76,11 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
       });
 
       if (activeTenantsInMonth && activeTenantsInMonth.length > 0) {
-        const propertyRevenue = property.monthly_rent;
+        const propertyRevenue = property.monthly_rent || 0;
         totalRevenue += propertyRevenue;
 
         propertyBreakdown[property.id] = {
-          name: property.name,
+          name: property.name || 'Unnamed Property',
           total: propertyRevenue,
           count: activeTenantsInMonth.length
         };
@@ -117,14 +126,29 @@ export function RevenueChart({ userId }: { userId: string }) {
     );
   }
 
-  if (!revenueData) return null;
+  if (!revenueData || revenueData.length === 0) {
+    return (
+      <Card className="col-span-4">
+        <CardHeader>
+          <div className="space-y-1">
+            <h3 className="text-lg font-semibold">Revenue Data</h3>
+            <p className="text-sm text-muted-foreground">No revenue data available</p>
+          </div>
+        </CardHeader>
+        <CardContent className="h-[300px] flex items-center justify-center">
+          <p className="text-muted-foreground">Start adding properties and tenants to see revenue data</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const gradientId = "revenueGradient";
-  const totalRevenue = revenueData.reduce((sum, month) => sum + month.revenue, 0);
+  const totalRevenue = revenueData.reduce((sum, month) => sum + (month?.revenue || 0), 0);
   const averageRevenue = totalRevenue / revenueData.length;
-  const currentMonthRevenue = revenueData[revenueData.length - 1].revenue;
+  const currentMonthRevenue = revenueData[revenueData.length - 1]?.revenue || 0;
   const previousMonthRevenue = revenueData[revenueData.length - 2]?.revenue || 0;
-  const revenueChange = ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100;
+  const revenueChange = previousMonthRevenue === 0 ? 0 : 
+    ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100;
 
   return (
     <Card className="col-span-4 overflow-hidden bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/50">
