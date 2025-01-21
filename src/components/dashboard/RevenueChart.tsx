@@ -14,10 +14,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TimeRange, getMonthsForRange, formatMonthDisplay } from "./utils/dateUtils";
 import { RevenueStats } from "./RevenueStats";
-import { PredictionChart } from "./PredictionChart";
-import { calculatePredictedRevenue } from "./utils/predictionUtils";
 import { MonthlyRevenue } from "./types/revenue";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<MonthlyRevenue[]> {
   console.log("Fetching revenue data for landlord:", userId);
@@ -99,22 +97,11 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
 export function RevenueChart({ userId }: { userId: string }) {
   const { t } = useTranslation();
   const [timeRange, setTimeRange] = useState<TimeRange>("6M");
-  const [predictions, setPredictions] = useState<MonthlyRevenue[]>([]);
   
   const { data: revenueData, isLoading } = useQuery({
     queryKey: ["revenue-chart", userId, timeRange],
     queryFn: () => fetchRevenueData(userId, timeRange),
   });
-
-  useEffect(() => {
-    async function loadPredictions() {
-      if (revenueData) {
-        const predictedData = await calculatePredictedRevenue(revenueData, userId);
-        setPredictions(predictedData);
-      }
-    }
-    loadPredictions();
-  }, [revenueData, userId]);
 
   if (isLoading) {
     return (
@@ -122,7 +109,7 @@ export function RevenueChart({ userId }: { userId: string }) {
         <CardHeader>
           <CardTitle>{t('dashboard.revenue.title')}</CardTitle>
         </CardHeader>
-        <CardContent className="h-[400px] animate-pulse bg-muted" />
+        <CardContent className="h-[300px] animate-pulse bg-muted" />
       </Card>
     );
   }
@@ -137,41 +124,40 @@ export function RevenueChart({ userId }: { userId: string }) {
   const revenueChange = ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100;
 
   return (
-    <>
-      <Card className="col-span-4 transition-all duration-200 hover:shadow-lg">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>
-              <RevenueStats 
-                totalRevenue={totalRevenue}
-                averageRevenue={averageRevenue}
-                revenueChange={revenueChange}
-              />
-            </CardTitle>
-            <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Select range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1M">Last Month</SelectItem>
-                <SelectItem value="6M">Last 6 Months</SelectItem>
-                <SelectItem value="1Y">Last Year</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent className="h-[400px]">
-          {revenueData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={revenueData}
-                margin={{
-                  top: 20,
-                  right: 30,
-                  left: 20,
-                  bottom: 20,
-                }}
-              >
+    <Card className="col-span-4 transition-all duration-200 hover:shadow-lg">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>
+            <RevenueStats 
+              totalRevenue={totalRevenue}
+              averageRevenue={averageRevenue}
+              revenueChange={revenueChange}
+            />
+          </CardTitle>
+          <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Select range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1M">Last Month</SelectItem>
+              <SelectItem value="6M">Last 6 Months</SelectItem>
+              <SelectItem value="1Y">Last Year</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent className="h-[300px]">
+        {revenueData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={revenueData}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 20,
+              }}
+            >
                 <defs>
                   <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
@@ -253,23 +239,21 @@ export function RevenueChart({ userId }: { userId: string }) {
                   animationBegin={0}
                   animationEasing="ease-in-out"
                 />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center">
-                <p className="text-muted-foreground mb-2">
-                  {t('dashboard.revenue.noData')}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Payments will appear here once processed
-                </p>
-              </div>
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <p className="text-muted-foreground mb-2">
+                {t('dashboard.revenue.noData')}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Payments will appear here once processed
+              </p>
             </div>
-          )}
-        </CardContent>
-      </Card>
-      <PredictionChart predictions={predictions} />
-    </>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

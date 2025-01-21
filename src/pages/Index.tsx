@@ -137,7 +137,7 @@ const Index = () => {
 
               {userRole === "landlord" && (
                 <section className="bg-white rounded-lg shadow-sm p-4">
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     <div className="border-b pb-4">
                       <h2 className="text-2xl font-bold tracking-tight text-gray-900">
                         Track your money
@@ -172,7 +172,7 @@ const Index = () => {
                         </Button>
                       </div>
                     </div>
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       {activeView === "history" && (
                         <div>
                           <div className="mb-3">
@@ -188,11 +188,11 @@ const Index = () => {
                           </div>
                         </div>
                       )}
-                      {(activeView === "predictions" || activeView === "forecast") && (
+                      {activeView === "predictions" && (
                         <div>
                           <div className="mb-3">
                             <h3 className="text-xl font-semibold text-gray-800">
-                              {activeView === "predictions" ? "Revenue Predictions" : "Revenue Forecast"}
+                              Revenue Predictions
                             </h3>
                             <p className="text-sm text-dashboard-text-muted">
                               Projected revenue based on historical data and trends
@@ -200,6 +200,26 @@ const Index = () => {
                           </div>
                           <div className="bg-dashboard-accent rounded-lg p-4">
                             <RevenuePrediction userId={userId} />
+                          </div>
+                        </div>
+                      )}
+                      {activeView === "forecast" && (
+                        <div>
+                          <div className="mb-3">
+                            <h3 className="text-xl font-semibold text-gray-800">
+                              Revenue Forecast
+                            </h3>
+                            <p className="text-sm text-dashboard-text-muted">
+                              Long-term revenue projections and analysis
+                            </p>
+                          </div>
+                          <div className="bg-dashboard-accent rounded-lg p-4">
+                            {/* Forecast component will be implemented later */}
+                            <div className="h-[300px] flex items-center justify-center">
+                              <p className="text-muted-foreground">
+                                Revenue forecast coming soon
+                              </p>
+                            </div>
                           </div>
                         </div>
                       )}
