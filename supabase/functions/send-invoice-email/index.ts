@@ -52,19 +52,24 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (invoiceError) {
       console.error('Error fetching invoice:', invoiceError);
-      throw invoiceError;
+      throw new Error(`Failed to fetch invoice: ${invoiceError.message}`);
     }
+
     if (!invoice) {
       console.error('Invoice not found');
       throw new Error('Invoice not found');
     }
 
-    if (!invoice.tenant.email) {
+    if (!invoice.tenant?.email) {
       console.error('Tenant email not found');
       throw new Error('Tenant email not found');
     }
 
-    console.log('Sending email for invoice:', invoice);
+    console.log('Preparing email for invoice:', {
+      invoiceId,
+      tenantEmail: invoice.tenant.email,
+      propertyName: invoice.property.name
+    });
 
     // Format the email content
     const emailHtml = `
@@ -81,35 +86,44 @@ const handler = async (req: Request): Promise<Response> => {
       <p>Best regards,<br>${invoice.landlord.first_name} ${invoice.landlord.last_name}</p>
     `;
 
+    const fromEmail = invoice.landlord.invoice_info?.email || 'onboarding@resend.dev';
+    console.log('Sending email from:', fromEmail);
+
     // Send email using Resend
-    const res = await fetch('https://api.resend.com/emails', {
+    const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: invoice.landlord.invoice_info?.email || 'onboarding@resend.dev',
+        from: fromEmail,
         to: invoice.tenant.email,
         subject: `Invoice for ${invoice.property.name}`,
         html: emailHtml,
       }),
     });
 
-    if (!res.ok) {
-      const error = await res.text();
-      console.error('Resend API error:', error);
-      throw new Error(`Failed to send email: ${error}`);
+    const responseData = await emailResponse.json();
+
+    if (!emailResponse.ok) {
+      console.error('Resend API error:', responseData);
+      throw new Error(`Failed to send email: ${JSON.stringify(responseData)}`);
     }
 
-    const data = await res.json();
-    return new Response(JSON.stringify(data), {
+    console.log('Email sent successfully:', responseData);
+
+    return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
   } catch (error) {
     console.error('Error in send-invoice-email function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : 'An unknown error occurred',
+        details: error
+      }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });
