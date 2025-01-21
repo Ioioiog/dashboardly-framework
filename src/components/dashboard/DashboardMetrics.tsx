@@ -15,11 +15,25 @@ interface Metrics {
 async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
   console.log("Fetching landlord metrics for user:", userId);
   
-  // First get the properties for this landlord
-  const { data: properties } = await supabase
+  // Get properties with active tenancies and their monthly rents
+  const { data: properties, error } = await supabase
     .from("properties")
-    .select("id, monthly_rent")
+    .select(`
+      id,
+      monthly_rent,
+      tenancies (
+        id,
+        status,
+        start_date,
+        end_date
+      )
+    `)
     .eq("landlord_id", userId);
+
+  if (error) {
+    console.error("Error fetching properties:", error);
+    throw error;
+  }
 
   if (!properties) {
     console.log("No properties found for landlord");
@@ -30,6 +44,20 @@ async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
       pendingMaintenance: 0,
     };
   }
+
+  // Calculate monthly revenue only from properties with active tenancies
+  const currentDate = new Date().toISOString();
+  const monthlyRevenue = properties.reduce((sum, property) => {
+    const hasActiveTenancy = property.tenancies?.some(tenancy => 
+      tenancy.status === 'active' && 
+      tenancy.start_date <= currentDate &&
+      (!tenancy.end_date || tenancy.end_date > currentDate)
+    );
+    
+    return hasActiveTenancy ? sum + Number(property.monthly_rent) : sum;
+  }, 0);
+
+  console.log("Monthly revenue from active tenancies:", monthlyRevenue);
 
   const propertyIds = properties.map(p => p.id);
   console.log("Found properties:", propertyIds);
@@ -47,21 +75,16 @@ async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
       .in("property_id", propertyIds),
   ]);
 
-  const totalRevenue = properties.reduce(
-    (sum, property) => sum + Number(property.monthly_rent),
-    0
-  );
-
   console.log("Landlord metrics calculated:", {
     properties: properties.length,
-    revenue: totalRevenue,
+    revenue: monthlyRevenue,
     tenants: tenantsCount.count,
     maintenance: maintenanceCount.count,
   });
 
   return {
     totalProperties: properties.length,
-    monthlyRevenue: totalRevenue,
+    monthlyRevenue: monthlyRevenue,
     activeTenants: tenantsCount.count || 0,
     pendingMaintenance: maintenanceCount.count || 0,
   };
