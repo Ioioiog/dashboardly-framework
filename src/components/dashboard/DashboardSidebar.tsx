@@ -22,11 +22,23 @@ export default function DashboardSidebar() {
 
   const handleSignOut = async () => {
     try {
-      console.log("Signing out...");
+      console.log("Initiating sign out process...");
+      
+      // Clear any existing session
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      console.log("Sign out successful");
-      navigate("/");
+      if (error) {
+        console.error("Error during sign out:", error);
+        throw error;
+      }
+
+      console.log("Sign out successful, clearing local storage...");
+      
+      // Clear local storage
+      localStorage.clear();
+      
+      console.log("Redirecting to auth page...");
+      navigate("/auth", { replace: true });
+      
       toast({
         title: "Signed out successfully",
         description: "You have been signed out of your account",
