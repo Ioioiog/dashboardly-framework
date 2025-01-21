@@ -50,8 +50,19 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('id', invoiceId)
       .single();
 
-    if (invoiceError) throw invoiceError;
-    if (!invoice) throw new Error('Invoice not found');
+    if (invoiceError) {
+      console.error('Error fetching invoice:', invoiceError);
+      throw invoiceError;
+    }
+    if (!invoice) {
+      console.error('Invoice not found');
+      throw new Error('Invoice not found');
+    }
+
+    if (!invoice.tenant.email) {
+      console.error('Tenant email not found');
+      throw new Error('Tenant email not found');
+    }
 
     console.log('Sending email for invoice:', invoice);
 
@@ -79,7 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: invoice.landlord.invoice_info?.email || 'onboarding@resend.dev',
-        to: invoice.tenant.email, // Changed from array to single string
+        to: invoice.tenant.email,
         subject: `Invoice for ${invoice.property.name}`,
         html: emailHtml,
       }),
