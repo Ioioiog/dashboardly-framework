@@ -15,12 +15,11 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     port: 8080,
-    host: "::",
+    host: true, // Changed from "::" to true for better compatibility
     hmr: {
-      protocol: 'wss', // Changed from 'ws' to 'wss' for secure WebSocket
-      host: '0.0.0.0',
-      port: 8080,
-      clientPort: 443, // Added clientPort for HTTPS
+      protocol: 'wss',
+      host: 'www.adminchirii.ro', // Updated to match the actual domain
+      clientPort: 443,
     },
   },
   preview: {
