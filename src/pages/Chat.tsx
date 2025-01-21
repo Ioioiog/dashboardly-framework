@@ -13,6 +13,7 @@ interface Message {
   sender_id: string;
   content: string;
   created_at: string;
+  profile_id: string;
   sender: {
     first_name: string | null;
     last_name: string | null;
@@ -42,6 +43,7 @@ const Chat = () => {
           sender_id,
           content,
           created_at,
+          profile_id,
           sender:profiles(first_name, last_name)
         `)
         .order("created_at", { ascending: true });
@@ -74,6 +76,7 @@ const Chat = () => {
               sender_id,
               content,
               created_at,
+              profile_id,
               sender:profiles(first_name, last_name)
             `)
             .eq("id", payload.new.id)
@@ -106,6 +109,7 @@ const Chat = () => {
       .insert({
         content: newMessage,
         sender_id: user.id,
+        profile_id: user.id,
       });
 
     if (error) {
@@ -132,6 +136,10 @@ const Chat = () => {
               <div className="space-y-4">
                 {messages.map((message) => {
                   const { data: { user } } = supabase.auth.getUser();
+                  const senderName = message.sender.first_name && message.sender.last_name
+                    ? `${message.sender.first_name} ${message.sender.last_name}`
+                    : "Unknown User";
+                    
                   return (
                     <div
                       key={message.id}
@@ -148,9 +156,7 @@ const Chat = () => {
                             : "bg-gray-100"
                         }`}
                       >
-                        <p className="text-sm font-semibold mb-1">
-                          {message.sender.first_name} {message.sender.last_name}
-                        </p>
+                        <p className="text-sm font-semibold mb-1">{senderName}</p>
                         <p>{message.content}</p>
                       </div>
                     </div>

@@ -281,6 +281,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          profile_id: string
           sender_id: string
           updated_at: string
         }
@@ -288,6 +289,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          profile_id: string
           sender_id: string
           updated_at?: string
         }
@@ -295,10 +297,19 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          profile_id?: string
           sender_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "messages_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
