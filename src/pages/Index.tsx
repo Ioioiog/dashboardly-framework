@@ -139,7 +139,7 @@ const Index = () => {
                   <div className="space-y-6">
                     <div className="border-b pb-4">
                       <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-                        {t('dashboard.revenue.overview')}
+                        Track your revenue
                       </h2>
                       <p className="mt-2 text-sm text-dashboard-text-muted">
                         Track your revenue trends and future predictions
