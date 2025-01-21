@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { DocumentList } from "@/components/documents/DocumentList";
 import { DocumentDialog } from "@/components/documents/DocumentDialog";
 import { DocumentType } from "@/integrations/supabase/types/document-types";
+import { DocumentFilters } from "@/components/documents/DocumentFilters";
+import { useQuery } from "@tanstack/react-query";
 
 const Documents = () => {
   const navigate = useNavigate();
@@ -17,6 +19,21 @@ const Documents = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [propertyFilter, setPropertyFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState<"all" | DocumentType>("all");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Fetch properties for the filter dropdown
+  const { data: properties } = useQuery({
+    queryKey: ["properties"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("properties")
+        .select("id, name");
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: userRole === "landlord"
+  });
 
   useEffect(() => {
     const checkUser = async () => {
@@ -82,11 +99,21 @@ const Documents = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6">
+            <DocumentFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              typeFilter={typeFilter}
+              setTypeFilter={setTypeFilter}
+              propertyFilter={propertyFilter}
+              setPropertyFilter={setPropertyFilter}
+              properties={properties}
+            />
             <DocumentList 
               userId={userId} 
               userRole={userRole}
               propertyFilter={propertyFilter}
               typeFilter={typeFilter}
+              searchTerm={searchTerm}
             />
           </div>
         </div>
