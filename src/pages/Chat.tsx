@@ -23,6 +23,7 @@ interface Message {
 const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { userRole } = useUserRole();
 
@@ -33,6 +34,21 @@ const Chat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Get current user ID
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Error fetching user:", error);
+        return;
+      }
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    getCurrentUser();
+  }, []);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -99,17 +115,14 @@ const Chat = () => {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!newMessage.trim() || !currentUserId) return;
 
     const { error } = await supabase
       .from("messages")
       .insert({
         content: newMessage,
-        sender_id: user.id,
-        profile_id: user.id,
+        sender_id: currentUserId,
+        profile_id: currentUserId,
       });
 
     if (error) {
@@ -135,7 +148,6 @@ const Chat = () => {
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
                 {messages.map((message) => {
-                  const { data: { user } } = supabase.auth.getUser();
                   const senderName = message.sender.first_name && message.sender.last_name
                     ? `${message.sender.first_name} ${message.sender.last_name}`
                     : "Unknown User";
@@ -144,14 +156,14 @@ const Chat = () => {
                     <div
                       key={message.id}
                       className={`flex ${
-                        message.sender_id === user?.id
+                        message.sender_id === currentUserId
                           ? "justify-end"
                           : "justify-start"
                       }`}
                     >
                       <div
                         className={`max-w-[70%] rounded-lg p-3 ${
-                          message.sender_id === user?.id
+                          message.sender_id === currentUserId
                             ? "bg-blue-500 text-white"
                             : "bg-gray-100"
                         }`}
