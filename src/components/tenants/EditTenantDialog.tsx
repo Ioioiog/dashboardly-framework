@@ -72,10 +72,14 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
           last_name: data.last_name,
           email: data.email,
           phone: data.phone,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', tenant.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Error updating profile:", profileError);
+        throw profileError;
+      }
 
       // Update existing tenancy
       const { error: updateTenancyError } = await supabase
@@ -87,7 +91,10 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
         .eq('tenant_id', tenant.id)
         .eq('property_id', tenant.property.id);
 
-      if (updateTenancyError) throw updateTenancyError;
+      if (updateTenancyError) {
+        console.error("Error updating tenancy:", updateTenancyError);
+        throw updateTenancyError;
+      }
 
       // Add new tenancies for additional properties
       const newProperties = data.propertyIds.filter((id: string) => id !== tenant.property.id);
@@ -104,7 +111,10 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
           .from('tenancies')
           .insert(newTenancies);
 
-        if (newTenancyError) throw newTenancyError;
+        if (newTenancyError) {
+          console.error("Error creating new tenancies:", newTenancyError);
+          throw newTenancyError;
+        }
       }
 
       toast({
@@ -113,6 +123,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
       });
       
       setOpen(false);
+      // Call onUpdate to refresh the tenant list
       onUpdate();
     } catch (error: any) {
       console.error("Error updating tenant:", error);

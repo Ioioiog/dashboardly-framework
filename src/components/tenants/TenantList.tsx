@@ -12,13 +12,20 @@ import { TenantObservationDialog } from "./TenantObservationDialog";
 import { TenantInteractionHistory } from "./TenantInteractionHistory";
 import { Tenant } from "@/types/tenant";
 import { format } from "date-fns";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TenantListProps {
   tenants: Tenant[];
 }
 
 export function TenantList({ tenants }: TenantListProps) {
+  const queryClient = useQueryClient();
   console.log("Rendering TenantList with tenants:", tenants);
+
+  const handleTenantUpdate = () => {
+    // Invalidate and refetch tenants data
+    queryClient.invalidateQueries({ queryKey: ["tenants"] });
+  };
 
   if (!tenants.length) {
     return (
@@ -70,7 +77,7 @@ export function TenantList({ tenants }: TenantListProps) {
                       tenantId={tenant.id}
                       tenantName={`${tenant.first_name} ${tenant.last_name}`}
                     />
-                    <EditTenantDialog tenant={tenant} onUpdate={() => {}} />
+                    <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
                   </TableCell>
                 </TableRow>
                 <TableRow>
