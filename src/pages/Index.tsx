@@ -139,7 +139,9 @@ const Index = () => {
                     <h2 className="text-2xl font-semibold text-gray-900">
                       {t('dashboard.revenue.overview')}
                     </h2>
-                    <RevenueChart userId={userId} />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <RevenueChart userId={userId} />
+                    </div>
                   </div>
                 </section>
               )}
