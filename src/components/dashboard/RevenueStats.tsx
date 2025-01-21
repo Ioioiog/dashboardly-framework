@@ -12,7 +12,7 @@ export function RevenueStats({ totalRevenue, averageRevenue, revenueChange }: Re
   return (
     <div className="flex items-center justify-between">
       <div>
-        <span>{t('dashboard.revenue.title')}</span>
+        <span>Performance</span>
         <div className="text-sm font-normal text-muted-foreground mt-1">
           Total: ${totalRevenue.toLocaleString()}
         </div>
