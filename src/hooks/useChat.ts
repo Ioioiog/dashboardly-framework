@@ -16,6 +16,7 @@ export function useChat(selectedTenantId: string | null) {
         return;
       }
       if (user) {
+        console.log("Current user ID:", user.id);
         setCurrentUserId(user.id);
       }
     };
@@ -23,36 +24,69 @@ export function useChat(selectedTenantId: string | null) {
   }, []);
 
   useEffect(() => {
-    if (!currentUserId || !selectedTenantId) {
+    if (!currentUserId) {
+      console.log("No current user ID yet");
       return;
     }
 
     const setupConversation = async () => {
       try {
-        const { data: conversation, error: conversationError } = await supabase
-          .from('conversations')
-          .select('id')
-          .eq('landlord_id', currentUserId)
-          .eq('tenant_id', selectedTenantId)
+        // First get the user's profile to determine their role
+        const { data: userProfile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', currentUserId)
           .single();
+
+        if (profileError) {
+          console.error("Error fetching user profile:", profileError);
+          return;
+        }
+
+        console.log("User profile:", userProfile);
+
+        let query = supabase
+          .from('conversations')
+          .select('id');
+
+        // If user is a tenant, find conversation where they are the tenant
+        if (userProfile.role === 'tenant') {
+          query = query.eq('tenant_id', currentUserId);
+        } else {
+          // For landlords, we need the selected tenant
+          if (!selectedTenantId) {
+            console.log("No tenant selected for landlord");
+            return;
+          }
+          query = query
+            .eq('landlord_id', currentUserId)
+            .eq('tenant_id', selectedTenantId);
+        }
+
+        const { data: conversation, error: conversationError } = await query.single();
 
         if (conversationError && conversationError.code !== 'PGRST116') {
           throw conversationError;
         }
 
         if (!conversation) {
-          const { data: newConversation, error: createError } = await supabase
-            .from('conversations')
-            .insert({
-              landlord_id: currentUserId,
-              tenant_id: selectedTenantId,
-            })
-            .select('id')
-            .single();
+          // Only create new conversation if user is landlord and has selected a tenant
+          if (userProfile.role === 'landlord' && selectedTenantId) {
+            const { data: newConversation, error: createError } = await supabase
+              .from('conversations')
+              .insert({
+                landlord_id: currentUserId,
+                tenant_id: selectedTenantId,
+              })
+              .select('id')
+              .single();
 
-          if (createError) throw createError;
-          setConversationId(newConversation.id);
+            if (createError) throw createError;
+            console.log("Created new conversation:", newConversation.id);
+            setConversationId(newConversation.id);
+          }
         } else {
+          console.log("Found existing conversation:", conversation.id);
           setConversationId(conversation.id);
         }
       } catch (error) {
@@ -69,7 +103,12 @@ export function useChat(selectedTenantId: string | null) {
   }, [currentUserId, selectedTenantId, toast]);
 
   useEffect(() => {
-    if (!conversationId) return;
+    if (!conversationId) {
+      console.log("No conversation ID yet");
+      return;
+    }
+
+    console.log("Fetching messages for conversation:", conversationId);
 
     const fetchMessages = async () => {
       const { data, error } = await supabase
@@ -91,6 +130,7 @@ export function useChat(selectedTenantId: string | null) {
         return;
       }
 
+      console.log("Fetched messages:", data);
       setMessages(data);
     };
 
@@ -107,6 +147,7 @@ export function useChat(selectedTenantId: string | null) {
           filter: `conversation_id=eq.${conversationId}`,
         },
         async (payload) => {
+          console.log("New message received:", payload);
           const { data: newMessage, error } = await supabase
             .from("messages")
             .select(`
@@ -137,7 +178,20 @@ export function useChat(selectedTenantId: string | null) {
   }, [conversationId]);
 
   const sendMessage = async (content: string) => {
-    if (!conversationId || !currentUserId || !content.trim()) return;
+    if (!conversationId || !currentUserId || !content.trim()) {
+      console.log("Missing required data for sending message:", {
+        conversationId,
+        currentUserId,
+        contentLength: content?.length
+      });
+      return;
+    }
+
+    console.log("Sending message:", {
+      conversationId,
+      currentUserId,
+      content
+    });
 
     const { error } = await supabase
       .from("messages")
