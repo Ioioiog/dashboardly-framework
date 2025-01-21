@@ -15,7 +15,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => ({
     },
   },
   server: {
-    host: "::",
+    host: "0.0.0.0",
     port: 8080,
     hmr: {
       protocol: 'ws',
