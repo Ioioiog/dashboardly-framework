@@ -1,29 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
-import { useUserRole } from "@/hooks/use-user-role";
-import { supabase } from "@/integrations/supabase/client";
-import { TenantSelect } from "@/components/chat/TenantSelect";
 import { useToast } from "@/hooks/use-toast";
-
-interface Message {
-  id: string;
-  sender_id: string;
-  content: string;
-  created_at: string;
-  profile_id: string;
-  conversation_id: string;
-  sender: {
-    first_name: string | null;
-    last_name: string | null;
-  };
-}
+import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/use-user-role";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import { ChatHeader } from "@/components/chat/ChatHeader";
+import { MessageList } from "@/components/chat/MessageList";
+import { MessageInput } from "@/components/chat/MessageInput";
 
 const Chat = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
@@ -62,7 +47,6 @@ const Chat = () => {
     const setupConversation = async () => {
       try {
         if (userRole === 'landlord' && selectedTenantId) {
-          // Get or create conversation for landlord
           const { data: conversation, error: conversationError } = await supabase
             .from('conversations')
             .select('id')
@@ -90,7 +74,6 @@ const Chat = () => {
             setConversationId(conversation.id);
           }
         } else if (userRole === 'tenant') {
-          // Get conversation for tenant
           const { data: conversation, error: conversationError } = await supabase
             .from('conversations')
             .select('id')
@@ -142,12 +125,11 @@ const Chat = () => {
         return;
       }
 
-      setMessages(data as Message[]);
+      setMessages(data);
     };
 
     fetchMessages();
 
-    // Subscribe to new messages
     const channel = supabase
       .channel("messages")
       .on(
@@ -178,7 +160,7 @@ const Chat = () => {
             return;
           }
 
-          setMessages((prev) => [...prev, newMessage as Message]);
+          setMessages((prev) => [...prev, newMessage]);
         }
       )
       .subscribe();
@@ -220,19 +202,10 @@ const Chat = () => {
       <main className="flex-1 ml-64 p-8">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md h-[calc(100vh-8rem)]">
           <div className="flex flex-col h-full">
-            <div className="p-4 border-b">
-              <h1 className="text-2xl font-semibold">
-                {userRole === "landlord" ? "Chat with Tenants" : "Chat with Landlord"}
-              </h1>
-              {userRole === "landlord" && (
-                <div className="mt-4">
-                  <TenantSelect
-                    onTenantSelect={(tenantId) => setSelectedTenantId(tenantId)}
-                    selectedTenantId={selectedTenantId || undefined}
-                  />
-                </div>
-              )}
-            </div>
+            <ChatHeader
+              onTenantSelect={setSelectedTenantId}
+              selectedTenantId={selectedTenantId}
+            />
             
             {(!selectedTenantId && userRole === "landlord") ? (
               <div className="flex-1 flex items-center justify-center">
@@ -240,52 +213,16 @@ const Chat = () => {
               </div>
             ) : (
               <>
-                <ScrollArea className="flex-1 p-4">
-                  <div className="space-y-4">
-                    {messages.map((message) => {
-                      const senderName = message.sender.first_name && message.sender.last_name
-                        ? `${message.sender.first_name} ${message.sender.last_name}`
-                        : "Unknown User";
-                        
-                      return (
-                        <div
-                          key={message.id}
-                          className={`flex ${
-                            message.sender_id === currentUserId
-                              ? "justify-end"
-                              : "justify-start"
-                          }`}
-                        >
-                          <div
-                            className={`max-w-[70%] rounded-lg p-3 ${
-                              message.sender_id === currentUserId
-                                ? "bg-blue-500 text-white"
-                                : "bg-gray-100"
-                            }`}
-                          >
-                            <p className="text-sm font-semibold mb-1">{senderName}</p>
-                            <p>{message.content}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    <div ref={messagesEndRef} />
-                  </div>
-                </ScrollArea>
-
-                <form onSubmit={handleSendMessage} className="p-4 border-t">
-                  <div className="flex gap-2">
-                    <Input
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Type your message..."
-                      className="flex-1"
-                    />
-                    <Button type="submit">
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </form>
+                <MessageList
+                  messages={messages}
+                  currentUserId={currentUserId}
+                  messagesEndRef={messagesEndRef}
+                />
+                <MessageInput
+                  newMessage={newMessage}
+                  setNewMessage={setNewMessage}
+                  handleSendMessage={handleSendMessage}
+                />
               </>
             )}
           </div>
