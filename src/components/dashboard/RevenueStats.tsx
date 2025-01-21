@@ -17,12 +17,12 @@ export function RevenueStats({ totalRevenue, averageRevenue, revenueChange }: Re
           Total: ${totalRevenue.toLocaleString()}
         </div>
       </div>
-      <div className="text-right">
-        <div className="text-sm font-normal">
+      <div className="text-right flex flex-col items-end">
+        <div className="text-sm font-normal text-center">
           Monthly Average: ${averageRevenue.toLocaleString()}
         </div>
         {!isNaN(revenueChange) && (
-          <div className={`text-sm ${revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+          <div className={`text-sm text-center ${revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
             {revenueChange >= 0 ? '↑' : '↓'} {Math.abs(revenueChange).toFixed(1)}% vs last month
           </div>
         )}
