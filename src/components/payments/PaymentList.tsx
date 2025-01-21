@@ -17,16 +17,6 @@ interface PaymentListProps {
 }
 
 export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
-</lov-replace>
-
-<lov-search>
-          <TableRow 
-            key={payment.id}
-            className={getStatusBackgroundColor(payment.status)}
-          >
-</lov-search>
-<lov-replace>
-          <TableRow key={payment.id}>
   if (payments.length === 0) {
     return (
       <div className="text-center py-6 text-muted-foreground">
@@ -50,10 +40,7 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
       </TableHeader>
       <TableBody>
         {payments.map((payment) => (
-          <TableRow 
-            key={payment.id}
-            className={getStatusBackgroundColor(payment.status)}
-          >
+          <TableRow key={payment.id}>
             <TableCell>
               <div>
                 <div className="font-medium">
