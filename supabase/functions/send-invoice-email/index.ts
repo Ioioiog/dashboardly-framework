@@ -24,9 +24,9 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
     const { invoiceId }: EmailRequest = await req.json();
 
-    console.log('Fetching invoice details for ID:', invoiceId);
+    console.log('Starting invoice email process for ID:', invoiceId);
 
-    // Get invoice details with related data - using explicit field selection
+    // Get invoice details with related data
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
       .select(`
@@ -59,19 +59,26 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!invoice) {
-      console.error('Invoice not found');
+      console.error('No invoice found for ID:', invoiceId);
       throw new Error('Invoice not found');
     }
 
     console.log('Retrieved invoice data:', {
       invoiceId,
-      tenantData: invoice.tenant,
-      propertyData: invoice.property
+      tenant: invoice.tenant,
+      property: invoice.property,
+      landlord: invoice.landlord
     });
 
-    if (!invoice.tenant?.email) {
-      console.error('Tenant email missing from data:', invoice.tenant);
-      throw new Error('Tenant email not found in profile');
+    // Validate tenant email
+    if (!invoice.tenant) {
+      console.error('No tenant data found for invoice:', invoiceId);
+      throw new Error('Tenant data not found');
+    }
+
+    if (!invoice.tenant.email) {
+      console.error('No email found for tenant:', invoice.tenant);
+      throw new Error('Tenant email not found');
     }
 
     console.log('Preparing email for invoice:', {
@@ -95,6 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
       <p>Best regards,<br>${invoice.landlord.first_name} ${invoice.landlord.last_name}</p>
     `;
 
+    // Get sender email from landlord's invoice info or use default
     const fromEmail = invoice.landlord.invoice_info?.email || 'onboarding@resend.dev';
     console.log('Sending email from:', fromEmail);
 
