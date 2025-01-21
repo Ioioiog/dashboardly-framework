@@ -134,24 +134,24 @@ const Index = () => {
 
               {userRole === "landlord" && (
                 <section className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     <div className="border-b pb-4">
                       <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-                        Revenue History
+                        Revenue Overview
                       </h2>
                       <p className="mt-2 text-sm text-dashboard-text-muted">
                         Track your revenue trends and future predictions
                       </p>
                     </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-800">
+                    <div className="space-y-8">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">
                           Revenue History
                         </h3>
                         <RevenueChart userId={userId} />
                       </div>
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-800">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">
                           Revenue Forecast
                         </h3>
                         <RevenuePrediction userId={userId} />
