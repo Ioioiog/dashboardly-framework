@@ -25,6 +25,7 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
   const months = getMonthsForRange(timeRange);
   console.log("Fetching data for months:", months);
 
+  // Updated query to fetch payments across all properties owned by the landlord
   const { data: payments, error } = await supabase
     .from("payments")
     .select(`
@@ -32,6 +33,8 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
       paid_date,
       tenancy:tenancies(
         property:properties(
+          id,
+          name,
           landlord_id
         )
       )
@@ -61,11 +64,30 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
       ? totalRevenue / paymentCount 
       : 0;
 
+    // Group payments by property for the tooltip
+    const propertyBreakdown = monthPayments.reduce((acc, payment) => {
+      const propertyId = payment.tenancy.property.id;
+      const propertyName = payment.tenancy.property.name;
+      
+      if (!acc[propertyId]) {
+        acc[propertyId] = {
+          name: propertyName,
+          total: 0,
+          count: 0
+        };
+      }
+      
+      acc[propertyId].total += Number(payment.amount);
+      acc[propertyId].count += 1;
+      return acc;
+    }, {} as Record<string, { name: string; total: number; count: number }>);
+
     return {
       month: formatMonthDisplay(monthStart),
       revenue: totalRevenue,
       count: paymentCount,
-      average: averagePayment
+      average: averagePayment,
+      propertyBreakdown: Object.values(propertyBreakdown)
     };
   });
 
@@ -167,7 +189,9 @@ export function RevenueChart({ userId }: { userId: string }) {
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
-                      const data = payload[0].payload as MonthlyRevenue;
+                      const data = payload[0].payload as MonthlyRevenue & {
+                        propertyBreakdown?: Array<{ name: string; total: number; count: number }>;
+                      };
                       return (
                         <div className="rounded-lg border bg-background p-3 shadow-lg ring-1 ring-black/5">
                           <div className="grid gap-2">
@@ -179,11 +203,21 @@ export function RevenueChart({ userId }: { userId: string }) {
                                 ${data.revenue.toLocaleString()}
                               </span>
                               <div className="mt-1 text-xs text-muted-foreground">
-                                <div>Payments: {data.count}</div>
+                                <div>Total Payments: {data.count}</div>
                                 {data.count > 0 && (
                                   <div>Average: ${data.average.toLocaleString()}</div>
                                 )}
                               </div>
+                              {data.propertyBreakdown && data.propertyBreakdown.length > 0 && (
+                                <div className="mt-2 border-t pt-2">
+                                  <span className="text-xs font-medium">Property Breakdown:</span>
+                                  {data.propertyBreakdown.map((prop, idx) => (
+                                    <div key={idx} className="text-xs text-muted-foreground mt-1">
+                                      {prop.name}: ${prop.total.toLocaleString()} ({prop.count} payments)
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
