@@ -17,19 +17,16 @@ interface PaymentListProps {
 }
 
 export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
-  const getStatusBackgroundColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'bg-[#FEF7CD]';
-      case 'paid':
-        return 'bg-[#F2FCE2]';
-      case 'overdue':
-        return 'bg-[#FFEBEE]';
-      default:
-        return '';
-    }
-  };
+</lov-replace>
 
+<lov-search>
+          <TableRow 
+            key={payment.id}
+            className={getStatusBackgroundColor(payment.status)}
+          >
+</lov-search>
+<lov-replace>
+          <TableRow key={payment.id}>
   if (payments.length === 0) {
     return (
       <div className="text-center py-6 text-muted-foreground">
