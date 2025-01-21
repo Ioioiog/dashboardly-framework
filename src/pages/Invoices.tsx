@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
@@ -8,6 +8,9 @@ import { Loader2 } from "lucide-react";
 import { InvoiceList } from "@/components/invoices/InvoiceList";
 import { InvoiceDialog } from "@/components/invoices/InvoiceDialog";
 import { Invoice } from "@/types/invoice";
+import { InvoiceFilters } from "@/components/invoices/InvoiceFilters";
+import { DateRange } from "react-day-picker";
+import { isWithinInterval, parseISO } from "date-fns";
 
 const Invoices = () => {
   const navigate = useNavigate();
@@ -15,6 +18,11 @@ const Invoices = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
+  
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   const fetchInvoices = async () => {
     try {
@@ -56,6 +64,36 @@ const Invoices = () => {
       });
     }
   };
+
+  const filteredInvoices = useMemo(() => {
+    return invoices.filter((invoice) => {
+      // Search filter
+      const searchContent = `
+        ${invoice.property?.name || ""} 
+        ${invoice.property?.address || ""} 
+        ${invoice.tenant?.first_name || ""} 
+        ${invoice.tenant?.last_name || ""} 
+        ${invoice.tenant?.email || ""}
+      `.toLowerCase();
+      
+      const matchesSearch = searchTerm === "" || searchContent.includes(searchTerm.toLowerCase());
+
+      // Status filter
+      const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
+
+      // Date range filter
+      let matchesDateRange = true;
+      if (dateRange?.from && dateRange?.to) {
+        const invoiceDate = parseISO(invoice.due_date);
+        matchesDateRange = isWithinInterval(invoiceDate, {
+          start: dateRange.from,
+          end: dateRange.to,
+        });
+      }
+
+      return matchesSearch && matchesStatus && matchesDateRange;
+    });
+  }, [invoices, searchTerm, statusFilter, dateRange]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -128,8 +166,16 @@ const Invoices = () => {
             )}
           </CardHeader>
           <CardContent>
+            <InvoiceFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+            />
             <InvoiceList 
-              invoices={invoices} 
+              invoices={filteredInvoices} 
               userRole={userRole} 
               onStatusUpdate={fetchInvoices}
             />
