@@ -115,7 +115,7 @@ const Index = () => {
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
       <main className="flex-1 ml-64 p-8 animate-fade-in">
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-6">
           <header className="bg-white rounded-lg shadow-sm p-6">
             <h1 className="text-3xl font-semibold text-gray-900">
               {t('dashboard.title')}
@@ -126,14 +126,19 @@ const Index = () => {
           </header>
 
           {userId && userRole && (
-            <div className="flex flex-col lg:flex-row gap-8">
-              <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
+            <div className="space-y-6">
+              {/* Top Section - Metrics Summary */}
+              <section className="bg-white rounded-lg shadow-sm p-6">
                 <DashboardMetrics userId={userId} userRole={userRole} />
-              </div>
+              </section>
+
+              {/* Bottom Section - Revenue Trends */}
               {userRole === "landlord" && (
-                <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
-                  <RevenueChart userId={userId} />
-                </div>
+                <section className="bg-white rounded-lg shadow-sm p-6">
+                  <div className="h-[600px]"> {/* Increased height for better visualization */}
+                    <RevenueChart userId={userId} />
+                  </div>
+                </section>
               )}
             </div>
           )}
