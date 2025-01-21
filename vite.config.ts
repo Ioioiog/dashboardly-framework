@@ -14,9 +14,12 @@ export default defineConfig(({ mode }) => ({
     },
   },
   server: {
-    port: 443,
+    port: 8080,
     host: true,
-    https: true,
+    https: {
+      key: undefined,
+      cert: undefined,
+    },
     hmr: {
       protocol: 'wss',
       host: 'www.adminchirii.ro',
@@ -32,8 +35,11 @@ export default defineConfig(({ mode }) => ({
     }
   },
   preview: {
-    port: 443,
-    https: true,
+    port: 8080,
+    https: {
+      key: undefined,
+      cert: undefined,
+    },
   },
   build: {
     rollupOptions: {
