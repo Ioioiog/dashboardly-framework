@@ -128,18 +128,16 @@ const Index = () => {
 
           {userId && userRole && (
             <div className="space-y-6">
-              {/* Top Section - Metrics Summary */}
               <section className="bg-white rounded-lg shadow-sm p-6">
                 <DashboardMetrics userId={userId} userRole={userRole} />
               </section>
 
-              {/* Bottom Section - Revenue Overview */}
               {userRole === "landlord" && (
                 <section className="bg-white rounded-lg shadow-sm p-6">
                   <div className="space-y-6">
                     <div className="border-b pb-4">
                       <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-                        Track your revenue
+                        Revenue History
                       </h2>
                       <p className="mt-2 text-sm text-dashboard-text-muted">
                         Track your revenue trends and future predictions
