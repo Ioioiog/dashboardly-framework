@@ -11,6 +11,8 @@ interface TenancyRevenue {
 }
 
 async function getFutureRentalRevenue(userId: string): Promise<TenancyRevenue[]> {
+  console.log("Fetching future rental revenue for user:", userId);
+  
   const { data: tenancies, error } = await supabase
     .from('tenancies')
     .select(`
@@ -29,6 +31,8 @@ async function getFutureRentalRevenue(userId: string): Promise<TenancyRevenue[]>
     return [];
   }
 
+  console.log("Found active tenancies:", tenancies);
+  
   return tenancies.map(tenancy => ({
     property_id: tenancy.property_id,
     property_name: tenancy.properties.name,
@@ -41,24 +45,13 @@ export async function calculatePredictedRevenue(
   historicalData: MonthlyRevenue[],
   userId: string
 ): Promise<MonthlyRevenue[]> {
-  if (historicalData.length < 2) return [];
-
-  // Calculate average month-over-month growth from historical data
-  let totalGrowth = 0;
-  for (let i = 1; i < historicalData.length; i++) {
-    const currentRevenue = historicalData[i].revenue;
-    const previousRevenue = historicalData[i - 1].revenue;
-    if (previousRevenue > 0) {
-      totalGrowth += (currentRevenue - previousRevenue) / previousRevenue;
-    }
-  }
+  console.log("Calculating predicted revenue with historical data:", historicalData);
   
-  const averageGrowthRate = totalGrowth / (historicalData.length - 1);
-  const averagePayments = historicalData.reduce((sum, month) => 
-    sum + month.count, 0) / historicalData.length;
+  if (historicalData.length < 2) return [];
 
   // Get future rental revenue from active tenancies
   const futureRents = await getFutureRentalRevenue(userId);
+  console.log("Future rental revenue:", futureRents);
   
   // Generate predictions for the next 12 months
   const predictions: MonthlyRevenue[] = [];
@@ -68,14 +61,7 @@ export async function calculatePredictedRevenue(
     const predictionDate = addMonths(lastMonth, i);
     const monthEnd = endOfMonth(predictionDate);
 
-    // Calculate base predicted revenue from historical trend
-    const previousRevenue = i === 1 
-      ? historicalData[historicalData.length - 1].revenue 
-      : predictions[i - 2].revenue;
-    
-    let predictedRevenue = previousRevenue * (1 + averageGrowthRate);
-
-    // Add known future rent payments
+    // Calculate total rent from active tenancies for this month
     const monthlyRents = futureRents.reduce((sum, tenancy) => {
       if (!tenancy.end_date || isBefore(predictionDate, parseISO(tenancy.end_date))) {
         return sum + tenancy.monthly_rent;
@@ -83,7 +69,7 @@ export async function calculatePredictedRevenue(
       return sum;
     }, 0);
 
-    predictedRevenue += monthlyRents;
+    console.log(`Month ${i} total rent:`, monthlyRents);
 
     // Create property breakdown for the tooltip
     const propertyBreakdown = futureRents
@@ -96,12 +82,13 @@ export async function calculatePredictedRevenue(
 
     predictions.push({
       month: formatMonthDisplay(format(predictionDate, 'yyyy-MM-dd')),
-      revenue: Math.round(predictedRevenue * 100) / 100,
-      count: Math.round(averagePayments + propertyBreakdown.length),
-      average: predictedRevenue / (averagePayments + propertyBreakdown.length),
+      revenue: monthlyRents,
+      count: propertyBreakdown.length,
+      average: monthlyRents / (propertyBreakdown.length || 1),
       propertyBreakdown
     });
   }
 
+  console.log("Final predictions:", predictions);
   return predictions;
 }
