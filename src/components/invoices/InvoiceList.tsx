@@ -4,7 +4,7 @@ import { Invoice } from "@/types/invoice";
 import { format } from "date-fns";
 import { PaymentActions } from "@/components/payments/PaymentActions";
 import { Button } from "@/components/ui/button";
-import { FileText, Trash2, Eye } from "lucide-react";
+import { FileText, Trash2, Eye, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -23,6 +23,7 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
   const [invoiceItems, setInvoiceItems] = useState<any[]>([]);
   const [companyInfo, setCompanyInfo] = useState<any>(null);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const handleDelete = async (invoiceId: string) => {
     try {
@@ -124,6 +125,33 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
     }
   };
 
+  const handleSendEmail = async (invoiceId: string) => {
+    try {
+      setIsSendingEmail(true);
+      console.log("Sending email for invoice:", invoiceId);
+      
+      const { data, error } = await supabase.functions.invoke('send-invoice-email', {
+        body: { invoiceId }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Invoice email sent successfully!",
+      });
+    } catch (error) {
+      console.error("Error sending invoice email:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to send invoice email.",
+      });
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
   return (
     <>
       <div className="grid gap-4">
@@ -180,15 +208,27 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
                     See Details
                   </Button>
                   {userRole === "landlord" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(invoice.id)}
-                      className="flex items-center gap-2 text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Delete
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSendEmail(invoice.id)}
+                        disabled={isSendingEmail}
+                        className="flex items-center gap-2"
+                      >
+                        <Mail className="h-4 w-4" />
+                        Send Email
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(invoice.id)}
+                        className="flex items-center gap-2 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </Button>
+                    </>
                   )}
                 </div>
                 {userRole === "landlord" ? (
