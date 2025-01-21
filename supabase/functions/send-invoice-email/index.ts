@@ -53,6 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
         landlord:profiles!invoices_landlord_id_fkey (
           first_name,
           last_name,
+          email,
           invoice_info
         ),
         items:invoice_items (
@@ -74,17 +75,34 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Invoice not found');
     }
 
-    if (!invoice.tenant?.email) {
-      console.error('No tenant email found for invoice:', invoiceId);
-      throw new Error('Tenant email not found');
-    }
-
     console.log('Retrieved invoice data:', {
       invoiceId,
       tenant: invoice.tenant,
       property: invoice.property,
       items: invoice.items
     });
+
+    // Verify tenant email exists
+    if (!invoice.tenant?.email) {
+      // Try to get tenant email from tenancies
+      const { data: tenancy, error: tenancyError } = await supabase
+        .from('tenancies')
+        .select(`
+          tenant:profiles!tenancies_tenant_id_fkey (
+            email
+          )
+        `)
+        .eq('property_id', invoice.property_id)
+        .eq('status', 'active')
+        .single();
+
+      if (tenancyError || !tenancy?.tenant?.email) {
+        console.error('Tenant email not found in any source');
+        throw new Error('Tenant email not found in any source');
+      }
+
+      invoice.tenant.email = tenancy.tenant.email;
+    }
 
     // Format the items for email
     const itemsList = invoice.items
@@ -139,16 +157,16 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Get sender email from landlord's invoice info or use default
-    const fromEmail = invoice.landlord.invoice_info?.email || 'onboarding@resend.dev';
-    console.log('Sending email from:', fromEmail);
+    // Get sender email from landlord's profile or use default
+    const fromEmail = invoice.landlord.email || 'onboarding@resend.dev';
+    console.log('Sending email from:', fromEmail, 'to:', invoice.tenant.email);
 
     // Send email using Resend
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
         from: fromEmail,
