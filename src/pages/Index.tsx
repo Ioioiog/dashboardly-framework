@@ -124,7 +124,7 @@ const Index = () => {
           </header>
 
           {userId && userRole && (
-            <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <DashboardMetrics userId={userId} userRole={userRole} />
               {userRole === "landlord" && <RevenueChart userId={userId} />}
             </div>
