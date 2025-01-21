@@ -125,7 +125,7 @@ export function RevenueChart({ userId }: { userId: string }) {
 
   return (
     <Card className="col-span-4 transition-all duration-200 hover:shadow-lg">
-      <CardHeader>
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle>
             <RevenueStats 
@@ -134,8 +134,11 @@ export function RevenueChart({ userId }: { userId: string }) {
               revenueChange={revenueChange}
             />
           </CardTitle>
-          <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
-            <SelectTrigger className="w-[140px]">
+          <Select 
+            value={timeRange} 
+            onValueChange={(value: TimeRange) => setTimeRange(value)}
+          >
+            <SelectTrigger className="w-[140px] bg-background border-muted-foreground/20">
               <SelectValue placeholder="Select range" />
             </SelectTrigger>
             <SelectContent>
@@ -146,7 +149,7 @@ export function RevenueChart({ userId }: { userId: string }) {
           </Select>
         </div>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[300px] pt-4">
         {revenueData.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
@@ -158,87 +161,89 @@ export function RevenueChart({ userId }: { userId: string }) {
                 bottom: 20,
               }}
             >
-                <defs>
-                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  className="stroke-muted/30"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="month"
-                  className="text-xs"
-                  tick={{ fill: "hsl(var(--muted-foreground))" }}
-                  axisLine={{ stroke: "hsl(var(--border))" }}
-                  tickLine={{ stroke: "hsl(var(--border))" }}
-                />
-                <YAxis
-                  className="text-xs"
-                  tick={{ fill: "hsl(var(--muted-foreground))" }}
-                  tickFormatter={(value) => `$${value.toLocaleString()}`}
-                  axisLine={{ stroke: "hsl(var(--border))" }}
-                  tickLine={{ stroke: "hsl(var(--border))" }}
-                />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const data = payload[0].payload as MonthlyRevenue & {
-                        propertyBreakdown?: Array<{ name: string; total: number; count: number }>;
-                      };
-                      return (
-                        <div className="rounded-lg border bg-background p-3 shadow-lg ring-1 ring-black/5">
-                          <div className="grid gap-2">
-                            <div className="flex flex-col">
-                              <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                {data.month}
-                              </span>
-                              <span className="font-bold text-lg">
-                                ${data.revenue.toLocaleString()}
-                              </span>
-                              <div className="mt-1 text-xs text-muted-foreground">
-                                <div>Total Payments: {data.count}</div>
-                                {data.count > 0 && (
-                                  <div>Average: ${data.average.toLocaleString()}</div>
-                                )}
-                              </div>
-                              {data.propertyBreakdown && data.propertyBreakdown.length > 0 && (
-                                <div className="mt-2 border-t pt-2">
-                                  <span className="text-xs font-medium">Property Breakdown:</span>
-                                  {data.propertyBreakdown.map((prop, idx) => (
-                                    <div key={idx} className="text-xs text-muted-foreground mt-1">
-                                      {prop.name}: ${prop.total.toLocaleString()} ({prop.count} payments)
-                                    </div>
-                                  ))}
-                                </div>
+              <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4}/>
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                className="stroke-muted/20"
+                horizontal={true}
+                vertical={false}
+              />
+              <XAxis
+                dataKey="month"
+                className="text-xs font-medium"
+                tick={{ fill: "hsl(var(--muted-foreground))" }}
+                axisLine={{ stroke: "hsl(var(--border))" }}
+                tickLine={{ stroke: "hsl(var(--border))" }}
+              />
+              <YAxis
+                className="text-xs font-medium"
+                tick={{ fill: "hsl(var(--muted-foreground))" }}
+                tickFormatter={(value) => `$${value.toLocaleString()}`}
+                axisLine={{ stroke: "hsl(var(--border))" }}
+                tickLine={{ stroke: "hsl(var(--border))" }}
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload as MonthlyRevenue & {
+                      propertyBreakdown?: Array<{ name: string; total: number; count: number }>;
+                    };
+                    return (
+                      <div className="rounded-lg border bg-background/95 p-4 shadow-xl ring-1 ring-black/5 backdrop-blur-sm">
+                        <div className="grid gap-2">
+                          <div className="flex flex-col">
+                            <span className="text-[0.70rem] uppercase text-muted-foreground font-medium">
+                              {data.month}
+                            </span>
+                            <span className="font-bold text-xl">
+                              ${data.revenue.toLocaleString()}
+                            </span>
+                            <div className="mt-1.5 text-xs text-muted-foreground">
+                              <div className="font-medium">Total Payments: {data.count}</div>
+                              {data.count > 0 && (
+                                <div className="font-medium">Average: ${data.average.toLocaleString()}</div>
                               )}
                             </div>
+                            {data.propertyBreakdown && data.propertyBreakdown.length > 0 && (
+                              <div className="mt-3 border-t pt-2">
+                                <span className="text-xs font-semibold">Property Breakdown:</span>
+                                {data.propertyBreakdown.map((prop, idx) => (
+                                  <div key={idx} className="text-xs text-muted-foreground mt-1.5 flex justify-between">
+                                    <span>{prop.name}:</span>
+                                    <span className="font-medium">${prop.total.toLocaleString()} ({prop.count} payments)</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{
-                    r: 6,
-                    style: { fill: "hsl(var(--primary))", opacity: 1 }
-                  }}
-                  fill={`url(#${gradientId})`}
-                  isAnimationActive={true}
-                  animationDuration={1500}
-                  animationBegin={0}
-                  animationEasing="ease-in-out"
-                />
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="revenue"
+                stroke="hsl(var(--primary))"
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{
+                  r: 6,
+                  style: { fill: "hsl(var(--primary))", opacity: 1 }
+                }}
+                fill={`url(#${gradientId})`}
+                isAnimationActive={true}
+                animationDuration={1500}
+                animationBegin={0}
+                animationEasing="ease-out"
+              />
             </LineChart>
           </ResponsiveContainer>
         ) : (
