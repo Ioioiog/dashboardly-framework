@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { FileText, UserCircle } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -35,56 +35,47 @@ const documentTypeLabels = {
 
 export function DocumentCard({ document: doc, userRole }: DocumentCardProps) {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between gap-4">
-          <CardTitle className="flex items-center gap-2 min-w-0">
-            <FileText className="h-5 w-5 flex-shrink-0" />
-            <span className="truncate overflow-hidden">{doc.name}</span>
-          </CardTitle>
+    <div className="p-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-medium truncate">{doc.name}</h3>
+            {doc.property && (
+              <p className="text-sm text-muted-foreground truncate">
+                {doc.property.name}
+              </p>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          {doc.tenant && (
+            <div className="hidden sm:flex items-center gap-2">
+              <UserCircle className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                {doc.tenant.first_name} {doc.tenant.last_name}
+              </span>
+            </div>
+          )}
+          
           <Badge variant="secondary" className="flex-shrink-0">
             {documentTypeLabels[doc.document_type]}
           </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {doc.property && (
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-gray-500">Property</p>
-              <p className="text-sm truncate">{doc.property.name}</p>
-            </div>
-          )}
-          {doc.tenant && (
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-gray-500">Assigned Tenant</p>
-              <div className="flex items-center gap-2 text-sm">
-                <UserCircle className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">
-                  {doc.tenant.first_name} {doc.tenant.last_name}
-                </span>
-              </div>
-              {doc.tenant.email && (
-                <p className="text-sm text-gray-500 truncate">{doc.tenant.email}</p>
-              )}
-            </div>
-          )}
-          <div>
-            <p className="text-sm font-medium text-gray-500">Uploaded</p>
-            <p className="text-sm">
-              {format(new Date(doc.created_at), "PPP")}
-            </p>
+          
+          <div className="hidden sm:block text-sm text-muted-foreground">
+            {format(new Date(doc.created_at), "MMM d, yyyy")}
           </div>
+          
           <DocumentActions 
             document={doc}
             userRole={userRole}
             onDocumentUpdated={() => {
-              // Trigger a refetch of the documents list
               window.location.reload();
             }}
           />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

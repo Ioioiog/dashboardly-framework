@@ -71,13 +71,17 @@ export function DocumentList({
   }
 
   return (
-    <div className="flex flex-col space-y-4 max-w-4xl mx-auto">
+    <div className="space-y-2 max-w-5xl mx-auto">
       {documents.map((document) => (
-        <DocumentCard 
-          key={document.id} 
-          document={document} 
-          userRole={userRole} 
-        />
+        <div 
+          key={document.id}
+          className="bg-card hover:bg-accent/5 transition-colors rounded-lg border shadow-sm"
+        >
+          <DocumentCard 
+            document={document} 
+            userRole={userRole} 
+          />
+        </div>
       ))}
     </div>
   );
