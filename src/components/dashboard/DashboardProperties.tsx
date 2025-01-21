@@ -5,6 +5,7 @@ import { useState } from "react";
 import { PropertyDialog } from "@/components/properties/PropertyDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PropertyFilters } from "@/components/properties/PropertyFilters";
 
 interface DashboardPropertiesProps {
   userRole: "landlord" | "tenant";
@@ -21,6 +22,8 @@ export function DashboardProperties({
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
   const { toast } = useToast();
 
   console.log("DashboardProperties - userRole:", userRole);
@@ -72,10 +75,24 @@ export function DashboardProperties({
     setShowEditDialog(true);
   };
 
+  const filteredProperties = properties?.filter(property => {
+    const matchesSearch = property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         property.address.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = typeFilter === "all" || property.type === typeFilter;
+    return matchesSearch && matchesType;
+  });
+
   return (
     <>
+      <PropertyFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        typeFilter={typeFilter}
+        setTypeFilter={setTypeFilter}
+      />
+
       <PropertyList
-        properties={properties}
+        properties={filteredProperties}
         isLoading={isLoading}
         userRole={userRole}
         onEdit={handleEditClick}
