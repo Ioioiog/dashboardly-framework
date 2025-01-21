@@ -61,7 +61,7 @@ export function TenantInteractionHistory({ tenantId }: TenantInteractionHistoryP
 
   return (
     <div className="space-y-4">
-      <Accordion type="single" collapsible>
+      <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="observations">
           <AccordionTrigger>Observations ({observations.length})</AccordionTrigger>
           <AccordionContent>
