@@ -14,7 +14,7 @@ export function useAuthState() {
 
     const initializeAuth = async () => {
       try {
-        console.log("Initializing authentication...");
+        console.log("Initializing authentication state...");
         setError(null);
         
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -24,54 +24,37 @@ export function useAuthState() {
           throw sessionError;
         }
 
+        if (session?.user) {
+          console.log("Initial session found, user is authenticated");
+          if (mounted) {
+            setIsAuthenticated(true);
+            setIsLoading(false);
+          }
+        } else {
+          console.log("No initial session found, user is not authenticated");
+          if (mounted) {
+            setIsAuthenticated(false);
+            setIsLoading(false);
+          }
+        }
+
         authListener = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           console.log("Auth state changed:", event, "Session:", currentSession ? "exists" : "null");
           
+          if (!mounted) return;
+
           if (event === 'SIGNED_OUT') {
             console.log("User signed out");
-            if (mounted) {
-              setIsAuthenticated(false);
-              setIsLoading(false);
-            }
+            setIsAuthenticated(false);
+            setIsLoading(false);
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             console.log("User signed in or token refreshed");
-            if (currentSession && mounted) {
-              const { data: { user }, error: userError } = await supabase.auth.getUser();
-              if (!userError && user) {
-                console.log("User verified after sign in:", user.id);
-                setIsAuthenticated(true);
-                setIsLoading(false);
-              } else {
-                console.error("Error verifying user after sign in:", userError);
-                throw userError;
-              }
+            if (currentSession?.user) {
+              setIsAuthenticated(true);
+              setIsLoading(false);
             }
           }
         });
-
-        if (session) {
-          console.log("Session found, verifying user...");
-          const { data: { user }, error: userError } = await supabase.auth.getUser();
-          
-          if (userError) {
-            console.error("User verification failed:", userError);
-            throw userError;
-          } else if (user) {
-            console.log("User verified successfully:", user.id);
-            if (mounted) {
-              setIsAuthenticated(true);
-            }
-          }
-        } else {
-          console.log("No session found");
-          if (mounted) {
-            setIsAuthenticated(false);
-          }
-        }
-
-        if (mounted) {
-          setIsLoading(false);
-        }
 
       } catch (error) {
         console.error("Authentication initialization error:", error);
