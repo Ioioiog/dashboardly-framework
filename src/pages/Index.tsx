@@ -132,10 +132,13 @@ const Index = () => {
                 <DashboardMetrics userId={userId} userRole={userRole} />
               </section>
 
-              {/* Bottom Section - Revenue Trends */}
+              {/* Bottom Section - Revenue Overview */}
               {userRole === "landlord" && (
                 <section className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="h-[600px]"> {/* Increased height for better visualization */}
+                  <div className="space-y-6">
+                    <h2 className="text-2xl font-semibold text-gray-900">
+                      {t('dashboard.revenue.overview')}
+                    </h2>
                     <RevenueChart userId={userId} />
                   </div>
                 </section>
