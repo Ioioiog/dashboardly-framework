@@ -25,66 +25,74 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
   const months = getMonthsForRange(timeRange);
   console.log("Fetching data for months:", months);
 
-  const { data: payments, error } = await supabase
-    .from("payments")
+  // Fetch all properties owned by the landlord with their active tenancies
+  const { data: properties, error: propertiesError } = await supabase
+    .from("properties")
     .select(`
-      amount,
-      paid_date,
-      tenancy:tenancies(
-        property:properties(
+      id,
+      name,
+      monthly_rent,
+      tenancies (
+        id,
+        start_date,
+        end_date,
+        status,
+        tenant:profiles (
           id,
-          name,
-          landlord_id
+          first_name,
+          last_name
         )
       )
     `)
-    .in("status", ["paid"])
-    .gte("paid_date", months[0])
-    .lte("paid_date", new Date().toISOString().split('T')[0])
-    .eq("tenancy.property.landlord_id", userId);
+    .eq("landlord_id", userId);
 
-  if (error) {
-    console.error("Error fetching revenue data:", error);
-    throw error;
+  if (propertiesError) {
+    console.error("Error fetching properties data:", propertiesError);
+    throw propertiesError;
   }
 
-  console.log("Raw payment data:", payments);
+  console.log("Raw properties data:", properties);
 
   const monthlyRevenue = months.map(monthStart => {
-    const monthPayments = payments?.filter(payment => 
-      payment.paid_date?.startsWith(monthStart.substring(0, 7))
-    ) || [];
+    const monthDate = new Date(monthStart);
+    const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
 
-    const totalRevenue = monthPayments.reduce((sum, payment) => 
-      sum + Number(payment.amount), 0);
+    let totalRevenue = 0;
+    const propertyBreakdown: Record<string, { name: string; total: number; count: number }> = {};
 
-    const paymentCount = monthPayments.length;
-    const averagePayment = paymentCount > 0 
-      ? totalRevenue / paymentCount 
-      : 0;
+    // Calculate revenue for each property based on active tenancies
+    properties?.forEach(property => {
+      const activeTenantsInMonth = property.tenancies?.filter(tenancy => {
+        const startDate = new Date(tenancy.start_date);
+        const endDate = tenancy.end_date ? new Date(tenancy.end_date) : null;
+        
+        return (
+          tenancy.status === 'active' &&
+          startDate <= monthEnd &&
+          (!endDate || endDate >= monthDate)
+        );
+      });
 
-    const propertyBreakdown = monthPayments.reduce((acc, payment) => {
-      const propertyId = payment.tenancy.property.id;
-      const propertyName = payment.tenancy.property.name;
-      
-      if (!acc[propertyId]) {
-        acc[propertyId] = {
-          name: propertyName,
-          total: 0,
-          count: 0
+      if (activeTenantsInMonth && activeTenantsInMonth.length > 0) {
+        const propertyRevenue = property.monthly_rent;
+        totalRevenue += propertyRevenue;
+
+        propertyBreakdown[property.id] = {
+          name: property.name,
+          total: propertyRevenue,
+          count: activeTenantsInMonth.length
         };
       }
-      
-      acc[propertyId].total += Number(payment.amount);
-      acc[propertyId].count += 1;
-      return acc;
-    }, {} as Record<string, { name: string; total: number; count: number }>);
+    });
+
+    const totalCount = Object.values(propertyBreakdown).reduce((sum, p) => sum + p.count, 0);
+    const averageRevenue = totalCount > 0 ? totalRevenue / totalCount : 0;
 
     return {
       month: formatMonthDisplay(monthStart),
       revenue: totalRevenue,
-      count: paymentCount,
-      average: averagePayment,
+      count: totalCount,
+      average: averageRevenue,
       propertyBreakdown: Object.values(propertyBreakdown)
     };
   });
