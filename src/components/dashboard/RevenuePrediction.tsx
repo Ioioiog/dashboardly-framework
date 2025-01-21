@@ -23,8 +23,6 @@ interface RevenuePredictionProps {
 export function RevenuePrediction({ userId }: RevenuePredictionProps) {
   const { t } = useTranslation();
   const [predictions, setPredictions] = useState<MonthlyRevenue[]>([]);
-  const [totalPredicted, setTotalPredicted] = useState(0);
-  const [averageMonthly, setAverageMonthly] = useState(0);
 
   const { data: revenueData, isLoading } = useQuery({
     queryKey: ["revenue-prediction", userId],
@@ -78,11 +76,6 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
       if (revenueData) {
         const predictedData = await calculatePredictedRevenue(revenueData, userId);
         setPredictions(predictedData);
-
-        const monthlyExpected = predictedData[0]?.revenue || 0;
-        const total = monthlyExpected * 12;
-        setTotalPredicted(total);
-        setAverageMonthly(monthlyExpected);
       }
     }
     loadPredictions();
@@ -207,25 +200,6 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-        
-        <div className="mt-8 grid grid-cols-2 gap-6 p-6 rounded-lg bg-muted/5 border">
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Total Predicted Revenue (12 months)
-            </h3>
-            <p className="text-2xl font-bold mt-1">
-              ${totalPredicted.toLocaleString()}
-            </p>
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Monthly Average
-            </h3>
-            <p className="text-2xl font-bold mt-1">
-              ${Math.round(averageMonthly).toLocaleString()}
-            </p>
-          </div>
         </div>
       </CardContent>
     </Card>
