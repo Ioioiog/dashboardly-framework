@@ -134,27 +134,41 @@ const Index = () => {
 
               {userRole === "landlord" && (
                 <section className="bg-white rounded-lg shadow-sm p-6">
-                  <div className="space-y-8">
-                    <div className="border-b pb-4">
-                      <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+                  <div className="space-y-10">
+                    <div className="border-b pb-6">
+                      <h2 className="text-3xl font-bold tracking-tight text-gray-900">
                         Revenue Overview
                       </h2>
-                      <p className="mt-2 text-sm text-dashboard-text-muted">
-                        Track your revenue trends and future predictions
+                      <p className="mt-3 text-base text-dashboard-text-muted">
+                        Track your revenue trends and future predictions with detailed insights
                       </p>
                     </div>
-                    <div className="space-y-8">
+                    <div className="space-y-12">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                          Revenue History
-                        </h3>
-                        <RevenueChart userId={userId} />
+                        <div className="mb-6">
+                          <h3 className="text-2xl font-semibold text-gray-800">
+                            Revenue History
+                          </h3>
+                          <p className="mt-2 text-sm text-dashboard-text-muted">
+                            Historical view of your monthly revenue performance
+                          </p>
+                        </div>
+                        <div className="bg-dashboard-accent rounded-lg p-6">
+                          <RevenueChart userId={userId} />
+                        </div>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                          Revenue Forecast
-                        </h3>
-                        <RevenuePrediction userId={userId} />
+                        <div className="mb-6">
+                          <h3 className="text-2xl font-semibold text-gray-800">
+                            Revenue Forecast
+                          </h3>
+                          <p className="mt-2 text-sm text-dashboard-text-muted">
+                            Projected revenue based on historical data and trends
+                          </p>
+                        </div>
+                        <div className="bg-dashboard-accent rounded-lg p-6">
+                          <RevenuePrediction userId={userId} />
+                        </div>
                       </div>
                     </div>
                   </div>
