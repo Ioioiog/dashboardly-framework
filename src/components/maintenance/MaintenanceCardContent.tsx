@@ -9,8 +9,23 @@ interface MaintenanceCardContentProps {
 export function MaintenanceCardContent({ request, onImageClick }: MaintenanceCardContentProps) {
   const { t } = useTranslation();
 
+  const getStatusBackgroundColor = (status: string) => {
+    switch (status) {
+      case 'in_progress':
+        return 'bg-[#D3E4FD]';
+      case 'pending':
+        return 'bg-[#FEF7CD]';
+      case 'completed':
+        return 'bg-[#F2FCE2]';
+      case 'cancelled':
+        return 'bg-[#F1F0FB]';
+      default:
+        return '';
+    }
+  };
+
   return (
-    <div className="px-4 pb-2">
+    <div className={`px-4 pb-2 ${getStatusBackgroundColor(request.status)}`}>
       <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
       {request.notes && (
         <div className="mt-2 p-2 bg-accent/30 rounded-md">
