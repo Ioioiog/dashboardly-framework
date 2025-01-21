@@ -206,6 +206,7 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
                     paymentId={utility.id}
                     status={utility.status}
                     userRole={userRole}
+                    onStatusChange={onStatusUpdate}
                   />
                 </div>
               ) : (
@@ -214,6 +215,7 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
                     paymentId={utility.id}
                     status={utility.status}
                     userRole={userRole}
+                    onStatusChange={onStatusUpdate}
                   />
                 )
               )}

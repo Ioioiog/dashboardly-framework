@@ -237,6 +237,7 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
                       paymentId={invoice.id}
                       status={invoice.status}
                       userRole={userRole}
+                      onStatusChange={onStatusUpdate}
                     />
                   </div>
                 ) : (
@@ -245,6 +246,7 @@ export function InvoiceList({ invoices, userRole, onStatusUpdate }: InvoiceListP
                       paymentId={invoice.id}
                       status={invoice.status}
                       userRole={userRole}
+                      onStatusChange={onStatusUpdate}
                     />
                   )
                 )}
