@@ -84,24 +84,41 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Verify tenant email exists
     if (!invoice.tenant?.email) {
-      // Try to get tenant email from tenancies
-      const { data: tenancy, error: tenancyError } = await supabase
-        .from('tenancies')
-        .select(`
-          tenant:profiles!tenancies_tenant_id_fkey (
-            email
-          )
-        `)
-        .eq('property_id', invoice.property_id)
-        .eq('status', 'active')
+      // Try to get tenant email directly from profiles table using tenant_id
+      const { data: tenantProfile, error: tenantError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', invoice.tenant_id)
         .single();
 
-      if (tenancyError || !tenancy?.tenant?.email) {
-        console.error('Tenant email not found in any source');
-        throw new Error('Tenant email not found in any source');
-      }
+      if (tenantError || !tenantProfile?.email) {
+        // If still not found, try to get from active tenancy
+        const { data: tenancy, error: tenancyError } = await supabase
+          .from('tenancies')
+          .select(`
+            tenant:profiles!tenancies_tenant_id_fkey (
+              email
+            )
+          `)
+          .eq('property_id', invoice.property_id)
+          .eq('tenant_id', invoice.tenant_id)
+          .eq('status', 'active')
+          .single();
 
-      invoice.tenant.email = tenancy.tenant.email;
+        if (tenancyError || !tenancy?.tenant?.email) {
+          console.error('Tenant email not found in any source', {
+            tenant_id: invoice.tenant_id,
+            property_id: invoice.property_id,
+            profileError: tenantError,
+            tenancyError
+          });
+          throw new Error('Tenant email not found in any source');
+        }
+
+        invoice.tenant.email = tenancy.tenant.email;
+      } else {
+        invoice.tenant.email = tenantProfile.email;
+      }
     }
 
     // Format the items for email
