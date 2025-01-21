@@ -126,12 +126,12 @@ const Index = () => {
           </header>
 
           {userId && userRole && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex flex-col lg:flex-row gap-8">
+              <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
                 <DashboardMetrics userId={userId} userRole={userRole} />
               </div>
               {userRole === "landlord" && (
-                <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
                   <RevenueChart userId={userId} />
                 </div>
               )}
