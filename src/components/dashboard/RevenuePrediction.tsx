@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { calculatePredictedRevenue } from "./utils/predictionUtils";
 import { getMonthsForRange } from "./utils/dateUtils";
+import { Badge } from "@/components/ui/badge";
 
 interface RevenuePredictionProps {
   userId: string;
@@ -17,8 +18,9 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
     queryKey: ["revenue-prediction", userId],
     queryFn: async () => {
       console.log("Fetching revenue data for predictions, landlord:", userId);
-      const months = getMonthsForRange("6M"); // Use last 6 months for prediction base
+      const months = getMonthsForRange("6M");
       
+      // Fetch payment data
       const { data: payments, error } = await supabase
         .from("payments")
         .select(`
@@ -40,7 +42,23 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
         throw error;
       }
 
-      return payments || [];
+      // Transform payments into monthly revenue data
+      const monthlyData = months.map(monthStart => {
+        const monthPayments = payments?.filter(payment => 
+          payment.paid_date?.startsWith(monthStart.substring(0, 7))
+        ) || [];
+
+        return {
+          month: monthStart,
+          revenue: monthPayments.reduce((sum, payment) => sum + Number(payment.amount), 0),
+          count: monthPayments.length,
+          average: monthPayments.length > 0 
+            ? monthPayments.reduce((sum, payment) => sum + Number(payment.amount), 0) / monthPayments.length 
+            : 0
+        };
+      });
+
+      return monthlyData;
     }
   });
 
@@ -50,7 +68,7 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
         <CardHeader>
           <CardTitle>{t('dashboard.revenue.prediction.title')}</CardTitle>
         </CardHeader>
-        <CardContent className="h-[400px] animate-pulse bg-muted" />
+        <CardContent className="h-[400px] animate-pulse bg-muted/10" />
       </Card>
     );
   }
@@ -77,42 +95,54 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
   return (
     <Card className="col-span-4">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">
-          {t('dashboard.revenue.prediction.title', 'Revenue Prediction')}
+        <CardTitle className="text-xl font-semibold">
+          Future Revenue Forecast
         </CardTitle>
+        <p className="text-sm text-muted-foreground mt-1">
+          Based on your historical revenue patterns
+        </p>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {predictions.map((prediction) => (
             <div 
               key={prediction.month}
-              className="flex flex-col p-4 bg-muted/5 rounded-lg border border-border/50"
+              className="flex flex-col p-6 rounded-lg bg-card hover:shadow-md transition-shadow duration-200 border"
             >
-              <span className="text-sm text-muted-foreground">{prediction.month}</span>
-              <span className="text-2xl font-semibold mt-1">
+              <span className="text-sm font-medium text-muted-foreground">
+                {prediction.month}
+              </span>
+              <span className="text-2xl font-bold mt-2">
                 ${prediction.revenue.toLocaleString()}
               </span>
-              <div className="text-sm text-muted-foreground mt-2">
-                <div>Expected payments: {prediction.count}</div>
-                <div>Avg. payment: ${Math.round(prediction.average).toLocaleString()}</div>
+              <div className="mt-4 space-y-2">
+                <Badge variant="secondary" className="w-fit">
+                  {prediction.count} payments expected
+                </Badge>
+                {prediction.count > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    Avg. ${Math.round(prediction.average).toLocaleString()} per payment
+                  </p>
+                )}
               </div>
             </div>
           ))}
         </div>
-        <div className="mt-6 pt-4 border-t border-border/50 grid grid-cols-2 gap-4">
+        
+        <div className="mt-8 grid grid-cols-2 gap-6 p-6 rounded-lg bg-muted/5 border">
           <div>
-            <span className="text-sm text-muted-foreground">
-              {t('dashboard.revenue.prediction.totalPredicted', 'Total Predicted Revenue')}
-            </span>
-            <p className="text-xl font-semibold mt-1">
+            <h3 className="text-sm font-medium text-muted-foreground">
+              Total Predicted Revenue
+            </h3>
+            <p className="text-2xl font-bold mt-1">
               ${totalPredicted.toLocaleString()}
             </p>
           </div>
           <div>
-            <span className="text-sm text-muted-foreground">
-              {t('dashboard.revenue.prediction.monthlyAverage', 'Predicted Monthly Average')}
-            </span>
-            <p className="text-xl font-semibold mt-1">
+            <h3 className="text-sm font-medium text-muted-foreground">
+              Monthly Average
+            </h3>
+            <p className="text-2xl font-bold mt-1">
               ${Math.round(averageMonthly).toLocaleString()}
             </p>
           </div>
