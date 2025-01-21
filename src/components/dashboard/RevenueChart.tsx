@@ -17,7 +17,7 @@ import { RevenueStats } from "./RevenueStats";
 import { PredictionChart } from "./PredictionChart";
 import { calculatePredictedRevenue } from "./utils/predictionUtils";
 import { MonthlyRevenue } from "./types/revenue";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<MonthlyRevenue[]> {
   console.log("Fetching revenue data for landlord:", userId);
@@ -96,11 +96,22 @@ async function fetchRevenueData(userId: string, timeRange: TimeRange): Promise<M
 export function RevenueChart({ userId }: { userId: string }) {
   const { t } = useTranslation();
   const [timeRange, setTimeRange] = useState<TimeRange>("6M");
+  const [predictions, setPredictions] = useState<MonthlyRevenue[]>([]);
   
   const { data: revenueData, isLoading } = useQuery({
     queryKey: ["revenue-chart", userId, timeRange],
     queryFn: () => fetchRevenueData(userId, timeRange),
   });
+
+  useEffect(() => {
+    async function loadPredictions() {
+      if (revenueData) {
+        const predictedData = await calculatePredictedRevenue(revenueData, userId);
+        setPredictions(predictedData);
+      }
+    }
+    loadPredictions();
+  }, [revenueData, userId]);
 
   if (isLoading) {
     return (
@@ -115,7 +126,6 @@ export function RevenueChart({ userId }: { userId: string }) {
 
   if (!revenueData) return null;
 
-  const predictions = await calculatePredictedRevenue(revenueData, userId);
   const gradientId = "revenueGradient";
   const totalRevenue = revenueData.reduce((sum, month) => sum + month.revenue, 0);
   const averageRevenue = totalRevenue / revenueData.length;

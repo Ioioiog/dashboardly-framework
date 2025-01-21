@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { calculatePredictedRevenue } from "./utils/predictionUtils";
 import { getMonthsForRange } from "./utils/dateUtils";
 import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
 
 interface RevenuePredictionProps {
   userId: string;
@@ -13,6 +14,9 @@ interface RevenuePredictionProps {
 
 export function RevenuePrediction({ userId }: RevenuePredictionProps) {
   const { t } = useTranslation();
+  const [predictions, setPredictions] = useState<MonthlyRevenue[]>([]);
+  const [totalPredicted, setTotalPredicted] = useState(0);
+  const [averageMonthly, setAverageMonthly] = useState(0);
 
   const { data: revenueData, isLoading } = useQuery({
     queryKey: ["revenue-prediction", userId],
@@ -62,6 +66,19 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
     }
   });
 
+  useEffect(() => {
+    async function loadPredictions() {
+      if (revenueData) {
+        const predictedData = await calculatePredictedRevenue(revenueData, userId);
+        setPredictions(predictedData);
+        const total = predictedData.reduce((sum, month) => sum + month.revenue, 0);
+        setTotalPredicted(total);
+        setAverageMonthly(total / predictedData.length);
+      }
+    }
+    loadPredictions();
+  }, [revenueData, userId]);
+
   if (isLoading) {
     return (
       <Card className="col-span-4">
@@ -87,10 +104,6 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
       </Card>
     );
   }
-
-  const predictions = calculatePredictedRevenue(revenueData);
-  const totalPredicted = predictions.reduce((sum, month) => sum + month.revenue, 0);
-  const averageMonthly = totalPredicted / predictions.length;
 
   return (
     <Card className="col-span-4">
