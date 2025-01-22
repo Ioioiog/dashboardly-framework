@@ -20,6 +20,12 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -124,72 +130,111 @@ export const DashboardSidebar = () => {
     (item) => !userRole || item.roles.includes(userRole)
   );
 
-  return (
-    <Collapsible
-      defaultOpen={true}
-      open={isExpanded}
-      onOpenChange={setIsExpanded}
-      className={cn(
-        "relative h-screen bg-dashboard-sidebar border-r border-gray-200 flex flex-col transition-all duration-300",
-        isExpanded ? "w-64" : "w-20"
-      )}
-    >
-      <div className="p-4">
-        <div className="flex items-center gap-2">
-          <img 
-            src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
-            alt="AdminChirii.ro Logo" 
-            className="h-8"
-          />
-          {isExpanded && <span className="font-semibold">AdminChirii.ro</span>}
-        </div>
-      </div>
-      <CollapsibleTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute -right-3 top-6 h-6 w-6 rounded-full border bg-background"
-        >
-          {isExpanded ? (
-            <ChevronLeft className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-        </Button>
-      </CollapsibleTrigger>
-      <CollapsibleContent
-        forceMount
-        className="flex-1 overflow-y-auto"
+  const MenuItem = ({ item }: { item: typeof menuItems[0] }) => {
+    const active = isActive(item.href);
+    const Icon = item.icon;
+    
+    const linkContent = (
+      <div
+        className={cn(
+          "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200",
+          active
+            ? "bg-primary/10 text-primary font-semibold"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+          !isExpanded && "justify-center px-2"
+        )}
       >
-        <nav className="px-2 py-4 space-y-1">
-          {filteredMenuItems.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                isActive(item.href)
-                  ? "bg-dashboard-accent text-dashboard-text"
-                  : "text-dashboard-text-muted hover:bg-dashboard-accent hover:text-dashboard-text"
-              )}
-            >
-              <item.icon className="mr-3 h-5 w-5" />
-              {isExpanded && item.title}
-            </Link>
-          ))}
-        </nav>
-      </CollapsibleContent>
-      <div className="p-4 border-t border-gray-200">
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-dashboard-text-muted hover:text-dashboard-text"
-          onClick={handleSignOut}
-        >
-          <LogOut className="mr-3 h-5 w-5" />
-          {isExpanded && "Sign Out"}
-        </Button>
+        <Icon className={cn("h-5 w-5", active && "text-primary")} />
+        {isExpanded && <span className="ml-3">{item.title}</span>}
       </div>
-    </Collapsible>
+    );
+
+    return isExpanded ? (
+      <Link to={item.href}>{linkContent}</Link>
+    ) : (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link to={item.href}>{linkContent}</Link>
+        </TooltipTrigger>
+        <TooltipContent side="right" align="center">
+          {item.title}
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
+
+  return (
+    <TooltipProvider delayDuration={0}>
+      <Collapsible
+        defaultOpen={true}
+        open={isExpanded}
+        onOpenChange={setIsExpanded}
+        className={cn(
+          "relative h-screen bg-background border-r border-border flex flex-col transition-all duration-300",
+          isExpanded ? "w-64" : "w-16"
+        )}
+      >
+        <div className="p-4">
+          <div className="flex items-center gap-2">
+            <img 
+              src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
+              alt="AdminChirii.ro Logo" 
+              className="h-8"
+            />
+            {isExpanded && <span className="font-semibold">AdminChirii.ro</span>}
+          </div>
+        </div>
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute -right-3 top-6 h-6 w-6 rounded-full border bg-background shadow-sm hover:bg-muted"
+          >
+            {isExpanded ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent
+          forceMount
+          className="flex-1 overflow-y-auto py-2 px-2"
+        >
+          <nav className="space-y-1">
+            {filteredMenuItems.map((item) => (
+              <MenuItem key={item.href} item={item} />
+            ))}
+          </nav>
+        </CollapsibleContent>
+        <div className="p-4 border-t border-border">
+          {isExpanded ? (
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-muted-foreground hover:text-foreground"
+              onClick={handleSignOut}
+            >
+              <LogOut className="mr-3 h-5 w-5" />
+              Sign Out
+            </Button>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-full text-muted-foreground hover:text-foreground"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Sign Out</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      </Collapsible>
+    </TooltipProvider>
   );
 };
 
