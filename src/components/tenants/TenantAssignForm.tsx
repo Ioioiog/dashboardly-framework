@@ -61,29 +61,40 @@ export function TenantAssignForm({
   });
 
   const checkTenancyOverlap = async (propertyId: string, startDate: string, endDate?: string) => {
-    const query = supabase
-      .from('tenancies')
-      .select('*')
-      .eq('property_id', propertyId)
-      .eq('status', 'active');
+    try {
+      console.log("Checking tenancy overlap for:", { propertyId, startDate, endDate });
+      
+      const query = supabase
+        .from('tenancies')
+        .select('*')
+        .eq('property_id', propertyId)
+        .eq('status', 'active');
 
-    query.or(`and(start_date,lte,${startDate},end_date,gte,${startDate}`);
-    if (endDate) {
-      query.or(`and(start_date,lte,${endDate},end_date,gte,${endDate})`);
-      query.or(`and(start_date,gte,${startDate},end_date,lte,${endDate})`);
-    } else {
-      query.or('end_date.is.null');
-    }
-    query.or(`))`);
+      // Add date overlap conditions
+      if (endDate) {
+        // Case 1: New tenancy overlaps with existing tenancy
+        query.or(`start_date.lte.${endDate},end_date.gte.${startDate}`);
+        // Case 2: Existing tenancy falls completely within new tenancy
+        query.or(`start_date.gte.${startDate},end_date.lte.${endDate}`);
+      } else {
+        // For indefinite tenancies, check if any existing tenancy overlaps with start date
+        query.or(`start_date.lte.${startDate},end_date.is.null`);
+        query.or(`start_date.lte.${startDate},end_date.gte.${startDate}`);
+      }
 
-    const { data: overlappingTenancies, error } = await query;
+      const { data: overlappingTenancies, error } = await query;
 
-    if (error) {
-      console.error("Error checking tenancy overlap:", error);
+      if (error) {
+        console.error("Error checking tenancy overlap:", error);
+        throw error;
+      }
+
+      console.log("Overlapping tenancies found:", overlappingTenancies);
+      return overlappingTenancies && overlappingTenancies.length > 0;
+    } catch (error) {
+      console.error("Error in checkTenancyOverlap:", error);
       throw error;
     }
-
-    return overlappingTenancies && overlappingTenancies.length > 0;
   };
 
   const handleFormSubmit = async (data: z.infer<typeof formSchema>) => {
