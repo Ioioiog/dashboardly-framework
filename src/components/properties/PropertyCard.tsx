@@ -149,7 +149,7 @@ export function PropertyCard({
               className="flex items-center gap-2"
             >
               <Edit className="h-4 w-4" />
-              <span className="hidden sm:inline ml-2">{t('common.edit')}</span>
+              <span className="hidden sm:inline ml-2">{t('common.actions.edit')}</span>
             </Button>
             <Button
               variant="outline"
@@ -158,7 +158,7 @@ export function PropertyCard({
               className="flex items-center gap-2 text-red-600 hover:text-red-700"
             >
               <Trash2 className="h-4 w-4" />
-              <span className="hidden sm:inline ml-2">{t('common.delete')}</span>
+              <span className="hidden sm:inline ml-2">{t('common.actions.delete')}</span>
             </Button>
           </CardFooter>
         )}
