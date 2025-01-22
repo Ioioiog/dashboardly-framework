@@ -21,6 +21,7 @@ export function useChat(selectedTenantId: string | null) {
           // Clear any invalid session data
           await supabase.auth.signOut();
           localStorage.removeItem('supabase.auth.token');
+          localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
           navigate('/auth');
           return;
         }
@@ -48,6 +49,8 @@ export function useChat(selectedTenantId: string | null) {
       } else {
         setCurrentUserId(null);
         if (event === 'SIGNED_OUT') {
+          localStorage.removeItem('supabase.auth.token');
+          localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
           navigate('/auth');
         }
       }
@@ -56,7 +59,7 @@ export function useChat(selectedTenantId: string | null) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, toast]);
 
   useEffect(() => {
     if (!currentUserId) {

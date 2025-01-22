@@ -27,6 +27,7 @@ export function ProtectedRoute({
           // Clear any invalid session data
           await supabase.auth.signOut();
           localStorage.removeItem('supabase.auth.token');
+          localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
           
           toast({
             title: "Session Expired",
@@ -40,6 +41,7 @@ export function ProtectedRoute({
           console.log("No valid session found");
           // Clear any stale session data
           localStorage.removeItem('supabase.auth.token');
+          localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
           return;
         }
 
@@ -48,6 +50,7 @@ export function ProtectedRoute({
         console.error("Session verification error:", error);
         // Clear session data on error
         localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
         
         toast({
           title: "Authentication Error",
@@ -68,6 +71,7 @@ export function ProtectedRoute({
       if (event === 'SIGNED_OUT' || !session) {
         console.log("User signed out or session expired");
         localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
       }
     });
 
