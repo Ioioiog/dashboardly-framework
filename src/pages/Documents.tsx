@@ -78,7 +78,7 @@ const Documents = () => {
   return (
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
-      <main className="flex-1 ml-64 p-8 animate-fade-in">
+      <main className="flex-1 p-8 animate-fade-in">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <header className="flex justify-between items-center">
