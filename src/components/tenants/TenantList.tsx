@@ -43,6 +43,8 @@ export function TenantList({ tenants }: TenantListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [showInactive, setShowInactive] = useState(false);
+  const [showResendDialog, setShowResendDialog] = useState(false);
+  const [selectedInvitation, setSelectedInvitation] = useState<any>(null);
   const { toast } = useToast();
 
   const handleTenantUpdate = () => {
@@ -99,6 +101,19 @@ export function TenantList({ tenants }: TenantListProps) {
 
   const getStatusBadgeColor = (status: string) => {
     return status === 'active' ? 'bg-green-500' : 'bg-gray-500';
+  };
+
+  const handleResendInvitation = (tenant: Tenant) => {
+    setSelectedInvitation({
+      id: tenant.invitation?.id,
+      email: tenant.email,
+      firstName: tenant.first_name,
+      lastName: tenant.last_name,
+      propertyIds: [tenant.property?.id],
+      startDate: tenant.tenancy?.start_date,
+      endDate: tenant.tenancy?.end_date,
+    });
+    setShowResendDialog(true);
   };
 
   const filteredTenants = (tenants || []).filter((tenant) => {
@@ -173,18 +188,25 @@ export function TenantList({ tenants }: TenantListProps) {
         {filteredTenants.map((tenant) => {
           if (!tenant || !tenant.property) return null;
           
+          const isExpired = tenant.invitation?.expiration_date && 
+            new Date(tenant.invitation.expiration_date) < new Date();
+          
           return viewMode === "grid" ? (
             <Card key={tenant.id}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <h3 className="font-semibold">{getTenantDisplayName(tenant)}</h3>
-                {tenant.tenancy && (
-                  <Badge className={getStatusBadgeColor(tenant.tenancy.status)}>
-                    {tenant.tenancy.status}
-                  </Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {isExpired && (
+                    <Badge variant="destructive">Expired</Badge>
+                  )}
+                  {tenant.tenancy && (
+                    <Badge className={getStatusBadgeColor(tenant.tenancy.status)}>
+                      {tenant.tenancy.status}
+                    </Badge>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">{tenant.email || "N/A"}</p>
                   <p className="text-sm text-muted-foreground">{tenant.phone || "N/A"}</p>
                   <p className="text-sm">{tenant.property.name} ({tenant.property.address})</p>
@@ -192,37 +214,45 @@ export function TenantList({ tenants }: TenantListProps) {
                     <p>Start: {tenant.tenancy?.start_date ? format(new Date(tenant.tenancy.start_date), "MMM d, yyyy") : "N/A"}</p>
                     <p>End: {tenant.tenancy?.end_date ? format(new Date(tenant.tenancy.end_date), "MMM d, yyyy") : "Ongoing"}</p>
                   </div>
-                  <div className="flex justify-end space-x-2 mt-4">
-                    <TenantObservationDialog
-                      tenantId={tenant.id}
-                      tenantName={getTenantDisplayName(tenant)}
-                    />
-                    <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="icon">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Tenant</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete this tenant? This action will remove all tenant observations and interactions, and mark their tenancy as inactive.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteTenant(tenant.id)}
-                            className="bg-red-600 hover:bg-red-700"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
+                <div className="flex justify-end space-x-2 mt-4">
+                  {isExpired && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleResendInvitation(tenant)}
+                    >
+                      Resend Invitation
+                    </Button>
+                  )}
+                  <TenantObservationDialog
+                    tenantId={tenant.id}
+                    tenantName={getTenantDisplayName(tenant)}
+                  />
+                  <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="icon">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Tenant</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this tenant? This action will remove all tenant observations and interactions, and mark their tenancy as inactive.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeleteTenant(tenant.id)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardContent>
             </Card>
@@ -245,13 +275,27 @@ export function TenantList({ tenants }: TenantListProps) {
                   : "Ongoing"}
               </TableCell>
               <TableCell>
-                {tenant.tenancy && (
-                  <Badge className={getStatusBadgeColor(tenant.tenancy.status)}>
-                    {tenant.tenancy.status}
-                  </Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {isExpired && (
+                    <Badge variant="destructive">Expired</Badge>
+                  )}
+                  {tenant.tenancy && (
+                    <Badge className={getStatusBadgeColor(tenant.tenancy.status)}>
+                      {tenant.tenancy.status}
+                    </Badge>
+                  )}
+                </div>
               </TableCell>
               <TableCell className="text-right space-x-2">
+                {isExpired && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleResendInvitation(tenant)}
+                  >
+                    Resend Invitation
+                  </Button>
+                )}
                 <TenantObservationDialog
                   tenantId={tenant.id}
                   tenantName={getTenantDisplayName(tenant)}
@@ -286,6 +330,13 @@ export function TenantList({ tenants }: TenantListProps) {
           );
         })}
       </div>
+
+      <TenantInviteDialog
+        properties={[]}
+        open={showResendDialog}
+        onOpenChange={setShowResendDialog}
+        existingInvitation={selectedInvitation}
+      />
     </div>
   );
 }

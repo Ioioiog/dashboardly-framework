@@ -11,9 +11,23 @@ interface TenantInviteDialogProps {
   properties: Property[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  existingInvitation?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    propertyIds: string[];
+    startDate: string;
+    endDate?: string;
+  };
 }
 
-export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInviteDialogProps) {
+export function TenantInviteDialog({ 
+  properties, 
+  open, 
+  onOpenChange, 
+  existingInvitation 
+}: TenantInviteDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -25,38 +39,58 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
       // Generate a unique token
       const token = crypto.randomUUID();
 
-      // Insert the invitation
-      const { data: invitation, error: invitationError } = await supabase
-        .from('tenant_invitations')
-        .insert({
-          email: data.email,
-          first_name: data.firstName,
-          last_name: data.lastName,
-          token: token,
-          start_date: data.startDate,
-          end_date: data.endDate || null,
-        })
-        .select()
-        .single();
+      if (existingInvitation) {
+        console.log("Resending invitation for:", existingInvitation.email);
+        
+        // Update the existing invitation with a new token and reset expiration
+        const { error: updateError } = await supabase
+          .from('tenant_invitations')
+          .update({
+            token: token,
+            expiration_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'pending',
+            used: false
+          })
+          .eq('id', existingInvitation.id);
 
-      if (invitationError) {
-        console.error("Error creating invitation:", invitationError);
-        throw new Error(invitationError.message);
-      }
+        if (updateError) {
+          console.error("Error updating invitation:", updateError);
+          throw new Error(updateError.message);
+        }
+      } else {
+        // Insert new invitation
+        const { data: invitation, error: invitationError } = await supabase
+          .from('tenant_invitations')
+          .insert({
+            email: data.email,
+            first_name: data.firstName,
+            last_name: data.lastName,
+            token: token,
+            start_date: data.startDate,
+            end_date: data.endDate || null,
+          })
+          .select()
+          .single();
 
-      // Insert property assignments
-      const propertyAssignments = data.propertyIds.map((propertyId: string) => ({
-        invitation_id: invitation.id,
-        property_id: propertyId,
-      }));
+        if (invitationError) {
+          console.error("Error creating invitation:", invitationError);
+          throw new Error(invitationError.message);
+        }
 
-      const { error: propertyAssignmentError } = await supabase
-        .from('tenant_invitation_properties')
-        .insert(propertyAssignments);
+        // Insert property assignments
+        const propertyAssignments = data.propertyIds.map((propertyId: string) => ({
+          invitation_id: invitation.id,
+          property_id: propertyId,
+        }));
 
-      if (propertyAssignmentError) {
-        console.error("Error assigning properties:", propertyAssignmentError);
-        throw new Error(propertyAssignmentError.message);
+        const { error: propertyAssignmentError } = await supabase
+          .from('tenant_invitation_properties')
+          .insert(propertyAssignments);
+
+        if (propertyAssignmentError) {
+          console.error("Error assigning properties:", propertyAssignmentError);
+          throw new Error(propertyAssignmentError.message);
+        }
       }
 
       // Get property details for the email
@@ -94,7 +128,9 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
 
       toast({
         title: "Success",
-        description: "Tenant invitation sent successfully.",
+        description: existingInvitation 
+          ? "Invitation resent successfully."
+          : "Tenant invitation sent successfully.",
       });
 
       onOpenChange(false);
@@ -114,12 +150,15 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create Tenant Account</DialogTitle>
+          <DialogTitle>
+            {existingInvitation ? "Resend Invitation" : "Create Tenant Account"}
+          </DialogTitle>
         </DialogHeader>
         <TenantInviteForm 
           properties={properties}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
+          defaultValues={existingInvitation}
         />
       </DialogContent>
     </Dialog>
