@@ -8,9 +8,10 @@ import { useState } from "react";
 
 interface TenantsHeaderProps {
   properties: Property[];
+  userRole: "landlord" | "tenant";
 }
 
-export function TenantsHeader({ properties }: TenantsHeaderProps) {
+export function TenantsHeader({ properties, userRole }: TenantsHeaderProps) {
   const { t } = useTranslation();
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);

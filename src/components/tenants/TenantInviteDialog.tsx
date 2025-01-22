@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Property } from "@/utils/propertyUtils";
 import { TenantInviteForm } from "./TenantInviteForm";
@@ -10,11 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface TenantInviteDialogProps {
   properties: Property[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
+export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInviteDialogProps) {
   const { toast } = useToast();
-  const [open, setOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmit = async (data: any) => {
@@ -64,7 +64,7 @@ export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
         description: "Tenant created successfully.",
       });
 
-      setOpen(false);
+      onOpenChange(false);
     } catch (error) {
       console.error("Error creating tenant:", error);
       toast({
@@ -78,10 +78,7 @@ export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Create Tenant</Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create Tenant Account</DialogTitle>
