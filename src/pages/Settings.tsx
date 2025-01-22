@@ -54,7 +54,7 @@ const Settings = () => {
   return (
     <div className="flex h-screen bg-background">
       <DashboardSidebar />
-      <main className="flex-1 p-8 ml-64 overflow-y-auto">
+      <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Settings Navigation - Now a horizontal row */}
           <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto">
