@@ -10,7 +10,6 @@ import {
   Droplets,
   LogOut,
   MessageCircle,
-  FileInvoice,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -62,7 +61,7 @@ export default function DashboardSidebar() {
     }
   };
 
-  const menuItems = [
+const menuItems = [
     {
       title: "Dashboard",
       icon: LayoutDashboard,
@@ -101,7 +100,7 @@ export default function DashboardSidebar() {
     },
     {
       title: "Invoices",
-      icon: FileInvoice,
+      icon: FileText,
       href: "/invoices",
       roles: ["landlord", "tenant"],
     },
