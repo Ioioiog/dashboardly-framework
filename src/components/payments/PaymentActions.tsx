@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Check, X, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,35 +16,60 @@ interface PaymentActionsProps {
   onStatusChange: () => void;
 }
 
-export function PaymentActions({ paymentId, status, userRole, onStatusChange }: PaymentActionsProps) {
+export const PaymentActions = ({
+  paymentId,
+  status,
+  userRole,
+  onStatusChange,
+}: PaymentActionsProps) => {
   const { toast } = useToast();
 
   const handleStatusChange = async (newStatus: string) => {
     try {
-      console.log("Updating payment status:", { paymentId, newStatus });
       const { error } = await supabase
         .from("payments")
-        .update({ 
-          status: newStatus,
-          paid_date: newStatus === "paid" ? new Date().toISOString() : null 
-        })
+        .update({ status: newStatus })
         .eq("id", paymentId);
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Payment status updated successfully",
+        description: `Payment marked as ${newStatus}`,
       });
 
-      // Call the onStatusChange callback to refresh the list
       onStatusChange();
     } catch (error) {
       console.error("Error updating payment status:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update payment status",
+        description: "Could not update payment status",
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from("payments")
+        .delete()
+        .eq("id", paymentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Payment deleted successfully",
+      });
+
+      onStatusChange();
+    } catch (error) {
+      console.error("Error deleting payment:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not delete payment",
       });
     }
   };
@@ -62,22 +87,26 @@ export function PaymentActions({ paymentId, status, userRole, onStatusChange }: 
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {status !== "paid" && (
+        {status === "pending" && (
           <DropdownMenuItem onClick={() => handleStatusChange("paid")}>
+            <Check className="mr-2 h-4 w-4" />
             Mark as Paid
           </DropdownMenuItem>
         )}
-        {status !== "pending" && (
+        {status === "paid" && (
           <DropdownMenuItem onClick={() => handleStatusChange("pending")}>
+            <X className="mr-2 h-4 w-4" />
             Mark as Pending
           </DropdownMenuItem>
         )}
-        {status !== "overdue" && (
-          <DropdownMenuItem onClick={() => handleStatusChange("overdue")}>
-            Mark as Overdue
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem 
+          onClick={handleDelete}
+          className="text-red-600 focus:text-red-600"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};
