@@ -180,13 +180,14 @@ export const DashboardSidebar = () => {
       <div className="p-4">
         <div className="flex items-center gap-2">
           <img 
-            src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
+            src="/lovable-uploads/9c23bc1b-4e8c-433e-a961-df606dc6a2c6.png" 
             alt="AdminChirii.ro Logo" 
-            className="h-8"
+            className="h-8 w-8"
           />
           {isExpanded && <span className="font-semibold">AdminChirii.ro</span>}
         </div>
       </div>
+      
       <CollapsibleTrigger asChild>
         <Button
           variant="ghost"
