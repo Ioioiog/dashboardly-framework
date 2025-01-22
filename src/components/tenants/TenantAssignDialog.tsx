@@ -22,7 +22,12 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
       // First get all active tenancy tenant IDs
       const { data: activeTenancies, error: tenancyError } = await supabase
         .from("tenancies")
-        .select("tenant_id")
+        .select(`
+          tenant_id,
+          property_id,
+          start_date,
+          end_date
+        `)
         .eq("status", "active");
 
       if (tenancyError) {
@@ -30,29 +35,42 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
         throw tenancyError;
       }
 
-      const activeTenantIds = activeTenancies?.map(t => t.tenant_id) || [];
-      console.log("Active tenant IDs:", activeTenantIds);
-
-      // Then fetch available tenants
-      const query = supabase
+      // Get all tenant profiles that have the 'tenant' role
+      const { data: profiles, error: profileError } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, email, phone, role, created_at, updated_at")
         .eq("role", "tenant");
 
-      // Only add the not-in filter if there are active tenants
-      if (activeTenantIds.length > 0) {
-        query.not('id', 'in', `(${activeTenantIds.join(',')})`);
+      if (profileError) {
+        console.error("Error fetching tenant profiles:", profileError);
+        throw profileError;
       }
 
-      const { data: profiles, error } = await query;
+      // Filter out tenants who have active tenancies with overlapping dates
+      const availableTenants = profiles.filter(profile => {
+        // Check if tenant has any active tenancies
+        const tenantTenancies = activeTenancies?.filter(t => t.tenant_id === profile.id) || [];
+        
+        // If tenant has no tenancies, they are available
+        if (tenantTenancies.length === 0) {
+          return true;
+        }
 
-      if (error) {
-        console.error("Error fetching available tenants:", error);
-        throw error;
-      }
+        // Check for each tenancy if it's currently active (no end date or end date in future)
+        const hasActiveOverlappingTenancy = tenantTenancies.some(tenancy => {
+          const today = new Date();
+          const endDate = tenancy.end_date ? new Date(tenancy.end_date) : null;
+          
+          // If there's no end date or the end date is in the future, tenant is not available
+          return !endDate || endDate > today;
+        });
 
-      console.log("Available tenants:", profiles);
-      return profiles;
+        // Tenant is available if they don't have any active overlapping tenancies
+        return !hasActiveOverlappingTenancy;
+      });
+
+      console.log("Available tenants:", availableTenants);
+      return availableTenants;
     },
     enabled: open,
   });
@@ -61,6 +79,27 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
     try {
       console.log("Creating tenancies with data:", data);
       
+      // Additional validation before creating tenancies
+      const { data: existingTenancies, error: validationError } = await supabase
+        .from("tenancies")
+        .select("*")
+        .eq("tenant_id", data.tenantId)
+        .eq("status", "active")
+        .overlaps("start_date", data.startDate, data.endDate || "infinity");
+
+      if (validationError) {
+        throw validationError;
+      }
+
+      if (existingTenancies && existingTenancies.length > 0) {
+        toast({
+          title: "Error",
+          description: "This tenant already has an active tenancy during the selected period.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Create tenancies for each selected property
       const tenancyPromises = data.propertyIds.map(async (propertyId: string) => {
         const { error: tenancyError } = await supabase
