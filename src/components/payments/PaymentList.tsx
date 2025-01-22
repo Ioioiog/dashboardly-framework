@@ -57,30 +57,47 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
     }
   };
 
-  // Set up real-time subscription
+  // Set up real-time subscription with proper channel configuration
   useEffect(() => {
     console.log("Setting up real-time subscription for payments...");
+    
+    // Enable real-time subscription for the payments table
     const channel = supabase
       .channel('payments-changes')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'payments'
         },
         (payload) => {
           console.log("Received real-time update:", payload);
+          // Immediately refresh the payments data when any change occurs
           refreshPayments();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+        
+        if (status === 'SUBSCRIBED') {
+          console.log("Successfully subscribed to payments changes");
+        }
+        
+        if (status === 'CLOSED') {
+          console.log("Subscription to payments changes closed");
+        }
+        
+        if (status === 'CHANNEL_ERROR') {
+          console.error("Error in payments subscription channel");
+        }
+      });
 
     return () => {
       console.log("Cleaning up real-time subscription...");
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [queryClient]); // Only re-run if queryClient changes
 
   if (payments.length === 0) {
     return (
