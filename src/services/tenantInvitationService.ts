@@ -21,10 +21,10 @@ export const tenantInvitationService = {
         .eq('status', 'pending')
         .eq('used', false)
         .gt('expiration_date', new Date().toISOString())
-        .single();
+        .maybeSingle();  // Changed from .single() to .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') {
-        console.error("Error checking existing invitations:", error);
+      if (error) {
+        console.error("Error checking existing invitations:", { message: error.message, details: error.details, hint: error.hint, code: error.code });
         throw new Error("Failed to check existing invitations");
       }
 
@@ -44,7 +44,7 @@ export const tenantInvitationService = {
         .from('profiles')
         .select('id')
         .eq('email', data.email)
-        .maybeSingle();
+        .maybeSingle();  // Using maybeSingle() here as well for consistency
 
       if (existingProfile) {
         throw new Error("A user with this email already exists");
