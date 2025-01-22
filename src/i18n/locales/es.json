@@ -9,6 +9,25 @@
     "success": "Éxito",
     "unexpectedError": "Ocurrió un error inesperado"
   },
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcome": "Bienvenido",
+    "overview": "Aquí hay una visión general de sus propiedades y finanzas",
+    "metrics": {
+      "totalProperties": "Total de Propiedades",
+      "monthlyRevenue": "Ingresos Mensuales",
+      "activeTenants": "Inquilinos Activos",
+      "pendingMaintenance": "Mantenimiento Pendiente",
+      "paymentStatus": "Estado de Pago"
+    },
+    "revenue": {
+      "title": "Historial de Ingresos",
+      "prediction": {
+        "title": "Predicciones de Ingresos"
+      },
+      "noData": "No hay datos de ingresos disponibles"
+    }
+  },
   "tenants": {
     "title": {
       "landlord": "Gestionar Inquilinos",

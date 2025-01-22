@@ -9,6 +9,25 @@
     "success": "Success",
     "unexpectedError": "An unexpected error occurred"
   },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "overview": "Here's an overview of your properties and finances",
+    "metrics": {
+      "totalProperties": "Total Properties",
+      "monthlyRevenue": "Monthly Revenue",
+      "activeTenants": "Active Tenants",
+      "pendingMaintenance": "Pending Maintenance",
+      "paymentStatus": "Payment Status"
+    },
+    "revenue": {
+      "title": "Revenue History",
+      "prediction": {
+        "title": "Revenue Predictions"
+      },
+      "noData": "No revenue data available"
+    }
+  },
   "tenants": {
     "title": {
       "landlord": "Manage Tenants",

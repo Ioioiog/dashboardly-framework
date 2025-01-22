@@ -9,6 +9,25 @@
     "success": "Succès",
     "unexpectedError": "Une erreur inattendue s'est produite"
   },
+  "dashboard": {
+    "title": "Tableau de Bord",
+    "welcome": "Bienvenue",
+    "overview": "Voici un aperçu de vos propriétés et de vos finances",
+    "metrics": {
+      "totalProperties": "Total des Propriétés",
+      "monthlyRevenue": "Revenus Mensuels",
+      "activeTenants": "Locataires Actifs",
+      "pendingMaintenance": "Maintenance en Attente",
+      "paymentStatus": "État des Paiements"
+    },
+    "revenue": {
+      "title": "Historique des Revenus",
+      "prediction": {
+        "title": "Prévisions des Revenus"
+      },
+      "noData": "Aucune donnée de revenus disponible"
+    }
+  },
   "tenants": {
     "title": {
       "landlord": "Gérer les Locataires",

@@ -9,6 +9,25 @@
     "success": "Succes",
     "unexpectedError": "A apărut o eroare neașteptată"
   },
+  "dashboard": {
+    "title": "Panou de Control",
+    "welcome": "Bun venit",
+    "overview": "Iată o prezentare generală a proprietăților și finanțelor dvs",
+    "metrics": {
+      "totalProperties": "Total Proprietăți",
+      "monthlyRevenue": "Venit Lunar",
+      "activeTenants": "Chiriași Activi",
+      "pendingMaintenance": "Mentenanță în Așteptare",
+      "paymentStatus": "Status Plată"
+    },
+    "revenue": {
+      "title": "Istoric Venituri",
+      "prediction": {
+        "title": "Predicții Venituri"
+      },
+      "noData": "Nu există date despre venituri"
+    }
+  },
   "tenants": {
     "title": {
       "landlord": "Gestionare Chiriași",
