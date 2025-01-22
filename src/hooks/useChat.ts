@@ -31,12 +31,11 @@ export function useChat(selectedTenantId: string | null) {
 
     const setupConversation = async () => {
       try {
-        // First get the user's profile to determine their role
         const { data: userProfile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', currentUserId)
-          .single();
+          .maybeSingle();
 
         if (profileError) {
           console.error("Error fetching user profile:", profileError);
@@ -49,11 +48,9 @@ export function useChat(selectedTenantId: string | null) {
           .from('conversations')
           .select('id');
 
-        // If user is a tenant, find conversation where they are the tenant
-        if (userProfile.role === 'tenant') {
+        if (userProfile?.role === 'tenant') {
           query = query.eq('tenant_id', currentUserId);
         } else {
-          // For landlords, we need the selected tenant
           if (!selectedTenantId) {
             console.log("No tenant selected for landlord");
             return;
@@ -70,8 +67,7 @@ export function useChat(selectedTenantId: string | null) {
         }
 
         if (!conversation) {
-          // Only create new conversation if user is landlord and has selected a tenant
-          if (userProfile.role === 'landlord' && selectedTenantId) {
+          if (userProfile?.role === 'landlord' && selectedTenantId) {
             const { data: newConversation, error: createError } = await supabase
               .from('conversations')
               .insert({
@@ -131,13 +127,14 @@ export function useChat(selectedTenantId: string | null) {
       }
 
       console.log("Fetched messages:", data);
-      setMessages(data);
+      setMessages(data || []);
     };
 
     fetchMessages();
 
+    // Subscribe to new messages
     const channel = supabase
-      .channel("messages")
+      .channel(`messages:${conversationId}`)
       .on(
         "postgres_changes",
         {
@@ -170,9 +167,12 @@ export function useChat(selectedTenantId: string | null) {
           setMessages((prev) => [...prev, newMessage]);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+      });
 
     return () => {
+      console.log("Cleaning up subscription");
       supabase.removeChannel(channel);
     };
   }, [conversationId]);
