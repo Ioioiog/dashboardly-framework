@@ -1,43 +1,20 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 import { Property } from "@/utils/propertyUtils";
-import { format } from "date-fns";
-import { Input } from "@/components/ui/input";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-const assignTenantSchema = z.object({
-  propertyId: z.string().min(1, "Please select a property"),
-  tenantId: z.string().min(1, "Please select a tenant"),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().optional(),
-});
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { TenantAssignForm } from "./TenantAssignForm";
 
 interface TenantAssignDialogProps {
+  properties: Property[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  properties: Property[];
 }
 
-export function TenantAssignDialog({ open, onOpenChange, properties }: TenantAssignDialogProps) {
+export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAssignDialogProps) {
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof assignTenantSchema>>({
-    resolver: zodResolver(assignTenantSchema),
-    defaultValues: {
-      propertyId: "",
-      tenantId: "",
-      startDate: format(new Date(), "yyyy-MM-dd"),
-    },
-  });
-
-  const { data: availableTenants } = useQuery({
+  const { data: availableTenants, isLoading } = useQuery({
     queryKey: ["available-tenants"],
     queryFn: async () => {
       console.log("Fetching available tenants");
@@ -80,35 +57,37 @@ export function TenantAssignDialog({ open, onOpenChange, properties }: TenantAss
     enabled: open,
   });
 
-  const onSubmit = async (values: z.infer<typeof assignTenantSchema>) => {
+  const handleSubmit = async (data: any) => {
     try {
-      console.log("Assigning tenant with values:", values);
-
-      const { error } = await supabase
-        .from("tenancies")
+      console.log("Creating tenancy with data:", data);
+      
+      const { error: tenancyError } = await supabase
+        .from('tenancies')
         .insert({
-          property_id: values.propertyId,
-          tenant_id: values.tenantId,
-          start_date: values.startDate,
-          end_date: values.endDate || null,
-          status: "active",
+          property_id: data.propertyId,
+          tenant_id: data.tenantId,
+          start_date: data.startDate,
+          end_date: data.endDate || null,
+          status: 'active'
         });
 
-      if (error) throw error;
+      if (tenancyError) {
+        console.error("Error creating tenancy:", tenancyError);
+        throw tenancyError;
+      }
 
       toast({
         title: "Success",
-        description: "Tenant assigned successfully",
+        description: "Tenant assigned successfully.",
       });
 
       onOpenChange(false);
-      form.reset();
     } catch (error) {
-      console.error("Error assigning tenant:", error);
+      console.error("Error in handleSubmit:", error);
       toast({
-        variant: "destructive",
         title: "Error",
         description: "Failed to assign tenant. Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -118,91 +97,13 @@ export function TenantAssignDialog({ open, onOpenChange, properties }: TenantAss
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Assign Tenant to Property</DialogTitle>
-          <DialogDescription>
-            Select a property and tenant to create a new tenancy.
-          </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="propertyId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Property</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a property" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {properties.map((property) => (
-                        <SelectItem key={property.id} value={property.id}>
-                          {property.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="tenantId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tenant</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a tenant" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {availableTenants?.map((tenant) => (
-                        <SelectItem key={tenant.id} value={tenant.id}>
-                          {tenant.first_name} {tenant.last_name} ({tenant.email})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="startDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Start Date</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="endDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>End Date (Optional)</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full">
-              Assign Tenant
-            </Button>
-          </form>
-        </Form>
+        <TenantAssignForm 
+          properties={properties}
+          availableTenants={availableTenants || []}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
       </DialogContent>
     </Dialog>
   );

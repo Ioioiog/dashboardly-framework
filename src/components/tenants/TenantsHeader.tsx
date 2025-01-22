@@ -32,22 +32,24 @@ export function TenantsHeader({ properties, userRole }: TenantsHeaderProps) {
           {description}
         </p>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <Button
-          onClick={() => setShowAssignDialog(true)}
-          className="flex items-center gap-2"
-        >
-          <UserPlus className="h-4 w-4" />
-          Assign Tenant
-        </Button>
-        <Button
-          onClick={() => setShowInviteDialog(true)}
-          className="flex items-center gap-2"
-        >
-          <Mail className="h-4 w-4" />
-          Invite Tenant
-        </Button>
-      </div>
+      {userRole === "landlord" && (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => setShowAssignDialog(true)}
+            className="flex items-center gap-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            Assign Existing Tenant
+          </Button>
+          <Button
+            onClick={() => setShowInviteDialog(true)}
+            className="flex items-center gap-2"
+          >
+            <Mail className="h-4 w-4" />
+            Invite New Tenant
+          </Button>
+        </div>
+      )}
 
       <TenantInviteDialog
         properties={properties}
