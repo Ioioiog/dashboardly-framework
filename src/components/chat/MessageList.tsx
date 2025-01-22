@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Message {
@@ -18,6 +18,11 @@ interface MessageListProps {
 }
 
 export function MessageList({ messages, currentUserId, messagesEndRef }: MessageListProps) {
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, messagesEndRef]);
+
   return (
     <ScrollArea className="flex-1 p-4">
       <div className="space-y-4">
@@ -27,24 +32,22 @@ export function MessageList({ messages, currentUserId, messagesEndRef }: Message
               ? `${message.sender.first_name} ${message.sender.last_name}`
               : "Unknown User";
 
+          const isCurrentUser = message.sender_id === currentUserId;
+
           return (
             <div
               key={message.id}
-              className={`flex ${
-                message.sender_id === currentUserId
-                  ? "justify-end"
-                  : "justify-start"
-              }`}
+              className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}
             >
               <div
                 className={`max-w-[70%] rounded-lg p-3 ${
-                  message.sender_id === currentUserId
+                  isCurrentUser
                     ? "bg-blue-500 text-white"
                     : "bg-gray-100"
                 }`}
               >
                 <p className="text-sm font-semibold mb-1">{senderName}</p>
-                <p>{message.content}</p>
+                <p className="break-words">{message.content}</p>
               </div>
             </div>
           );
