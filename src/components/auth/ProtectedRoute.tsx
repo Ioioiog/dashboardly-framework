@@ -34,21 +34,21 @@ export function ProtectedRoute({
           return;
         }
 
-        if (!session) {
+        if (!session?.access_token) {
           console.log("No valid session found");
           handleSessionError();
           return;
         }
 
         // Verify the session is still valid by attempting to get the user
-        const { error: userError } = await supabase.auth.getUser();
-        if (userError) {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
           console.error("User verification error:", userError);
           handleSessionError();
           return;
         }
 
-        console.log("Session verified successfully for user:", session.user.id);
+        console.log("Session verified successfully for user:", user.id);
       } catch (error) {
         console.error("Session verification error:", error);
         if (mounted) {
@@ -61,8 +61,12 @@ export function ProtectedRoute({
       // Clear any stored session data
       localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
       
-      // Sign out the user
-      await supabase.auth.signOut();
+      try {
+        // Sign out the user
+        await supabase.auth.signOut();
+      } catch (error) {
+        console.error("Error during signout:", error);
+      }
       
       if (mounted) {
         toast({
