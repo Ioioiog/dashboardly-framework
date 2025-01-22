@@ -1,4 +1,3 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import { TenantInviteDialog } from "./TenantInviteDialog";
 import { Property } from "@/utils/propertyUtils";
@@ -8,59 +7,50 @@ import { UserPlus, Mail } from "lucide-react";
 import { useState } from "react";
 
 interface TenantsHeaderProps {
-  userRole: "landlord" | "tenant";
   properties: Property[];
 }
 
-export const TenantsHeader = ({ userRole, properties }: TenantsHeaderProps) => {
+export function TenantsHeader({ properties }: TenantsHeaderProps) {
   const { t } = useTranslation();
-  const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
 
   return (
-    <header className="mb-8 flex justify-between items-center">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 className="text-3xl font-semibold text-gray-900">
-          {userRole === "landlord" 
-            ? t('tenants.title.landlord') 
-            : t('tenants.title.tenant')}
-        </h1>
-        <p className="mt-2 text-dashboard-text">
-          {userRole === "landlord"
-            ? t('tenants.description.landlord')
-            : t('tenants.description.tenant')}
+        <h1 className="text-3xl font-bold tracking-tight">{t('tenants.title')}</h1>
+        <p className="text-muted-foreground">
+          {t('tenants.description')}
         </p>
       </div>
-      {userRole === "landlord" && (
-        <div className="flex gap-2">
-          <Button 
-            variant="outline"
-            onClick={() => setShowAssignDialog(true)}
-          >
-            <UserPlus className="mr-2 h-4 w-4" />
-            Assign Tenant
-          </Button>
-          <Button
-            onClick={() => setShowInviteDialog(true)}
-          >
-            <Mail className="mr-2 h-4 w-4" />
-            Invite Tenant
-          </Button>
-        </div>
-      )}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          onClick={() => setShowAssignDialog(true)}
+          className="flex items-center gap-2"
+        >
+          <UserPlus className="h-4 w-4" />
+          Assign Tenant
+        </Button>
+        <Button
+          onClick={() => setShowInviteDialog(true)}
+          className="flex items-center gap-2"
+        >
+          <Mail className="h-4 w-4" />
+          Invite Tenant
+        </Button>
+      </div>
 
-      {showAssignDialog && (
-        <TenantAssignDialog
-          open={showAssignDialog}
-          onOpenChange={setShowAssignDialog}
-          propertyId={null}
-          propertyName={null}
-        />
-      )}
-
-      {showInviteDialog && (
-        <TenantInviteDialog properties={properties} />
-      )}
-    </header>
+      <TenantInviteDialog
+        properties={properties}
+        open={showInviteDialog}
+        onOpenChange={setShowInviteDialog}
+      />
+      
+      <TenantAssignDialog
+        properties={properties}
+        open={showAssignDialog}
+        onOpenChange={setShowAssignDialog}
+      />
+    </div>
   );
-};
+}

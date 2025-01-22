@@ -1,156 +1,98 @@
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { registerTenant } from "@/utils/tenantUtils";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Property } from "@/utils/propertyUtils";
+import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const assignTenantSchema = z.object({
+  propertyId: z.string().min(1, "Please select a property"),
+  tenantId: z.string().min(1, "Please select a tenant"),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().optional(),
+});
 
 interface TenantAssignDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  propertyId?: string;
-  propertyName?: string;
+  properties: Property[];
 }
 
-export function TenantAssignDialog({
-  open,
-  onOpenChange,
-  propertyId,
-  propertyName,
-}: TenantAssignDialogProps) {
-  const [email, setEmail] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [existingTenants, setExistingTenants] = useState<any[]>([]);
-  const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
-  const [isNewTenant, setIsNewTenant] = useState(true);
-  const [availableProperties, setAvailableProperties] = useState<any[]>([]);
-  const [selectedPropertyIds, setSelectedPropertyIds] = useState<string[]>(propertyId ? [propertyId] : []);
+export function TenantAssignDialog({ open, onOpenChange, properties }: TenantAssignDialogProps) {
   const { toast } = useToast();
 
-  // Fetch existing tenants and available properties when dialog opens
-  React.useEffect(() => {
-    if (open) {
-      fetchExistingTenants();
-      fetchAvailableProperties();
-    }
-  }, [open]);
+  const form = useForm<z.infer<typeof assignTenantSchema>>({
+    resolver: zodResolver(assignTenantSchema),
+    defaultValues: {
+      propertyId: "",
+      tenantId: "",
+      startDate: format(new Date(), "yyyy-MM-dd"),
+    },
+  });
 
-  const fetchExistingTenants = async () => {
-    try {
-      const { data: tenants, error } = await supabase
-        .from('profiles')
-        .select('id, email, first_name, last_name')
-        .eq('role', 'tenant');
+  const { data: availableTenants } = useQuery({
+    queryKey: ["available-tenants"],
+    queryFn: async () => {
+      console.log("Fetching available tenants");
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email")
+        .eq("role", "tenant")
+        .not("id", "in", (
+          await supabase
+            .from("tenancies")
+            .select("tenant_id")
+            .eq("status", "active")
+        ).data?.map(t => t.tenant_id) || []);
 
-      if (error) throw error;
-      setExistingTenants(tenants || []);
-    } catch (error) {
-      console.error('Error fetching tenants:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch existing tenants",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const fetchAvailableProperties = async () => {
-    try {
-      const { data: properties, error } = await supabase
-        .from('properties')
-        .select('*')
-        .not('tenancies', 'cs', '[{"status":"active"}]');
-
-      if (error) throw error;
-      setAvailableProperties(properties || []);
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch available properties",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      if (selectedPropertyIds.length === 0) {
-        throw new Error("Please select at least one property");
+      if (error) {
+        console.error("Error fetching available tenants:", error);
+        throw error;
       }
 
-      if (isNewTenant) {
-        // Register new tenant for multiple properties
-        await registerTenant({
-          email,
-          firstName,
-          lastName,
-          propertyIds: selectedPropertyIds,
-          startDate,
-          endDate
+      console.log("Available tenants:", profiles);
+      return profiles;
+    },
+    enabled: open,
+  });
+
+  const onSubmit = async (values: z.infer<typeof assignTenantSchema>) => {
+    try {
+      console.log("Assigning tenant with values:", values);
+
+      const { error } = await supabase
+        .from("tenancies")
+        .insert({
+          property_id: values.propertyId,
+          tenant_id: values.tenantId,
+          start_date: values.startDate,
+          end_date: values.endDate || null,
+          status: "active",
         });
 
-        toast({
-          title: "Success",
-          description: "Tenant invitation sent and tenancies created successfully",
-        });
-      } else if (selectedTenantId) {
-        // Create tenancies for existing tenant
-        const tenancies = selectedPropertyIds.map(propertyId => ({
-          property_id: propertyId,
-          tenant_id: selectedTenantId,
-          start_date: startDate,
-          end_date: endDate || null,
-          status: 'active'
-        }));
+      if (error) throw error;
 
-        const { error: tenancyError } = await supabase
-          .from('tenancies')
-          .insert(tenancies);
-
-        if (tenancyError) throw tenancyError;
-
-        toast({
-          title: "Success",
-          description: "Tenancies created successfully",
-        });
-      }
+      toast({
+        title: "Success",
+        description: "Tenant assigned successfully",
+      });
 
       onOpenChange(false);
-      // Reset form
-      setEmail("");
-      setFirstName("");
-      setLastName("");
-      setStartDate("");
-      setEndDate("");
-      setSelectedTenantId(null);
-      setSelectedPropertyIds([]);
-    } catch (error: any) {
-      console.error("Error in tenant assignment:", error);
+      form.reset();
+    } catch (error) {
+      console.error("Error assigning tenant:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to assign tenant",
         variant: "destructive",
+        title: "Error",
+        description: "Failed to assign tenant. Please try again.",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -158,131 +100,92 @@ export function TenantAssignDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Assign Tenant to Properties</DialogTitle>
+          <DialogTitle>Assign Tenant to Property</DialogTitle>
           <DialogDescription>
-            {propertyName ? `Assign a tenant to: ${propertyName}` : 'Assign a tenant to multiple properties'}
+            Select a property and tenant to create a new tenancy.
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="mb-4">
-          <Label>Tenant Type</Label>
-          <div className="flex gap-4 mt-2">
-            <Button
-              variant={isNewTenant ? "default" : "outline"}
-              onClick={() => setIsNewTenant(true)}
-            >
-              New Tenant
-            </Button>
-            <Button
-              variant={!isNewTenant ? "default" : "outline"}
-              onClick={() => setIsNewTenant(false)}
-            >
-              Existing Tenant
-            </Button>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isNewTenant ? (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="tenant@example.com"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                  placeholder="John"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                  placeholder="Doe"
-                />
-              </div>
-            </>
-          ) : (
-            <div className="space-y-2">
-              <Label>Select Existing Tenant</Label>
-              <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-                {existingTenants.map((tenant) => (
-                  <div key={tenant.id} className="flex items-center space-x-2 py-2">
-                    <Checkbox
-                      checked={selectedTenantId === tenant.id}
-                      onCheckedChange={() => setSelectedTenantId(tenant.id)}
-                    />
-                    <Label>
-                      {tenant.first_name} {tenant.last_name} ({tenant.email})
-                    </Label>
-                  </div>
-                ))}
-              </ScrollArea>
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label>Select Properties</Label>
-            <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-              {availableProperties.map((property) => (
-                <div key={property.id} className="flex items-center space-x-2 py-2">
-                  <Checkbox
-                    checked={selectedPropertyIds.includes(property.id)}
-                    onCheckedChange={(checked) => {
-                      setSelectedPropertyIds(prev => 
-                        checked 
-                          ? [...prev, property.id]
-                          : prev.filter(id => id !== property.id)
-                      );
-                    }}
-                    disabled={propertyId === property.id}
-                  />
-                  <Label>
-                    {property.name} ({property.address})
-                  </Label>
-                </div>
-              ))}
-            </ScrollArea>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="startDate">Start Date</Label>
-            <Input
-              id="startDate"
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              required
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="propertyId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Property</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a property" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {properties.map((property) => (
+                        <SelectItem key={property.id} value={property.id}>
+                          {property.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="endDate">End Date (Optional)</Label>
-            <Input
-              id="endDate"
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+            <FormField
+              control={form.control}
+              name="tenantId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tenant</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a tenant" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {availableTenants?.map((tenant) => (
+                        <SelectItem key={tenant.id} value={tenant.id}>
+                          {tenant.first_name} {tenant.last_name} ({tenant.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Creating Tenancy..." : "Create Tenancy"}
-          </Button>
-        </form>
+            <FormField
+              control={form.control}
+              name="startDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Date</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="endDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>End Date (Optional)</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full">
+              Assign Tenant
+            </Button>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
