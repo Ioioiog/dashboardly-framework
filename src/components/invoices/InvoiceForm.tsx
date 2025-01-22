@@ -1,231 +1,205 @@
-import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-
-interface InvoiceFormValues {
-  property_id: string;
-  utility_id: string;
-  details?: string;
-  document?: File;
-  tenant_email?: string;
-}
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface InvoiceFormProps {
   onSuccess?: () => void;
 }
 
-interface Utility {
+interface Property {
   id: string;
-  amount: number;
+  name: string;
+}
+
+interface Tenant {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
+interface UtilityBill {
+  id: string;
   type: string;
+  amount: number;
   due_date: string;
 }
 
 export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [utilityBills, setUtilityBills] = useState<UtilityBill[]>([]);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
+  const [selectedTenantId, setSelectedTenantId] = useState<string>("");
+  const [selectedUtilityId, setSelectedUtilityId] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
+  const [details, setDetails] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-  const [properties, setProperties] = useState<Array<{ id: string; name: string }>>([]);
-  const [utilities, setUtilities] = useState<Utility[]>([]);
   const { toast } = useToast();
-  const form = useForm<InvoiceFormValues>();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
-  const [selectedUtilityId, setSelectedUtilityId] = useState<string | null>(null);
-  const [tenantEmail, setTenantEmail] = useState<string | null>(null);
-  const [selectedUtilityAmount, setSelectedUtilityAmount] = useState<number | null>(null);
 
-  // Fetch properties when component mounts
   useEffect(() => {
-    const fetchProperties = async () => {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) {
-        console.error("Error getting user:", userError);
-        return;
-      }
-      if (!user) return;
-
-      const { data: properties, error: propertiesError } = await supabase
-        .from("properties")
-        .select("id, name")
-        .eq("landlord_id", user.id);
-
-      if (propertiesError) {
-        console.error("Error fetching properties:", propertiesError);
-        return;
-      }
-
-      setProperties(properties || []);
-    };
-
     fetchProperties();
   }, []);
 
-  // Fetch utilities when property is selected
   useEffect(() => {
-    const fetchUtilities = async () => {
-      if (!selectedPropertyId) {
-        setUtilities([]);
-        return;
-      }
-
-      const { data: utilities, error: utilitiesError } = await supabase
-        .from("utilities")
-        .select("*")
-        .eq("property_id", selectedPropertyId)
-        .eq("status", "pending");
-
-      if (utilitiesError) {
-        console.error("Error fetching utilities:", utilitiesError);
-        return;
-      }
-
-      setUtilities(utilities || []);
-    };
-
-    fetchUtilities();
+    if (selectedPropertyId) {
+      fetchTenants(selectedPropertyId);
+      fetchUtilityBills(selectedPropertyId);
+    } else {
+      setTenants([]);
+      setUtilityBills([]);
+    }
   }, [selectedPropertyId]);
 
-  // Fetch tenant email when property is selected
-  useEffect(() => {
-    const fetchTenantEmail = async () => {
-      if (!selectedPropertyId) return;
+  const fetchProperties = async () => {
+    try {
+      console.log("Fetching properties...");
+      const { data: propertiesData, error } = await supabase
+        .from("properties")
+        .select("id, name");
 
-      const { data: tenancy, error: tenancyError } = await supabase
-        .from("tenancies")
-        .select(`
-          tenant:profiles (
-            email
-          )
-        `)
-        .eq("property_id", selectedPropertyId)
-        .eq("status", "active")
-        .single();
-
-      if (tenancyError) {
-        console.error("Error fetching tenant:", tenancyError);
-        return;
-      }
-
-      if (tenancy?.tenant?.email) {
-        setTenantEmail(tenancy.tenant.email);
-        form.setValue("tenant_email", tenancy.tenant.email);
-      }
-    };
-
-    fetchTenantEmail();
-  }, [selectedPropertyId, form]);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
+      if (error) throw error;
+      setProperties(propertiesData || []);
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch properties",
+      });
     }
   };
 
-  const onSubmit = async (values: InvoiceFormValues) => {
-    if (!selectedUtilityAmount) {
+  const fetchTenants = async (propertyId: string) => {
+    try {
+      console.log("Fetching tenants for property:", propertyId);
+      const { data: tenanciesData, error } = await supabase
+        .from("tenancies")
+        .select(`
+          tenant:profiles!tenancies_tenant_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email
+          )
+        `)
+        .eq("property_id", propertyId)
+        .eq("status", "active");
+
+      if (error) throw error;
+
+      const tenantsData = tenanciesData
+        .map((t) => t.tenant)
+        .filter((t): t is Tenant => t !== null);
+      setTenants(tenantsData);
+    } catch (error) {
+      console.error("Error fetching tenants:", error);
       toast({
-        title: "Error",
-        description: "Please select a utility bill",
         variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch tenants",
+      });
+    }
+  };
+
+  const fetchUtilityBills = async (propertyId: string) => {
+    try {
+      console.log("Fetching utility bills for property:", propertyId);
+      const { data: utilityData, error } = await supabase
+        .from("utilities")
+        .select("*")
+        .eq("property_id", propertyId)
+        .eq("status", "pending")
+        .not("id", "in", (
+          await supabase
+            .from("invoice_items")
+            .select("description")
+            .eq("type", "utility")
+        ).data?.map(item => item.description) || []);
+
+      if (error) throw error;
+      setUtilityBills(utilityData || []);
+    } catch (error) {
+      console.error("Error fetching utility bills:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch utility bills",
+      });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedPropertyId || !selectedTenantId || !selectedUtilityId) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please fill in all required fields",
       });
       return;
     }
 
     try {
       setIsLoading(true);
-      console.log("Submitting invoice with values:", values);
+      console.log("Creating manual invoice...");
 
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError) throw userError;
-      if (!user) throw new Error("No user found");
-
-      // Check if user is a landlord
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError) throw profileError;
-      if (profile.role !== "landlord") throw new Error("Only landlords can create invoices");
-
-      // Get the first tenant for this property
-      const { data: tenancy, error: tenancyError } = await supabase
-        .from("tenancies")
-        .select("tenant_id")
-        .eq("property_id", values.property_id)
-        .eq("status", "active")
-        .single();
-
-      if (tenancyError) throw tenancyError;
-
-      // Update tenant email if provided
-      if (values.tenant_email) {
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ email: values.tenant_email })
-          .eq("id", tenancy.tenant_id);
-
-        if (updateError) throw updateError;
+      const selectedUtility = utilityBills.find(u => u.id === selectedUtilityId);
+      if (!selectedUtility) {
+        throw new Error("Selected utility bill not found");
       }
 
-      // Format the due date as an ISO string date
-      const dueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No authenticated user");
 
-      // Create the invoice
+      // Create invoice
       const { data: invoice, error: invoiceError } = await supabase
         .from("invoices")
         .insert({
-          amount: selectedUtilityAmount,
-          due_date: dueDate,
+          property_id: selectedPropertyId,
+          tenant_id: selectedTenantId,
           landlord_id: user.id,
-          property_id: values.property_id,
-          tenant_id: tenancy.tenant_id,
-          status: "pending",
+          amount: Number(selectedUtility.amount),
+          due_date: selectedUtility.due_date,
+          status: "pending"
         })
         .select()
         .single();
 
       if (invoiceError) throw invoiceError;
 
-      // Create invoice items for the utility bill
+      // Create invoice item for the utility bill
       const { error: itemError } = await supabase
         .from("invoice_items")
         .insert({
           invoice_id: invoice.id,
-          description: values.details || "Utility bill payment",
-          amount: selectedUtilityAmount,
+          description: `Utility Bill - ${selectedUtility.type}`,
+          amount: selectedUtility.amount,
           type: "utility"
         });
 
       if (itemError) throw itemError;
 
-      // Upload document if selected
-      if (selectedFile) {
-        const fileExt = selectedFile.name.split('.').pop();
-        const filePath = `${invoice.id}/${crypto.randomUUID()}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('invoice-documents')
-          .upload(filePath, selectedFile);
-
-        if (uploadError) throw uploadError;
-      }
-
-      // Update utility status to invoiced
-      const { error: utilityUpdateError } = await supabase
+      // Update utility status
+      const { error: utilityError } = await supabase
         .from("utilities")
         .update({ status: "invoiced" })
-        .eq("id", values.utility_id);
+        .eq("id", selectedUtilityId);
 
-      if (utilityUpdateError) throw utilityUpdateError;
+      if (utilityError) throw utilityError;
 
       toast({
         title: "Success",
@@ -235,19 +209,12 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       if (onSuccess) {
         onSuccess();
       }
-
-      form.reset();
-      setSelectedFile(null);
-      setTenantEmail(null);
-      setSelectedPropertyId(null);
-      setSelectedUtilityId(null);
-      setSelectedUtilityAmount(null);
     } catch (error) {
       console.error("Error creating invoice:", error);
       toast({
+        variant: "destructive",
         title: "Error",
         description: "Failed to create invoice",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -255,89 +222,91 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="property">Property</Label>
-        <Select 
-          onValueChange={(value) => {
-            form.setValue("property_id", value);
-            setSelectedPropertyId(value);
-          }}
-          required
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a property" />
-          </SelectTrigger>
-          <SelectContent>
-            {properties.map((property) => (
-              <SelectItem key={property.id} value={property.id}>
-                {property.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <Alert>
+        <AlertDescription>
+          VAT is not applied to manual invoices.
+        </AlertDescription>
+      </Alert>
 
-      {selectedPropertyId && (
-        <div className="space-y-2">
-          <Label htmlFor="utility">Utility Bill</Label>
-          <Select 
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="property">Property</Label>
+          <Select
+            value={selectedPropertyId}
             onValueChange={(value) => {
-              form.setValue("utility_id", value);
-              setSelectedUtilityId(value);
-              const selectedUtility = utilities.find(u => u.id === value);
-              setSelectedUtilityAmount(selectedUtility?.amount || null);
+              setSelectedPropertyId(value);
+              setSelectedTenantId("");
+              setSelectedUtilityId("");
             }}
-            required
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a utility bill" />
+              <SelectValue placeholder="Select a property" />
             </SelectTrigger>
             <SelectContent>
-              {utilities.map((utility) => (
-                <SelectItem key={utility.id} value={utility.id}>
-                  {utility.type} - ${utility.amount} (Due: {new Date(utility.due_date).toLocaleDateString()})
+              {properties.map((property) => (
+                <SelectItem key={property.id} value={property.id}>
+                  {property.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-      )}
 
-      {selectedPropertyId && (
-        <div className="space-y-2">
-          <Label htmlFor="tenant_email">Tenant Email</Label>
-          <Input
-            id="tenant_email"
-            type="email"
-            {...form.register("tenant_email")}
-            defaultValue={tenantEmail || ""}
-            placeholder="tenant@example.com"
+        {selectedPropertyId && (
+          <div>
+            <Label htmlFor="tenant">Tenant</Label>
+            <Select
+              value={selectedTenantId}
+              onValueChange={setSelectedTenantId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a tenant" />
+              </SelectTrigger>
+              <SelectContent>
+                {tenants.map((tenant) => (
+                  <SelectItem key={tenant.id} value={tenant.id}>
+                    {`${tenant.first_name} ${tenant.last_name}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {selectedPropertyId && (
+          <div>
+            <Label htmlFor="utility">Assign Utility Bill</Label>
+            <Select
+              value={selectedUtilityId}
+              onValueChange={setSelectedUtilityId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a utility bill" />
+              </SelectTrigger>
+              <SelectContent>
+                {utilityBills.map((utility) => (
+                  <SelectItem key={utility.id} value={utility.id}>
+                    {`${utility.type} - $${utility.amount} (Due: ${new Date(utility.due_date).toLocaleDateString()})`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        <div>
+          <Label htmlFor="details">Additional Details (Optional)</Label>
+          <Textarea
+            id="details"
+            value={details}
+            onChange={(e) => setDetails(e.target.value)}
+            className="h-32"
           />
         </div>
-      )}
-
-      <div className="space-y-2">
-        <Label htmlFor="details">Details</Label>
-        <Textarea
-          id="details"
-          {...form.register("details")}
-          placeholder="Enter invoice details..."
-        />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="document">Upload Document</Label>
-        <Input
-          id="document"
-          type="file"
-          accept=".pdf,.doc,.docx"
-          onChange={handleFileChange}
-          className="cursor-pointer"
-        />
-      </div>
-
-      <Button type="submit" disabled={isLoading}>
+      <Button type="submit" disabled={isLoading || !selectedUtilityId}>
         {isLoading ? "Creating..." : "Create Invoice"}
       </Button>
     </form>
