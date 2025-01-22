@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export function useChat(selectedTenantId: string | null) {
   const [messages, setMessages] = useState<any[]>([]);
@@ -8,6 +9,7 @@ export function useChat(selectedTenantId: string | null) {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Handle authentication state
   useEffect(() => {
@@ -16,6 +18,10 @@ export function useChat(selectedTenantId: string | null) {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error("Session error:", error);
+          // Clear any invalid session data
+          await supabase.auth.signOut();
+          localStorage.removeItem('supabase.auth.token');
+          navigate('/auth');
           return;
         }
         
@@ -25,9 +31,11 @@ export function useChat(selectedTenantId: string | null) {
         } else {
           console.log("No active session found");
           setCurrentUserId(null);
+          navigate('/auth');
         }
       } catch (error) {
         console.error("Auth check error:", error);
+        navigate('/auth');
       }
     };
 
@@ -39,15 +47,17 @@ export function useChat(selectedTenantId: string | null) {
         setCurrentUserId(session.user.id);
       } else {
         setCurrentUserId(null);
+        if (event === 'SIGNED_OUT') {
+          navigate('/auth');
+        }
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
-  // Setup conversation
   useEffect(() => {
     if (!currentUserId) {
       console.log("No current user ID yet");
@@ -130,7 +140,6 @@ export function useChat(selectedTenantId: string | null) {
     setupConversation();
   }, [currentUserId, selectedTenantId, toast]);
 
-  // Handle messages
   useEffect(() => {
     if (!conversationId) {
       console.log("No conversation ID yet");
