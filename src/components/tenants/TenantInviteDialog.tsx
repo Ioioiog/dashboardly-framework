@@ -30,28 +30,33 @@ export function TenantInviteDialog({
   existingInvitation 
 }: TenantInviteDialogProps) {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [showResendConfirm, setShowResendConfirm] = React.useState(false);
-  const [resendData, setResendData] = React.useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showResendConfirm, setShowResendConfirm] = useState(false);
+  const [resendData, setResendData] = useState<any>(null);
 
   const checkExistingInvitation = async (email: string) => {
     console.log("Checking for existing invitation for email:", email);
     
-    const { data: existingInvites, error } = await supabase
-      .from('tenant_invitations')
-      .select('*')
-      .eq('email', email)
-      .eq('status', 'pending')
-      .eq('used', false)
-      .gt('expiration_date', new Date().toISOString())
-      .single();
+    try {
+      const { data: existingInvites, error } = await supabase
+        .from('tenant_invitations')
+        .select('*')
+        .eq('email', email)
+        .eq('status', 'pending')
+        .eq('used', false)
+        .gt('expiration_date', new Date().toISOString())
+        .single();
 
-    if (error && error.code !== 'PGRST116') {
-      console.error("Error checking existing invitations:", error);
+      if (error && error.code !== 'PGRST116') {
+        console.error("Error checking existing invitations:", error);
+        throw new Error("Failed to check existing invitations");
+      }
+
+      return existingInvites;
+    } catch (error) {
+      console.error("Error in checkExistingInvitation:", error);
       throw new Error("Failed to check existing invitations");
     }
-
-    return existingInvites;
   };
 
   const handleResendConfirm = async () => {
@@ -98,6 +103,17 @@ export function TenantInviteDialog({
           throw new Error(updateError.message);
         }
       } else {
+        // Check for duplicate email in profiles
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', data.email)
+          .maybeSingle();
+
+        if (existingProfile) {
+          throw new Error("A user with this email already exists");
+        }
+
         // Insert new invitation
         const { data: invitation, error: invitationError } = await supabase
           .from('tenant_invitations')
@@ -129,7 +145,7 @@ export function TenantInviteDialog({
 
         if (propertyAssignmentError) {
           console.error("Error assigning properties:", propertyAssignmentError);
-          throw new Error(propertyAssignmentError.message);
+          throw new Error("Failed to assign properties to invitation");
         }
       }
 
@@ -141,7 +157,7 @@ export function TenantInviteDialog({
 
       if (propertyError) {
         console.error("Error fetching property details:", propertyError);
-        throw new Error(propertyError.message);
+        throw new Error("Failed to fetch property details");
       }
 
       // Send invitation email
@@ -175,10 +191,12 @@ export function TenantInviteDialog({
 
       onOpenChange(false);
     } catch (error) {
-      console.error("Error creating tenant:", error);
+      console.error("Error in handleSubmit:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create tenant. Please try again.",
+        description: error instanceof Error 
+          ? error.message 
+          : "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {

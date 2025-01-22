@@ -19,58 +19,63 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
     queryFn: async () => {
       console.log("Fetching available tenants");
       
-      // First get all active tenancy tenant IDs
-      const { data: activeTenancies, error: tenancyError } = await supabase
-        .from("tenancies")
-        .select(`
-          tenant_id,
-          property_id,
-          start_date,
-          end_date
-        `)
-        .eq("status", "active");
+      try {
+        // First get all active tenancy tenant IDs
+        const { data: activeTenancies, error: tenancyError } = await supabase
+          .from("tenancies")
+          .select(`
+            tenant_id,
+            property_id,
+            start_date,
+            end_date
+          `)
+          .eq("status", "active");
 
-      if (tenancyError) {
-        console.error("Error fetching active tenancies:", tenancyError);
-        throw tenancyError;
-      }
-
-      // Get all tenant profiles that have the 'tenant' role
-      const { data: profiles, error: profileError } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name, email, phone, role, created_at, updated_at")
-        .eq("role", "tenant");
-
-      if (profileError) {
-        console.error("Error fetching tenant profiles:", profileError);
-        throw profileError;
-      }
-
-      // Filter out tenants who have active tenancies with overlapping dates
-      const availableTenants = profiles.filter(profile => {
-        // Check if tenant has any active tenancies
-        const tenantTenancies = activeTenancies?.filter(t => t.tenant_id === profile.id) || [];
-        
-        // If tenant has no tenancies, they are available
-        if (tenantTenancies.length === 0) {
-          return true;
+        if (tenancyError) {
+          console.error("Error fetching active tenancies:", tenancyError);
+          throw tenancyError;
         }
 
-        // Check for each tenancy if it's currently active (no end date or end date in future)
-        const hasActiveOverlappingTenancy = tenantTenancies.some(tenancy => {
-          const today = new Date();
-          const endDate = tenancy.end_date ? new Date(tenancy.end_date) : null;
+        // Get all tenant profiles that have the 'tenant' role
+        const { data: profiles, error: profileError } = await supabase
+          .from("profiles")
+          .select("id, first_name, last_name, email, phone, role, created_at, updated_at")
+          .eq("role", "tenant");
+
+        if (profileError) {
+          console.error("Error fetching tenant profiles:", profileError);
+          throw profileError;
+        }
+
+        // Filter out tenants who have active tenancies with overlapping dates
+        const availableTenants = profiles.filter(profile => {
+          // Check if tenant has any active tenancies
+          const tenantTenancies = activeTenancies?.filter(t => t.tenant_id === profile.id) || [];
           
-          // If there's no end date or the end date is in the future, tenant is not available
-          return !endDate || endDate > today;
+          // If tenant has no tenancies, they are available
+          if (tenantTenancies.length === 0) {
+            return true;
+          }
+
+          // Check for each tenancy if it's currently active (no end date or end date in future)
+          const hasActiveOverlappingTenancy = tenantTenancies.some(tenancy => {
+            const today = new Date();
+            const endDate = tenancy.end_date ? new Date(tenancy.end_date) : null;
+            
+            // If there's no end date or the end date is in the future, tenant is not available
+            return !endDate || endDate > today;
+          });
+
+          // Tenant is available if they don't have any active overlapping tenancies
+          return !hasActiveOverlappingTenancy;
         });
 
-        // Tenant is available if they don't have any active overlapping tenancies
-        return !hasActiveOverlappingTenancy;
-      });
-
-      console.log("Available tenants:", availableTenants);
-      return availableTenants;
+        console.log("Available tenants:", availableTenants);
+        return availableTenants;
+      } catch (error) {
+        console.error("Error fetching available tenants:", error);
+        throw new Error("Failed to fetch available tenants");
+      }
     },
     enabled: open,
   });
@@ -88,20 +93,34 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
         .overlaps("start_date", [data.startDate, data.endDate || "infinity"]);
 
       if (validationError) {
-        throw validationError;
+        console.error("Validation error:", validationError);
+        throw new Error("Failed to validate tenancy dates");
       }
 
       if (existingTenancies && existingTenancies.length > 0) {
-        toast({
-          title: "Error",
-          description: "This tenant already has an active tenancy during the selected period.",
-          variant: "destructive",
-        });
-        return;
+        throw new Error("This tenant already has an active tenancy during the selected period");
       }
 
       // Create tenancies for each selected property
       const tenancyPromises = data.propertyIds.map(async (propertyId: string) => {
+        // Check for existing tenancies on the property
+        const { data: propertyTenancies, error: propertyCheckError } = await supabase
+          .from("tenancies")
+          .select("*")
+          .eq("property_id", propertyId)
+          .eq("status", "active")
+          .overlaps("start_date", [data.startDate, data.endDate || "infinity"]);
+
+        if (propertyCheckError) {
+          console.error("Property check error:", propertyCheckError);
+          throw new Error(`Failed to check property ${propertyId} availability`);
+        }
+
+        if (propertyTenancies && propertyTenancies.length > 0) {
+          const property = properties.find(p => p.id === propertyId);
+          throw new Error(`${property?.name || 'Property'} is already occupied during this period`);
+        }
+
         const { error: tenancyError } = await supabase
           .from('tenancies')
           .insert({
@@ -114,7 +133,7 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
 
         if (tenancyError) {
           console.error("Error creating tenancy:", tenancyError);
-          throw tenancyError;
+          throw new Error(`Failed to create tenancy for property ${propertyId}`);
         }
       });
 
@@ -130,7 +149,9 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
       console.error("Error in handleSubmit:", error);
       toast({
         title: "Error",
-        description: "Failed to assign tenant. Please try again.",
+        description: error instanceof Error 
+          ? error.message 
+          : "Failed to assign tenant. Please try again.",
         variant: "destructive",
       });
     }
