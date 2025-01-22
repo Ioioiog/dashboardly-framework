@@ -15,7 +15,7 @@ interface Utility {
   property: {
     name: string;
     address: string;
-  };
+  } | null;
 }
 
 interface UtilityListProps {
@@ -29,6 +29,7 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
 
   const handleStatusUpdate = async (utilityId: string, newStatus: string) => {
     try {
+      console.log('Updating utility status:', { utilityId, newStatus });
       const { error } = await supabase
         .from("utilities")
         .update({ status: newStatus })
@@ -58,7 +59,6 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
     try {
       console.log("Fetching invoice for utility ID:", utilityId);
       
-      // First get the invoice details
       const { data: invoice, error: invoiceError } = await supabase
         .from('utility_invoices')
         .select('pdf_path')
@@ -92,11 +92,10 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
 
       console.log("Creating signed URL for PDF path:", invoice.pdf_path);
       
-      // Get the temporary URL for the file
       const { data: { signedUrl }, error: urlError } = await supabase
         .storage
         .from('utility-invoices')
-        .createSignedUrl(invoice.pdf_path, 60); // URL valid for 60 seconds
+        .createSignedUrl(invoice.pdf_path, 60);
 
       if (urlError) {
         console.error("Error creating signed URL:", urlError);
@@ -104,7 +103,6 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
       }
 
       console.log("Opening signed URL in new tab");
-      // Open the PDF in a new tab
       window.open(signedUrl, '_blank');
     } catch (error) {
       console.error("Error viewing invoice:", error);
@@ -148,81 +146,97 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
     }
   };
 
+  if (!Array.isArray(utilities)) {
+    console.error("Utilities prop is not an array:", utilities);
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Error loading utilities.
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-4">
-      {utilities.map((utility) => (
-        <Card key={utility.id}>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <div className="text-sm font-medium text-gray-500">Property</div>
-                <div>{utility.property.name}</div>
-                <div className="text-sm text-gray-500">{utility.property.address}</div>
+      {utilities.map((utility) => {
+        if (!utility?.id) {
+          console.error("Invalid utility object:", utility);
+          return null;
+        }
+
+        return (
+          <Card key={utility.id}>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <div className="text-sm font-medium text-gray-500">Property</div>
+                  <div>{utility.property?.name || 'N/A'}</div>
+                  <div className="text-sm text-gray-500">{utility.property?.address || 'N/A'}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-500">Type</div>
+                  <div className="capitalize">{utility.type}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-500">Amount</div>
+                  <div>${utility.amount.toFixed(2)}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-500">Due Date</div>
+                  <div>{new Date(utility.due_date).toLocaleDateString()}</div>
+                </div>
               </div>
-              <div>
-                <div className="text-sm font-medium text-gray-500">Type</div>
-                <div className="capitalize">{utility.type}</div>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-gray-500">Amount</div>
-                <div>${utility.amount.toFixed(2)}</div>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-gray-500">Due Date</div>
-                <div>{new Date(utility.due_date).toLocaleDateString()}</div>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Badge
-                  variant={utility.status === "paid" ? "default" : "secondary"}
-                >
-                  {utility.status}
-                </Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleViewInvoice(utility.id)}
-                  className="flex items-center gap-2"
-                >
-                  <FileText className="h-4 w-4" />
-                  See Invoice
-                </Button>
-                {userRole === "landlord" && (
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Badge
+                    variant={utility.status === "paid" ? "default" : "secondary"}
+                  >
+                    {utility.status}
+                  </Badge>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleDelete(utility.id)}
-                    className="flex items-center gap-2 text-destructive hover:text-destructive"
+                    onClick={() => handleViewInvoice(utility.id)}
+                    className="flex items-center gap-2"
                   >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
+                    <FileText className="h-4 w-4" />
+                    See Invoice
                   </Button>
+                  {userRole === "landlord" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(utility.id)}
+                      className="flex items-center gap-2 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </Button>
+                  )}
+                </div>
+                {userRole === "landlord" ? (
+                  <div className="flex gap-2">
+                    <PaymentActions
+                      paymentId={utility.id}
+                      status={utility.status}
+                      userRole={userRole}
+                      onStatusChange={onStatusUpdate}
+                    />
+                  </div>
+                ) : (
+                  utility.status !== "paid" && (
+                    <PaymentActions
+                      paymentId={utility.id}
+                      status={utility.status}
+                      userRole={userRole}
+                      onStatusChange={onStatusUpdate}
+                    />
+                  )
                 )}
               </div>
-              {userRole === "landlord" ? (
-                <div className="flex gap-2">
-                  <PaymentActions
-                    paymentId={utility.id}
-                    status={utility.status}
-                    userRole={userRole}
-                    onStatusChange={onStatusUpdate}
-                  />
-                </div>
-              ) : (
-                utility.status !== "paid" && (
-                  <PaymentActions
-                    paymentId={utility.id}
-                    status={utility.status}
-                    userRole={userRole}
-                    onStatusChange={onStatusUpdate}
-                  />
-                )
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        );
+      })}
       {utilities.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           No utility bills found.
