@@ -157,7 +157,7 @@ const Invoices = () => {
   return (
     <div className="flex h-screen bg-gray-100">
       <DashboardSidebar />
-      <div className="flex-1 p-8 ml-64">
+      <div className="flex-1 p-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Invoices</CardTitle>
