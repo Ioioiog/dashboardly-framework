@@ -11,7 +11,7 @@ interface MaintenanceDialogProps {
 export function MaintenanceDialog({ open, onOpenChange, request }: MaintenanceDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent aria-describedby="maintenance-dialog-description">
+      <DialogContent className="max-w-2xl" aria-describedby="maintenance-dialog-description">
         <DialogHeader>
           <DialogTitle>
             {request ? "Edit Maintenance Request" : "New Maintenance Request"}

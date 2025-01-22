@@ -10,7 +10,7 @@ export function useAuthState() {
 
   useEffect(() => {
     let mounted = true;
-    let authListener: any = null;
+    let authListener: { subscription: { unsubscribe: () => void } } | null = null;
 
     const initializeAuth = async () => {
       try {
@@ -28,7 +28,7 @@ export function useAuthState() {
         }
 
         // Set up auth state change listener
-        authListener = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           console.log("Auth state changed:", event, "Session:", currentSession ? "exists" : "null");
           
           if (event === 'SIGNED_OUT') {
@@ -50,6 +50,9 @@ export function useAuthState() {
             }
           }
         });
+
+        // Store the auth listener for cleanup
+        authListener = { subscription };
 
         // If we have a session, verify the user
         if (session) {
@@ -116,7 +119,8 @@ export function useAuthState() {
 
     return () => {
       mounted = false;
-      if (authListener) {
+      if (authListener?.subscription?.unsubscribe) {
+        console.log("Cleaning up auth listener...");
         authListener.subscription.unsubscribe();
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
