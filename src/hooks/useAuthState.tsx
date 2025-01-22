@@ -37,18 +37,28 @@ export function useAuthState() {
             if (mounted) {
               setIsAuthenticated(false);
               setIsLoading(false);
+              // Clear local storage on sign out
+              localStorage.removeItem('supabase.auth.token');
             }
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             console.log(`Auth event: ${event}`);
             if (currentSession && mounted) {
               try {
+                // Verify the session is still valid
                 const { data: { user }, error: userError } = await supabase.auth.getUser();
                 if (!userError && user) {
                   console.log("User verified:", user.id);
                   setIsAuthenticated(true);
                 } else {
                   console.error("Error verifying user:", userError);
+                  // Handle invalid session
+                  await supabase.auth.signOut();
                   setIsAuthenticated(false);
+                  toast({
+                    title: "Session Expired",
+                    description: "Please sign in again.",
+                    variant: "destructive",
+                  });
                 }
               } catch (error) {
                 console.error("Error during user verification:", error);
@@ -72,7 +82,14 @@ export function useAuthState() {
             if (userError) {
               console.error("User verification failed:", userError);
               if (mounted) {
+                // Clear invalid session
+                await supabase.auth.signOut();
                 setIsAuthenticated(false);
+                toast({
+                  title: "Session Expired",
+                  description: "Please sign in again.",
+                  variant: "destructive",
+                });
               }
             } else if (user) {
               console.log("User verified successfully:", user.id);
