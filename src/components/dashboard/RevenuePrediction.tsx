@@ -115,9 +115,6 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
         <CardTitle className="text-xl font-semibold">
           Revenue Predictions
         </CardTitle>
-        <p className="text-sm text-muted-foreground mt-1">
-          Based on historical data and trends
-        </p>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
