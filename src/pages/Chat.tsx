@@ -16,14 +16,19 @@ const Chat = () => {
   const { toast } = useToast();
   
   const { currentUserId, isAuthenticated, isLoading } = useAuthState();
-  const { conversationId } = useConversation(currentUserId, selectedTenantId);
+  const { conversationId, isLoading: isConversationLoading } = useConversation(currentUserId, selectedTenantId);
   const { messages, sendMessage } = useMessages(conversationId);
 
   // Show loading state
-  if (isLoading) {
+  if (isLoading || isConversationLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
+      <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <DashboardSidebar />
+        <main className="flex-1 p-8">
+          <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+            <div className="animate-pulse text-lg">Loading chat...</div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -40,6 +45,15 @@ const Chat = () => {
       toast({
         title: "Authentication Error",
         description: "You must be logged in to send messages.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedTenantId && !conversationId) {
+      toast({
+        title: "No conversation selected",
+        description: "Please select a tenant to start chatting.",
         variant: "destructive",
       });
       return;
