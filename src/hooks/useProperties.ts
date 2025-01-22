@@ -35,6 +35,19 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
         console.log("useProperties - User ID:", user.id);
         console.log("useProperties - User Role:", userRole);
 
+        // Get user profile to verify email
+        const { data: userProfile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching user profile:", profileError);
+        } else {
+          console.log("User profile:", userProfile);
+        }
+
         if (userRole === "landlord") {
           console.log("Executing landlord properties query...");
           const { data, error } = await supabase
