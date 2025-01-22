@@ -18,8 +18,8 @@ import { supabase } from "@/integrations/supabase/client";
 interface TenantAssignDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  propertyId: string;
-  propertyName: string;
+  propertyId?: string;
+  propertyName?: string;
 }
 
 export function TenantAssignDialog({
@@ -37,12 +37,15 @@ export function TenantAssignDialog({
   const [existingTenants, setExistingTenants] = useState<any[]>([]);
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const [isNewTenant, setIsNewTenant] = useState(true);
+  const [availableProperties, setAvailableProperties] = useState<any[]>([]);
+  const [selectedPropertyIds, setSelectedPropertyIds] = useState<string[]>(propertyId ? [propertyId] : []);
   const { toast } = useToast();
 
-  // Fetch existing tenants when dialog opens
+  // Fetch existing tenants and available properties when dialog opens
   React.useEffect(() => {
     if (open) {
       fetchExistingTenants();
+      fetchAvailableProperties();
     }
   }, [open]);
 
@@ -65,43 +68,68 @@ export function TenantAssignDialog({
     }
   };
 
+  const fetchAvailableProperties = async () => {
+    try {
+      const { data: properties, error } = await supabase
+        .from('properties')
+        .select('*')
+        .not('tenancies', 'cs', '[{"status":"active"}]');
+
+      if (error) throw error;
+      setAvailableProperties(properties || []);
+    } catch (error) {
+      console.error('Error fetching properties:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch available properties",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
+      if (selectedPropertyIds.length === 0) {
+        throw new Error("Please select at least one property");
+      }
+
       if (isNewTenant) {
-        // Register new tenant
+        // Register new tenant for multiple properties
         await registerTenant({
           email,
           firstName,
           lastName,
-          propertyId,
+          propertyIds: selectedPropertyIds,
           startDate,
           endDate
         });
 
         toast({
           title: "Success",
-          description: "Tenant invitation sent and tenancy created successfully",
+          description: "Tenant invitation sent and tenancies created successfully",
         });
       } else if (selectedTenantId) {
-        // Create tenancy for existing tenant
+        // Create tenancies for existing tenant
+        const tenancies = selectedPropertyIds.map(propertyId => ({
+          property_id: propertyId,
+          tenant_id: selectedTenantId,
+          start_date: startDate,
+          end_date: endDate || null,
+          status: 'active'
+        }));
+
         const { error: tenancyError } = await supabase
           .from('tenancies')
-          .insert({
-            property_id: propertyId,
-            tenant_id: selectedTenantId,
-            start_date: startDate,
-            end_date: endDate || null,
-            status: 'active'
-          });
+          .insert(tenancies);
 
         if (tenancyError) throw tenancyError;
 
         toast({
           title: "Success",
-          description: "Tenancy created successfully",
+          description: "Tenancies created successfully",
         });
       }
 
@@ -113,6 +141,7 @@ export function TenantAssignDialog({
       setStartDate("");
       setEndDate("");
       setSelectedTenantId(null);
+      setSelectedPropertyIds([]);
     } catch (error: any) {
       console.error("Error in tenant assignment:", error);
       toast({
@@ -129,9 +158,9 @@ export function TenantAssignDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Assign Tenant to Property</DialogTitle>
+          <DialogTitle>Assign Tenant to Properties</DialogTitle>
           <DialogDescription>
-            Assign a tenant to: {propertyName}
+            {propertyName ? `Assign a tenant to: ${propertyName}` : 'Assign a tenant to multiple properties'}
           </DialogDescription>
         </DialogHeader>
         
@@ -206,6 +235,30 @@ export function TenantAssignDialog({
               </ScrollArea>
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label>Select Properties</Label>
+            <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+              {availableProperties.map((property) => (
+                <div key={property.id} className="flex items-center space-x-2 py-2">
+                  <Checkbox
+                    checked={selectedPropertyIds.includes(property.id)}
+                    onCheckedChange={(checked) => {
+                      setSelectedPropertyIds(prev => 
+                        checked 
+                          ? [...prev, property.id]
+                          : prev.filter(id => id !== property.id)
+                      );
+                    }}
+                    disabled={propertyId === property.id}
+                  />
+                  <Label>
+                    {property.name} ({property.address})
+                  </Label>
+                </div>
+              ))}
+            </ScrollArea>
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="startDate">Start Date</Label>

@@ -4,7 +4,7 @@ interface TenantRegistrationData {
   email: string;
   firstName: string;
   lastName: string;
-  propertyId: string;
+  propertyIds: string[];
   startDate: string;
   endDate?: string;
 }
@@ -40,17 +40,19 @@ export async function registerTenant(data: TenantRegistrationData) {
 
     console.log("Created invitation:", invitation);
 
-    // Link invitation to property
-    console.log("Creating property assignment...");
+    // Link invitation to properties
+    console.log("Creating property assignments...");
+    const propertyAssignments = data.propertyIds.map(propertyId => ({
+      invitation_id: invitation.id,
+      property_id: propertyId,
+    }));
+
     const { error: propertyError } = await supabase
       .from("tenant_invitation_properties")
-      .insert({
-        invitation_id: invitation.id,
-        property_id: data.propertyId,
-      });
+      .insert(propertyAssignments);
 
     if (propertyError) {
-      console.error("Error creating property assignment:", propertyError);
+      console.error("Error creating property assignments:", propertyError);
       throw propertyError;
     }
 
@@ -60,7 +62,7 @@ export async function registerTenant(data: TenantRegistrationData) {
       {
         body: {
           email: data.email,
-          propertyId: data.propertyId,
+          propertyIds: data.propertyIds,
           token: token,
           startDate: data.startDate,
           endDate: data.endDate,
