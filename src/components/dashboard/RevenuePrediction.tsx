@@ -90,11 +90,6 @@ export function RevenuePrediction({ userId }: RevenuePredictionProps) {
 
   return (
     <Card className="col-span-4">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold">
-          Revenue Predictions
-        </CardTitle>
-      </CardHeader>
       <CardContent>
         <div className="h-[300px]">
           <RevenueLineChart 
