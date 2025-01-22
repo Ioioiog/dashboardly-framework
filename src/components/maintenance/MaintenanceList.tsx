@@ -53,7 +53,7 @@ export function MaintenanceList({ requests, isLoading, isLandlord }: Maintenance
 
   if (!requests?.length) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <Card className="p-4">
           <div className="text-center text-gray-500">
             {t('maintenance.noRequests')}
@@ -64,7 +64,7 @@ export function MaintenanceList({ requests, isLoading, isLandlord }: Maintenance
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <MaintenanceFilters
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
