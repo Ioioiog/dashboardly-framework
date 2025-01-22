@@ -37,11 +37,14 @@ export function TenantInviteDialog({
   } = useInvitation();
 
   const handleSubmit = async (data: any) => {
+    console.log("Handling new invitation submission:", data);
     const success = await originalHandleSubmit(data);
+    
     if (success) {
       // Get current user (landlord) ID
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        console.log("Logging tenant invitation action");
         await tenantAuditService.logTenantAction({
           action_type: 'invitation_sent',
           landlord_id: user.id,
@@ -60,21 +63,24 @@ export function TenantInviteDialog({
   };
 
   const handleResendConfirm = async () => {
+    console.log("Handling invitation resend");
     const success = await originalHandleResendConfirm();
+    
     if (success) {
       // Get current user (landlord) ID
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      if (user && existingInvitation) {
+        console.log("Logging tenant invitation resend action");
         await tenantAuditService.logTenantAction({
           action_type: 'invitation_resent',
           landlord_id: user.id,
-          tenant_email: existingInvitation?.email,
-          property_ids: existingInvitation?.propertyIds || [],
+          tenant_email: existingInvitation.email,
+          property_ids: existingInvitation.propertyIds,
           metadata: {
-            first_name: existingInvitation?.firstName,
-            last_name: existingInvitation?.lastName,
-            start_date: existingInvitation?.startDate,
-            end_date: existingInvitation?.endDate
+            first_name: existingInvitation.firstName,
+            last_name: existingInvitation.lastName,
+            start_date: existingInvitation.startDate,
+            end_date: existingInvitation.endDate
           }
         });
       }
