@@ -90,7 +90,7 @@ export function MaintenanceCardFooter({ request, onImageClick, onHistoryClick, o
           className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
         >
           <Trash2 className="w-3 h-3 mr-1" />
-          {t('maintenance.details.delete')}
+          Delete
         </Button>
       </div>
     </div>
