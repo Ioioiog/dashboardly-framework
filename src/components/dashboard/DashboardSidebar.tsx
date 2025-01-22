@@ -26,8 +26,11 @@ export default function DashboardSidebar() {
       console.log("Signing out...");
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
       console.log("Sign out successful");
-      navigate("/");
+      localStorage.removeItem('supabase.auth.token');
+      navigate("/auth", { replace: true });
+      
       toast({
         title: "Signed out successfully",
         description: "You have been signed out of your account",
@@ -46,7 +49,7 @@ export default function DashboardSidebar() {
     {
       title: "Dashboard",
       icon: LayoutDashboard,
-      href: "/",
+      href: "/dashboard",
       roles: ["landlord", "tenant"],
     },
     {
@@ -83,12 +86,6 @@ export default function DashboardSidebar() {
       title: "Utilities",
       icon: Droplets,
       href: "/utilities",
-      roles: ["landlord", "tenant"],
-    },
-    {
-      title: "Invoices",
-      icon: FileText,
-      href: "/invoices",
       roles: ["landlord", "tenant"],
     },
     {
