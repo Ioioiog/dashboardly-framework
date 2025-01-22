@@ -8,7 +8,7 @@ interface Message {
   sender: {
     first_name: string | null;
     last_name: string | null;
-  };
+  } | null;
 }
 
 interface MessageListProps {
@@ -18,7 +18,6 @@ interface MessageListProps {
 }
 
 export function MessageList({ messages, currentUserId, messagesEndRef }: MessageListProps) {
-  // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, messagesEndRef]);
@@ -27,10 +26,9 @@ export function MessageList({ messages, currentUserId, messagesEndRef }: Message
     <ScrollArea className="flex-1 p-4">
       <div className="space-y-4">
         {messages.map((message) => {
-          const senderName =
-            message.sender.first_name && message.sender.last_name
-              ? `${message.sender.first_name} ${message.sender.last_name}`
-              : "Unknown User";
+          const senderName = message.sender
+            ? `${message.sender.first_name || ''} ${message.sender.last_name || ''}`.trim() || 'Unknown User'
+            : 'Unknown User';
 
           const isCurrentUser = message.sender_id === currentUserId;
 

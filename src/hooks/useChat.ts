@@ -8,21 +8,45 @@ export function useChat(selectedTenantId: string | null) {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const { toast } = useToast();
 
+  // Handle authentication state
   useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) {
-        console.error("Error fetching user:", error);
-        return;
-      }
-      if (user) {
-        console.log("Current user ID:", user.id);
-        setCurrentUserId(user.id);
+    const checkAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Session error:", error);
+          return;
+        }
+        
+        if (session?.user) {
+          console.log("Setting current user ID:", session.user.id);
+          setCurrentUserId(session.user.id);
+        } else {
+          console.log("No active session found");
+          setCurrentUserId(null);
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
       }
     };
-    getCurrentUser();
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
+      if (session?.user) {
+        setCurrentUserId(session.user.id);
+      } else {
+        setCurrentUserId(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
+  // Setup conversation
   useEffect(() => {
     if (!currentUserId) {
       console.log("No current user ID yet");
@@ -98,6 +122,7 @@ export function useChat(selectedTenantId: string | null) {
     setupConversation();
   }, [currentUserId, selectedTenantId, toast]);
 
+  // Handle messages
   useEffect(() => {
     if (!conversationId) {
       console.log("No conversation ID yet");
@@ -132,7 +157,6 @@ export function useChat(selectedTenantId: string | null) {
 
     fetchMessages();
 
-    // Subscribe to new messages
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
