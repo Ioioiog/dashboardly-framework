@@ -11,10 +11,10 @@ export const supabase = createClient<Database>(
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: false,
+      detectSessionInUrl: true,
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      storageKey: 'sb-wecmvyohaxizmnhuvjly-auth-token',
       flowType: 'pkce',
-      debug: true
     },
     global: {
       headers: {
@@ -73,11 +73,8 @@ const handleInvalidSession = async () => {
   } catch (err) {
     console.error('Error during signOut:', err);
   }
-  // Clear all auth-related items from localStorage
-  localStorage.removeItem('supabase.auth.token');
-  localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
   
-  // Clear any other auth-related items that might exist
+  // Clear all auth-related items from localStorage
   const keysToRemove = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
