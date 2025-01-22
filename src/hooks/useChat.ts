@@ -76,8 +76,16 @@ export function useChat(selectedTenantId: string | null) {
         return;
       }
 
+      console.log("Sending message with data:", {
+        sender_id: currentUserId,
+        profile_id: currentUserId, // Add profile_id field
+        content: content.trim(),
+        conversation_id: selectedTenantId
+      });
+
       const { error } = await supabase.from('messages').insert({
         sender_id: currentUserId,
+        profile_id: currentUserId, // Add profile_id field
         content: content.trim(),
         conversation_id: selectedTenantId
       });
