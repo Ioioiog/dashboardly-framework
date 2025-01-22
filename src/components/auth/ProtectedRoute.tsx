@@ -40,15 +40,15 @@ export function ProtectedRoute({
           return;
         }
 
-        // Verify the session is still valid by attempting to get the user
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
-          console.error("User verification error:", userError);
+        // Refresh the session to ensure it's valid
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.error("Session refresh error:", refreshError);
           handleSessionError();
           return;
         }
 
-        console.log("Session verified successfully for user:", user.id);
+        console.log("Session verified and refreshed successfully");
       } catch (error) {
         console.error("Session verification error:", error);
         if (mounted) {
