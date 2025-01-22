@@ -116,10 +116,10 @@ const Index = () => {
   }, [navigate, toast, t]);
 
   return (
-    <div className="flex bg-dashboard-background min-h-screen">
+    <div className="flex min-h-screen w-full bg-dashboard-background">
       <DashboardSidebar />
       <main className="flex-1 ml-64 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-4 space-y-4">
+        <div className="p-4 space-y-4">
           <header className="bg-white rounded-lg shadow-sm p-4">
             <h1 className="text-2xl font-semibold text-gray-900">
               {t('dashboard.title')}
