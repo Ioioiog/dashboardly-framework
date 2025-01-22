@@ -185,9 +185,6 @@ const Index = () => {
                             <h3 className="text-xl font-semibold text-gray-800">
                               Revenue Predictions
                             </h3>
-                            <p className="text-sm text-dashboard-text-muted">
-                              Projected revenue based on historical data and trends
-                            </p>
                           </div>
                           <div className="bg-dashboard-accent rounded-lg">
                             <RevenuePrediction userId={userId} />
