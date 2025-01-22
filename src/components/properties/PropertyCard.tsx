@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, UserPlus, Calendar, DollarSign, UserMinus } from "lucide-react";
+import { Edit, Trash2, Calendar, DollarSign, UserMinus } from "lucide-react";
 import { Property } from "@/utils/propertyUtils";
-import { TenantAssignDialog } from "./TenantAssignDialog";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -24,7 +23,6 @@ export function PropertyCard({
   onDelete,
   viewMode = "grid" 
 }: PropertyCardProps) {
-  const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -162,25 +160,9 @@ export function PropertyCard({
               <Trash2 className="h-4 w-4" />
               {t('common.delete')}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowAssignDialog(true)}
-              className="flex items-center gap-2"
-            >
-              <UserPlus className="h-4 w-4" />
-              {t('properties.assign_tenant')}
-            </Button>
           </CardFooter>
         )}
       </Card>
-
-      <TenantAssignDialog
-        open={showAssignDialog}
-        onOpenChange={setShowAssignDialog}
-        propertyId={property.id}
-        propertyName={property.name}
-      />
     </>
   );
 }
