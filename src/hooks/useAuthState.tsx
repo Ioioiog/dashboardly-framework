@@ -16,6 +16,7 @@ export function useAuthState() {
       try {
         console.log("Initializing authentication...");
         
+        // Get the initial session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -31,22 +32,33 @@ export function useAuthState() {
         const { data } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           console.log("Auth state changed:", event, "Session:", currentSession ? "exists" : "null");
           
-          if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
-            console.log("User signed out or token refreshed");
+          if (event === 'SIGNED_OUT') {
+            console.log("User signed out");
             if (mounted) {
-              setIsAuthenticated(!!currentSession);
+              setIsAuthenticated(false);
             }
-          } else if (event === 'SIGNED_IN') {
-            console.log("User signed in");
+          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            console.log(`Auth event: ${event}`);
             if (currentSession && mounted) {
               try {
                 const { data: { user }, error: userError } = await supabase.auth.getUser();
                 if (!userError && user) {
-                  console.log("User verified after sign in:", user.id);
+                  console.log("User verified:", user.id);
                   setIsAuthenticated(true);
                 } else {
-                  console.error("Error verifying user after sign in:", userError);
+                  console.error("Error verifying user:", userError);
                   setIsAuthenticated(false);
+                  // Try to refresh the session
+                  const { error: refreshError } = await supabase.auth.refreshSession();
+                  if (refreshError) {
+                    console.error("Session refresh failed:", refreshError);
+                    await supabase.auth.signOut();
+                    toast({
+                      title: "Session Expired",
+                      description: "Please sign in again to continue.",
+                      variant: "destructive",
+                    });
+                  }
                 }
               } catch (error) {
                 console.error("Error during user verification:", error);
@@ -74,6 +86,11 @@ export function useAuthState() {
                 if (refreshError) {
                   console.error("Session refresh failed:", refreshError);
                   await supabase.auth.signOut();
+                  toast({
+                    title: "Session Expired",
+                    description: "Please sign in again to continue.",
+                    variant: "destructive",
+                  });
                 }
               }
             } else if (user) {
