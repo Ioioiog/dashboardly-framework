@@ -31,8 +31,8 @@ export default function Properties() {
       if (error) throw error;
 
       toast({
-        title: t("properties.toast.updated.title"),
-        description: t("properties.toast.updated.description"),
+        title: t("properties.toast.success.updated"),
+        description: t("properties.toast.success.updated"),
       });
       
       setShowDialog(false);
@@ -42,7 +42,7 @@ export default function Properties() {
       toast({
         variant: "destructive",
         title: t("common.error"),
-        description: t("properties.toast.error"),
+        description: t("properties.toast.error.update"),
       });
       return false;
     }
@@ -59,8 +59,8 @@ export default function Properties() {
       if (error) throw error;
 
       toast({
-        title: t("properties.toast.deleted.title"),
-        description: t("properties.toast.deleted.description"),
+        title: t("properties.toast.success.deleted"),
+        description: t("properties.toast.success.deleted"),
       });
       
       return true;
@@ -69,7 +69,7 @@ export default function Properties() {
       toast({
         variant: "destructive",
         title: t("common.error"),
-        description: t("properties.toast.error"),
+        description: t("properties.toast.error.delete"),
       });
       return false;
     }
@@ -89,10 +89,10 @@ export default function Properties() {
             <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                  {t("properties.title")}
+                  {t(`properties.title.${userRole}`)}
                 </h1>
                 <p className="mt-2 text-sm text-gray-500">
-                  {t("properties.description")}
+                  {t(`properties.description.${userRole}`)}
                 </p>
               </div>
 
