@@ -184,7 +184,16 @@ export const DashboardSidebar = () => {
             alt="AdminChirii.ro Logo" 
             className="h-8 w-8"
           />
-          {isExpanded && <span className="font-semibold">AdminChirii.ro</span>}
+          {isExpanded && (
+            <div className="flex flex-col items-start">
+              <span className="font-semibold text-blue-600">
+                <span>Admin</span>
+                <span>Chirii</span>
+                <span className="text-gray-800">.ro</span>
+              </span>
+              <span className="text-xs text-gray-500">simplificăm administrarea chiriilor</span>
+            </div>
+          )}
         </div>
       </div>
       
