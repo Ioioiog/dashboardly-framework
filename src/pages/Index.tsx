@@ -3,12 +3,10 @@ import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
-import { RevenueChart } from "@/components/dashboard/RevenueChart";
-import { RevenuePrediction } from "@/components/dashboard/RevenuePrediction";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
-import { BarChart2, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { DashboardHeader } from "@/components/dashboard/sections/DashboardHeader";
+import { RevenueSection } from "@/components/dashboard/sections/RevenueSection";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -17,7 +15,6 @@ const Index = () => {
   const [userId, setUserId] = React.useState<string | null>(null);
   const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | null>(null);
   const [userName, setUserName] = React.useState<string>("");
-  const [activeView, setActiveView] = React.useState<"history" | "predictions">("history");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -120,14 +117,7 @@ const Index = () => {
       <DashboardSidebar />
       <main className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-4">
-          <header className="bg-white rounded-lg shadow-sm p-4">
-            <h1 className="text-2xl font-semibold text-gray-900">
-              {t('dashboard.title')}
-            </h1>
-            <p className="mt-1 text-dashboard-text">
-              {t('dashboard.welcome')}, {userName}! {t('dashboard.overview')}
-            </p>
-          </header>
+          <DashboardHeader userName={userName} />
 
           {userId && userRole && (
             <div className="space-y-4">
@@ -136,64 +126,7 @@ const Index = () => {
               </section>
 
               {userRole === "landlord" && (
-                <section className="bg-white rounded-lg shadow-sm p-4">
-                  <div className="space-y-4">
-                    <div className="border-b pb-4">
-                      <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-                        Track your money
-                      </h2>
-                      <div className="mt-4 flex gap-2">
-                        <Button
-                          variant={activeView === "history" ? "default" : "outline"}
-                          onClick={() => setActiveView("history")}
-                          className="flex items-center gap-2"
-                          size="sm"
-                        >
-                          <BarChart2 className="w-4 h-4" />
-                          Revenue History
-                        </Button>
-                        <Button
-                          variant={activeView === "predictions" ? "default" : "outline"}
-                          onClick={() => setActiveView("predictions")}
-                          className="flex items-center gap-2"
-                          size="sm"
-                        >
-                          <TrendingUp className="w-4 h-4" />
-                          Revenue Predictions
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      {activeView === "history" ? (
-                        <div>
-                          <div className="mb-3">
-                            <h3 className="text-xl font-semibold text-gray-800">
-                              Revenue History
-                            </h3>
-                            <p className="text-sm text-dashboard-text-muted">
-                              Historical view of your monthly revenue performance
-                            </p>
-                          </div>
-                          <div className="bg-dashboard-accent rounded-lg">
-                            <RevenueChart userId={userId} />
-                          </div>
-                        </div>
-                      ) : (
-                        <div>
-                          <div className="mb-3">
-                            <h3 className="text-xl font-semibold text-gray-800">
-                              Revenue Predictions
-                            </h3>
-                          </div>
-                          <div className="bg-dashboard-accent rounded-lg">
-                            <RevenuePrediction userId={userId} />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </section>
+                <RevenueSection userId={userId} />
               )}
             </div>
           )}
@@ -201,6 +134,6 @@ const Index = () => {
       </main>
     </div>
   );
-};
+}
 
 export default Index;
