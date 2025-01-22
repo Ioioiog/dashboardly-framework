@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { TenantInviteDialog } from "./TenantInviteDialog";
 import { Property } from "@/utils/propertyUtils";
-import { TenantAssignDialog } from "@/components/properties/TenantAssignDialog";
+import { TenantAssignDialog } from "./TenantAssignDialog";
 import { Button } from "@/components/ui/button";
 import { UserPlus, Mail } from "lucide-react";
 import { useState } from "react";
