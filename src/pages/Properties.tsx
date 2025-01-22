@@ -18,9 +18,11 @@ export default function Properties() {
   const { userRole } = useUserRole();
 
   console.log("Properties page - User Role:", userRole);
+  console.log("Properties page - Rendering with userRole:", userRole);
 
   const handleEdit = async (property: Property, data: any): Promise<boolean> => {
     try {
+      console.log("Attempting to edit property:", property.id, data);
       const { error } = await supabase
         .from("properties")
         .update(data)
@@ -48,6 +50,7 @@ export default function Properties() {
 
   const handleDelete = async (property: Property) => {
     try {
+      console.log("Attempting to delete property:", property.id);
       const { error } = await supabase
         .from("properties")
         .delete()

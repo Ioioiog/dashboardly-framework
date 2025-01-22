@@ -19,18 +19,24 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", userRole],
     queryFn: async () => {
-      const { data: user } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      if (!user.user) {
+      if (userError) {
+        console.error("Error fetching user:", userError);
+        throw userError;
+      }
+
+      if (!user) {
         console.error("No user found in useProperties");
         throw new Error("No user found");
       }
 
-      console.log("useProperties - User ID:", user.user.id);
+      console.log("useProperties - User ID:", user.id);
       console.log("useProperties - User Role:", userRole);
 
       if (userRole === "landlord") {
         // For landlords, fetch properties with their active tenancies
+        console.log("Executing landlord properties query...");
         const { data, error } = await supabase
           .from("properties")
           .select(`
@@ -48,7 +54,7 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
               )
             )
           `)
-          .eq("landlord_id", user.user.id)
+          .eq("landlord_id", user.id)
           .eq("tenancies.status", "active");
 
         if (error) {
@@ -56,7 +62,7 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           throw error;
         }
 
-        console.log("Landlord properties query result:", data);
+        console.log("Landlord properties raw query result:", data);
 
         // Transform the data to match our Property interface
         const transformedData = data?.map(property => ({
@@ -72,7 +78,7 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
         return transformedData || [];
       } else {
         // For tenants, fetch through tenancies table
-        console.log("Fetching tenant properties for user:", user.user.id);
+        console.log("Fetching tenant properties for user:", user.id);
         const { data: tenanciesData, error } = await supabase
           .from("tenancies")
           .select(`
@@ -81,7 +87,7 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
             start_date,
             end_date
           `)
-          .eq("tenant_id", user.user.id)
+          .eq("tenant_id", user.id)
           .eq("status", "active");
 
         if (error) {
