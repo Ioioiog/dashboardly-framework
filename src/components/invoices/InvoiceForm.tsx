@@ -117,19 +117,36 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   const fetchUtilityBills = async (propertyId: string) => {
     try {
       console.log("Fetching utility bills for property:", propertyId);
-      const { data: utilityData, error } = await supabase
+      
+      // First, get the IDs of utilities that are already invoiced
+      const { data: invoicedUtilities, error: invoiceError } = await supabase
+        .from("invoice_items")
+        .select("description")
+        .eq("type", "utility");
+
+      if (invoiceError) throw invoiceError;
+
+      // Extract utility IDs from descriptions (if any exist)
+      const invoicedUtilityIds = invoicedUtilities
+        ?.map(item => item.description)
+        .filter(Boolean) || [];
+
+      // Build the query for pending utilities
+      let query = supabase
         .from("utilities")
         .select("*")
         .eq("property_id", propertyId)
-        .eq("status", "pending")
-        .not("id", "in", (
-          await supabase
-            .from("invoice_items")
-            .select("description")
-            .eq("type", "utility")
-        ).data?.map(item => item.description) || []);
+        .eq("status", "pending");
 
-      if (error) throw error;
+      // Only add the not-in filter if we have invoiced utilities
+      if (invoicedUtilityIds.length > 0) {
+        query = query.not('id', 'in', invoicedUtilityIds);
+      }
+
+      const { data: utilityData, error: utilityError } = await query;
+
+      if (utilityError) throw utilityError;
+      console.log("Fetched utility bills:", utilityData);
       setUtilityBills(utilityData || []);
     } catch (error) {
       console.error("Error fetching utility bills:", error);
