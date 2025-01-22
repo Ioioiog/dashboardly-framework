@@ -22,7 +22,6 @@ const Tenants = () => {
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const { data: tenants = [], isLoading, error: tenantsError } = useTenants();
-  const [tenantInfo, setTenantInfo] = useState<any>(null);
   const [isCheckingProfile, setIsCheckingProfile] = useState(true);
 
   useEffect(() => {
@@ -67,7 +66,6 @@ const Tenants = () => {
         console.log("Profile role:", profile.role);
         setUserRole(profile.role as "landlord" | "tenant");
 
-        // Redirect tenants to dashboard
         if (profile.role === "tenant") {
           console.log("User is tenant, redirecting to dashboard");
           navigate("/dashboard");
@@ -151,7 +149,6 @@ const Tenants = () => {
     );
   }
 
-  // Only render for landlords
   if (userRole !== "landlord") {
     return null;
   }
