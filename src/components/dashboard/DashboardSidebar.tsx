@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   LayoutDashboard,
   Home,
@@ -18,7 +19,6 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -126,6 +126,7 @@ export const DashboardSidebar = () => {
 
   return (
     <Collapsible
+      defaultOpen={true}
       open={isExpanded}
       onOpenChange={setIsExpanded}
       className={cn(
