@@ -642,6 +642,7 @@ export type Database = {
           created_at: string
           email: string
           end_date: string | null
+          expiration_date: string
           first_name: string | null
           id: string
           last_name: string | null
@@ -649,11 +650,13 @@ export type Database = {
           status: string
           token: string
           updated_at: string
+          used: boolean
         }
         Insert: {
           created_at?: string
           email: string
           end_date?: string | null
+          expiration_date?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -661,11 +664,13 @@ export type Database = {
           status?: string
           token: string
           updated_at?: string
+          used?: boolean
         }
         Update: {
           created_at?: string
           email?: string
           end_date?: string | null
+          expiration_date?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -673,6 +678,7 @@ export type Database = {
           status?: string
           token?: string
           updated_at?: string
+          used?: boolean
         }
         Relationships: []
       }
