@@ -19,96 +19,103 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", userRole],
     queryFn: async () => {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError) {
-        console.error("Error fetching user:", userError);
-        throw userError;
-      }
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          console.error("Error fetching user in useProperties:", userError);
+          throw userError;
+        }
 
-      if (!user) {
-        console.error("No user found in useProperties");
-        throw new Error("No user found");
-      }
+        if (!user) {
+          console.error("No authenticated user found in useProperties");
+          return [];
+        }
 
-      console.log("useProperties - User ID:", user.id);
-      console.log("useProperties - User Role:", userRole);
+        console.log("useProperties - User ID:", user.id);
+        console.log("useProperties - User Role:", userRole);
 
-      if (userRole === "landlord") {
-        console.log("Executing landlord properties query...");
-        const { data, error } = await supabase
-          .from("properties")
-          .select(`
-            *,
-            tenancies!inner (
-              id,
-              start_date,
-              end_date,
-              status,
-              tenant:profiles!tenancies_tenant_id_fkey (
+        if (userRole === "landlord") {
+          console.log("Executing landlord properties query...");
+          const { data, error } = await supabase
+            .from("properties")
+            .select(`
+              *,
+              tenancies (
                 id,
-                first_name,
-                last_name,
-                email
+                start_date,
+                end_date,
+                status,
+                tenant:profiles (
+                  id,
+                  first_name,
+                  last_name,
+                  email
+                )
               )
-            )
-          `)
-          .eq("landlord_id", user.id);
+            `)
+            .eq("landlord_id", user.id);
 
-        if (error) {
-          console.error("Error fetching landlord properties:", error);
-          throw error;
-        }
-
-        console.log("Raw landlord properties data:", data);
-
-        // Transform the data to match our Property interface
-        const transformedData = data?.map(property => ({
-          ...property,
-          tenancy: property.tenancies?.find(t => t.status === 'active')
-            ? {
-                start_date: property.tenancies.find(t => t.status === 'active')?.start_date,
-                end_date: property.tenancies.find(t => t.status === 'active')?.end_date,
-                tenant: property.tenancies.find(t => t.status === 'active')?.tenant
-              }
-            : undefined
-        }));
-
-        console.log("Transformed landlord properties:", transformedData);
-        return transformedData || [];
-      } else {
-        // For tenants, fetch through tenancies table
-        console.log("Fetching tenant properties for user:", user.id);
-        const { data: tenanciesData, error } = await supabase
-          .from("tenancies")
-          .select(`
-            property:properties (*),
-            status,
-            start_date,
-            end_date
-          `)
-          .eq("tenant_id", user.id)
-          .eq("status", "active");
-
-        if (error) {
-          console.error("Error fetching tenant properties:", error);
-          throw error;
-        }
-        
-        console.log("Raw tenancies data:", tenanciesData);
-        
-        const properties = tenanciesData?.map(item => ({
-          ...item.property,
-          tenancy: {
-            end_date: item.end_date,
-            start_date: item.start_date
+          if (error) {
+            console.error("Error fetching landlord properties:", error);
+            throw error;
           }
-        })) || [];
 
-        console.log("Transformed tenant properties:", properties);
-        return properties;
+          console.log("Raw landlord properties data:", data);
+
+          // Transform the data to match our Property interface
+          const transformedData = data?.map(property => ({
+            ...property,
+            tenancy: property.tenancies?.find(t => t.status === 'active')
+              ? {
+                  start_date: property.tenancies.find(t => t.status === 'active')?.start_date,
+                  end_date: property.tenancies.find(t => t.status === 'active')?.end_date,
+                  tenant: property.tenancies.find(t => t.status === 'active')?.tenant
+                }
+              : undefined
+          }));
+
+          console.log("Transformed landlord properties:", transformedData);
+          return transformedData || [];
+        } else {
+          // For tenants, fetch through tenancies table
+          console.log("Fetching tenant properties for user:", user.id);
+          const { data: tenanciesData, error } = await supabase
+            .from("tenancies")
+            .select(`
+              property:properties (*),
+              status,
+              start_date,
+              end_date
+            `)
+            .eq("tenant_id", user.id)
+            .eq("status", "active");
+
+          if (error) {
+            console.error("Error fetching tenant properties:", error);
+            throw error;
+          }
+          
+          console.log("Raw tenancies data:", tenanciesData);
+          
+          const properties = tenanciesData?.map(item => ({
+            ...item.property,
+            tenancy: {
+              end_date: item.end_date,
+              start_date: item.start_date
+            }
+          })) || [];
+
+          console.log("Transformed tenant properties:", properties);
+          return properties;
+        }
+      } catch (error) {
+        console.error("Error in useProperties:", error);
+        throw error;
       }
     },
+    retry: 1,
+    staleTime: 30000,
   });
 
   return { properties: properties as Property[], isLoading };
