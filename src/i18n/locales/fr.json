@@ -1,97 +1,82 @@
 {
-  "common": {
-    "edit": "Modifier",
-    "delete": "Supprimer",
-    "save": "Enregistrer",
-    "cancel": "Annuler",
-    "loading": "Chargement...",
-    "error": "Erreur",
-    "success": "Succès",
-    "unexpectedError": "Une erreur inattendue s'est produite"
-  },
-  "dashboard": {
-    "title": "Tableau de Bord",
-    "welcome": "Bienvenue",
-    "overview": "Voici un aperçu de vos propriétés et de vos finances",
-    "metrics": {
-      "totalProperties": "Total des Propriétés",
-      "monthlyRevenue": "Revenus Mensuels",
-      "activeTenants": "Locataires Actifs",
-      "pendingMaintenance": "Maintenance en Attente",
-      "paymentStatus": "État des Paiements"
+  "maintenance": {
+    "title": "Demandes de Maintenance",
+    "newRequest": "Nouvelle Demande",
+    "noRequests": "Aucune demande de maintenance trouvée",
+    "details": {
+      "viewImages": "Voir les Images",
+      "viewHistory": "Voir l'Historique",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "imageAlt": "Image de demande de maintenance {{number}}"
     },
-    "revenue": {
-      "title": "Historique des Revenus",
-      "prediction": {
-        "title": "Prévisions des Revenus"
-      },
-      "noData": "Aucune donnée de revenus disponible"
-    }
-  },
-  "properties": {
-    "title": "Propriétés",
-    "description": "Gérez votre portefeuille immobilier",
-    "addProperty": "Ajouter une Propriété",
-    "empty": {
-      "landlord": "Vous n'avez pas encore ajouté de propriétés. Cliquez sur le bouton ci-dessus pour ajouter votre première propriété.",
-      "tenant": "Vous n'avez pas encore de propriétés assignées.",
-      "tenant.contact": "Veuillez contacter votre propriétaire si vous pensez qu'il s'agit d'une erreur."
+    "status": {
+      "pending": "En Attente",
+      "in_progress": "En Cours",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
     },
-    "error": {
-      "fetch": "Échec du chargement des propriétés"
+    "priority": {
+      "low": "Priorité Basse",
+      "medium": "Priorité Moyenne",
+      "high": "Priorité Haute"
     },
-    "toast": {
-      "updated": {
-        "title": "Propriété Mise à Jour",
-        "description": "La propriété a été mise à jour avec succès"
-      },
-      "deleted": {
-        "title": "Propriété Supprimée",
-        "description": "La propriété a été supprimée avec succès"
-      },
-      "error": "Échec de l'action demandée"
-    },
-    "rent": {
-      "period": "mois"
-    },
-    "type": "Type de Propriété",
     "filters": {
-      "search": "Rechercher des propriétés...",
-      "type": {
-        "label": "Type de Propriété",
-        "all": "Tous les types",
-        "apartment": "Appartement",
-        "house": "Maison",
-        "condo": "Copropriété",
-        "commercial": "Commercial"
+      "search": "Rechercher des demandes...",
+      "status": {
+        "label": "Filtrer par statut",
+        "all": "Tous les statuts"
+      },
+      "priority": {
+        "label": "Filtrer par priorité",
+        "all": "Toutes les priorités"
+      },
+      "issueType": {
+        "label": "Filtrer par type de problème",
+        "all": "Tous les types"
       }
-    }
-  },
-  "tenants": {
-    "title": {
-      "landlord": "Gérer les Locataires",
-      "tenant": "Votre Location"
-    },
-    "description": {
-      "landlord": "Voir et gérer vos locataires",
-      "tenant": "Voir les détails et documents de votre location"
-    },
-    "actions": {
-      "invite": "Inviter un Locataire",
-      "assign": "Attribuer une Propriété"
     },
     "form": {
-      "email": "Email",
-      "firstName": "Prénom",
-      "lastName": "Nom",
-      "properties": "Propriétés",
-      "startDate": "Date de début",
-      "endDate": "Date de fin (Optionnel)",
-      "submit": "Créer un Locataire",
-      "submitting": "Création du Locataire..."
+      "title": {
+        "label": "Titre",
+        "placeholder": "Brève description du problème"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Description détaillée du problème de maintenance"
+      },
+      "notes": {
+        "label": "Notes Supplémentaires",
+        "placeholder": "Toute information supplémentaire ou instructions spéciales"
+      },
+      "issueType": {
+        "label": "Type de Problème",
+        "placeholder": "Sélectionnez un type de problème"
+      },
+      "priority": {
+        "label": "Priorité",
+        "placeholder": "Sélectionnez le niveau de priorité"
+      },
+      "property": {
+        "label": "Propriété",
+        "placeholder": "Sélectionnez une propriété"
+      },
+      "images": {
+        "label": "Images",
+        "placeholder": "Télécharger des images"
+      }
     },
-    "error": {
-      "loading": "Échec du chargement des locataires"
+    "toast": {
+      "success": {
+        "created": "Demande de maintenance créée avec succès",
+        "updated": "Demande de maintenance mise à jour avec succès",
+        "deleted": "Demande de maintenance supprimée avec succès"
+      },
+      "error": {
+        "create": "Échec de la création de la demande de maintenance",
+        "update": "Échec de la mise à jour de la demande de maintenance",
+        "delete": "Échec de la suppression de la demande de maintenance"
+      }
     }
   }
 }

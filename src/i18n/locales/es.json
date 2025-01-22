@@ -1,97 +1,82 @@
 {
-  "common": {
-    "edit": "Editar",
-    "delete": "Eliminar",
-    "save": "Guardar",
-    "cancel": "Cancelar",
-    "loading": "Cargando...",
-    "error": "Error",
-    "success": "Éxito",
-    "unexpectedError": "Ocurrió un error inesperado"
-  },
-  "dashboard": {
-    "title": "Panel de Control",
-    "welcome": "Bienvenido",
-    "overview": "Aquí hay una visión general de sus propiedades y finanzas",
-    "metrics": {
-      "totalProperties": "Total de Propiedades",
-      "monthlyRevenue": "Ingresos Mensuales",
-      "activeTenants": "Inquilinos Activos",
-      "pendingMaintenance": "Mantenimiento Pendiente",
-      "paymentStatus": "Estado de Pago"
+  "maintenance": {
+    "title": "Solicitudes de Mantenimiento",
+    "newRequest": "Nueva Solicitud",
+    "noRequests": "No se encontraron solicitudes de mantenimiento",
+    "details": {
+      "viewImages": "Ver Imágenes",
+      "viewHistory": "Ver Historial",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "imageAlt": "Imagen de solicitud de mantenimiento {{number}}"
     },
-    "revenue": {
-      "title": "Historial de Ingresos",
-      "prediction": {
-        "title": "Predicciones de Ingresos"
-      },
-      "noData": "No hay datos de ingresos disponibles"
-    }
-  },
-  "properties": {
-    "title": "Propiedades",
-    "description": "Gestione su cartera de propiedades",
-    "addProperty": "Agregar Propiedad",
-    "empty": {
-      "landlord": "Aún no ha agregado ninguna propiedad. Haga clic en el botón de arriba para agregar su primera propiedad.",
-      "tenant": "Aún no tiene propiedades asignadas.",
-      "tenant.contact": "Póngase en contacto con su arrendador si cree que esto es un error."
+    "status": {
+      "pending": "Pendiente",
+      "in_progress": "En Progreso",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
     },
-    "error": {
-      "fetch": "Error al cargar las propiedades"
+    "priority": {
+      "low": "Prioridad Baja",
+      "medium": "Prioridad Media",
+      "high": "Prioridad Alta"
     },
-    "toast": {
-      "updated": {
-        "title": "Propiedad Actualizada",
-        "description": "La propiedad se ha actualizado correctamente"
-      },
-      "deleted": {
-        "title": "Propiedad Eliminada",
-        "description": "La propiedad se ha eliminado correctamente"
-      },
-      "error": "Error al realizar la acción solicitada"
-    },
-    "rent": {
-      "period": "mes"
-    },
-    "type": "Tipo de Propiedad",
     "filters": {
-      "search": "Buscar propiedades...",
-      "type": {
-        "label": "Tipo de Propiedad",
-        "all": "Todos los tipos",
-        "apartment": "Apartamento",
-        "house": "Casa",
-        "condo": "Condominio",
-        "commercial": "Comercial"
+      "search": "Buscar solicitudes...",
+      "status": {
+        "label": "Filtrar por estado",
+        "all": "Todos los estados"
+      },
+      "priority": {
+        "label": "Filtrar por prioridad",
+        "all": "Todas las prioridades"
+      },
+      "issueType": {
+        "label": "Filtrar por tipo de problema",
+        "all": "Todos los tipos"
       }
-    }
-  },
-  "tenants": {
-    "title": {
-      "landlord": "Gestionar Inquilinos",
-      "tenant": "Tu Alquiler"
-    },
-    "description": {
-      "landlord": "Ver y gestionar los inquilinos de tu propiedad",
-      "tenant": "Ver los detalles y documentos de tu alquiler"
-    },
-    "actions": {
-      "invite": "Invitar Inquilino",
-      "assign": "Asignar Propiedad"
     },
     "form": {
-      "email": "Correo electrónico",
-      "firstName": "Nombre",
-      "lastName": "Apellido",
-      "properties": "Propiedades",
-      "startDate": "Fecha de inicio",
-      "endDate": "Fecha de finalización (Opcional)",
-      "submit": "Crear Inquilino",
-      "submitting": "Creando Inquilino..."
+      "title": {
+        "label": "Título",
+        "placeholder": "Breve descripción del problema"
+      },
+      "description": {
+        "label": "Descripción",
+        "placeholder": "Descripción detallada del problema de mantenimiento"
+      },
+      "notes": {
+        "label": "Notas Adicionales",
+        "placeholder": "Cualquier información adicional o instrucciones especiales"
+      },
+      "issueType": {
+        "label": "Tipo de Problema",
+        "placeholder": "Seleccione un tipo de problema"
+      },
+      "priority": {
+        "label": "Prioridad",
+        "placeholder": "Seleccione el nivel de prioridad"
+      },
+      "property": {
+        "label": "Propiedad",
+        "placeholder": "Seleccione una propiedad"
+      },
+      "images": {
+        "label": "Imágenes",
+        "placeholder": "Subir imágenes"
+      }
     },
-    "error": {
-      "loading": "Error al cargar inquilinos"
+    "toast": {
+      "success": {
+        "created": "Solicitud de mantenimiento creada exitosamente",
+        "updated": "Solicitud de mantenimiento actualizada exitosamente",
+        "deleted": "Solicitud de mantenimiento eliminada exitosamente"
+      },
+      "error": {
+        "create": "Error al crear la solicitud de mantenimiento",
+        "update": "Error al actualizar la solicitud de mantenimiento",
+        "delete": "Error al eliminar la solicitud de mantenimiento"
+      }
     }
   }
 }

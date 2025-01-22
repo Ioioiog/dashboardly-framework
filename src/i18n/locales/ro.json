@@ -1,97 +1,82 @@
 {
-  "common": {
-    "edit": "Editare",
-    "delete": "Ștergere",
-    "save": "Salvare",
-    "cancel": "Anulare",
-    "loading": "Se încarcă...",
-    "error": "Eroare",
-    "success": "Succes",
-    "unexpectedError": "A apărut o eroare neașteptată"
-  },
-  "dashboard": {
-    "title": "Panou de Control",
-    "welcome": "Bun venit",
-    "overview": "Iată o prezentare generală a proprietăților și finanțelor dvs",
-    "metrics": {
-      "totalProperties": "Total Proprietăți",
-      "monthlyRevenue": "Venit Lunar",
-      "activeTenants": "Chiriași Activi",
-      "pendingMaintenance": "Mentenanță în Așteptare",
-      "paymentStatus": "Status Plată"
+  "maintenance": {
+    "title": "Cereri de Mentenanță",
+    "newRequest": "Cerere Nouă",
+    "noRequests": "Nu s-au găsit cereri de mentenanță",
+    "details": {
+      "viewImages": "Vezi Imagini",
+      "viewHistory": "Vezi Istoric",
+      "edit": "Editează",
+      "delete": "Șterge",
+      "imageAlt": "Imagine cerere de mentenanță {{number}}"
     },
-    "revenue": {
-      "title": "Istoric Venituri",
-      "prediction": {
-        "title": "Predicții Venituri"
-      },
-      "noData": "Nu există date despre venituri"
-    }
-  },
-  "properties": {
-    "title": "Proprietăți",
-    "description": "Gestionați portofoliul dvs. de proprietăți",
-    "addProperty": "Adăugare Proprietate",
-    "empty": {
-      "landlord": "Nu ați adăugat încă nicio proprietate. Faceți clic pe butonul de mai sus pentru a adăuga prima proprietate.",
-      "tenant": "Nu aveți încă proprietăți atribuite.",
-      "tenant.contact": "Vă rugăm să contactați proprietarul dacă credeți că aceasta este o eroare."
+    "status": {
+      "pending": "În Așteptare",
+      "in_progress": "În Lucru",
+      "completed": "Finalizat",
+      "cancelled": "Anulat"
     },
-    "error": {
-      "fetch": "Eroare la încărcarea proprietăților"
+    "priority": {
+      "low": "Prioritate Scăzută",
+      "medium": "Prioritate Medie",
+      "high": "Prioritate Ridicată"
     },
-    "toast": {
-      "updated": {
-        "title": "Proprietate Actualizată",
-        "description": "Proprietatea a fost actualizată cu succes"
-      },
-      "deleted": {
-        "title": "Proprietate Ștearsă",
-        "description": "Proprietatea a fost ștearsă cu succes"
-      },
-      "error": "Eroare la efectuarea acțiunii solicitate"
-    },
-    "rent": {
-      "period": "lună"
-    },
-    "type": "Tip Proprietate",
     "filters": {
-      "search": "Căutare proprietăți...",
-      "type": {
-        "label": "Tip Proprietate",
-        "all": "Toate tipurile",
-        "apartment": "Apartament",
-        "house": "Casă",
-        "condo": "Condominium",
-        "commercial": "Comercial"
+      "search": "Caută cereri...",
+      "status": {
+        "label": "Filtrează după status",
+        "all": "Toate statusurile"
+      },
+      "priority": {
+        "label": "Filtrează după prioritate",
+        "all": "Toate prioritățile"
+      },
+      "issueType": {
+        "label": "Filtrează după tip",
+        "all": "Toate tipurile"
       }
-    }
-  },
-  "tenants": {
-    "title": {
-      "landlord": "Gestionare Chiriași",
-      "tenant": "Chiria Ta"
-    },
-    "description": {
-      "landlord": "Vizualizează și gestionează chiriașii proprietății tale",
-      "tenant": "Vizualizează detaliile și documentele chiriei tale"
-    },
-    "actions": {
-      "invite": "Invită Chiriaș",
-      "assign": "Atribuie Proprietate"
     },
     "form": {
-      "email": "Email",
-      "firstName": "Prenume",
-      "lastName": "Nume",
-      "properties": "Proprietăți",
-      "startDate": "Data de început",
-      "endDate": "Data de sfârșit (Opțional)",
-      "submit": "Creare Chiriaș",
-      "submitting": "Se creează Chiriașul..."
+      "title": {
+        "label": "Titlu",
+        "placeholder": "Scurtă descriere a problemei"
+      },
+      "description": {
+        "label": "Descriere",
+        "placeholder": "Descriere detaliată a problemei de mentenanță"
+      },
+      "notes": {
+        "label": "Note Adiționale",
+        "placeholder": "Orice informații suplimentare sau instrucțiuni speciale"
+      },
+      "issueType": {
+        "label": "Tip Problemă",
+        "placeholder": "Selectează un tip de problemă"
+      },
+      "priority": {
+        "label": "Prioritate",
+        "placeholder": "Selectează nivelul de prioritate"
+      },
+      "property": {
+        "label": "Proprietate",
+        "placeholder": "Selectează o proprietate"
+      },
+      "images": {
+        "label": "Imagini",
+        "placeholder": "Încarcă imagini"
+      }
     },
-    "error": {
-      "loading": "Eroare la încărcarea chiriașilor"
+    "toast": {
+      "success": {
+        "created": "Cererea de mentenanță a fost creată cu succes",
+        "updated": "Cererea de mentenanță a fost actualizată cu succes",
+        "deleted": "Cererea de mentenanță a fost ștearsă cu succes"
+      },
+      "error": {
+        "create": "Eroare la crearea cererii de mentenanță",
+        "update": "Eroare la actualizarea cererii de mentenanță",
+        "delete": "Eroare la ștergerea cererii de mentenanță"
+      }
     }
   }
 }

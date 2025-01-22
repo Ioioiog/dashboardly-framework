@@ -1,97 +1,82 @@
 {
-  "common": {
-    "edit": "Edit",
-    "delete": "Delete",
-    "save": "Save",
-    "cancel": "Cancel",
-    "loading": "Loading...",
-    "error": "Error",
-    "success": "Success",
-    "unexpectedError": "An unexpected error occurred"
-  },
-  "dashboard": {
-    "title": "Dashboard",
-    "welcome": "Welcome",
-    "overview": "Here's an overview of your properties and finances",
-    "metrics": {
-      "totalProperties": "Total Properties",
-      "monthlyRevenue": "Monthly Revenue",
-      "activeTenants": "Active Tenants",
-      "pendingMaintenance": "Pending Maintenance",
-      "paymentStatus": "Payment Status"
+  "maintenance": {
+    "title": "Maintenance Requests",
+    "newRequest": "New Request",
+    "noRequests": "No maintenance requests found",
+    "details": {
+      "viewImages": "View Images",
+      "viewHistory": "View History",
+      "edit": "Edit",
+      "delete": "Delete",
+      "imageAlt": "Maintenance request image {{number}}"
     },
-    "revenue": {
-      "title": "Revenue History",
-      "prediction": {
-        "title": "Revenue Predictions"
-      },
-      "noData": "No revenue data available"
-    }
-  },
-  "properties": {
-    "title": "Properties",
-    "description": "Manage your property portfolio",
-    "addProperty": "Add Property",
-    "empty": {
-      "landlord": "You haven't added any properties yet. Click the button above to add your first property.",
-      "tenant": "You don't have any properties assigned to you yet.",
-      "tenant.contact": "Please contact your landlord if you believe this is an error."
+    "status": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
     },
-    "error": {
-      "fetch": "Failed to load properties"
+    "priority": {
+      "low": "Low Priority",
+      "medium": "Medium Priority",
+      "high": "High Priority"
     },
-    "toast": {
-      "updated": {
-        "title": "Property Updated",
-        "description": "The property has been updated successfully"
-      },
-      "deleted": {
-        "title": "Property Deleted",
-        "description": "The property has been deleted successfully"
-      },
-      "error": "Failed to perform the requested action"
-    },
-    "rent": {
-      "period": "month"
-    },
-    "type": "Property Type",
     "filters": {
-      "search": "Search properties...",
-      "type": {
-        "label": "Property Type",
-        "all": "All types",
-        "apartment": "Apartment",
-        "house": "House",
-        "condo": "Condo",
-        "commercial": "Commercial"
+      "search": "Search requests...",
+      "status": {
+        "label": "Filter by status",
+        "all": "All statuses"
+      },
+      "priority": {
+        "label": "Filter by priority",
+        "all": "All priorities"
+      },
+      "issueType": {
+        "label": "Filter by issue type",
+        "all": "All types"
       }
-    }
-  },
-  "tenants": {
-    "title": {
-      "landlord": "Manage Tenants",
-      "tenant": "Your Tenancy"
-    },
-    "description": {
-      "landlord": "View and manage your property tenants",
-      "tenant": "View your tenancy details and documents"
-    },
-    "actions": {
-      "invite": "Invite Tenant",
-      "assign": "Assign Property"
     },
     "form": {
-      "email": "Email",
-      "firstName": "First Name",
-      "lastName": "Last Name",
-      "properties": "Properties",
-      "startDate": "Start Date",
-      "endDate": "End Date (Optional)",
-      "submit": "Create Tenant",
-      "submitting": "Creating Tenant..."
+      "title": {
+        "label": "Title",
+        "placeholder": "Brief description of the issue"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Detailed description of the maintenance issue"
+      },
+      "notes": {
+        "label": "Additional Notes",
+        "placeholder": "Any additional information or special instructions"
+      },
+      "issueType": {
+        "label": "Issue Type",
+        "placeholder": "Select an issue type"
+      },
+      "priority": {
+        "label": "Priority",
+        "placeholder": "Select priority level"
+      },
+      "property": {
+        "label": "Property",
+        "placeholder": "Select a property"
+      },
+      "images": {
+        "label": "Images",
+        "placeholder": "Upload images"
+      }
     },
-    "error": {
-      "loading": "Failed to load tenants"
+    "toast": {
+      "success": {
+        "created": "Maintenance request created successfully",
+        "updated": "Maintenance request updated successfully",
+        "deleted": "Maintenance request deleted successfully"
+      },
+      "error": {
+        "create": "Failed to create maintenance request",
+        "update": "Failed to update maintenance request",
+        "delete": "Failed to delete maintenance request"
+      }
     }
   }
 }
