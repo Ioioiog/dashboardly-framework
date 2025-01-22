@@ -21,7 +21,7 @@ const Chat = () => {
   return (
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
-      <main className="flex-1 ml-64 p-8">
+      <main className="flex-1 p-8">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md h-[calc(100vh-8rem)]">
           <div className="flex flex-col h-full">
             <ChatHeader
