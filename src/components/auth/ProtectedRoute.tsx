@@ -42,24 +42,41 @@ export function ProtectedRoute({
             await supabase.auth.signOut();
             navigate(redirectTo);
           }
-        } else {
-          // Verify the session is still valid
-          const { data: { user }, error: userError } = await supabase.auth.getUser();
-          
-          if (userError) {
-            console.error("User verification failed:", userError);
-            if (mounted) {
-              toast({
-                title: "Authentication Error",
-                description: "Your session has expired. Please sign in again.",
-                variant: "destructive",
-              });
-              await supabase.auth.signOut();
-              navigate(redirectTo);
-            }
-          } else {
-            console.log("Valid session found:", user.id);
+          return;
+        }
+
+        // Try to refresh the session
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.error("Session refresh failed:", refreshError);
+          if (mounted) {
+            toast({
+              title: "Session Expired",
+              description: "Please sign in again to continue.",
+              variant: "destructive",
+            });
+            await supabase.auth.signOut();
+            navigate(redirectTo);
           }
+          return;
+        }
+
+        // Verify the session is still valid
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          console.error("User verification failed:", userError);
+          if (mounted) {
+            toast({
+              title: "Authentication Error",
+              description: "Your session has expired. Please sign in again.",
+              variant: "destructive",
+            });
+            await supabase.auth.signOut();
+            navigate(redirectTo);
+          }
+        } else {
+          console.log("Valid session found:", user.id);
         }
       } catch (error) {
         console.error("Error checking session:", error);

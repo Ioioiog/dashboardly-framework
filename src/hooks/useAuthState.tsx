@@ -10,7 +10,7 @@ export function useAuthState() {
 
   useEffect(() => {
     let mounted = true;
-    let authListener: { subscription: { unsubscribe: () => void } } | null = null;
+    let authListener: { data: { subscription: { unsubscribe: () => void } } } | null = null;
 
     const initializeAuth = async () => {
       try {
@@ -28,23 +28,28 @@ export function useAuthState() {
         }
 
         // Set up auth state change listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+        const { data } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           console.log("Auth state changed:", event, "Session:", currentSession ? "exists" : "null");
           
-          if (event === 'SIGNED_OUT') {
-            console.log("User signed out");
+          if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+            console.log("User signed out or token refreshed");
             if (mounted) {
-              setIsAuthenticated(false);
+              setIsAuthenticated(!!currentSession);
             }
-          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            console.log("User signed in or token refreshed");
+          } else if (event === 'SIGNED_IN') {
+            console.log("User signed in");
             if (currentSession && mounted) {
-              const { data: { user }, error: userError } = await supabase.auth.getUser();
-              if (!userError && user) {
-                console.log("User verified after sign in:", user.id);
-                setIsAuthenticated(true);
-              } else {
-                console.error("Error verifying user after sign in:", userError);
+              try {
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                if (!userError && user) {
+                  console.log("User verified after sign in:", user.id);
+                  setIsAuthenticated(true);
+                } else {
+                  console.error("Error verifying user after sign in:", userError);
+                  setIsAuthenticated(false);
+                }
+              } catch (error) {
+                console.error("Error during user verification:", error);
                 setIsAuthenticated(false);
               }
             }
@@ -52,22 +57,35 @@ export function useAuthState() {
         });
 
         // Store the auth listener for cleanup
-        authListener = { subscription };
+        authListener = { data };
 
         // If we have a session, verify the user
         if (session) {
           console.log("Session found, verifying user...");
-          const { data: { user }, error: userError } = await supabase.auth.getUser();
-          
-          if (userError) {
-            console.error("User verification failed:", userError);
+          try {
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (userError) {
+              console.error("User verification failed:", userError);
+              if (mounted) {
+                setIsAuthenticated(false);
+                // Try to refresh the session
+                const { error: refreshError } = await supabase.auth.refreshSession();
+                if (refreshError) {
+                  console.error("Session refresh failed:", refreshError);
+                  await supabase.auth.signOut();
+                }
+              }
+            } else if (user) {
+              console.log("User verified successfully:", user.id);
+              if (mounted) {
+                setIsAuthenticated(true);
+              }
+            }
+          } catch (error) {
+            console.error("Error during session verification:", error);
             if (mounted) {
               setIsAuthenticated(false);
-            }
-          } else if (user) {
-            console.log("User verified successfully:", user.id);
-            if (mounted) {
-              setIsAuthenticated(true);
             }
           }
         } else {
@@ -89,7 +107,7 @@ export function useAuthState() {
           toast({
             variant: "destructive",
             title: "Authentication Error",
-            description: "There was a problem with authentication. Please try logging in again.",
+            description: "There was a problem with authentication. Please sign in again.",
           });
         }
       }
@@ -119,9 +137,9 @@ export function useAuthState() {
 
     return () => {
       mounted = false;
-      if (authListener?.subscription?.unsubscribe) {
+      if (authListener?.data?.subscription?.unsubscribe) {
         console.log("Cleaning up auth listener...");
-        authListener.subscription.unsubscribe();
+        authListener.data.subscription.unsubscribe();
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (authCheckTimeoutRef.current) {
