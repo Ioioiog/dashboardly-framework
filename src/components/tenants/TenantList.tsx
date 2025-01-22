@@ -10,6 +10,7 @@ import {
 import { EditTenantDialog } from "./EditTenantDialog";
 import { TenantObservationDialog } from "./TenantObservationDialog";
 import { TenantInteractionHistory } from "./TenantInteractionHistory";
+import { TenantInviteDialog } from "./TenantInviteDialog";
 import { Tenant } from "@/types/tenant";
 import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";

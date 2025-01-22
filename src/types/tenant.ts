@@ -17,6 +17,11 @@ export interface Tenant {
     end_date: string | null;
     status: string;
   };
+  invitation?: {
+    id: string;
+    expiration_date: string;
+    status: string;
+  };
 }
 
 export interface Property {
