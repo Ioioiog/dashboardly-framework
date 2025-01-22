@@ -11,6 +11,7 @@ interface DocumentListProps {
   propertyFilter: string;
   typeFilter: "all" | DocumentType;
   searchTerm: string;
+  viewMode: "grid" | "list";
 }
 
 export function DocumentList({ 
@@ -18,7 +19,8 @@ export function DocumentList({
   userRole, 
   propertyFilter, 
   typeFilter,
-  searchTerm 
+  searchTerm,
+  viewMode
 }: DocumentListProps) {
   const { data: documents, isLoading } = useQuery({
     queryKey: ["documents", propertyFilter, typeFilter, searchTerm],
@@ -63,7 +65,7 @@ export function DocumentList({
   });
 
   if (isLoading) {
-    return <DocumentListSkeleton />;
+    return <DocumentListSkeleton viewMode={viewMode} />;
   }
 
   if (!documents?.length) {
@@ -71,7 +73,9 @@ export function DocumentList({
   }
 
   return (
-    <div className="space-y-2 max-w-5xl mx-auto">
+    <div className={`space-y-2 max-w-5xl mx-auto ${
+      viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4 space-y-0' : ''
+    }`}>
       {documents.map((document) => (
         <div 
           key={document.id}
@@ -79,7 +83,8 @@ export function DocumentList({
         >
           <DocumentCard 
             document={document} 
-            userRole={userRole} 
+            userRole={userRole}
+            viewMode={viewMode}
           />
         </div>
       ))}

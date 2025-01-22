@@ -1,9 +1,17 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function DocumentListSkeleton() {
+interface DocumentListSkeletonProps {
+  viewMode: "grid" | "list";
+}
+
+export function DocumentListSkeleton({ viewMode }: DocumentListSkeletonProps) {
   return (
-    <div className="flex flex-col space-y-4 max-w-4xl mx-auto">
+    <div className={`flex ${
+      viewMode === 'grid' 
+        ? 'grid grid-cols-1 md:grid-cols-2 gap-4' 
+        : 'flex-col space-y-4'
+    } max-w-5xl mx-auto`}>
       {[1, 2, 3].map((i) => (
         <Card key={i}>
           <CardHeader>

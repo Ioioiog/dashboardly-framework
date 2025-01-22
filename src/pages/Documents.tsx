@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Grid, List, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { DocumentDialog } from "@/components/documents/DocumentDialog";
 import { DocumentType } from "@/integrations/supabase/types/document-types";
 import { DocumentFilters } from "@/components/documents/DocumentFilters";
 import { useQuery } from "@tanstack/react-query";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const Documents = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const Documents = () => {
   const [propertyFilter, setPropertyFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState<"all" | DocumentType>("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
   // Fetch properties for the filter dropdown
   const { data: properties } = useQuery({
@@ -86,15 +88,25 @@ const Documents = () => {
                   Manage and view your property-related documents.
                 </p>
               </div>
-              {userRole === "landlord" && (
-                <Button 
-                  className="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white"
-                  onClick={() => setShowAddModal(true)}
-                >
-                  <Plus className="h-4 w-4" />
-                  Upload Document
-                </Button>
-              )}
+              <div className="flex items-center gap-4">
+                <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as "grid" | "list")}>
+                  <ToggleGroupItem value="grid" aria-label="Grid view">
+                    <Grid className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="list" aria-label="List view">
+                    <List className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
+                {userRole === "landlord" && (
+                  <Button 
+                    className="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white"
+                    onClick={() => setShowAddModal(true)}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Upload Document
+                  </Button>
+                )}
+              </div>
             </header>
           </div>
 
@@ -114,6 +126,7 @@ const Documents = () => {
               propertyFilter={propertyFilter}
               typeFilter={typeFilter}
               searchTerm={searchTerm}
+              viewMode={viewMode}
             />
           </div>
         </div>
