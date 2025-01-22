@@ -6,6 +6,7 @@ export function useChat(selectedTenantId: string | null) {
   const [messages, setMessages] = useState<any[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   // Handle authentication state
@@ -54,7 +55,10 @@ export function useChat(selectedTenantId: string | null) {
     }
 
     const setupConversation = async () => {
+      setIsLoading(true);
       try {
+        console.log("Setting up conversation for user:", currentUserId);
+        
         const { data: userProfile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
@@ -63,7 +67,7 @@ export function useChat(selectedTenantId: string | null) {
 
         if (profileError) {
           console.error("Error fetching user profile:", profileError);
-          return;
+          throw profileError;
         }
 
         console.log("User profile:", userProfile);
@@ -77,6 +81,7 @@ export function useChat(selectedTenantId: string | null) {
         } else {
           if (!selectedTenantId) {
             console.log("No tenant selected for landlord");
+            setIsLoading(false);
             return;
           }
           query = query
@@ -92,6 +97,7 @@ export function useChat(selectedTenantId: string | null) {
 
         if (!conversation) {
           if (userProfile?.role === 'landlord' && selectedTenantId) {
+            console.log("Creating new conversation between landlord and tenant");
             const { data: newConversation, error: createError } = await supabase
               .from('conversations')
               .insert({
@@ -116,6 +122,8 @@ export function useChat(selectedTenantId: string | null) {
           description: "Failed to setup conversation",
           variant: "destructive",
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -148,6 +156,11 @@ export function useChat(selectedTenantId: string | null) {
 
       if (error) {
         console.error("Error fetching messages:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load messages",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -157,6 +170,7 @@ export function useChat(selectedTenantId: string | null) {
 
     fetchMessages();
 
+    // Subscribe to new messages
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
@@ -199,7 +213,7 @@ export function useChat(selectedTenantId: string | null) {
       console.log("Cleaning up subscription");
       supabase.removeChannel(channel);
     };
-  }, [conversationId]);
+  }, [conversationId, toast]);
 
   const sendMessage = async (content: string) => {
     if (!conversationId || !currentUserId || !content.trim()) {
@@ -240,5 +254,6 @@ export function useChat(selectedTenantId: string | null) {
     messages,
     currentUserId,
     sendMessage,
+    isLoading,
   };
 }
