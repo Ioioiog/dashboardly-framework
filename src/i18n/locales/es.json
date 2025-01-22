@@ -78,5 +78,104 @@
         "delete": "Error al eliminar la solicitud de mantenimiento"
       }
     }
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcome": "Bienvenido",
+    "overview": "Aquí tienes una visión general de tus propiedades y finanzas",
+    "metrics": {
+      "totalProperties": "Total de Propiedades",
+      "monthlyRevenue": "Ingresos Mensuales",
+      "activeTenants": "Inquilinos Activos",
+      "pendingMaintenance": "Mantenimiento Pendiente",
+      "paymentStatus": "Estado de Pago",
+      "noData": "No hay datos disponibles"
+    },
+    "revenue": {
+      "title": "Resumen de Ingresos",
+      "noData": "No hay datos de ingresos disponibles",
+      "prediction": {
+        "title": "Predicciones de Ingresos",
+        "description": "Basado en datos históricos y tendencias",
+        "noData": "No hay datos disponibles para predicciones"
+      },
+      "history": {
+        "title": "Historial de Ingresos",
+        "description": "Vista histórica del rendimiento de ingresos mensuales"
+      }
+    },
+    "performance": {
+      "title": "Rendimiento",
+      "total": "Total",
+      "monthlyAverage": "Promedio Mensual",
+      "vsLastMonth": "vs mes anterior"
+    }
+  },
+  "properties": {
+    "title": {
+      "landlord": "Mis Propiedades",
+      "tenant": "Mis Alquileres"
+    },
+    "description": {
+      "landlord": "Gestiona tu cartera de propiedades",
+      "tenant": "Ver tus alquileres actuales"
+    },
+    "filters": {
+      "search": "Buscar propiedades...",
+      "type": {
+        "label": "Tipo de Propiedad",
+        "all": "Todos los Tipos",
+        "apartment": "Apartamento",
+        "house": "Casa",
+        "condo": "Condominio",
+        "commercial": "Comercial"
+      }
+    },
+    "noProperties": "No se encontraron propiedades",
+    "viewMode": {
+      "grid": "Vista en Cuadrícula",
+      "list": "Vista en Lista"
+    }
+  },
+  "tenants": {
+    "title": {
+      "landlord": "Mis Inquilinos",
+      "tenant": "Mi Perfil"
+    },
+    "description": {
+      "landlord": "Gestiona tus inquilinos",
+      "tenant": "Ver y actualizar tu información de inquilino"
+    },
+    "dashboard": {
+      "property": "Propiedad Actual",
+      "leasePeriod": "Período de Arrendamiento",
+      "monthlyRent": "Alquiler Mensual",
+      "endDate": "Fecha de finalización: {{date}}",
+      "noEndDate": "Sin fecha de finalización"
+    }
+  },
+  "common": {
+    "actions": {
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "back": "Atrás"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "pending": "Pendiente",
+      "completed": "Completado"
+    },
+    "timeRanges": {
+      "1M": "Último Mes",
+      "6M": "Últimos 6 Meses",
+      "1Y": "Último Año",
+      "nextMonth": "Próximo Mes",
+      "next6Months": "Próximos 6 Meses",
+      "nextYear": "Próximo Año"
+    }
   }
 }

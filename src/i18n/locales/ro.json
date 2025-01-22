@@ -78,5 +78,104 @@
         "delete": "Eroare la ștergerea cererii de mentenanță"
       }
     }
+  },
+  "dashboard": {
+    "title": "Panou de Control",
+    "welcome": "Bun venit",
+    "overview": "Iată o prezentare generală a proprietăților și finanțelor tale",
+    "metrics": {
+      "totalProperties": "Total Proprietăți",
+      "monthlyRevenue": "Venit Lunar",
+      "activeTenants": "Chiriași Activi",
+      "pendingMaintenance": "Mentenanță în Așteptare",
+      "paymentStatus": "Stare Plată",
+      "noData": "Nu există date disponibile"
+    },
+    "revenue": {
+      "title": "Prezentare Venituri",
+      "noData": "Nu există date despre venituri",
+      "prediction": {
+        "title": "Predicții Venituri",
+        "description": "Bazat pe date istorice și tendințe",
+        "noData": "Nu există date disponibile pentru predicții"
+      },
+      "history": {
+        "title": "Istoric Venituri",
+        "description": "Vizualizare istorică a performanței veniturilor lunare"
+      }
+    },
+    "performance": {
+      "title": "Performanță",
+      "total": "Total",
+      "monthlyAverage": "Media Lunară",
+      "vsLastMonth": "vs luna trecută"
+    }
+  },
+  "properties": {
+    "title": {
+      "landlord": "Proprietățile Mele",
+      "tenant": "Închirierile Mele"
+    },
+    "description": {
+      "landlord": "Gestionează portofoliul tău de proprietăți",
+      "tenant": "Vezi închirierile tale curente"
+    },
+    "filters": {
+      "search": "Caută proprietăți...",
+      "type": {
+        "label": "Tip Proprietate",
+        "all": "Toate Tipurile",
+        "apartment": "Apartament",
+        "house": "Casă",
+        "condo": "Condominium",
+        "commercial": "Comercial"
+      }
+    },
+    "noProperties": "Nu s-au găsit proprietăți",
+    "viewMode": {
+      "grid": "Vizualizare Grid",
+      "list": "Vizualizare Listă"
+    }
+  },
+  "tenants": {
+    "title": {
+      "landlord": "Chiriașii Mei",
+      "tenant": "Profilul Meu"
+    },
+    "description": {
+      "landlord": "Gestionează chiriașii tăi",
+      "tenant": "Vezi și actualizează informațiile tale de chiriaș"
+    },
+    "dashboard": {
+      "property": "Proprietatea Curentă",
+      "leasePeriod": "Perioada de Închiriere",
+      "monthlyRent": "Chirie Lunară",
+      "endDate": "Data de sfârșit: {{date}}",
+      "noEndDate": "Fără dată de sfârșit"
+    }
+  },
+  "common": {
+    "actions": {
+      "edit": "Editează",
+      "delete": "Șterge",
+      "save": "Salvează",
+      "cancel": "Anulează",
+      "confirm": "Confirmă",
+      "back": "Înapoi"
+    },
+    "status": {
+      "active": "Activ",
+      "inactive": "Inactiv",
+      "pending": "În Așteptare",
+      "completed": "Finalizat"
+    },
+    "timeRanges": {
+      "1M": "Ultima Lună",
+      "6M": "Ultimele 6 Luni",
+      "1Y": "Ultimul An",
+      "nextMonth": "Luna Următoare",
+      "next6Months": "Următoarele 6 Luni",
+      "nextYear": "Anul Următor"
+    }
   }
 }

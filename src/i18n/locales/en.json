@@ -78,5 +78,104 @@
         "delete": "Failed to delete maintenance request"
       }
     }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "overview": "Here's an overview of your properties and finances",
+    "metrics": {
+      "totalProperties": "Total Properties",
+      "monthlyRevenue": "Monthly Revenue",
+      "activeTenants": "Active Tenants",
+      "pendingMaintenance": "Pending Maintenance",
+      "paymentStatus": "Payment Status",
+      "noData": "No data available"
+    },
+    "revenue": {
+      "title": "Revenue Overview",
+      "noData": "No revenue data available",
+      "prediction": {
+        "title": "Revenue Predictions",
+        "description": "Based on historical data and trends",
+        "noData": "No revenue data available for predictions"
+      },
+      "history": {
+        "title": "Revenue History",
+        "description": "Historical view of your monthly revenue performance"
+      }
+    },
+    "performance": {
+      "title": "Performance",
+      "total": "Total",
+      "monthlyAverage": "Monthly Average",
+      "vsLastMonth": "vs last month"
+    }
+  },
+  "properties": {
+    "title": {
+      "landlord": "My Properties",
+      "tenant": "My Rentals"
+    },
+    "description": {
+      "landlord": "Manage your property portfolio",
+      "tenant": "View your current rentals"
+    },
+    "filters": {
+      "search": "Search properties...",
+      "type": {
+        "label": "Property Type",
+        "all": "All Types",
+        "apartment": "Apartment",
+        "house": "House",
+        "condo": "Condo",
+        "commercial": "Commercial"
+      }
+    },
+    "noProperties": "No properties found",
+    "viewMode": {
+      "grid": "Grid View",
+      "list": "List View"
+    }
+  },
+  "tenants": {
+    "title": {
+      "landlord": "My Tenants",
+      "tenant": "My Profile"
+    },
+    "description": {
+      "landlord": "Manage your tenants",
+      "tenant": "View and update your tenant information"
+    },
+    "dashboard": {
+      "property": "Current Property",
+      "leasePeriod": "Lease Period",
+      "monthlyRent": "Monthly Rent",
+      "endDate": "End Date: {{date}}",
+      "noEndDate": "No end date set"
+    }
+  },
+  "common": {
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "back": "Back"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "completed": "Completed"
+    },
+    "timeRanges": {
+      "1M": "Last Month",
+      "6M": "Last 6 Months",
+      "1Y": "Last Year",
+      "nextMonth": "Next Month",
+      "next6Months": "Next 6 Months",
+      "nextYear": "Next Year"
+    }
   }
 }
