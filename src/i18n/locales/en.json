@@ -120,6 +120,19 @@
       "landlord": "Manage your property portfolio",
       "tenant": "View your current rentals"
     },
+    "addProperty": "Add Property",
+    "rent": {
+      "period": "month"
+    },
+    "type": "Property Type",
+    "empty": {
+      "landlord": "You haven't added any properties yet",
+      "tenant": "You don't have any active rentals",
+      "tenant.contact": "Please contact your landlord for more information"
+    },
+    "error": {
+      "fetch": "Failed to fetch properties"
+    },
     "filters": {
       "search": "Search properties...",
       "type": {
@@ -131,10 +144,31 @@
         "commercial": "Commercial"
       }
     },
-    "noProperties": "No properties found",
     "viewMode": {
       "grid": "Grid View",
       "list": "List View"
+    },
+    "form": {
+      "name": "Property Name",
+      "address": "Address",
+      "monthlyRent": "Monthly Rent",
+      "type": "Property Type",
+      "description": "Description",
+      "availableFrom": "Available From",
+      "contractEndDate": "Contract End Date",
+      "contractEndDateNote": "This date is automatically set to the tenant's contract end date"
+    },
+    "toast": {
+      "success": {
+        "created": "Property created successfully",
+        "updated": "Property updated successfully",
+        "deleted": "Property deleted successfully"
+      },
+      "error": {
+        "create": "Failed to create property",
+        "update": "Failed to update property",
+        "delete": "Failed to delete property"
+      }
     }
   },
   "tenants": {

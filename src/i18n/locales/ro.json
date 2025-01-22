@@ -117,8 +117,21 @@
       "tenant": "Închirierile Mele"
     },
     "description": {
-      "landlord": "Gestionează portofoliul tău de proprietăți",
+      "landlord": "Gestionează portofoliul tău imobiliar",
       "tenant": "Vezi închirierile tale curente"
+    },
+    "addProperty": "Adaugă Proprietate",
+    "rent": {
+      "period": "lună"
+    },
+    "type": "Tip Proprietate",
+    "empty": {
+      "landlord": "Nu ai adăugat încă nicio proprietate",
+      "tenant": "Nu ai nicio închiriere activă",
+      "tenant.contact": "Te rugăm să contactezi proprietarul pentru mai multe informații"
+    },
+    "error": {
+      "fetch": "Eroare la încărcarea proprietăților"
     },
     "filters": {
       "search": "Caută proprietăți...",
@@ -131,10 +144,31 @@
         "commercial": "Comercial"
       }
     },
-    "noProperties": "Nu s-au găsit proprietăți",
     "viewMode": {
       "grid": "Vizualizare Grid",
       "list": "Vizualizare Listă"
+    },
+    "form": {
+      "name": "Nume Proprietate",
+      "address": "Adresă",
+      "monthlyRent": "Chirie Lunară",
+      "type": "Tip Proprietate",
+      "description": "Descriere",
+      "availableFrom": "Disponibil Din",
+      "contractEndDate": "Data Încheierii Contractului",
+      "contractEndDateNote": "Această dată este setată automat la data de încheiere a contractului chiriașului"
+    },
+    "toast": {
+      "success": {
+        "created": "Proprietate creată cu succes",
+        "updated": "Proprietate actualizată cu succes",
+        "deleted": "Proprietate ștearsă cu succes"
+      },
+      "error": {
+        "create": "Eroare la crearea proprietății",
+        "update": "Eroare la actualizarea proprietății",
+        "delete": "Eroare la ștergerea proprietății"
+      }
     }
   },
   "tenants": {

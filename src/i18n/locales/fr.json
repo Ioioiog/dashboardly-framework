@@ -118,7 +118,20 @@
     },
     "description": {
       "landlord": "Gérez votre portefeuille immobilier",
-      "tenant": "Voir vos locations actuelles"
+      "tenant": "Consultez vos locations actuelles"
+    },
+    "addProperty": "Ajouter une Propriété",
+    "rent": {
+      "period": "mois"
+    },
+    "type": "Type de Propriété",
+    "empty": {
+      "landlord": "Vous n'avez pas encore ajouté de propriétés",
+      "tenant": "Vous n'avez pas de locations actives",
+      "tenant.contact": "Veuillez contacter votre propriétaire pour plus d'informations"
+    },
+    "error": {
+      "fetch": "Échec de la récupération des propriétés"
     },
     "filters": {
       "search": "Rechercher des propriétés...",
@@ -131,10 +144,31 @@
         "commercial": "Commercial"
       }
     },
-    "noProperties": "Aucune propriété trouvée",
     "viewMode": {
       "grid": "Vue en Grille",
       "list": "Vue en Liste"
+    },
+    "form": {
+      "name": "Nom de la Propriété",
+      "address": "Adresse",
+      "monthlyRent": "Loyer Mensuel",
+      "type": "Type de Propriété",
+      "description": "Description",
+      "availableFrom": "Disponible à partir de",
+      "contractEndDate": "Date de Fin du Contrat",
+      "contractEndDateNote": "Cette date est automatiquement définie à la date de fin du contrat du locataire"
+    },
+    "toast": {
+      "success": {
+        "created": "Propriété créée avec succès",
+        "updated": "Propriété mise à jour avec succès",
+        "deleted": "Propriété supprimée avec succès"
+      },
+      "error": {
+        "create": "Échec de la création de la propriété",
+        "update": "Échec de la mise à jour de la propriété",
+        "delete": "Échec de la suppression de la propriété"
+      }
     }
   },
   "tenants": {
