@@ -57,8 +57,8 @@ export function useAuthState() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
       
-      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
-        console.log("User signed out or deleted");
+      if (event === 'SIGNED_OUT') {
+        console.log("User signed out");
         if (mounted) {
           setIsAuthenticated(false);
           setIsLoading(false);
