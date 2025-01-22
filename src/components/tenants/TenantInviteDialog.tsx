@@ -59,9 +59,42 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
         throw new Error(propertyAssignmentError.message);
       }
 
+      // Get property details for the email
+      const { data: propertyDetails, error: propertyError } = await supabase
+        .from('properties')
+        .select('name, address')
+        .in('id', data.propertyIds);
+
+      if (propertyError) {
+        console.error("Error fetching property details:", propertyError);
+        throw new Error(propertyError.message);
+      }
+
+      // Send invitation email
+      const { error: emailError } = await supabase.functions.invoke(
+        'send-tenant-invitation',
+        {
+          body: {
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            propertyIds: data.propertyIds,
+            properties: propertyDetails,
+            token: token,
+            startDate: data.startDate,
+            endDate: data.endDate
+          }
+        }
+      );
+
+      if (emailError) {
+        console.error("Error sending invitation email:", emailError);
+        throw new Error("Failed to send invitation email");
+      }
+
       toast({
         title: "Success",
-        description: "Tenant created successfully.",
+        description: "Tenant invitation sent successfully.",
       });
 
       onOpenChange(false);

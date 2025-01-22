@@ -7,11 +7,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+interface Property {
+  name: string;
+  address: string;
+}
+
 interface InvitationRequest {
   email: string;
-  firstName: string | null;
-  lastName: string | null;
-  propertyId: string;
+  firstName: string;
+  lastName: string;
+  propertyIds: string[];
+  properties: Property[];
   token: string;
   startDate: string;
   endDate?: string;
@@ -26,58 +32,28 @@ serve(async (req) => {
 
   try {
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
-    const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
-
-    if (!RESEND_API_KEY || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      console.error('Missing environment variables:', {
-        hasResendKey: !!RESEND_API_KEY,
-        hasSupabaseUrl: !!SUPABASE_URL,
-        hasSupabaseKey: !!SUPABASE_ANON_KEY
-      })
-      throw new Error('Missing required environment variables')
+    if (!RESEND_API_KEY) {
+      throw new Error('Missing RESEND_API_KEY environment variable')
     }
 
     const requestData: InvitationRequest = await req.json()
-    const { email, firstName, lastName, propertyId, token, startDate, endDate } = requestData
+    const { email, firstName, lastName, properties, token, startDate, endDate } = requestData
     
     console.log('Processing invitation request:', {
       email,
       firstName,
       lastName,
-      propertyId,
+      properties,
       token,
       startDate,
       endDate
     })
 
-    // Initialize Supabase client
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-    // Fetch property details
-    console.log('Fetching property details for ID:', propertyId)
-    const { data: property, error: propertyError } = await supabase
-      .from('properties')
-      .select('*')
-      .eq('id', propertyId)
-      .single()
-
-    if (propertyError) {
-      console.error('Property fetch error:', propertyError)
-      throw new Error(`Failed to fetch property: ${propertyError.message}`)
-    }
-
-    if (!property) {
-      console.error('Property not found for ID:', propertyId)
-      throw new Error('Property not found')
-    }
-
-    console.log('Found property:', property)
-
     // Initialize Resend
     const resend = new Resend(RESEND_API_KEY)
+    
     // Use the correct domain in the invitation URL
-    const inviteUrl = `${req.headers.get('origin')}/tenant-registration?invitation=${token}`
+    const inviteUrl = `${req.headers.get('origin')}/tenant-registration?token=${token}`
 
     console.log('Sending invitation email to:', email)
     console.log('Using invite URL:', inviteUrl)
@@ -88,11 +64,15 @@ serve(async (req) => {
       subject: 'Invitation to Join Property Management Platform',
       html: `
         <p>Hello ${firstName || ''} ${lastName || ''},</p>
-        <p>You have been invited to join our property management platform for the property: ${property.name}</p>
-        <p>Property Details:</p>
+        <p>You have been invited to join our property management platform for the following properties:</p>
+        ${properties.map(property => `
+          <div style="margin-bottom: 10px;">
+            <strong>${property.name}</strong><br/>
+            ${property.address}
+          </div>
+        `).join('')}
+        <p>Tenancy Details:</p>
         <ul>
-          <li>Name: ${property.name}</li>
-          <li>Address: ${property.address}</li>
           <li>Start Date: ${startDate}</li>
           ${endDate ? `<li>End Date: ${endDate}</li>` : ''}
         </ul>
