@@ -118,8 +118,8 @@ const Index = () => {
   return (
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
-      <main className="flex-1 ml-64 p-6">
-        <div className="max-w-7xl mx-auto space-y-4">
+      <main className="flex-1 ml-64 overflow-y-auto">
+        <div className="max-w-7xl mx-auto p-4 space-y-4">
           <header className="bg-white rounded-lg shadow-sm p-4">
             <h1 className="text-2xl font-semibold text-gray-900">
               {t('dashboard.title')}
@@ -163,8 +163,9 @@ const Index = () => {
                         </Button>
                       </div>
                     </div>
+                    
                     <div className="space-y-4">
-                      {activeView === "history" && (
+                      {activeView === "history" ? (
                         <div>
                           <div className="mb-3">
                             <h3 className="text-xl font-semibold text-gray-800">
@@ -174,12 +175,11 @@ const Index = () => {
                               Historical view of your monthly revenue performance
                             </p>
                           </div>
-                          <div className="bg-dashboard-accent rounded-lg p-4">
+                          <div className="bg-dashboard-accent rounded-lg">
                             <RevenueChart userId={userId} />
                           </div>
                         </div>
-                      )}
-                      {activeView === "predictions" && (
+                      ) : (
                         <div>
                           <div className="mb-3">
                             <h3 className="text-xl font-semibold text-gray-800">
@@ -189,7 +189,7 @@ const Index = () => {
                               Projected revenue based on historical data and trends
                             </p>
                           </div>
-                          <div className="bg-dashboard-accent rounded-lg p-4">
+                          <div className="bg-dashboard-accent rounded-lg">
                             <RevenuePrediction userId={userId} />
                           </div>
                         </div>
