@@ -17,6 +17,8 @@ export default function Properties() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const { userRole } = useUserRole();
 
+  console.log("Properties page - User Role:", userRole);
+
   const handleEdit = async (property: Property, data: any): Promise<boolean> => {
     try {
       const { error } = await supabase
@@ -71,6 +73,7 @@ export default function Properties() {
   };
 
   if (!userRole) {
+    console.log("No user role found, returning null");
     return null;
   }
 

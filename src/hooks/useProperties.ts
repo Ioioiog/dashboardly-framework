@@ -19,14 +19,15 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties", userRole],
     queryFn: async () => {
-      console.log("Fetching properties data for role:", userRole);
       const { data: user } = await supabase.auth.getUser();
       
       if (!user.user) {
+        console.error("No user found in useProperties");
         throw new Error("No user found");
       }
 
-      console.log("Current user ID:", user.user.id);
+      console.log("useProperties - User ID:", user.user.id);
+      console.log("useProperties - User Role:", userRole);
 
       if (userRole === "landlord") {
         // For landlords, fetch properties with their active tenancies
@@ -55,6 +56,8 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           throw error;
         }
 
+        console.log("Landlord properties query result:", data);
+
         // Transform the data to match our Property interface
         const transformedData = data?.map(property => ({
           ...property,
@@ -65,11 +68,11 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           } : undefined
         }));
 
-        console.log("Fetched landlord properties with tenancies:", transformedData);
+        console.log("Transformed landlord properties:", transformedData);
         return transformedData || [];
       } else {
-        // For tenants, we need to join through the tenancies table
-        console.log("Fetching tenant properties through tenancies...");
+        // For tenants, fetch through tenancies table
+        console.log("Fetching tenant properties for user:", user.user.id);
         const { data: tenanciesData, error } = await supabase
           .from("tenancies")
           .select(`
@@ -86,6 +89,8 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           throw error;
         }
         
+        console.log("Raw tenancies data:", tenanciesData);
+        
         const properties = tenanciesData?.map(item => ({
           ...item.property,
           tenancy: {
@@ -94,8 +99,7 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           }
         })) || [];
 
-        console.log("Fetched tenant properties:", properties);
-        console.log("Raw tenancies data:", tenanciesData);
+        console.log("Transformed tenant properties:", properties);
         return properties;
       }
     },
