@@ -12,6 +12,7 @@ interface PropertyListProps {
   userRole: "landlord" | "tenant";
   onEdit?: (property: Property, data: any) => void;
   onDelete?: (property: Property) => void;
+  viewMode: "grid" | "list";
 }
 
 export function PropertyList({ 
@@ -19,14 +20,15 @@ export function PropertyList({
   isLoading, 
   userRole, 
   onEdit, 
-  onDelete 
+  onDelete,
+  viewMode 
 }: PropertyListProps) {
   const { t } = useTranslation();
 
   // Show loading skeleton
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-7xl mx-auto">
+      <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} gap-4 max-w-7xl mx-auto`}>
         {[...Array(3)].map((_, i) => (
           <Card key={i} className="p-6 animate-pulse">
             <div className="space-y-3">
@@ -78,9 +80,9 @@ export function PropertyList({
     );
   }
 
-  // Show property grid
+  // Show property grid/list
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-7xl mx-auto">
+    <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} gap-4 max-w-7xl mx-auto`}>
       {properties.map((property) => (
         <PropertyCard
           key={property.id}
@@ -88,6 +90,7 @@ export function PropertyList({
           userRole={userRole}
           onEdit={onEdit}
           onDelete={onDelete}
+          viewMode={viewMode}
         />
       ))}
     </div>

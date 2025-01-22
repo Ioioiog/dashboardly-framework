@@ -14,9 +14,16 @@ interface PropertyCardProps {
   userRole: "landlord" | "tenant";
   onEdit?: (property: Property, data: any) => void;
   onDelete?: (property: Property) => void;
+  viewMode?: "grid" | "list";
 }
 
-export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyCardProps) {
+export function PropertyCard({ 
+  property, 
+  userRole, 
+  onEdit, 
+  onDelete,
+  viewMode = "grid" 
+}: PropertyCardProps) {
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { t } = useTranslation();
@@ -60,13 +67,18 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
     }
   };
 
-  console.log("User role:", userRole);
-  console.log("Tenancy info:", property.tenancy);
+  const cardClassName = viewMode === "list" 
+    ? "flex flex-row items-start gap-6" 
+    : "";
+
+  const contentClassName = viewMode === "list"
+    ? "flex-1"
+    : "";
 
   return (
     <>
-      <Card>
-        <CardContent className="p-6">
+      <Card className={cardClassName}>
+        <CardContent className={`p-6 ${contentClassName}`}>
           <div className="space-y-4">
             <div className="space-y-2">
               <h3 className="text-xl font-semibold">{property.name}</h3>
@@ -131,7 +143,7 @@ export function PropertyCard({ property, userRole, onEdit, onDelete }: PropertyC
           </div>
         </CardContent>
         {userRole === "landlord" && (
-          <CardFooter className="px-6 py-4 bg-gray-50 gap-2 flex-wrap">
+          <CardFooter className={`px-6 py-4 bg-gray-50 gap-2 flex-wrap ${viewMode === "list" ? "border-l" : ""}`}>
             <Button
               variant="outline"
               size="sm"
