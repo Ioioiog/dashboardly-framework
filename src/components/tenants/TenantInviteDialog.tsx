@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Property } from "@/utils/propertyUtils";
 import { TenantInviteForm } from "./TenantInviteForm";
 import { supabase } from "@/integrations/supabase/client";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface TenantInviteDialogProps {
   properties: Property[];
@@ -30,6 +31,8 @@ export function TenantInviteDialog({
 }: TenantInviteDialogProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [showResendConfirm, setShowResendConfirm] = React.useState(false);
+  const [resendData, setResendData] = React.useState<any>(null);
 
   const checkExistingInvitation = async (email: string) => {
     console.log("Checking for existing invitation for email:", email);
@@ -43,12 +46,18 @@ export function TenantInviteDialog({
       .gt('expiration_date', new Date().toISOString())
       .single();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 is the "no rows returned" error
+    if (error && error.code !== 'PGRST116') {
       console.error("Error checking existing invitations:", error);
       throw new Error("Failed to check existing invitations");
     }
 
     return existingInvites;
+  };
+
+  const handleResendConfirm = async () => {
+    console.log("Confirming resend for data:", resendData);
+    setShowResendConfirm(false);
+    await handleSubmit(resendData);
   };
 
   const handleSubmit = async (data: any) => {
@@ -60,19 +69,8 @@ export function TenantInviteDialog({
       if (!existingInvitation) {
         const existingInvite = await checkExistingInvitation(data.email);
         if (existingInvite) {
-          toast({
-            title: "Invitation Already Exists",
-            description: "An active invitation for this email address already exists. Would you like to resend it?",
-            variant: "destructive",
-            action: (
-              <button
-                onClick={() => handleSubmit({ ...existingInvite, resend: true })}
-                className="bg-white text-red-600 px-3 py-2 rounded-md text-sm font-medium hover:bg-red-50"
-              >
-                Resend
-              </button>
-            ),
-          });
+          setResendData({ ...existingInvite, resend: true });
+          setShowResendConfirm(true);
           setIsSubmitting(false);
           return;
         }
@@ -189,20 +187,39 @@ export function TenantInviteDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>
-            {existingInvitation ? "Resend Invitation" : "Create Tenant Account"}
-          </DialogTitle>
-        </DialogHeader>
-        <TenantInviteForm 
-          properties={properties}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          defaultValues={existingInvitation}
-        />
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {existingInvitation ? "Resend Invitation" : "Create Tenant Account"}
+            </DialogTitle>
+          </DialogHeader>
+          <TenantInviteForm 
+            properties={properties}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            defaultValues={existingInvitation}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showResendConfirm} onOpenChange={setShowResendConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Resend Invitation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              An active invitation already exists for this email address. Would you like to resend it with a new expiration date?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResendConfirm}>
+              Resend Invitation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
