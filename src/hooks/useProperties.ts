@@ -70,11 +70,19 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           const { data: tenanciesData, error } = await supabase
             .from("tenancies")
             .select(`
-              id,
-              status,
+              property:properties(
+                id,
+                name,
+                address,
+                monthly_rent,
+                type,
+                description,
+                available_from,
+                landlord_id
+              ),
               start_date,
               end_date,
-              property:properties(*)
+              status
             `)
             .eq("tenant_id", user.id)
             .eq("status", "active");
@@ -90,8 +98,8 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           const properties = tenanciesData?.map(tenancy => ({
             ...tenancy.property,
             tenancy: {
-              end_date: tenancy.end_date,
               start_date: tenancy.start_date,
+              end_date: tenancy.end_date,
               status: tenancy.status
             }
           })) || [];
