@@ -1,11 +1,10 @@
-import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
-  Building2,
+  Home,
   Users,
-  FileText,
   Wrench,
-  Receipt,
+  FileText,
+  CreditCard,
   Settings,
   Droplets,
   LogOut,
@@ -13,55 +12,43 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-export default function DashboardSidebar() {
-  const navigate = useNavigate();
+export function DashboardSidebar() {
   const { userRole } = useUserRole();
+  const location = useLocation();
   const { toast } = useToast();
 
   const handleSignOut = async () => {
     try {
-      console.log("Starting sign out process...");
-      
-      // First clear any existing session data from localStorage
-      localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
-      
-      // Attempt to sign out with local scope only
-      const { error } = await supabase.auth.signOut({ 
-        scope: 'local'
-      });
-      
-      if (error) {
-        console.error("Error during sign out:", error);
-        throw error;
-      }
-      
-      console.log("Sign out successful");
-      navigate("/auth", { replace: true });
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       
       toast({
         title: "Signed out successfully",
-        description: "You have been signed out of your account",
+        description: "You have been signed out of your account.",
       });
     } catch (error) {
       console.error("Error signing out:", error);
-      
-      // Even if there's an error, we want to redirect to auth
-      // since the session is likely invalid anyway
-      navigate("/auth", { replace: true });
-      
       toast({
+        title: "Error signing out",
+        description: "There was a problem signing out. Please try again.",
         variant: "destructive",
-        title: "Sign out completed with warnings",
-        description: "You have been signed out, but there were some warnings. Please sign in again.",
       });
     }
   };
 
-const menuItems = [
+  const isActive = (href: string) => {
+    if (href === "/dashboard") {
+      return location.pathname === href;
+    }
+    return location.pathname.startsWith(href);
+  };
+
+  const menuItems = [
     {
       title: "Dashboard",
       icon: LayoutDashboard,
@@ -70,7 +57,7 @@ const menuItems = [
     },
     {
       title: "Properties",
-      icon: Building2,
+      icon: Home,
       href: "/properties",
       roles: ["landlord", "tenant"],
     },
@@ -81,27 +68,27 @@ const menuItems = [
       roles: ["landlord"],
     },
     {
-      title: "Documents",
-      icon: FileText,
-      href: "/documents",
-      roles: ["landlord", "tenant"],
-    },
-    {
       title: "Maintenance",
       icon: Wrench,
       href: "/maintenance",
       roles: ["landlord", "tenant"],
     },
     {
-      title: "Payments",
-      icon: Receipt,
-      href: "/payments",
+      title: "Documents",
+      icon: FileText,
+      href: "/documents",
       roles: ["landlord", "tenant"],
     },
     {
       title: "Invoices",
       icon: FileText,
       href: "/invoices",
+      roles: ["landlord", "tenant"],
+    },
+    {
+      title: "Payments",
+      icon: CreditCard,
+      href: "/payments",
       roles: ["landlord", "tenant"],
     },
     {
@@ -124,47 +111,43 @@ const menuItems = [
     },
   ];
 
-  const filteredMenuItems = menuItems.filter((item) =>
-    userRole ? item.roles.includes(userRole) : item.roles.includes("tenant")
+  const filteredMenuItems = menuItems.filter(
+    (item) => !userRole || item.roles.includes(userRole)
   );
 
   return (
-    <div className="fixed inset-y-0 left-0 w-64 bg-dashboard-sidebar border-r border-gray-200">
-      <div className="flex h-full flex-col justify-between">
-        <div className="space-y-4">
-          <div className="mb-8 p-4">
-            <img 
-              src="/lovable-uploads/a279fbbc-be90-4a4b-afe5-ae98a7d6c04d.png" 
-              alt="AdminChirii.ro" 
-              className="h-20 w-auto"
-            />
-          </div>
-          <nav className="space-y-2">
-            {filteredMenuItems.map((item) => (
-              <button
-                key={item.href}
-                onClick={() => navigate(item.href)}
-                className={cn(
-                  "flex w-full items-center space-x-2 px-4 py-2 text-dashboard-text hover:bg-dashboard-accent hover:text-dashboard-text transition-colors",
-                  window.location.pathname === item.href &&
-                    "bg-dashboard-accent text-dashboard-text"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                <span>{item.title}</span>
-              </button>
-            ))}
-          </nav>
-        </div>
-        <div className="p-4">
-          <button
-            onClick={handleSignOut}
-            className="flex w-full items-center space-x-2 px-4 py-2 text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-            <span>Sign Out</span>
-          </button>
-        </div>
+    <div className="h-screen w-64 bg-dashboard-sidebar border-r border-gray-200 flex flex-col">
+      <div className="p-4">
+        <h1 className="text-2xl font-bold text-gray-800">PropMan</h1>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        <nav className="px-2 py-4 space-y-1">
+          {filteredMenuItems.map((item) => (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={cn(
+                "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                isActive(item.href)
+                  ? "bg-dashboard-accent text-dashboard-text"
+                  : "text-dashboard-text-muted hover:bg-dashboard-accent hover:text-dashboard-text"
+              )}
+            >
+              <item.icon className="mr-3 h-5 w-5" />
+              {item.title}
+            </Link>
+          ))}
+        </nav>
+      </div>
+      <div className="p-4 border-t border-gray-200">
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-dashboard-text-muted hover:text-dashboard-text"
+          onClick={handleSignOut}
+        >
+          <LogOut className="mr-3 h-5 w-5" />
+          Sign Out
+        </Button>
       </div>
     </div>
   );
