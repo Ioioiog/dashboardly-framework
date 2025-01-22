@@ -36,7 +36,7 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
       // Then fetch available tenants
       const query = supabase
         .from("profiles")
-        .select("id, first_name, last_name, email")
+        .select("id, first_name, last_name, email, phone, role, created_at, updated_at")
         .eq("role", "tenant");
 
       // Only add the not-in filter if there are active tenants
