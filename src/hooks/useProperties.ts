@@ -41,12 +41,12 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
             .from("properties")
             .select(`
               *,
-              tenancies (
+              tenancies:tenancies(
                 id,
                 start_date,
                 end_date,
                 status,
-                tenant:profiles (
+                tenant:profiles(
                   id,
                   first_name,
                   last_name,
@@ -84,7 +84,7 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           const { data: tenanciesData, error } = await supabase
             .from("tenancies")
             .select(`
-              property:properties (*),
+              property:properties(*),
               status,
               start_date,
               end_date
