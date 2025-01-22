@@ -24,9 +24,7 @@ export function useAuthState() {
             setIsLoading(false);
           }
           // Clear invalid session data
-          await supabase.auth.signOut({ scope: 'local' });
-          localStorage.removeItem('supabase.auth.token');
-          localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
+          await supabase.auth.signOut();
           return;
         }
 
@@ -40,6 +38,8 @@ export function useAuthState() {
           if (mounted) {
             setIsAuthenticated(false);
           }
+          // Clear any stale session data
+          await supabase.auth.signOut();
         }
 
         if (mounted) {
@@ -52,6 +52,8 @@ export function useAuthState() {
           setIsLoading(false);
           setIsAuthenticated(false);
         }
+        // Clear session data on error
+        await supabase.auth.signOut();
       }
     };
 
@@ -67,15 +69,13 @@ export function useAuthState() {
         if (mounted) {
           setIsAuthenticated(false);
         }
-        // Clear session data
-        localStorage.removeItem('supabase.auth.token');
-        localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
         
         toast({
           title: "Session Ended",
           description: "Your session has ended. Please sign in again.",
           variant: "destructive",
         });
+
       } else if (event === 'SIGNED_IN' && session) {
         console.log("User signed in successfully");
         if (mounted) {
