@@ -24,6 +24,7 @@ export function useAuthState() {
           if (mounted) {
             setIsAuthenticated(false);
             setIsLoading(false);
+            localStorage.removeItem('supabase.auth.token');
           }
           return;
         }
@@ -37,22 +38,20 @@ export function useAuthState() {
             if (mounted) {
               setIsAuthenticated(false);
               setIsLoading(false);
-              // Clear local storage on sign out
               localStorage.removeItem('supabase.auth.token');
             }
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             console.log(`Auth event: ${event}`);
             if (currentSession && mounted) {
               try {
-                // Verify the session is still valid
                 const { data: { user }, error: userError } = await supabase.auth.getUser();
                 if (!userError && user) {
                   console.log("User verified:", user.id);
                   setIsAuthenticated(true);
                 } else {
                   console.error("Error verifying user:", userError);
-                  // Handle invalid session
                   await supabase.auth.signOut();
+                  localStorage.removeItem('supabase.auth.token');
                   setIsAuthenticated(false);
                   toast({
                     title: "Session Expired",
@@ -63,8 +62,11 @@ export function useAuthState() {
               } catch (error) {
                 console.error("Error during user verification:", error);
                 setIsAuthenticated(false);
+                localStorage.removeItem('supabase.auth.token');
               } finally {
-                setIsLoading(false);
+                if (mounted) {
+                  setIsLoading(false);
+                }
               }
             }
           }
@@ -82,8 +84,8 @@ export function useAuthState() {
             if (userError) {
               console.error("User verification failed:", userError);
               if (mounted) {
-                // Clear invalid session
                 await supabase.auth.signOut();
+                localStorage.removeItem('supabase.auth.token');
                 setIsAuthenticated(false);
                 toast({
                   title: "Session Expired",
@@ -101,6 +103,7 @@ export function useAuthState() {
             console.error("Error during session verification:", error);
             if (mounted) {
               setIsAuthenticated(false);
+              localStorage.removeItem('supabase.auth.token');
             }
           }
         } else {
@@ -119,6 +122,7 @@ export function useAuthState() {
         if (mounted) {
           setIsLoading(false);
           setIsAuthenticated(false);
+          localStorage.removeItem('supabase.auth.token');
         }
       }
     };
@@ -126,12 +130,10 @@ export function useAuthState() {
     // Handle tab visibility changes
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // Clear any existing timeout
         if (authCheckTimeoutRef.current) {
           clearTimeout(authCheckTimeoutRef.current);
         }
         
-        // Set a small delay before checking auth to prevent multiple rapid checks
         authCheckTimeoutRef.current = setTimeout(() => {
           console.log("Tab became visible, checking auth state...");
           initializeAuth();

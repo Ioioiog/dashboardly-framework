@@ -13,8 +13,7 @@ export const supabase = createClient<Database>(
       persistSession: true,
       detectSessionInUrl: true,
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      flowType: 'pkce',
-      debug: process.env.NODE_ENV === 'development'
+      flowType: 'pkce'
     },
     global: {
       headers: {
@@ -27,38 +26,38 @@ export const supabase = createClient<Database>(
 // Initialize session from localStorage if it exists
 const initSession = async () => {
   try {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) {
-      console.error('Error initializing session:', error);
+    // Clear any existing invalid sessions first
+    const existingSession = await supabase.auth.getSession();
+    if (existingSession.error) {
+      console.error('Error with existing session:', existingSession.error);
       await supabase.auth.signOut();
+      localStorage.removeItem('supabase.auth.token');
       return;
     }
-    
-    if (session) {
-      console.log('Session initialized successfully');
-      // Verify the session is still valid
-      const { data: { user }, error: refreshError } = await supabase.auth.getUser();
-      if (refreshError || !user) {
-        console.error('Session invalid, signing out:', refreshError);
-        await supabase.auth.signOut();
-      } else {
-        // Set up auto token refresh
-        supabase.auth.onAuthStateChange((event, session) => {
-          if (event === 'TOKEN_REFRESHED') {
-            console.log('Token refreshed successfully');
-          }
-        });
+
+    // Set up session refresh handling
+    supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event);
+      
+      if (event === 'SIGNED_OUT') {
+        console.log('User signed out, clearing session data');
+        localStorage.removeItem('supabase.auth.token');
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
+      } else if (event === 'SIGNED_IN') {
+        console.log('User signed in, session established');
       }
-    } else {
-      console.log('No session found');
-    }
+    });
+
   } catch (err) {
     console.error('Unexpected error during session initialization:', err);
+    // Clear any invalid session data
     await supabase.auth.signOut();
+    localStorage.removeItem('supabase.auth.token');
   }
 };
 
-// Call initSession when the client is imported
+// Call initSession when the client is imported in browser environment
 if (typeof window !== 'undefined') {
   initSession();
 }
