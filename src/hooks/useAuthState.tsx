@@ -54,20 +54,18 @@ export function useAuthState() {
     initializeAuth();
 
     // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
       
       if (event === 'SIGNED_OUT') {
         console.log("User signed out");
         if (mounted) {
           setIsAuthenticated(false);
-          setIsLoading(false);
         }
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        console.log("User signed in or token refreshed");
+      } else if (event === 'SIGNED_IN' && session) {
+        console.log("User signed in successfully");
         if (mounted) {
           setIsAuthenticated(true);
-          setIsLoading(false);
         }
       }
     });

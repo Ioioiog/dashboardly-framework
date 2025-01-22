@@ -2,64 +2,39 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const isPasswordReset = location.hash.includes('type=recovery');
-  const invitationToken = searchParams.get('invitation');
 
   useEffect(() => {
-    const checkUser = async () => {
-      console.log("Checking user session on Auth page...");
+    const checkSession = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
-        console.error("Error checking session:", error.message);
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: error.message,
-        });
+        console.error("Session check error:", error);
         return;
       }
 
-      if (session?.user) {
-        console.log("User is already authenticated, redirecting to dashboard");
-        navigate("/dashboard");
+      if (session) {
+        console.log("Active session found, redirecting to dashboard");
+        navigate("/dashboard", { replace: true });
       }
     };
 
-    checkUser();
+    checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed in Auth page:", event);
-        
-        if (event === 'SIGNED_IN' && session) {
-          console.log("Sign in successful, redirecting...");
-          
-          if (invitationToken) {
-            console.log("Processing invitation token:", invitationToken);
-            navigate(`/tenant-registration?invitation=${invitationToken}`);
-            return;
-          }
-          
-          navigate("/dashboard");
-        }
-
-        if (event === 'SIGNED_OUT') {
-          console.log("User signed out");
-        }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        console.log("Sign in successful, redirecting to dashboard");
+        navigate("/dashboard", { replace: true });
       }
-    );
+    });
 
     return () => subscription.unsubscribe();
-  }, [navigate, toast, isPasswordReset, invitationToken]);
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -76,7 +51,6 @@ const AuthPage = () => {
         </div>
         <Auth
           supabaseClient={supabase}
-          view={isPasswordReset ? "update_password" : "sign_in"}
           appearance={{
             theme: ThemeSupa,
             variables: {
