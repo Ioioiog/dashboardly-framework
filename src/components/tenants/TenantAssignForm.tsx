@@ -64,22 +64,24 @@ export function TenantAssignForm({
     try {
       console.log("Checking tenancy overlap for:", { propertyId, startDate, endDate });
       
-      const query = supabase
+      let query = supabase
         .from('tenancies')
         .select('*')
         .eq('property_id', propertyId)
         .eq('status', 'active');
 
-      // Add date overlap conditions
       if (endDate) {
-        // Case 1: New tenancy overlaps with existing tenancy
-        query.or(`start_date.lte.${endDate},end_date.gte.${startDate}`);
-        // Case 2: Existing tenancy falls completely within new tenancy
-        query.or(`start_date.gte.${startDate},end_date.lte.${endDate}`);
+        // For fixed-term tenancies
+        query = query.or(
+          `and(start_date.lte.${endDate},end_date.gte.${startDate}),` +
+          `and(start_date.gte.${startDate},end_date.lte.${endDate}),` +
+          `and(start_date.lte.${startDate},end_date.gte.${endDate})`
+        );
       } else {
-        // For indefinite tenancies, check if any existing tenancy overlaps with start date
-        query.or(`start_date.lte.${startDate},end_date.is.null`);
-        query.or(`start_date.lte.${startDate},end_date.gte.${startDate}`);
+        // For indefinite tenancies
+        query = query.or(
+          `and(start_date.lte.${startDate},or(end_date.is.null,end_date.gte.${startDate}))`
+        );
       }
 
       const { data: overlappingTenancies, error } = await query;
