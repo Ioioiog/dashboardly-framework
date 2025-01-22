@@ -45,7 +45,7 @@ export function MessageInput({
   }, [newMessage, isTyping, onTypingStart, onTypingStop]);
 
   const onEmojiClick = (emojiData: EmojiClickData) => {
-    setNewMessage(prev => prev + emojiData.emoji);
+    setNewMessage(newMessage + emojiData.emoji);
   };
 
   return (
