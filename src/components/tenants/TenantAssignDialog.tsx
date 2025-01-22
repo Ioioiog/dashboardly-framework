@@ -4,6 +4,7 @@ import { Property } from "@/utils/propertyUtils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TenantAssignForm } from "./TenantAssignForm";
+import { tenantAuditService } from "@/services/tenantAuditService";
 
 interface TenantAssignDialogProps {
   properties: Property[];
@@ -101,6 +102,11 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
         throw new Error("This tenant already has an active tenancy during the selected period");
       }
 
+      // Get current user (landlord) ID
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) throw new Error("No authenticated user found");
+
       // Create tenancies for each selected property
       const tenancyPromises = data.propertyIds.map(async (propertyId: string) => {
         // Check for existing tenancies on the property
@@ -138,6 +144,18 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
       });
 
       await Promise.all(tenancyPromises);
+
+      // Log the tenant assignment
+      await tenantAuditService.logTenantAction({
+        action_type: 'tenant_assigned',
+        landlord_id: user.id,
+        tenant_id: data.tenantId,
+        property_ids: data.propertyIds,
+        metadata: {
+          start_date: data.startDate,
+          end_date: data.endDate
+        }
+      });
 
       toast({
         title: "Success",

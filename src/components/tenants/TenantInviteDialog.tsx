@@ -4,6 +4,8 @@ import { Property } from "@/utils/propertyUtils";
 import { TenantInviteForm } from "./TenantInviteForm";
 import { TenantInviteConfirmDialog } from "./TenantInviteConfirmDialog";
 import { useInvitation } from "@/hooks/useInvitation";
+import { tenantAuditService } from "@/services/tenantAuditService";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TenantInviteDialogProps {
   properties: Property[];
@@ -30,20 +32,52 @@ export function TenantInviteDialog({
     isSubmitting,
     showResendConfirm,
     setShowResendConfirm,
-    handleSubmit,
-    handleResendConfirm,
+    handleSubmit: originalHandleSubmit,
+    handleResendConfirm: originalHandleResendConfirm,
   } = useInvitation();
 
-  const onSubmit = async (data: any) => {
-    const success = await handleSubmit(data);
+  const handleSubmit = async (data: any) => {
+    const success = await originalHandleSubmit(data);
     if (success) {
+      // Get current user (landlord) ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await tenantAuditService.logTenantAction({
+          action_type: 'invitation_sent',
+          landlord_id: user.id,
+          tenant_email: data.email,
+          property_ids: data.propertyIds,
+          metadata: {
+            first_name: data.firstName,
+            last_name: data.lastName,
+            start_date: data.startDate,
+            end_date: data.endDate
+          }
+        });
+      }
       onOpenChange(false);
     }
   };
 
-  const onResendConfirm = async () => {
-    const success = await handleResendConfirm();
+  const handleResendConfirm = async () => {
+    const success = await originalHandleResendConfirm();
     if (success) {
+      // Get current user (landlord) ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await tenantAuditService.logTenantAction({
+          action_type: 'invitation_resent',
+          landlord_id: user.id,
+          tenant_email: existingInvitation?.email,
+          property_ids: existingInvitation?.propertyIds || [],
+          metadata: {
+            first_name: existingInvitation?.firstName,
+            last_name: existingInvitation?.lastName,
+            start_date: existingInvitation?.startDate,
+            end_date: existingInvitation?.endDate
+          }
+        });
+      }
       onOpenChange(false);
     }
   };
@@ -59,7 +93,7 @@ export function TenantInviteDialog({
           </DialogHeader>
           <TenantInviteForm 
             properties={properties}
-            onSubmit={onSubmit}
+            onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
             defaultValues={existingInvitation}
           />
@@ -69,7 +103,7 @@ export function TenantInviteDialog({
       <TenantInviteConfirmDialog
         open={showResendConfirm}
         onOpenChange={setShowResendConfirm}
-        onConfirm={onResendConfirm}
+        onConfirm={handleResendConfirm}
       />
     </>
   );

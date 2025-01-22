@@ -4,6 +4,7 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { tenantAuditService } from "@/services/tenantAuditService";
 
 const TenantRegistration = () => {
   const navigate = useNavigate();
@@ -107,7 +108,7 @@ const TenantRegistration = () => {
 
             if (profileError) throw profileError;
 
-            // Get all properties assigned to this invitation
+            // Get property assignments
             const { data: propertyAssignments, error: assignmentsError } = await supabase
               .from('tenant_invitation_properties')
               .select('property_id')
@@ -131,6 +132,19 @@ const TenantRegistration = () => {
             });
 
             await Promise.all(tenancyPromises);
+
+            // Log the invitation acceptance
+            await tenantAuditService.logTenantAction({
+              action_type: 'invitation_accepted',
+              landlord_id: invitation.landlord_id,
+              tenant_id: session.user.id,
+              tenant_email: invitation.email,
+              property_ids: propertyAssignments.map(pa => pa.property_id),
+              metadata: {
+                start_date: invitation.start_date,
+                end_date: invitation.end_date
+              }
+            });
 
             toast({
               title: "Welcome!",
