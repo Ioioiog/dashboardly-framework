@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "./use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export function useAuthState() {
   const { toast } = useToast();
@@ -15,32 +15,44 @@ export function useAuthState() {
       try {
         console.log("Initializing authentication state...");
         
+        // Clear any potentially invalid session data
+        const currentSession = localStorage.getItem('sb-wecmvyohaxizmnhuvjly-auth-token');
+        if (currentSession && !JSON.parse(currentSession).access_token) {
+          localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
+        }
+        
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error('Error with existing session:', sessionError);
           if (mounted) {
-            setIsAuthenticated(false);
-            setCurrentUserId(null);
-            setIsLoading(false);
+            handleAuthError();
           }
-          await supabase.auth.signOut();
           return;
         }
 
-        if (session?.user) {
-          console.log("Valid session found for user:", session.user.id);
-          if (mounted) {
-            setIsAuthenticated(true);
-            setCurrentUserId(session.user.id);
-          }
-        } else {
+        if (!session) {
           console.log("No active session found");
           if (mounted) {
-            setIsAuthenticated(false);
-            setCurrentUserId(null);
+            handleAuthError();
           }
-          await supabase.auth.signOut();
+          return;
+        }
+
+        // Verify the session is still valid
+        const { error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error("User verification error:", userError);
+          if (mounted) {
+            handleAuthError();
+          }
+          return;
+        }
+
+        if (mounted && session.user) {
+          console.log("Setting current user ID:", session.user.id);
+          setIsAuthenticated(true);
+          setCurrentUserId(session.user.id);
         }
 
         if (mounted) {
@@ -50,12 +62,19 @@ export function useAuthState() {
       } catch (error) {
         console.error("Authentication initialization error:", error);
         if (mounted) {
-          setIsLoading(false);
-          setIsAuthenticated(false);
-          setCurrentUserId(null);
+          handleAuthError();
         }
-        await supabase.auth.signOut();
       }
+    };
+
+    const handleAuthError = async () => {
+      setIsAuthenticated(false);
+      setCurrentUserId(null);
+      setIsLoading(false);
+      
+      // Clean up the session
+      localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
+      await supabase.auth.signOut();
     };
 
     initializeAuth();
@@ -82,9 +101,9 @@ export function useAuthState() {
           setIsAuthenticated(true);
           setCurrentUserId(session.user.id);
         }
-      } else if (event === 'TOKEN_REFRESHED') {
+      } else if (event === 'TOKEN_REFRESHED' && session) {
         console.log("Session token refreshed");
-        if (session) {
+        if (mounted) {
           setCurrentUserId(session.user.id);
         }
       }
