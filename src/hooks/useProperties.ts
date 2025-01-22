@@ -63,31 +63,18 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           }
 
           console.log("Raw landlord properties data:", data);
-
-          // Transform the data to match our Property interface
-          const transformedData = data?.map(property => ({
-            ...property,
-            tenancy: property.tenancies?.find(t => t.status === 'active')
-              ? {
-                  start_date: property.tenancies.find(t => t.status === 'active')?.start_date,
-                  end_date: property.tenancies.find(t => t.status === 'active')?.end_date,
-                  tenant: property.tenancies.find(t => t.status === 'active')?.tenant
-                }
-              : undefined
-          }));
-
-          console.log("Transformed landlord properties:", transformedData);
-          return transformedData || [];
+          return data || [];
         } else {
-          // For tenants, fetch through tenancies table
+          // For tenants, fetch through tenancies table with explicit status check
           console.log("Fetching tenant properties for user:", user.id);
           const { data: tenanciesData, error } = await supabase
             .from("tenancies")
             .select(`
-              property:properties(*),
+              id,
               status,
               start_date,
-              end_date
+              end_date,
+              property:properties(*)
             `)
             .eq("tenant_id", user.id)
             .eq("status", "active");
@@ -99,16 +86,29 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           
           console.log("Raw tenancies data:", tenanciesData);
           
-          const properties = tenanciesData?.map(item => ({
-            ...item.property,
+          // Transform the data to match our Property interface
+          const properties = tenanciesData?.map(tenancy => ({
+            ...tenancy.property,
             tenancy: {
-              end_date: item.end_date,
-              start_date: item.start_date
+              end_date: tenancy.end_date,
+              start_date: tenancy.start_date,
+              status: tenancy.status
             }
           })) || [];
 
           console.log("Transformed tenant properties:", properties);
-          return properties;
+          
+          // Additional validation to ensure we're returning valid properties
+          const validProperties = properties.filter(property => {
+            if (!property || !property.id) {
+              console.log("Found invalid property:", property);
+              return false;
+            }
+            return true;
+          });
+
+          console.log("Final filtered properties:", validProperties);
+          return validProperties;
         }
       } catch (error) {
         console.error("Error in useProperties:", error);
