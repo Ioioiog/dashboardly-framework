@@ -15,7 +15,7 @@ const AuthPage = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      console.log("Checking user session...");
+      console.log("Checking user session on Auth page...");
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
@@ -28,15 +28,8 @@ const AuthPage = () => {
         return;
       }
 
-      // If we have an invitation token, redirect to tenant registration
-      if (invitationToken) {
-        console.log("Found invitation token, redirecting to tenant registration");
-        navigate(`/tenant-registration?invitation=${invitationToken}`);
-        return;
-      }
-
-      if (session && !isPasswordReset) {
-        console.log("User is authenticated, redirecting to dashboard");
+      if (session?.user) {
+        console.log("User is already authenticated, redirecting to dashboard");
         navigate("/dashboard");
       }
     };
@@ -45,10 +38,10 @@ const AuthPage = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth state changed:", event);
+        console.log("Auth state changed in Auth page:", event);
         
-        if (event === 'SIGNED_IN') {
-          console.log("User signed in successfully");
+        if (event === 'SIGNED_IN' && session) {
+          console.log("Sign in successful, redirecting...");
           
           if (invitationToken) {
             console.log("Processing invitation token:", invitationToken);
@@ -57,6 +50,10 @@ const AuthPage = () => {
           }
           
           navigate("/dashboard");
+        }
+
+        if (event === 'SIGNED_OUT') {
+          console.log("User signed out");
         }
       }
     );
@@ -107,6 +104,14 @@ const AuthPage = () => {
           }}
           providers={[]}
           redirectTo={window.location.origin}
+          onError={(error) => {
+            console.error("Auth error:", error);
+            toast({
+              variant: "destructive",
+              title: "Authentication Error",
+              description: error.message,
+            });
+          }}
         />
       </div>
     </div>
