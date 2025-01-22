@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-const DashboardSidebar = () => {
+export const DashboardSidebar = () => {
   const { userRole } = useUserRole();
   const location = useLocation();
   const { toast } = useToast();
@@ -118,11 +118,13 @@ const DashboardSidebar = () => {
   return (
     <div className="h-screen w-64 bg-dashboard-sidebar border-r border-gray-200 flex flex-col">
       <div className="p-4">
-        <h1 className="text-2xl font-bold">
-          <span className="text-blue-600">Admin</span>
-          <span className="text-blue-800">Chirii</span>
-          <span className="text-slate-500 font-light">.ro</span>
-        </h1>
+        <div className="flex items-center gap-2">
+          <img 
+            src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
+            alt="AdminChirii.ro Logo" 
+            className="h-8"
+          />
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto">
         <nav className="px-2 py-4 space-y-1">
