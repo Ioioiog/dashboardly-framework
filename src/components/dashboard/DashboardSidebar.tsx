@@ -149,75 +149,79 @@ export const DashboardSidebar = () => {
       </div>
     );
 
-    return isExpanded ? (
-      <Link to={item.href}>{linkContent}</Link>
-    ) : (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Link to={item.href}>{linkContent}</Link>
-        </TooltipTrigger>
-        <TooltipContent side="right" align="center">
-          {item.title}
-        </TooltipContent>
-      </Tooltip>
+    if (isExpanded) {
+      return <Link to={item.href}>{linkContent}</Link>;
+    }
+
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link to={item.href}>{linkContent}</Link>
+          </TooltipTrigger>
+          <TooltipContent side="right" align="center">
+            {item.title}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   };
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <Collapsible
-        defaultOpen={true}
-        open={isExpanded}
-        onOpenChange={setIsExpanded}
-        className={cn(
-          "relative h-screen bg-background border-r border-border flex flex-col transition-all duration-300",
-          isExpanded ? "w-64" : "w-16"
-        )}
-      >
-        <div className="p-4">
-          <div className="flex items-center gap-2">
-            <img 
-              src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
-              alt="AdminChirii.ro Logo" 
-              className="h-8"
-            />
-            {isExpanded && <span className="font-semibold">AdminChirii.ro</span>}
-          </div>
+    <Collapsible
+      defaultOpen={true}
+      open={isExpanded}
+      onOpenChange={setIsExpanded}
+      className={cn(
+        "relative h-screen bg-background border-r border-border flex flex-col transition-all duration-300",
+        isExpanded ? "w-64" : "w-16"
+      )}
+    >
+      <div className="p-4">
+        <div className="flex items-center gap-2">
+          <img 
+            src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
+            alt="AdminChirii.ro Logo" 
+            className="h-8"
+          />
+          {isExpanded && <span className="font-semibold">AdminChirii.ro</span>}
         </div>
-        <CollapsibleTrigger asChild>
+      </div>
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute -right-3 top-6 h-6 w-6 rounded-full border bg-background shadow-sm hover:bg-muted"
+        >
+          {isExpanded ? (
+            <ChevronLeft className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent
+        forceMount
+        className="flex-1 overflow-y-auto py-2 px-2"
+      >
+        <nav className="space-y-1">
+          {filteredMenuItems.map((item) => (
+            <MenuItem key={item.href} item={item} />
+          ))}
+        </nav>
+      </CollapsibleContent>
+      <div className="p-4 border-t border-border">
+        {isExpanded ? (
           <Button
             variant="ghost"
-            size="icon"
-            className="absolute -right-3 top-6 h-6 w-6 rounded-full border bg-background shadow-sm hover:bg-muted"
+            className="w-full justify-start text-muted-foreground hover:text-foreground"
+            onClick={handleSignOut}
           >
-            {isExpanded ? (
-              <ChevronLeft className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
+            <LogOut className="mr-3 h-5 w-5" />
+            Sign Out
           </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent
-          forceMount
-          className="flex-1 overflow-y-auto py-2 px-2"
-        >
-          <nav className="space-y-1">
-            {filteredMenuItems.map((item) => (
-              <MenuItem key={item.href} item={item} />
-            ))}
-          </nav>
-        </CollapsibleContent>
-        <div className="p-4 border-t border-border">
-          {isExpanded ? (
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-muted-foreground hover:text-foreground"
-              onClick={handleSignOut}
-            >
-              <LogOut className="mr-3 h-5 w-5" />
-              Sign Out
-            </Button>
-          ) : (
+        ) : (
+          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -231,10 +235,10 @@ export const DashboardSidebar = () => {
               </TooltipTrigger>
               <TooltipContent side="right">Sign Out</TooltipContent>
             </Tooltip>
-          )}
-        </div>
-      </Collapsible>
-    </TooltipProvider>
+          </TooltipProvider>
+        )}
+      </div>
+    </Collapsible>
   );
 };
 
