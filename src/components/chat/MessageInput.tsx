@@ -3,6 +3,8 @@ import { Send, Paperclip, Smile } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
 interface MessageInputProps {
   newMessage: string;
@@ -42,6 +44,10 @@ export function MessageInput({
     };
   }, [newMessage, isTyping, onTypingStart, onTypingStop]);
 
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setNewMessage(prev => prev + emojiData.emoji);
+  };
+
   return (
     <TooltipProvider>
       <form onSubmit={handleSendMessage} className="p-4 border-t dark:border-gray-700 bg-white dark:bg-gray-900">
@@ -69,8 +75,8 @@ export function MessageInput({
             className="flex-1"
           />
           
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <Button
                 type="button"
                 variant="ghost"
@@ -79,11 +85,15 @@ export function MessageInput({
               >
                 <Smile className="h-4 w-4" />
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Add emoji</p>
-            </TooltipContent>
-          </Tooltip>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0" align="end">
+              <EmojiPicker
+                onEmojiClick={onEmojiClick}
+                width="100%"
+                height={400}
+              />
+            </PopoverContent>
+          </Popover>
 
           <Tooltip>
             <TooltipTrigger asChild>
