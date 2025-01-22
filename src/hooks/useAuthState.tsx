@@ -14,7 +14,6 @@ export function useAuthState() {
       try {
         console.log("Initializing authentication state...");
         
-        // First, try to get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -23,7 +22,6 @@ export function useAuthState() {
             setIsAuthenticated(false);
             setIsLoading(false);
           }
-          // Clear invalid session data
           await supabase.auth.signOut();
           return;
         }
@@ -38,7 +36,6 @@ export function useAuthState() {
           if (mounted) {
             setIsAuthenticated(false);
           }
-          // Clear any stale session data
           await supabase.auth.signOut();
         }
 
@@ -52,16 +49,13 @@ export function useAuthState() {
           setIsLoading(false);
           setIsAuthenticated(false);
         }
-        // Clear session data on error
         await supabase.auth.signOut();
       }
     };
 
-    // Initialize auth state
     initializeAuth();
 
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
       
       if (event === 'SIGNED_OUT' || !session) {

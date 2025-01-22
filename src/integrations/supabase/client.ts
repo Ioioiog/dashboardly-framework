@@ -29,60 +29,26 @@ const initSession = async () => {
   try {
     console.log('Initializing Supabase session...');
     
-    // First, try to get the current session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError) {
       console.error('Error getting session:', sessionError);
-      await handleInvalidSession();
+      await supabase.auth.signOut();
       return;
     }
 
     if (!session) {
       console.log('No active session found');
-      await handleInvalidSession();
+      await supabase.auth.signOut();
       return;
     }
 
     console.log('Valid session found:', session.user.id);
 
-    // Set up session refresh handling
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, 'Session:', session ? 'exists' : 'null');
-      
-      if (event === 'SIGNED_OUT' || !session) {
-        console.log('User signed out or session expired, clearing session data');
-        await handleInvalidSession();
-      } else if (event === 'TOKEN_REFRESHED') {
-        console.log('Session token refreshed successfully');
-      }
-    });
-
   } catch (err) {
     console.error('Unexpected error during session initialization:', err);
-    await handleInvalidSession();
+    await supabase.auth.signOut();
   }
-};
-
-// Helper function to handle invalid sessions
-const handleInvalidSession = async () => {
-  console.log('Handling invalid session...');
-  try {
-    // Clear any existing invalid sessions
-    await supabase.auth.signOut({ scope: 'local' });
-  } catch (err) {
-    console.error('Error during signOut:', err);
-  }
-  
-  // Clear all auth-related items from localStorage
-  const keysToRemove = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key?.includes('supabase') || key?.includes('sb-')) {
-      keysToRemove.push(key);
-    }
-  }
-  keysToRemove.forEach(key => localStorage.removeItem(key));
 };
 
 // Call initSession when the client is imported in browser environment

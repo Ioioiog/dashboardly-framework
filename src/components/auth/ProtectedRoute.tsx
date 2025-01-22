@@ -24,20 +24,17 @@ export function ProtectedRoute({
         
         if (error) {
           console.error("Session verification error:", error);
-          // Clear any invalid session data
-          await supabase.auth.signOut();
-          
           toast({
-            title: "Session Expired",
-            description: "Your session has expired. Please sign in again.",
+            title: "Session Error",
+            description: "There was a problem verifying your session. Please sign in again.",
             variant: "destructive",
           });
+          await supabase.auth.signOut();
           return;
         }
 
         if (!session) {
           console.log("No valid session found");
-          // Clear any stale session data
           await supabase.auth.signOut();
           return;
         }
@@ -45,14 +42,12 @@ export function ProtectedRoute({
         console.log("Session verified successfully for user:", session.user.id);
       } catch (error) {
         console.error("Session verification error:", error);
-        // Clear session data on error
-        await supabase.auth.signOut();
-        
         toast({
           title: "Authentication Error",
           description: "There was a problem verifying your session. Please sign in again.",
           variant: "destructive",
         });
+        await supabase.auth.signOut();
       }
     };
 
@@ -61,12 +56,11 @@ export function ProtectedRoute({
     }
 
     // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
       
       if (event === 'SIGNED_OUT' || !session) {
         console.log("User signed out or session expired");
-        await supabase.auth.signOut();
       }
     });
 
