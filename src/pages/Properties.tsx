@@ -7,6 +7,7 @@ import { Property } from "@/utils/propertyUtils";
 import { PropertyDialog } from "@/components/properties/PropertyDialog";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 
 export default function Properties() {
