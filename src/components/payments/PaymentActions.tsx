@@ -5,8 +5,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Check, MoreHorizontal, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface PaymentActionsProps {
@@ -26,9 +26,23 @@ export const PaymentActions = ({
 
   const handleStatusChange = async (newStatus: string) => {
     try {
+      const updateData: {
+        status: string;
+        paid_date?: string | null;
+      } = {
+        status: newStatus,
+      };
+
+      // Set paid_date when marking as paid, remove it otherwise
+      if (newStatus === "paid") {
+        updateData.paid_date = new Date().toISOString();
+      } else {
+        updateData.paid_date = null;
+      }
+
       const { error } = await supabase
         .from("payments")
-        .update({ status: newStatus })
+        .update(updateData)
         .eq("id", paymentId);
 
       if (error) throw error;
@@ -49,7 +63,7 @@ export const PaymentActions = ({
     }
   };
 
-  if (userRole !== "landlord") {
+  if (userRole === "tenant") {
     return null;
   }
 
