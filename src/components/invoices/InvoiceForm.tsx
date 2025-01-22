@@ -74,6 +74,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
     } else {
       setTenants([]);
       setUtilityBills([]);
+      setSelectedUtilityIds([]);
     }
   }, [selectedPropertyId]);
 
@@ -141,9 +142,14 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       if (invoiceError) throw invoiceError;
 
       // Extract utility IDs from descriptions (if any exist)
-      const invoicedUtilityIds = invoicedUtilities
-        ?.map(item => item.description)
-        .filter(Boolean) || [];
+      const invoicedUtilityIds = (invoicedUtilities || [])
+        .map(item => {
+          const match = item.description.match(/Utility Bill - ID: (.+)/);
+          return match ? match[1] : null;
+        })
+        .filter(Boolean);
+
+      console.log("Invoiced utility IDs:", invoicedUtilityIds);
 
       // Build the query for pending utilities
       let query = supabase
@@ -154,7 +160,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
       // Only add the not-in filter if we have invoiced utilities
       if (invoicedUtilityIds.length > 0) {
-        query = query.not('id', 'in', invoicedUtilityIds);
+        query = query.not('id', 'in', `(${invoicedUtilityIds.join(',')})`);
       }
 
       const { data: utilityData, error: utilityError } = await query;
@@ -217,7 +223,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       // Create invoice items for each selected utility bill
       const invoiceItems = selectedUtilities.map(utility => ({
         invoice_id: invoice.id,
-        description: `Utility Bill - ${utility.type}`,
+        description: `Utility Bill - ID: ${utility.id}`,
         amount: utility.amount,
         type: "utility"
       }));
@@ -244,12 +250,12 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       if (onSuccess) {
         onSuccess();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating invoice:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create invoice",
+        description: error.message || "Failed to create invoice",
       });
     } finally {
       setIsLoading(false);
@@ -331,7 +337,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
                   <CommandInput placeholder="Search utility bills..." />
                   <CommandEmpty>No utility bills found.</CommandEmpty>
                   <CommandGroup>
-                    {utilityBills.map((bill) => (
+                    {(utilityBills || []).map((bill) => (
                       <CommandItem
                         key={bill.id}
                         onSelect={() => {
