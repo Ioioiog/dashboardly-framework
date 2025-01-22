@@ -23,12 +23,23 @@ export default function DashboardSidebar() {
 
   const handleSignOut = async () => {
     try {
-      console.log("Signing out...");
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      console.log("Starting sign out process...");
+      
+      // First clear any existing session data from localStorage
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
+      
+      // Attempt to sign out with local scope only
+      const { error } = await supabase.auth.signOut({ 
+        scope: 'local'
+      });
+      
+      if (error) {
+        console.error("Error during sign out:", error);
+        throw error;
+      }
       
       console.log("Sign out successful");
-      localStorage.removeItem('supabase.auth.token');
       navigate("/auth", { replace: true });
       
       toast({
@@ -37,10 +48,15 @@ export default function DashboardSidebar() {
       });
     } catch (error) {
       console.error("Error signing out:", error);
+      
+      // Even if there's an error, we want to redirect to auth
+      // since the session is likely invalid anyway
+      navigate("/auth", { replace: true });
+      
       toast({
         variant: "destructive",
-        title: "Error signing out",
-        description: "There was a problem signing out. Please try again.",
+        title: "Sign out completed with warnings",
+        description: "You have been signed out, but there were some warnings. Please sign in again.",
       });
     }
   };
