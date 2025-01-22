@@ -9,6 +9,13 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+interface TenantSelect {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+}
+
 interface TenantSelectProps {
   onTenantSelect: (tenantId: string) => void;
   selectedTenantId?: string;
@@ -18,6 +25,7 @@ export function TenantSelect({ onTenantSelect, selectedTenantId }: TenantSelectP
   const { data: tenants, isLoading } = useQuery({
     queryKey: ["tenants"],
     queryFn: async () => {
+      console.log("Fetching tenants...");
       const { data: tenancies, error } = await supabase
         .from("tenancies")
         .select(`
@@ -31,10 +39,16 @@ export function TenantSelect({ onTenantSelect, selectedTenantId }: TenantSelectP
         `)
         .eq("status", "active");
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching tenants:", error);
+        throw error;
+      }
+
+      // Filter out any tenancies where tenant data is missing
+      const validTenancies = tenancies.filter(tenancy => tenancy.tenant);
 
       // Deduplicate tenants by tenant_id
-      const uniqueTenants = tenancies.reduce((acc, current) => {
+      const uniqueTenants = validTenancies.reduce((acc, current) => {
         if (!acc.find(item => item.tenant.id === current.tenant.id)) {
           acc.push(current);
         }
@@ -50,6 +64,10 @@ export function TenantSelect({ onTenantSelect, selectedTenantId }: TenantSelectP
     return <div>Loading tenants...</div>;
   }
 
+  if (!tenants || tenants.length === 0) {
+    return <div>No tenants available</div>;
+  }
+
   return (
     <Select
       value={selectedTenantId}
@@ -59,11 +77,16 @@ export function TenantSelect({ onTenantSelect, selectedTenantId }: TenantSelectP
         <SelectValue placeholder="Select a tenant" />
       </SelectTrigger>
       <SelectContent>
-        {tenants?.map((tenancy) => (
-          <SelectItem key={tenancy.tenant.id} value={tenancy.tenant.id}>
-            {tenancy.tenant.first_name} {tenancy.tenant.last_name}
-          </SelectItem>
-        ))}
+        {tenants.map((tenancy) => {
+          // Additional safety check
+          if (!tenancy.tenant) return null;
+          
+          return (
+            <SelectItem key={tenancy.tenant.id} value={tenancy.tenant.id}>
+              {tenancy.tenant.first_name} {tenancy.tenant.last_name}
+            </SelectItem>
+          );
+        })}
       </SelectContent>
     </Select>
   );
