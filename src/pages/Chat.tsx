@@ -6,7 +6,7 @@ import { MessageList } from "@/components/chat/MessageList";
 import { MessageInput } from "@/components/chat/MessageInput";
 import { useConversation } from "@/hooks/chat/useConversation";
 import { useMessages } from "@/hooks/chat/useMessages";
-import { useAuthState } from "@/hooks/useAuthState";
+import { useAuthState } from "@/hooks/chat/useAuthState";
 import { useToast } from "@/hooks/use-toast";
 
 const Chat = () => {
@@ -15,12 +15,22 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
-  const { isAuthenticated, currentUserId } = useAuthState();
+  const { currentUserId, isAuthenticated, isLoading } = useAuthState();
   const { conversationId } = useConversation(currentUserId, selectedTenantId);
   const { messages, sendMessage } = useMessages(conversationId);
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+
   // Redirect to auth page if not authenticated
   if (!isAuthenticated) {
+    console.log("User not authenticated, redirecting to auth page");
     return <Navigate to="/auth" replace />;
   }
 
