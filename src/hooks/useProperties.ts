@@ -40,12 +40,12 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           .from("properties")
           .select(`
             *,
-            tenancies (
+            tenancies!inner (
               id,
               start_date,
               end_date,
               status,
-              tenant:profiles (
+              tenant:profiles!tenancies_tenant_id_fkey (
                 id,
                 first_name,
                 last_name,
