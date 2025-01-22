@@ -14,7 +14,6 @@ export function useAuthState() {
       try {
         console.log("Initializing authentication state...");
         
-        // Get the initial session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -27,12 +26,12 @@ export function useAuthState() {
         }
 
         if (session?.user) {
-          console.log("Valid session found:", session.user.id);
+          console.log("Valid session found for user:", session.user.id);
           if (mounted) {
             setIsAuthenticated(true);
           }
         } else {
-          console.log("No active session");
+          console.log("No active session found");
           if (mounted) {
             setIsAuthenticated(false);
           }
@@ -51,27 +50,27 @@ export function useAuthState() {
       }
     };
 
+    // Initialize auth state
+    initializeAuth();
+
     // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
       
-      if (event === 'SIGNED_OUT' || !session) {
-        console.log("User signed out or no session");
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        console.log("User signed out or deleted");
         if (mounted) {
           setIsAuthenticated(false);
           setIsLoading(false);
         }
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        console.log(`Auth event: ${event}`);
+        console.log("User signed in or token refreshed");
         if (mounted) {
           setIsAuthenticated(true);
           setIsLoading(false);
         }
       }
     });
-
-    // Initial auth check
-    initializeAuth();
 
     return () => {
       mounted = false;

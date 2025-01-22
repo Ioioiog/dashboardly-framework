@@ -22,10 +22,10 @@ export function ProtectedRoute({
         console.log("Verifying session validity...");
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error || !session) {
-          console.log("No valid session found");
+        if (error) {
+          console.error("Session verification error:", error);
           toast({
-            title: "Session Expired",
+            title: "Authentication Error",
             description: "Please sign in again to continue.",
             variant: "destructive",
           });
@@ -33,7 +33,12 @@ export function ProtectedRoute({
           return;
         }
 
-        console.log("Session verified successfully");
+        if (!session) {
+          console.log("No valid session found");
+          return;
+        }
+
+        console.log("Session verified successfully for user:", session.user.id);
       } catch (error) {
         console.error("Session verification error:", error);
         toast({
