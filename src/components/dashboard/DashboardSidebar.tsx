@@ -178,14 +178,14 @@ export const DashboardSidebar = () => {
       )}
     >
       <div className="p-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <img 
             src="/lovable-uploads/9c23bc1b-4e8c-433e-a961-df606dc6a2c6.png" 
             alt="AdminChirii.ro Logo" 
             className="h-8 w-8"
           />
           {isExpanded && (
-            <div className="flex flex-col items-start">
+            <div className="flex flex-col items-center">
               <span className="text-2xl">
                 <span className="text-blue-600 font-bold">Admin</span>
                 <span className="text-blue-600 font-bold">Chirii</span>
