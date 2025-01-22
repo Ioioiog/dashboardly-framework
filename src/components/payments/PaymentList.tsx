@@ -13,6 +13,9 @@ import { PaymentActions } from "./PaymentActions";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface PaymentListProps {
   payments: PaymentWithRelations[];
@@ -20,13 +23,38 @@ interface PaymentListProps {
 }
 
 export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
-  // Get the query client instance
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Function to refresh payments data
   const refreshPayments = () => {
     console.log("Refreshing payments data...");
     queryClient.invalidateQueries({ queryKey: ["payments"] });
+  };
+
+  const handleDelete = async (paymentId: string) => {
+    try {
+      const { error } = await supabase
+        .from("payments")
+        .delete()
+        .eq("id", paymentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Payment deleted successfully",
+      });
+
+      refreshPayments();
+    } catch (error) {
+      console.error("Error deleting payment:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not delete payment",
+      });
+    }
   };
 
   // Set up real-time subscription
@@ -37,7 +65,7 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen to all changes (INSERT, UPDATE, DELETE)
+          event: '*',
           schema: 'public',
           table: 'payments'
         },
@@ -48,7 +76,6 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
       )
       .subscribe();
 
-    // Cleanup subscription on unmount
     return () => {
       console.log("Cleaning up real-time subscription...");
       supabase.removeChannel(channel);
@@ -73,7 +100,8 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
           <TableHead>Due Date</TableHead>
           <TableHead>Paid Date</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead className="w-[100px]"></TableHead>
+          <TableHead>Actions</TableHead>
+          {userRole === "landlord" && <TableHead className="w-[50px]"></TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -120,6 +148,18 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
                 onStatusChange={refreshPayments}
               />
             </TableCell>
+            {userRole === "landlord" && (
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(payment.id)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TableCell>
+            )}
           </TableRow>
         ))}
       </TableBody>

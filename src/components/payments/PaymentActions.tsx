@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Check, X, Trash2 } from "lucide-react";
+import { MoreHorizontal, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -49,31 +49,6 @@ export const PaymentActions = ({
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      const { error } = await supabase
-        .from("payments")
-        .delete()
-        .eq("id", paymentId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Payment deleted successfully",
-      });
-
-      onStatusChange();
-    } catch (error) {
-      console.error("Error deleting payment:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Could not delete payment",
-      });
-    }
-  };
-
   if (userRole !== "landlord") {
     return null;
   }
@@ -99,12 +74,9 @@ export const PaymentActions = ({
             Mark as Pending
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem 
-          onClick={handleDelete}
-          className="text-red-600 focus:text-red-600"
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete
+        <DropdownMenuItem onClick={() => handleStatusChange("overdue")}>
+          <X className="mr-2 h-4 w-4" />
+          Mark as Overdue
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
