@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -151,13 +151,19 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
       console.log("Already used utility IDs:", usedUtilityIds);
 
-      // Then fetch utilities for the selected property that haven't been used
-      const { data: utilityData, error: utilityError } = await supabase
+      // Build the query for utilities
+      let query = supabase
         .from("utilities")
         .select("*")
         .eq("property_id", propertyId)
-        .eq("status", "pending")
-        .not('id', 'in', usedUtilityIds.length > 0 ? `(${usedUtilityIds.join(',')})` : '');
+        .eq("status", "pending");
+
+      // Only add the not.in filter if we have used utility IDs
+      if (usedUtilityIds.length > 0) {
+        query = query.not('id', 'in', `(${usedUtilityIds.join(',')})`);
+      }
+
+      const { data: utilityData, error: utilityError } = await query;
 
       if (utilityError) throw utilityError;
 
