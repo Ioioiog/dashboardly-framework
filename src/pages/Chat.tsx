@@ -3,19 +3,25 @@ import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { MessageList } from "@/components/chat/MessageList";
 import { MessageInput } from "@/components/chat/MessageInput";
-import { useChat } from "@/hooks/useChat";
+import { useConversation } from "@/hooks/chat/useConversation";
+import { useMessages } from "@/hooks/chat/useMessages";
+import { useAuthState } from "@/hooks/useAuthState";
 
 const Chat = () => {
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const { messages, currentUserId, sendMessage } = useChat(selectedTenantId);
+  const { isAuthenticated, currentUserId } = useAuthState();
+  const { conversationId } = useConversation(currentUserId, selectedTenantId);
+  const { messages, sendMessage } = useMessages(conversationId);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    await sendMessage(newMessage);
-    setNewMessage("");
+    if (newMessage.trim()) {
+      await sendMessage(newMessage, currentUserId);
+      setNewMessage("");
+    }
   };
 
   return (
