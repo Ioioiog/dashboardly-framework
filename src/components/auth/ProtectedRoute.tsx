@@ -24,23 +24,31 @@ export function ProtectedRoute({
         
         if (error) {
           console.error("Session verification error:", error);
+          // Clear any invalid session data
+          await supabase.auth.signOut();
+          localStorage.removeItem('supabase.auth.token');
+          
           toast({
-            title: "Authentication Error",
-            description: "Please sign in again to continue.",
+            title: "Session Expired",
+            description: "Your session has expired. Please sign in again.",
             variant: "destructive",
           });
-          await supabase.auth.signOut();
           return;
         }
 
         if (!session) {
           console.log("No valid session found");
+          // Clear any stale session data
+          localStorage.removeItem('supabase.auth.token');
           return;
         }
 
         console.log("Session verified successfully for user:", session.user.id);
       } catch (error) {
         console.error("Session verification error:", error);
+        // Clear session data on error
+        localStorage.removeItem('supabase.auth.token');
+        
         toast({
           title: "Authentication Error",
           description: "There was a problem verifying your session. Please sign in again.",
@@ -52,6 +60,20 @@ export function ProtectedRoute({
     if (isAuthenticated) {
       checkSession();
     }
+
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
+      
+      if (event === 'SIGNED_OUT' || !session) {
+        console.log("User signed out or session expired");
+        localStorage.removeItem('supabase.auth.token');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [isAuthenticated, toast]);
 
   if (!isAuthenticated) {
