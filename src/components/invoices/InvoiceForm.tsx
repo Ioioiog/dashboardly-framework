@@ -170,6 +170,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       setUtilityBills(utilityData || []);
     } catch (error) {
       console.error("Error fetching utility bills:", error);
+      setUtilityBills([]); // Ensure utilityBills is always an array
       toast({
         variant: "destructive",
         title: "Error",
@@ -212,7 +213,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
           tenant_id: selectedTenantId,
           landlord_id: user.id,
           amount: totalAmount,
-          due_date: selectedUtilities[0].due_date, // Using the first utility's due date
+          due_date: selectedUtilities[0].due_date,
           status: "pending"
         })
         .select()
@@ -337,7 +338,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
                   <CommandInput placeholder="Search utility bills..." />
                   <CommandEmpty>No utility bills found.</CommandEmpty>
                   <CommandGroup>
-                    {(utilityBills || []).map((bill) => (
+                    {utilityBills.map((bill) => (
                       <CommandItem
                         key={bill.id}
                         onSelect={() => {
