@@ -21,6 +21,8 @@ import {
 import { ProfileSchema } from "@/integrations/supabase/database-types/profile";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   propertyIds: z.array(z.string()).min(1, "Select at least one property"),
@@ -42,6 +44,7 @@ export function TenantAssignForm({
   onSubmit,
   isLoading,
 }: TenantAssignFormProps) {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -52,9 +55,69 @@ export function TenantAssignForm({
     },
   });
 
+  const checkTenancyOverlap = async (propertyId: string, startDate: string, endDate?: string) => {
+    console.log("Checking tenancy overlap for property:", propertyId);
+    console.log("Start date:", startDate);
+    console.log("End date:", endDate);
+
+    const query = supabase
+      .from('tenancies')
+      .select('*')
+      .eq('property_id', propertyId)
+      .eq('status', 'active');
+
+    // Add date range conditions
+    query.or(`and(start_date,lte,${startDate},end_date,gte,${startDate}`);
+    if (endDate) {
+      query.or(`and(start_date,lte,${endDate},end_date,gte,${endDate})`);
+      query.or(`and(start_date,gte,${startDate},end_date,lte,${endDate})`);
+    } else {
+      query.or('end_date.is.null');
+    }
+    query.or(`))`);
+
+    const { data: overlappingTenancies, error } = await query;
+
+    if (error) {
+      console.error("Error checking tenancy overlap:", error);
+      throw error;
+    }
+
+    return overlappingTenancies && overlappingTenancies.length > 0;
+  };
+
+  const handleFormSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      // Check for overlapping tenancies for each selected property
+      for (const propertyId of data.propertyIds) {
+        const hasOverlap = await checkTenancyOverlap(propertyId, data.startDate, data.endDate);
+        
+        if (hasOverlap) {
+          const property = properties.find(p => p.id === propertyId);
+          toast({
+            title: "Tenancy Overlap Detected",
+            description: `${property?.name} already has an active tenancy during this period. Please adjust the dates or select a different property.`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      // If no overlaps, proceed with form submission
+      onSubmit(data);
+    } catch (error) {
+      console.error("Error in handleFormSubmit:", error);
+      toast({
+        title: "Error",
+        description: "Failed to validate tenancy dates. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="tenantId"
