@@ -8,25 +8,46 @@ export function useUserRole() {
 
   useEffect(() => {
     async function getUserRole() {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        console.log("No user found");
-        setUserRole(null);
-        return;
-      }
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          console.error("Error fetching user:", userError);
+          setUserRole(null);
+          return;
+        }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
+        if (!user) {
+          console.log("No authenticated user found");
+          setUserRole(null);
+          return;
+        }
 
-      console.log("User profile:", profile);
-      
-      if (profile?.role) {
-        setUserRole(profile.role as UserRole);
-      } else {
+        console.log("Fetching role for user:", user.id);
+
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching user profile:", profileError);
+          setUserRole(null);
+          return;
+        }
+
+        console.log("User profile data:", profile);
+        
+        if (profile?.role) {
+          console.log("Setting user role to:", profile.role);
+          setUserRole(profile.role as UserRole);
+        } else {
+          console.log("No role found in profile");
+          setUserRole(null);
+        }
+      } catch (error) {
+        console.error("Unexpected error in getUserRole:", error);
         setUserRole(null);
       }
     }
