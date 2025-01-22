@@ -32,10 +32,11 @@ export function useAuthState() {
         const { data } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           console.log("Auth state changed:", event, "Session:", currentSession ? "exists" : "null");
           
-          if (event === 'SIGNED_OUT') {
-            console.log("User signed out");
+          if (event === 'SIGNED_OUT' || !currentSession) {
+            console.log("User signed out or no session");
             if (mounted) {
               setIsAuthenticated(false);
+              setIsLoading(false);
             }
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             console.log(`Auth event: ${event}`);
@@ -48,21 +49,12 @@ export function useAuthState() {
                 } else {
                   console.error("Error verifying user:", userError);
                   setIsAuthenticated(false);
-                  // Try to refresh the session
-                  const { error: refreshError } = await supabase.auth.refreshSession();
-                  if (refreshError) {
-                    console.error("Session refresh failed:", refreshError);
-                    await supabase.auth.signOut();
-                    toast({
-                      title: "Session Expired",
-                      description: "Please sign in again to continue.",
-                      variant: "destructive",
-                    });
-                  }
                 }
               } catch (error) {
                 console.error("Error during user verification:", error);
                 setIsAuthenticated(false);
+              } finally {
+                setIsLoading(false);
               }
             }
           }
@@ -81,17 +73,6 @@ export function useAuthState() {
               console.error("User verification failed:", userError);
               if (mounted) {
                 setIsAuthenticated(false);
-                // Try to refresh the session
-                const { error: refreshError } = await supabase.auth.refreshSession();
-                if (refreshError) {
-                  console.error("Session refresh failed:", refreshError);
-                  await supabase.auth.signOut();
-                  toast({
-                    title: "Session Expired",
-                    description: "Please sign in again to continue.",
-                    variant: "destructive",
-                  });
-                }
               }
             } else if (user) {
               console.log("User verified successfully:", user.id);
@@ -121,11 +102,6 @@ export function useAuthState() {
         if (mounted) {
           setIsLoading(false);
           setIsAuthenticated(false);
-          toast({
-            variant: "destructive",
-            title: "Authentication Error",
-            description: "There was a problem with authentication. Please sign in again.",
-          });
         }
       }
     };

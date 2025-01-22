@@ -45,22 +45,6 @@ export function ProtectedRoute({
           return;
         }
 
-        // Try to refresh the session
-        const { error: refreshError } = await supabase.auth.refreshSession();
-        if (refreshError) {
-          console.error("Session refresh failed:", refreshError);
-          if (mounted) {
-            toast({
-              title: "Session Expired",
-              description: "Please sign in again to continue.",
-              variant: "destructive",
-            });
-            await supabase.auth.signOut();
-            navigate(redirectTo);
-          }
-          return;
-        }
-
         // Verify the session is still valid
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
