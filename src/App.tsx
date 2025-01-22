@@ -1,7 +1,7 @@
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import AppRoutes from "@/components/routing/AppRoutes";
+import { AppRoutes } from "@/components/routing/AppRoutes";
 import "./App.css";
 
 // Create a client

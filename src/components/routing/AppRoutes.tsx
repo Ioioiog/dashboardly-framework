@@ -14,10 +14,10 @@ import Invoices from "@/pages/Invoices";
 import Chat from "@/pages/Chat";
 
 interface AppRoutesProps {
-  isAuthenticated: boolean;
+  isAuthenticated?: boolean;
 }
 
-export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
+export function AppRoutes({ isAuthenticated = false }: AppRoutesProps) {
   return (
     <Routes>
       {/* Public routes - must be first */}
