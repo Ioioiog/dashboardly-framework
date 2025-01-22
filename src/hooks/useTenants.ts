@@ -38,7 +38,7 @@ export function useTenants() {
 
         console.log("User profile:", profile);
 
-        // Fetch tenancies with related data
+        // Fetch all tenancies (both active and inactive) with related data
         const { data: tenantsData, error: tenantsError } = await supabase
           .from('tenancies')
           .select(`
@@ -62,8 +62,7 @@ export function useTenants() {
               name,
               address
             )
-          `)
-          .eq('status', 'active');
+          `);
 
         if (tenantsError) {
           console.error("Error fetching tenants:", tenantsError);

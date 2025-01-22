@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 interface TenantListProps {
   tenants: Tenant[];
@@ -36,6 +37,10 @@ export function TenantList({ tenants }: TenantListProps) {
       return tenant.email || "No name provided";
     }
     return `${tenant.first_name || ''} ${tenant.last_name || ''}`.trim();
+  };
+
+  const getStatusBadgeColor = (status: string) => {
+    return status === 'active' ? 'bg-green-500' : 'bg-gray-500';
   };
 
   const filteredTenants = tenants.filter((tenant) => {
@@ -83,6 +88,7 @@ export function TenantList({ tenants }: TenantListProps) {
               <TableHead>Property</TableHead>
               <TableHead>Start Date</TableHead>
               <TableHead>End Date</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -108,6 +114,11 @@ export function TenantList({ tenants }: TenantListProps) {
                         ? format(new Date(tenant.tenancy.end_date), "MMM d, yyyy")
                         : "Ongoing"}
                     </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusBadgeColor(tenant.tenancy.status)}>
+                        {tenant.tenancy.status}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-right space-x-2">
                       <TenantObservationDialog
                         tenantId={tenant.id}
@@ -117,7 +128,7 @@ export function TenantList({ tenants }: TenantListProps) {
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell colSpan={7} className="bg-gray-50">
+                    <TableCell colSpan={8} className="bg-gray-50">
                       <TenantInteractionHistory tenantId={tenant.id} />
                     </TableCell>
                   </TableRow>
