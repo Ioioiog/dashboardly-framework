@@ -35,7 +35,6 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
       console.log("useProperties - User Role:", userRole);
 
       if (userRole === "landlord") {
-        // For landlords, fetch all their properties with optional tenancies
         console.log("Executing landlord properties query...");
         const { data, error } = await supabase
           .from("properties")
@@ -46,7 +45,7 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
               start_date,
               end_date,
               status,
-              tenant:profiles!tenancies_tenant_id_fkey (
+              tenant:profiles (
                 id,
                 first_name,
                 last_name,
@@ -54,24 +53,25 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
               )
             )
           `)
-          .eq("landlord_id", user.id)
-          .eq("tenancies.status", "active");
+          .eq("landlord_id", user.id);
 
         if (error) {
           console.error("Error fetching landlord properties:", error);
           throw error;
         }
 
-        console.log("Landlord properties raw query result:", data);
+        console.log("Raw landlord properties data:", data);
 
         // Transform the data to match our Property interface
         const transformedData = data?.map(property => ({
           ...property,
-          tenancy: property.tenancies?.[0] ? {
-            start_date: property.tenancies[0].start_date,
-            end_date: property.tenancies[0].end_date,
-            tenant: property.tenancies[0].tenant
-          } : undefined
+          tenancy: property.tenancies?.find(t => t.status === 'active')
+            ? {
+                start_date: property.tenancies.find(t => t.status === 'active')?.start_date,
+                end_date: property.tenancies.find(t => t.status === 'active')?.end_date,
+                tenant: property.tenancies.find(t => t.status === 'active')?.tenant
+              }
+            : undefined
         }));
 
         console.log("Transformed landlord properties:", transformedData);
