@@ -1,146 +1,45 @@
 {
   "common": {
-    "cancel": "Cancel",
-    "delete": "Delete",
     "edit": "Edit",
+    "delete": "Delete",
     "save": "Save",
+    "cancel": "Cancel",
     "loading": "Loading...",
     "error": "Error",
+    "success": "Success",
     "unexpectedError": "An unexpected error occurred"
-  },
-  "dashboard": {
-    "title": "Dashboard",
-    "welcome": "Welcome back",
-    "overview": "Here's an overview of your property management",
-    "metrics": {
-      "totalProperties": "Total Properties",
-      "monthlyRevenue": "Monthly Revenue",
-      "activeTenants": "Active Tenants",
-      "pendingMaintenance": "Pending Maintenance",
-      "currentProperty": "Current Property",
-      "paymentStatus": "Payment Status",
-      "description": {
-        "properties": "Number of properties you manage",
-        "revenue": "Total monthly rental income",
-        "tenants": "Number of active tenants",
-        "maintenance": "Pending maintenance requests",
-        "currentProperty": "Your current rental property",
-        "paymentStatus": "Status of your latest payment"
-      }
-    },
-    "recentActivity": "Recent Activity"
-  },
-  "navigation": {
-    "dashboard": "Dashboard",
-    "properties": "Properties",
-    "tenants": "Tenants",
-    "maintenance": "Maintenance",
-    "documents": "Documents",
-    "payments": "Payments",
-    "utilities": "Utilities",
-    "settings": "Settings",
-    "logout": "Logout"
-  },
-  "properties": {
-    "title": "Properties",
-    "description": "Manage and view your property details.",
-    "noProperties": "No properties found",
-    "addProperty": "Add Property",
-    "type": "Type",
-    "address": "Address",
-    "rent": {
-      "period": "month"
-    },
-    "available_from": "Available from",
-    "assign_tenant": "Assign Tenant",
-    "empty": {
-      "landlord": "No properties found. Add your first property to get started!",
-      "tenant": "No active leases found. Properties will appear here once you're assigned as a tenant.",
-      "tenant.contact": "Contact your landlord if you believe this is an error."
-    },
-    "error": {
-      "fetch": "There was a problem fetching the properties. Please try again later."
-    }
-  },
-  "settings": {
-    "title": "Settings",
-    "language": "Language",
-    "personalInfo": "Personal Information",
-    "firstName": "First Name",
-    "lastName": "Last Name",
-    "email": "Email",
-    "phone": "Phone",
-    "save": "Save Changes",
-    "password": {
-      "title": "Change Password",
-      "current": "Current Password",
-      "new": "New Password",
-      "confirm": "Confirm New Password",
-      "update": "Update Password"
-    }
   },
   "tenants": {
     "title": {
-      "landlord": "Tenants",
-      "tenant": "My Tenancy"
+      "landlord": "Manage Tenants",
+      "tenant": "Your Tenancy"
     },
     "description": {
-      "landlord": "Manage and view your property tenants.",
-      "tenant": "View your tenancy details."
+      "landlord": "View and manage your property tenants",
+      "tenant": "View your tenancy details and documents"
     },
-    "dashboard": {
-      "property": "Property",
-      "leasePeriod": "Lease Period",
-      "monthlyRent": "Monthly Rent",
-      "endDate": "Until {{date}}",
-      "noEndDate": "No end date"
+    "actions": {
+      "invite": "Invite Tenant",
+      "assign": "Assign Property"
     },
-    "noTenancy": {
-      "message": "No active tenancy found. Please contact your landlord if you believe this is an error."
+    "form": {
+      "email": "Email",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "properties": "Properties",
+      "startDate": "Start Date",
+      "endDate": "End Date (Optional)",
+      "submit": "Create Tenant",
+      "submitting": "Creating Tenant..."
     },
     "error": {
-      "loading": "Error loading tenant data. Please try again later."
-    },
-    "list": {
-      "name": "Name",
-      "contact": "Contact",
-      "property": "Property",
-      "startDate": "Start Date",
-      "endDate": "End Date",
-      "status": "Status",
-      "actions": "Actions",
-      "noEndDate": "No end date"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "pending": "Pending",
-      "expired": "Expired"
+      "loading": "Failed to load tenants"
     }
   },
-  "maintenance": {
-    "title": "Maintenance Requests",
-    "newRequest": "New Request",
-    "noRequests": "No maintenance requests found",
-    "details": {
-      "imageAlt": "Request image {{number}}",
-      "createdOn": "Created on",
-      "requestedBy": "Requested by",
-      "viewImages": "View Images",
-      "viewHistory": "View History",
-      "edit": "Edit"
+  "properties": {
+    "rent": {
+      "period": "month"
     },
-    "status": {
-      "pending": "Pending",
-      "in_progress": "In Progress",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
-    },
-    "priority": {
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High",
-      "urgent": "Urgent"
-    }
+    "type": "Property Type"
   }
 }

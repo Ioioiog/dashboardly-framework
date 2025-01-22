@@ -1,162 +1,45 @@
 {
-  "dashboard": {
-    "title": "Panel de Control",
-    "welcome": "Bienvenido de nuevo",
-    "overview": "Aquí tiene un resumen de su gestión inmobiliaria",
-    "metrics": {
-      "totalProperties": "Total de Propiedades",
-      "monthlyRevenue": "Ingresos Mensuales",
-      "activeTenants": "Inquilinos Activos",
-      "pendingMaintenance": "Mantenimiento Pendiente",
-      "currentProperty": "Propiedad Actual",
-      "paymentStatus": "Estado de Pago",
-      "description": {
-        "properties": "Número de propiedades que administra",
-        "revenue": "Ingreso mensual total por alquileres",
-        "tenants": "Número de inquilinos activos",
-        "maintenance": "Solicitudes de mantenimiento pendientes",
-        "currentProperty": "Su propiedad de alquiler actual",
-        "paymentStatus": "Estado de su último pago"
-      }
-    },
-    "recentActivity": "Actividad Reciente",
-    "properties": {
-      "title": "Sus Propiedades",
-      "noProperties": "No se encontraron propiedades",
-      "addProperty": "Añadir Propiedad"
-    },
-    "revenue": {
-      "title": "Ingresos Mensuales",
-      "noData": "No hay datos de ingresos disponibles"
-    }
-  },
-  "navigation": {
-    "dashboard": "Panel",
-    "properties": "Propiedades",
-    "tenants": "Inquilinos",
-    "maintenance": "Mantenimiento",
-    "documents": "Documentos",
-    "payments": "Pagos",
-    "utilities": "Servicios",
-    "settings": "Ajustes",
-    "logout": "Cerrar Sesión"
-  },
-  "metrics": {
-    "totalProperties": "Total de Propiedades",
-    "monthlyRevenue": "Ingresos Mensuales",
-    "activeTenants": "Inquilinos Activos",
-    "pendingMaintenance": "Mantenimiento Pendiente",
-    "currentProperty": "Propiedad Actual",
-    "paymentStatus": "Estado de Pago"
-  },
-  "settings": {
-    "title": "Ajustes",
-    "language": "Idioma",
-    "personalInfo": "Información Personal",
-    "firstName": "Nombre",
-    "lastName": "Apellidos",
-    "email": "Correo Electrónico",
-    "phone": "Teléfono",
-    "save": "Guardar Cambios",
-    "password": {
-      "title": "Cambiar Contraseña",
-      "current": "Contraseña Actual",
-      "new": "Nueva Contraseña",
-      "confirm": "Confirmar Nueva Contraseña",
-      "update": "Actualizar Contraseña"
-    }
-  },
-  "properties": {
-    "title": "Propiedades",
-    "description": "Gestiona y visualiza los detalles de tus propiedades.",
-    "noProperties": "No se encontraron propiedades",
-    "addProperty": "Añadir Propiedad",
-    "type": "Tipo",
-    "address": "Dirección",
-    "rent": {
-      "period": "mes"
-    },
-    "available_from": "Disponible desde",
-    "assign_tenant": "Asignar Inquilino",
-    "empty": {
-      "landlord": "No se encontraron propiedades. ¡Añade tu primera propiedad para comenzar!",
-      "tenant": "No se encontraron arrendamientos activos. Las propiedades aparecerán aquí una vez que seas asignado como inquilino.",
-      "tenant.contact": "Contacta a tu arrendador si crees que esto es un error."
-    },
-    "error": {
-      "fetch": "Hubo un problema al obtener las propiedades. Por favor, inténtalo de nuevo más tarde."
-    }
+  "common": {
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "unexpectedError": "Ocurrió un error inesperado"
   },
   "tenants": {
     "title": {
-      "landlord": "Inquilinos",
-      "tenant": "Mi Alquiler"
+      "landlord": "Gestionar Inquilinos",
+      "tenant": "Tu Alquiler"
     },
     "description": {
-      "landlord": "Gestiona y visualiza tus inquilinos.",
-      "tenant": "Ver detalles de tu alquiler."
+      "landlord": "Ver y gestionar los inquilinos de tu propiedad",
+      "tenant": "Ver los detalles y documentos de tu alquiler"
     },
-    "dashboard": {
-      "property": "Propiedad",
-      "leasePeriod": "Período de Alquiler",
-      "monthlyRent": "Alquiler Mensual",
-      "endDate": "Hasta {{date}}",
-      "noEndDate": "Sin fecha de finalización"
+    "actions": {
+      "invite": "Invitar Inquilino",
+      "assign": "Asignar Propiedad"
     },
-    "noTenancy": {
-      "message": "No se encontró un alquiler activo. Contacta a tu propietario si crees que esto es un error."
+    "form": {
+      "email": "Correo electrónico",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "properties": "Propiedades",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de finalización (Opcional)",
+      "submit": "Crear Inquilino",
+      "submitting": "Creando Inquilino..."
     },
     "error": {
-      "loading": "Error al cargar datos de inquilinos. Por favor, inténtalo de nuevo más tarde."
-    },
-    "list": {
-      "name": "Nombre",
-      "contact": "Contacto",
-      "property": "Propiedad",
-      "startDate": "Fecha de Inicio",
-      "endDate": "Fecha de Fin",
-      "status": "Estado",
-      "actions": "Acciones",
-      "noEndDate": "Sin fecha de fin"
-    },
-    "status": {
-      "active": "Activo",
-      "inactive": "Inactivo",
-      "pending": "Pendiente",
-      "expired": "Expirado"
+      "loading": "Error al cargar inquilinos"
     }
   },
-  "common": {
-    "cancel": "Cancelar",
-    "delete": "Eliminar",
-    "edit": "Editar",
-    "save": "Guardar",
-    "loading": "Cargando...",
-    "error": "Error"
-  },
-  "maintenance": {
-    "title": "Solicitudes de Mantenimiento",
-    "newRequest": "Nueva Solicitud",
-    "noRequests": "No se encontraron solicitudes de mantenimiento",
-    "details": {
-      "imageAlt": "Imagen de solicitud {{number}}",
-      "createdOn": "Creado el",
-      "requestedBy": "Solicitado por",
-      "viewImages": "Ver Imágenes",
-      "viewHistory": "Ver Historial",
-      "edit": "Editar"
+  "properties": {
+    "rent": {
+      "period": "mes"
     },
-    "status": {
-      "pending": "Pendiente",
-      "in_progress": "En Progreso",
-      "completed": "Completado",
-      "cancelled": "Cancelado"
-    },
-    "priority": {
-      "low": "Baja",
-      "medium": "Media",
-      "high": "Alta",
-      "urgent": "Urgente"
-    }
+    "type": "Tipo de Propiedad"
   }
 }

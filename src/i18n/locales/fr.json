@@ -1,141 +1,45 @@
 {
-  "dashboard": {
-    "title": "Tableau de Bord",
-    "welcome": "Bon retour",
-    "overview": "Voici un aperçu de votre gestion immobilière",
-    "metrics": {
-      "totalProperties": "Total des Propriétés",
-      "monthlyRevenue": "Revenu Mensuel",
-      "activeTenants": "Locataires Actifs",
-      "pendingMaintenance": "Maintenance en Attente",
-      "currentProperty": "Propriété Actuelle",
-      "paymentStatus": "État des Paiements",
-      "description": {
-        "properties": "Nombre de propriétés que vous gérez",
-        "revenue": "Revenu locatif mensuel total",
-        "tenants": "Nombre de locataires actifs",
-        "maintenance": "Demandes de maintenance en attente",
-        "currentProperty": "Votre propriété locative actuelle",
-        "paymentStatus": "État de votre dernier paiement"
-      }
-    },
-    "recentActivity": "Activité Récente",
-    "properties": {
-      "title": "Vos Propriétés",
-      "noProperties": "Aucune propriété trouvée",
-      "addProperty": "Ajouter une Propriété"
-    },
-    "revenue": {
-      "title": "Revenu Mensuel",
-      "noData": "Aucune donnée de revenu disponible"
-    }
-  },
-  "navigation": {
-    "dashboard": "Tableau de Bord",
-    "properties": "Propriétés",
-    "tenants": "Locataires",
-    "maintenance": "Maintenance",
-    "documents": "Documents",
-    "payments": "Paiements",
-    "utilities": "Services",
-    "settings": "Paramètres",
-    "logout": "Déconnexion"
-  },
-  "metrics": {
-    "totalProperties": "Total des Propriétés",
-    "monthlyRevenue": "Revenu Mensuel",
-    "activeTenants": "Locataires Actifs",
-    "pendingMaintenance": "Maintenance en Attente",
-    "currentProperty": "Propriété Actuelle",
-    "paymentStatus": "État des Paiements"
-  },
-  "settings": {
-    "title": "Paramètres",
-    "language": "Langue",
-    "personalInfo": "Informations Personnelles",
-    "firstName": "Prénom",
-    "lastName": "Nom",
-    "email": "Email",
-    "phone": "Téléphone",
-    "save": "Enregistrer les Modifications",
-    "password": {
-      "title": "Changer le Mot de Passe",
-      "current": "Mot de Passe Actuel",
-      "new": "Nouveau Mot de Passe",
-      "confirm": "Confirmer le Nouveau Mot de Passe",
-      "update": "Mettre à Jour le Mot de Passe"
-    }
+  "common": {
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "unexpectedError": "Une erreur inattendue s'est produite"
   },
   "tenants": {
     "title": {
-      "landlord": "Locataires",
-      "tenant": "Ma Location"
+      "landlord": "Gérer les Locataires",
+      "tenant": "Votre Location"
     },
     "description": {
-      "landlord": "Gérez et visualisez vos locataires.",
-      "tenant": "Voir les détails de votre location."
+      "landlord": "Voir et gérer vos locataires",
+      "tenant": "Voir les détails et documents de votre location"
     },
-    "dashboard": {
-      "property": "Propriété",
-      "leasePeriod": "Période de Location",
-      "monthlyRent": "Loyer Mensuel",
-      "endDate": "Jusqu'au {{date}}",
-      "noEndDate": "Pas de date de fin"
+    "actions": {
+      "invite": "Inviter un Locataire",
+      "assign": "Attribuer une Propriété"
     },
-    "noTenancy": {
-      "message": "Aucune location active trouvée. Contactez votre propriétaire si vous pensez qu'il s'agit d'une erreur."
+    "form": {
+      "email": "Email",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "properties": "Propriétés",
+      "startDate": "Date de début",
+      "endDate": "Date de fin (Optionnel)",
+      "submit": "Créer un Locataire",
+      "submitting": "Création du Locataire..."
     },
     "error": {
-      "loading": "Erreur lors du chargement des données des locataires. Veuillez réessayer plus tard."
-    },
-    "list": {
-      "name": "Nom",
-      "contact": "Contact",
-      "property": "Propriété",
-      "startDate": "Date de Début",
-      "endDate": "Date de Fin",
-      "status": "Statut",
-      "actions": "Actions",
-      "noEndDate": "Pas de date de fin"
-    },
-    "status": {
-      "active": "Actif",
-      "inactive": "Inactif",
-      "pending": "En Attente",
-      "expired": "Expiré"
+      "loading": "Échec du chargement des locataires"
     }
   },
-  "common": {
-    "cancel": "Annuler",
-    "delete": "Supprimer",
-    "edit": "Modifier",
-    "save": "Enregistrer",
-    "loading": "Chargement...",
-    "error": "Erreur"
-  },
-  "maintenance": {
-    "title": "Demandes de Maintenance",
-    "newRequest": "Nouvelle Demande",
-    "noRequests": "Aucune demande de maintenance trouvée",
-    "details": {
-      "imageAlt": "Image de la demande {{number}}",
-      "createdOn": "Créé le",
-      "requestedBy": "Demandé par",
-      "viewImages": "Voir les Images",
-      "viewHistory": "Voir l'Historique",
-      "edit": "Modifier"
+  "properties": {
+    "rent": {
+      "period": "mois"
     },
-    "status": {
-      "pending": "En Attente",
-      "in_progress": "En Cours",
-      "completed": "Terminé",
-      "cancelled": "Annulé"
-    },
-    "priority": {
-      "low": "Faible",
-      "medium": "Moyenne",
-      "high": "Haute",
-      "urgent": "Urgente"
-    }
+    "type": "Type de Propriété"
   }
 }

@@ -1,148 +1,45 @@
 {
-  "dashboard": {
-    "title": "Panou de Control",
-    "welcome": "Bine ai revenit",
-    "overview": "Iată o prezentare generală a gestionării proprietăților tale",
-    "metrics": {
-      "totalProperties": "Total Proprietăți",
-      "monthlyRevenue": "Venit Lunar",
-      "activeTenants": "Chiriași Activi",
-      "pendingMaintenance": "Întreținere în Așteptare",
-      "currentProperty": "Proprietatea Curentă",
-      "paymentStatus": "Stare Plată",
-      "description": {
-        "properties": "Numărul de proprietăți pe care le gestionezi",
-        "revenue": "Venitul lunar total din chirii",
-        "tenants": "Numărul de chiriași activi",
-        "maintenance": "Cereri de întreținere în așteptare",
-        "currentProperty": "Proprietatea ta închiriată curentă",
-        "paymentStatus": "Starea ultimei tale plăți"
-      }
-    },
-    "recentActivity": "Activitate Recentă",
-    "properties": {
-      "title": "Proprietățile Tale",
-      "noProperties": "Nu s-au găsit proprietăți",
-      "addProperty": "Adaugă Proprietate",
-      "type": "Tip",
-      "address": "Adresă",
-      "rent": {
-        "period": "lună"
-      },
-      "available_from": "Disponibil din",
-      "assign_tenant": "Atribuie Chiriaș",
-      "empty": {
-        "landlord": "Nu s-au găsit proprietăți. Adaugă prima ta proprietate pentru a începe!",
-        "tenant": "Nu s-au găsit contracte active. Proprietățile vor apărea aici odată ce ești atribuit ca chiriaș.",
-        "tenant.contact": "Contactează proprietarul dacă crezi că aceasta este o eroare."
-      },
-      "error": {
-        "fetch": "A apărut o problemă la încărcarea proprietăților. Te rugăm să încerci din nou mai târziu."
-      }
-    },
-    "revenue": {
-      "title": "Venit Lunar",
-      "noData": "Nu există date despre venituri"
-    }
-  },
-  "navigation": {
-    "dashboard": "Panou",
-    "properties": "Proprietăți",
-    "tenants": "Chiriași",
-    "maintenance": "Întreținere",
-    "documents": "Documente",
-    "payments": "Plăți",
-    "utilities": "Utilități",
-    "settings": "Setări",
-    "logout": "Deconectare"
-  },
-  "metrics": {
-    "totalProperties": "Total Proprietăți",
-    "monthlyRevenue": "Venit Lunar",
-    "activeTenants": "Chiriași Activi",
-    "pendingMaintenance": "Întreținere în Așteptare",
-    "currentProperty": "Proprietatea Curentă",
-    "paymentStatus": "Stare Plată"
-  },
-  "settings": {
-    "title": "Setări",
-    "language": "Limbă",
-    "personalInfo": "Informații Personale",
-    "firstName": "Prenume",
-    "lastName": "Nume",
-    "email": "Email",
-    "phone": "Telefon",
-    "save": "Salvează Modificările",
-    "password": {
-      "title": "Schimbă Parola",
-      "current": "Parola Actuală",
-      "new": "Parola Nouă",
-      "confirm": "Confirmă Parola Nouă",
-      "update": "Actualizează Parola"
-    }
+  "common": {
+    "edit": "Editare",
+    "delete": "Ștergere",
+    "save": "Salvare",
+    "cancel": "Anulare",
+    "loading": "Se încarcă...",
+    "error": "Eroare",
+    "success": "Succes",
+    "unexpectedError": "A apărut o eroare neașteptată"
   },
   "tenants": {
     "title": {
-      "landlord": "Chiriași",
-      "tenant": "Chiria Mea"
+      "landlord": "Gestionare Chiriași",
+      "tenant": "Chiria Ta"
     },
     "description": {
-      "landlord": "Gestionează și vizualizează chiriașii tăi.",
-      "tenant": "Vezi detaliile chiriei tale."
+      "landlord": "Vizualizează și gestionează chiriașii proprietății tale",
+      "tenant": "Vizualizează detaliile și documentele chiriei tale"
     },
-    "dashboard": {
-      "property": "Proprietate",
-      "leasePeriod": "Perioada de Închiriere",
-      "monthlyRent": "Chirie Lunară",
-      "endDate": "Până la {{date}}",
-      "noEndDate": "Fără dată de încheiere"
+    "actions": {
+      "invite": "Invită Chiriaș",
+      "assign": "Atribuie Proprietate"
     },
-    "noTenancy": {
-      "message": "Nu s-a găsit nicio chirie activă. Contactează proprietarul dacă crezi că aceasta este o eroare."
+    "form": {
+      "email": "Email",
+      "firstName": "Prenume",
+      "lastName": "Nume",
+      "properties": "Proprietăți",
+      "startDate": "Data de început",
+      "endDate": "Data de sfârșit (Opțional)",
+      "submit": "Creare Chiriaș",
+      "submitting": "Se creează Chiriașul..."
     },
     "error": {
-      "loading": "Eroare la încărcarea datelor chiriașilor. Te rugăm să încerci din nou mai târziu."
-    },
-    "list": {
-      "name": "Nume",
-      "contact": "Contact",
-      "property": "Proprietate",
-      "startDate": "Data Începerii",
-      "endDate": "Data Încheierii",
-      "status": "Stare",
-      "actions": "Acțiuni",
-      "noEndDate": "Fără dată de încheiere"
-    },
-    "status": {
-      "active": "Activ",
-      "inactive": "Inactiv",
-      "pending": "În Așteptare",
-      "expired": "Expirat"
+      "loading": "Eroare la încărcarea chiriașilor"
     }
   },
-  "maintenance": {
-    "title": "Cereri de Întreținere",
-    "newRequest": "Cerere Nouă",
-    "noRequests": "Nu s-au găsit cereri de întreținere",
-    "details": {
-      "imageAlt": "Imaginea cererii {{number}}",
-      "createdOn": "Creat la",
-      "requestedBy": "Solicitat de",
-      "viewImages": "Vezi Imaginile",
-      "viewHistory": "Vezi Istoricul",
-      "edit": "Editează"
+  "properties": {
+    "rent": {
+      "period": "lună"
     },
-    "status": {
-      "pending": "În Așteptare",
-      "in_progress": "În Desfășurare",
-      "completed": "Finalizat",
-      "cancelled": "Anulat"
-    },
-    "priority": {
-      "low": "Scăzută",
-      "medium": "Medie",
-      "high": "Ridicată",
-      "urgent": "Urgentă"
-    }
+    "type": "Tip Proprietate"
   }
 }
