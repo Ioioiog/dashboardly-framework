@@ -62,22 +62,24 @@ export const PaymentActions = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {status === "pending" && (
+        {status !== "paid" && (
           <DropdownMenuItem onClick={() => handleStatusChange("paid")}>
             <Check className="mr-2 h-4 w-4" />
             Mark as Paid
           </DropdownMenuItem>
         )}
-        {status === "paid" && (
+        {status !== "overdue" && (
+          <DropdownMenuItem onClick={() => handleStatusChange("overdue")}>
+            <X className="mr-2 h-4 w-4" />
+            Mark as Overdue
+          </DropdownMenuItem>
+        )}
+        {status !== "pending" && (
           <DropdownMenuItem onClick={() => handleStatusChange("pending")}>
             <X className="mr-2 h-4 w-4" />
             Mark as Pending
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={() => handleStatusChange("overdue")}>
-          <X className="mr-2 h-4 w-4" />
-          Mark as Overdue
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
