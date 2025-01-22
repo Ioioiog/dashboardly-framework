@@ -186,12 +186,12 @@ export const DashboardSidebar = () => {
           />
           {isExpanded && (
             <div className="flex flex-col items-start">
-              <span className="font-semibold text-blue-600">
-                <span>Admin</span>
-                <span>Chirii</span>
+              <span className="text-2xl">
+                <span className="text-blue-600 font-bold">Admin</span>
+                <span className="text-blue-600 font-bold">Chirii</span>
                 <span className="text-gray-800">.ro</span>
               </span>
-              <span className="text-xs text-gray-500">simplificăm administrarea chiriilor</span>
+              <span className="text-sm text-gray-500">simplificăm administrarea chiriilor</span>
             </div>
           )}
         </div>
