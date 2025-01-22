@@ -11,10 +11,10 @@ export const supabase = createClient<Database>(
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true,
+      detectSessionInUrl: false,
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
       flowType: 'pkce',
-      debug: true // Enable debug mode for development
+      debug: true
     },
     global: {
       headers: {
@@ -68,12 +68,24 @@ const initSession = async () => {
 const handleInvalidSession = async () => {
   console.log('Handling invalid session...');
   try {
-    await supabase.auth.signOut();
+    // Clear any existing invalid sessions
+    await supabase.auth.signOut({ scope: 'local' });
   } catch (err) {
     console.error('Error during signOut:', err);
   }
+  // Clear all auth-related items from localStorage
   localStorage.removeItem('supabase.auth.token');
   localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
+  
+  // Clear any other auth-related items that might exist
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.includes('supabase') || key?.includes('sb-')) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(key => localStorage.removeItem(key));
 };
 
 // Call initSession when the client is imported in browser environment

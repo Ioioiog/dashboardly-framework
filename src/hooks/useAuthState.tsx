@@ -14,23 +14,24 @@ export function useAuthState() {
       try {
         console.log("Initializing authentication state...");
         
-        // Clear any existing invalid sessions first
-        const existingSession = await supabase.auth.getSession();
-        if (existingSession.error) {
-          console.error('Error with existing session:', existingSession.error);
+        // First, try to get the current session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Error with existing session:', sessionError);
           if (mounted) {
             setIsAuthenticated(false);
             setIsLoading(false);
           }
           // Clear invalid session data
-          await supabase.auth.signOut();
+          await supabase.auth.signOut({ scope: 'local' });
           localStorage.removeItem('supabase.auth.token');
           localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
           return;
         }
 
-        if (existingSession.data.session?.user) {
-          console.log("Valid session found for user:", existingSession.data.session.user.id);
+        if (session?.user) {
+          console.log("Valid session found for user:", session.user.id);
           if (mounted) {
             setIsAuthenticated(true);
           }
