@@ -116,7 +116,7 @@ const Tenants = () => {
     return (
       <div className="flex bg-dashboard-background min-h-screen">
         <DashboardSidebar />
-        <main className="flex-1 ml-64 p-8">
+        <main className="flex-1 p-8">
           <div className="max-w-7xl mx-auto space-y-6">
             <Skeleton className="h-12 w-1/3" />
             <Skeleton className="h-4 w-1/2" />
@@ -137,7 +137,7 @@ const Tenants = () => {
     return (
       <div className="flex bg-dashboard-background min-h-screen">
         <DashboardSidebar />
-        <main className="flex-1 ml-64 p-8">
+        <main className="flex-1 p-8">
           <Alert variant="destructive">
             <AlertDescription>
               {t('tenants.error.loading')}
@@ -155,7 +155,7 @@ const Tenants = () => {
   return (
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
-      <main className="flex-1 ml-64 p-8">
+      <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto space-y-8">
           <TenantsHeader userRole={userRole} properties={properties} />
           
