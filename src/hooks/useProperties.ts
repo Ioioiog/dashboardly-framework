@@ -41,7 +41,7 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
           .from("properties")
           .select(`
             *,
-            tenancies (
+            tenancies!inner (
               id,
               start_date,
               end_date,
