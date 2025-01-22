@@ -67,21 +67,21 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
 
   return (
     <>
-      <Card className="transition-all duration-200 hover:shadow-md">
-        <CardHeader>
+      <Card className="bg-white border-gray-100 shadow-sm hover:shadow-md transition-all duration-200">
+        <CardHeader className="p-3">
           <MaintenanceCardHeader 
             request={request} 
             isLandlord={isLandlord} 
             onStatusChange={handleStatusChange} 
           />
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 pt-0">
           <MaintenanceCardContent 
             request={request} 
             onImageClick={() => setIsImageDialogOpen(true)} 
           />
         </CardContent>
-        <CardFooter>
+        <CardFooter className="p-3 pt-0">
           <MaintenanceCardFooter 
             request={request}
             onImageClick={() => setIsImageDialogOpen(true)}
