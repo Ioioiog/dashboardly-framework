@@ -11,6 +11,8 @@ import { TenantsHeader } from "@/components/tenants/TenantsHeader";
 import { TenantDashboard } from "@/components/tenants/TenantDashboard";
 import { NoTenancy } from "@/components/tenants/NoTenancy";
 import { useTranslation } from "react-i18next";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Tenants = () => {
   const navigate = useNavigate();
@@ -118,11 +120,13 @@ const Tenants = () => {
       <div className="flex bg-dashboard-background min-h-screen">
         <DashboardSidebar />
         <main className="flex-1 ml-64 p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-32 bg-gray-200 rounded"></div>
+          <div className="max-w-7xl mx-auto space-y-6">
+            <Skeleton className="h-12 w-1/3" />
+            <Skeleton className="h-4 w-1/2" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-48" />
+              ))}
             </div>
           </div>
         </main>
@@ -155,12 +159,51 @@ const Tenants = () => {
   return (
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
-      <main className="flex-1 ml-64 p-8 animate-fade-in">
-        <div className="max-w-7xl mx-auto">
+      <main className="flex-1 ml-64 p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
           <TenantsHeader userRole={userRole} properties={properties} />
-          <div className="space-y-8">
-            <TenantList tenants={tenants} />
-          </div>
+          
+          <Tabs defaultValue="list" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="list">List View</TabsTrigger>
+              <TabsTrigger value="grid">Grid View</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="list" className="space-y-6">
+              {isLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-24" />
+                  ))}
+                </div>
+              ) : (
+                <TenantList tenants={tenants} />
+              )}
+            </TabsContent>
+            
+            <TabsContent value="grid" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {isLoading ? (
+                  [1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-48" />
+                  ))
+                ) : (
+                  tenants.map((tenant) => (
+                    <div key={tenant.id} className="bg-white rounded-lg shadow p-6 space-y-4">
+                      <h3 className="text-lg font-semibold">
+                        {tenant.first_name} {tenant.last_name}
+                      </h3>
+                      <p className="text-sm text-gray-600">{tenant.email}</p>
+                      <div className="text-sm">
+                        <p className="font-medium">Property:</p>
+                        <p>{tenant.property.name}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>
