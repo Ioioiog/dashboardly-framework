@@ -201,13 +201,14 @@ export const DashboardSidebar = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute -right-3 top-6 h-6 w-6 rounded-full border bg-background shadow-sm hover:bg-muted"
+          className="absolute -right-3 top-6 h-7 w-7 rounded-full border bg-white/50 backdrop-blur supports-[backdrop-filter]:bg-white/50 shadow-lg hover:shadow-md hover:bg-white/80 transition-all duration-200 dark:bg-gray-950/50 dark:hover:bg-gray-950/80"
         >
           {isExpanded ? (
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4 text-gray-600" />
           ) : (
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 text-gray-600" />
           )}
+          <span className="sr-only">Toggle sidebar</span>
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent
@@ -253,3 +254,4 @@ export const DashboardSidebar = () => {
 };
 
 export default DashboardSidebar;
+
