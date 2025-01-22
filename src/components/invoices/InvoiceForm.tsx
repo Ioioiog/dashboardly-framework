@@ -133,41 +133,39 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
     try {
       console.log("Fetching utility bills for property:", propertyId);
       
-      // First, get the IDs of utilities that are already invoiced
-      const { data: invoicedUtilities, error: invoiceError } = await supabase
+      // First, get all utility IDs that are already used in invoices
+      const { data: invoiceItems, error: invoiceError } = await supabase
         .from("invoice_items")
         .select("description")
         .eq("type", "utility");
 
       if (invoiceError) throw invoiceError;
 
-      // Extract utility IDs from descriptions (if any exist)
-      const invoicedUtilityIds = (invoicedUtilities || [])
+      // Extract utility IDs from descriptions
+      const usedUtilityIds = (invoiceItems || [])
         .map(item => {
           const match = item.description.match(/Utility Bill - ID: (.+)/);
           return match ? match[1] : null;
         })
         .filter(Boolean);
 
-      console.log("Invoiced utility IDs:", invoicedUtilityIds);
+      console.log("Already used utility IDs:", usedUtilityIds);
 
-      // Build the query for pending utilities
-      let query = supabase
+      // Then fetch utilities for the selected property that haven't been used
+      const { data: utilityData, error: utilityError } = await supabase
         .from("utilities")
         .select("*")
         .eq("property_id", propertyId)
-        .eq("status", "pending");
-
-      // Only add the not-in filter if we have invoiced utilities
-      if (invoicedUtilityIds.length > 0) {
-        query = query.not('id', 'in', `(${invoicedUtilityIds.join(',')})`);
-      }
-
-      const { data: utilityData, error: utilityError } = await query;
+        .eq("status", "pending")
+        .not('id', 'in', usedUtilityIds.length > 0 ? `(${usedUtilityIds.join(',')})` : '');
 
       if (utilityError) throw utilityError;
-      console.log("Fetched utility bills:", utilityData);
+
+      console.log("Available utility bills:", utilityData);
       setUtilityBills(utilityData || []);
+      
+      // Clear selected utilities when changing property
+      setSelectedUtilityIds([]);
     } catch (error) {
       console.error("Error fetching utility bills:", error);
       setUtilityBills([]); // Ensure utilityBills is always an array
@@ -336,7 +334,11 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
               <PopoverContent className="w-full p-0">
                 <Command>
                   <CommandInput placeholder="Search utility bills..." />
-                  <CommandEmpty>No utility bills found.</CommandEmpty>
+                  <CommandEmpty>
+                    {utilityBills.length === 0 
+                      ? "No unused utility bills available for this property."
+                      : "No matching utility bills found."}
+                  </CommandEmpty>
                   <CommandGroup>
                     {utilityBills.map((bill) => (
                       <CommandItem
