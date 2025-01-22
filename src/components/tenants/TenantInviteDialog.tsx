@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+"use client";
+
+import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -12,8 +14,8 @@ interface TenantInviteDialogProps {
 
 export function TenantInviteDialog({ properties }: TenantInviteDialogProps) {
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true);
