@@ -14,19 +14,23 @@ export function useAuthState() {
       try {
         console.log("Initializing authentication state...");
         
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Session error:", sessionError);
+        // Clear any existing invalid sessions first
+        const existingSession = await supabase.auth.getSession();
+        if (existingSession.error) {
+          console.error('Error with existing session:', existingSession.error);
           if (mounted) {
             setIsAuthenticated(false);
             setIsLoading(false);
           }
+          // Clear invalid session data
+          await supabase.auth.signOut();
+          localStorage.removeItem('supabase.auth.token');
+          localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
           return;
         }
 
-        if (session?.user) {
-          console.log("Valid session found for user:", session.user.id);
+        if (existingSession.data.session?.user) {
+          console.log("Valid session found for user:", existingSession.data.session.user.id);
           if (mounted) {
             setIsAuthenticated(true);
           }
@@ -57,16 +61,27 @@ export function useAuthState() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
       
-      if (event === 'SIGNED_OUT') {
-        console.log("User signed out");
+      if (event === 'SIGNED_OUT' || !session) {
+        console.log("User signed out or session expired");
         if (mounted) {
           setIsAuthenticated(false);
         }
+        // Clear session data
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
+        
+        toast({
+          title: "Session Ended",
+          description: "Your session has ended. Please sign in again.",
+          variant: "destructive",
+        });
       } else if (event === 'SIGNED_IN' && session) {
         console.log("User signed in successfully");
         if (mounted) {
           setIsAuthenticated(true);
         }
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log("Session token refreshed");
       }
     });
 
