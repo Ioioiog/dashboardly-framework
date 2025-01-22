@@ -13,6 +13,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface InvoiceFormProps {
   onSuccess?: () => void;
@@ -43,10 +57,10 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   const [utilityBills, setUtilityBills] = useState<UtilityBill[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
   const [selectedTenantId, setSelectedTenantId] = useState<string>("");
-  const [selectedUtilityId, setSelectedUtilityId] = useState<string>("");
-  const [amount, setAmount] = useState<string>("");
+  const [selectedUtilityIds, setSelectedUtilityIds] = useState<string[]>([]);
   const [details, setDetails] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -161,7 +175,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedPropertyId || !selectedTenantId || !selectedUtilityId) {
+    if (!selectedPropertyId || !selectedTenantId || selectedUtilityIds.length === 0) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -174,10 +188,12 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       setIsLoading(true);
       console.log("Creating manual invoice...");
 
-      const selectedUtility = utilityBills.find(u => u.id === selectedUtilityId);
-      if (!selectedUtility) {
-        throw new Error("Selected utility bill not found");
+      const selectedUtilities = utilityBills.filter(u => selectedUtilityIds.includes(u.id));
+      if (selectedUtilities.length === 0) {
+        throw new Error("No utility bills selected");
       }
+
+      const totalAmount = selectedUtilities.reduce((sum, utility) => sum + utility.amount, 0);
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No authenticated user");
@@ -189,8 +205,8 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
           property_id: selectedPropertyId,
           tenant_id: selectedTenantId,
           landlord_id: user.id,
-          amount: Number(selectedUtility.amount),
-          due_date: selectedUtility.due_date,
+          amount: totalAmount,
+          due_date: selectedUtilities[0].due_date, // Using the first utility's due date
           status: "pending"
         })
         .select()
@@ -198,23 +214,25 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
       if (invoiceError) throw invoiceError;
 
-      // Create invoice item for the utility bill
+      // Create invoice items for each selected utility bill
+      const invoiceItems = selectedUtilities.map(utility => ({
+        invoice_id: invoice.id,
+        description: `Utility Bill - ${utility.type}`,
+        amount: utility.amount,
+        type: "utility"
+      }));
+
       const { error: itemError } = await supabase
         .from("invoice_items")
-        .insert({
-          invoice_id: invoice.id,
-          description: `Utility Bill - ${selectedUtility.type}`,
-          amount: selectedUtility.amount,
-          type: "utility"
-        });
+        .insert(invoiceItems);
 
       if (itemError) throw itemError;
 
-      // Update utility status
+      // Update utility statuses
       const { error: utilityError } = await supabase
         .from("utilities")
         .update({ status: "invoiced" })
-        .eq("id", selectedUtilityId);
+        .in("id", selectedUtilityIds);
 
       if (utilityError) throw utilityError;
 
@@ -254,7 +272,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
             onValueChange={(value) => {
               setSelectedPropertyId(value);
               setSelectedTenantId("");
-              setSelectedUtilityId("");
+              setSelectedUtilityIds([]);
             }}
           >
             <SelectTrigger>
@@ -293,22 +311,53 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
         {selectedPropertyId && (
           <div>
-            <Label htmlFor="utility">Assign Utility Bill</Label>
-            <Select
-              value={selectedUtilityId}
-              onValueChange={setSelectedUtilityId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a utility bill" />
-              </SelectTrigger>
-              <SelectContent>
-                {utilityBills.map((utility) => (
-                  <SelectItem key={utility.id} value={utility.id}>
-                    {`${utility.type} - $${utility.amount} (Due: ${new Date(utility.due_date).toLocaleDateString()})`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Assign Utility Bills</Label>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full justify-between"
+                >
+                  {selectedUtilityIds.length === 0
+                    ? "Select utility bills..."
+                    : `${selectedUtilityIds.length} bill${selectedUtilityIds.length === 1 ? '' : 's'} selected`}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  <CommandInput placeholder="Search utility bills..." />
+                  <CommandEmpty>No utility bills found.</CommandEmpty>
+                  <CommandGroup>
+                    {utilityBills.map((bill) => (
+                      <CommandItem
+                        key={bill.id}
+                        onSelect={() => {
+                          setSelectedUtilityIds((prev) => {
+                            const isSelected = prev.includes(bill.id);
+                            if (isSelected) {
+                              return prev.filter((id) => id !== bill.id);
+                            } else {
+                              return [...prev, bill.id];
+                            }
+                          });
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedUtilityIds.includes(bill.id) ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {`${bill.type} - $${bill.amount} (Due: ${new Date(bill.due_date).toLocaleDateString()})`}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         )}
 
@@ -323,7 +372,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
         </div>
       </div>
 
-      <Button type="submit" disabled={isLoading || !selectedUtilityId}>
+      <Button type="submit" disabled={isLoading || selectedUtilityIds.length === 0}>
         {isLoading ? "Creating..." : "Create Invoice"}
       </Button>
     </form>
