@@ -51,7 +51,6 @@ export function TenantList({ tenants }: TenantListProps) {
     try {
       console.log("Deleting tenant:", tenantId);
       
-      // Delete related records first
       await supabase
         .from('tenant_observations')
         .delete()
@@ -62,7 +61,6 @@ export function TenantList({ tenants }: TenantListProps) {
         .delete()
         .eq('tenant_id', tenantId);
 
-      // Update tenancy status to inactive
       const { error: tenancyError } = await supabase
         .from('tenancies')
         .update({ status: 'inactive' })
@@ -78,7 +76,6 @@ export function TenantList({ tenants }: TenantListProps) {
         description: "The tenant has been successfully removed.",
       });
 
-      // Refresh the tenants list
       handleTenantUpdate();
     } catch (error) {
       console.error("Error deleting tenant:", error);
@@ -91,6 +88,7 @@ export function TenantList({ tenants }: TenantListProps) {
   };
 
   const getTenantDisplayName = (tenant: Tenant) => {
+    if (!tenant) return "No name provided";
     if (!tenant.first_name && !tenant.last_name) {
       return tenant.email || "No name provided";
     }
@@ -101,12 +99,14 @@ export function TenantList({ tenants }: TenantListProps) {
     return status === 'active' ? 'bg-green-500' : 'bg-gray-500';
   };
 
-  const filteredTenants = tenants.filter((tenant) => {
+  const filteredTenants = (tenants || []).filter((tenant) => {
+    if (!tenant) return false;
+    
     const searchString = searchTerm.toLowerCase();
     const tenantName = getTenantDisplayName(tenant).toLowerCase();
     const tenantEmail = (tenant.email || "").toLowerCase();
-    const propertyName = (tenant.property.name || "").toLowerCase();
-    const propertyAddress = (tenant.property.address || "").toLowerCase();
+    const propertyName = (tenant.property?.name || "").toLowerCase();
+    const propertyAddress = (tenant.property?.address || "").toLowerCase();
 
     return (
       tenantName.includes(searchString) ||
@@ -116,7 +116,7 @@ export function TenantList({ tenants }: TenantListProps) {
     );
   });
 
-  if (!tenants.length) {
+  if (!Array.isArray(tenants) || tenants.length === 0) {
     return (
       <div className="rounded-lg border bg-card text-card-foreground shadow p-8 text-center">
         <p className="text-muted-foreground">No tenants found</p>
@@ -126,58 +126,64 @@ export function TenantList({ tenants }: TenantListProps) {
 
   const renderGridView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {filteredTenants.map((tenant) => (
-        <Card key={`${tenant.id}-${tenant.property.id}-${tenant.tenancy.start_date}`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <h3 className="font-semibold">{getTenantDisplayName(tenant)}</h3>
-            <Badge className={getStatusBadgeColor(tenant.tenancy.status)}>
-              {tenant.tenancy.status}
-            </Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">{tenant.email || "N/A"}</p>
-              <p className="text-sm text-muted-foreground">{tenant.phone || "N/A"}</p>
-              <p className="text-sm">{tenant.property.name} ({tenant.property.address})</p>
-              <div className="text-sm">
-                <p>Start: {tenant.tenancy.start_date ? format(new Date(tenant.tenancy.start_date), "MMM d, yyyy") : "N/A"}</p>
-                <p>End: {tenant.tenancy.end_date ? format(new Date(tenant.tenancy.end_date), "MMM d, yyyy") : "Ongoing"}</p>
+      {filteredTenants.map((tenant) => {
+        if (!tenant || !tenant.property) return null;
+        
+        return (
+          <Card key={`${tenant.id}-${tenant.property.id}-${tenant.tenancy.start_date}`}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <h3 className="font-semibold">{getTenantDisplayName(tenant)}</h3>
+              {tenant.tenancy && (
+                <Badge className={getStatusBadgeColor(tenant.tenancy.status)}>
+                  {tenant.tenancy.status}
+                </Badge>
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">{tenant.email || "N/A"}</p>
+                <p className="text-sm text-muted-foreground">{tenant.phone || "N/A"}</p>
+                <p className="text-sm">{tenant.property.name} ({tenant.property.address})</p>
+                <div className="text-sm">
+                  <p>Start: {tenant.tenancy?.start_date ? format(new Date(tenant.tenancy.start_date), "MMM d, yyyy") : "N/A"}</p>
+                  <p>End: {tenant.tenancy?.end_date ? format(new Date(tenant.tenancy.end_date), "MMM d, yyyy") : "Ongoing"}</p>
+                </div>
+                <div className="flex justify-end space-x-2 mt-4">
+                  <TenantObservationDialog
+                    tenantId={tenant.id}
+                    tenantName={getTenantDisplayName(tenant)}
+                  />
+                  <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="icon">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Tenant</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this tenant? This action will remove all tenant observations and interactions, and mark their tenancy as inactive.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeleteTenant(tenant.id)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
-              <div className="flex justify-end space-x-2 mt-4">
-                <TenantObservationDialog
-                  tenantId={tenant.id}
-                  tenantName={getTenantDisplayName(tenant)}
-                />
-                <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="icon">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Tenant</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete this tenant? This action will remove all tenant observations and interactions, and mark their tenancy as inactive.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDeleteTenant(tenant.id)}
-                        className="bg-red-600 hover:bg-red-700"
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 
@@ -197,72 +203,75 @@ export function TenantList({ tenants }: TenantListProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-            {filteredTenants.map((tenant) => {
-              console.log("Tenant data:", tenant);
-              return (
-                <React.Fragment key={`${tenant.id}-${tenant.property.id}-${tenant.tenancy.start_date}`}>
-                  <TableRow>
-                    <TableCell>{getTenantDisplayName(tenant)}</TableCell>
-                    <TableCell>{tenant.email || "N/A"}</TableCell>
-                    <TableCell>{tenant.phone || "N/A"}</TableCell>
-                    <TableCell>
-                      {tenant.property.name} ({tenant.property.address})
-                    </TableCell>
-                    <TableCell>
-                      {tenant.tenancy.start_date
-                        ? format(new Date(tenant.tenancy.start_date), "MMM d, yyyy")
-                        : "N/A"}
-                    </TableCell>
-                    <TableCell>
-                      {tenant.tenancy.end_date
-                        ? format(new Date(tenant.tenancy.end_date), "MMM d, yyyy")
-                        : "Ongoing"}
-                    </TableCell>
-                    <TableCell>
+          {filteredTenants.map((tenant) => {
+            if (!tenant || !tenant.property) return null;
+            
+            return (
+              <React.Fragment key={`${tenant.id}-${tenant.property.id}-${tenant.tenancy.start_date}`}>
+                <TableRow>
+                  <TableCell>{getTenantDisplayName(tenant)}</TableCell>
+                  <TableCell>{tenant.email || "N/A"}</TableCell>
+                  <TableCell>{tenant.phone || "N/A"}</TableCell>
+                  <TableCell>
+                    {tenant.property.name} ({tenant.property.address})
+                  </TableCell>
+                  <TableCell>
+                    {tenant.tenancy?.start_date
+                      ? format(new Date(tenant.tenancy.start_date), "MMM d, yyyy")
+                      : "N/A"}
+                  </TableCell>
+                  <TableCell>
+                    {tenant.tenancy?.end_date
+                      ? format(new Date(tenant.tenancy.end_date), "MMM d, yyyy")
+                      : "Ongoing"}
+                  </TableCell>
+                  <TableCell>
+                    {tenant.tenancy && (
                       <Badge className={getStatusBadgeColor(tenant.tenancy.status)}>
                         {tenant.tenancy.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <TenantObservationDialog
-                        tenantId={tenant.id}
-                        tenantName={getTenantDisplayName(tenant)}
-                      />
-                      <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="icon">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Tenant</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete this tenant? This action will remove all tenant observations and interactions, and mark their tenancy as inactive.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteTenant(tenant.id)}
-                              className="bg-red-600 hover:bg-red-700"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell colSpan={8} className="bg-gray-50">
-                      <TenantInteractionHistory tenantId={tenant.id} />
-                    </TableCell>
-                  </TableRow>
-                </React.Fragment>
-              );
-            })}
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <TenantObservationDialog
+                      tenantId={tenant.id}
+                      tenantName={getTenantDisplayName(tenant)}
+                    />
+                    <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="icon">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Tenant</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete this tenant? This action will remove all tenant observations and interactions, and mark their tenancy as inactive.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteTenant(tenant.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell colSpan={8} className="bg-gray-50">
+                    <TenantInteractionHistory tenantId={tenant.id} />
+                  </TableCell>
+                </TableRow>
+              </React.Fragment>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
@@ -284,18 +293,20 @@ export function TenantList({ tenants }: TenantListProps) {
         <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex">
           <button
             onClick={() => setViewMode("grid")}
-            className={`inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-l-full px-4 py-2 ${
+            className={cn(
+              "inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-l-full px-4 py-2",
               viewMode === "grid" ? "bg-white text-blue-400" : ""
-            }`}
+            )}
           >
             <LayoutGrid className="w-4 h-4 mr-2" />
             <span>Grid</span>
           </button>
           <button
             onClick={() => setViewMode("list")}
-            className={`inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2 ${
+            className={cn(
+              "inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2",
               viewMode === "list" ? "bg-white text-blue-400" : ""
-            }`}
+            )}
           >
             <List className="w-4 h-4 mr-2" />
             <span>List</span>
