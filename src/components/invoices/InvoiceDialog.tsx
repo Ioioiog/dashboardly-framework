@@ -38,7 +38,7 @@ export function InvoiceDialog({ onInvoiceCreated }: InvoiceDialogProps) {
         </DialogHeader>
         <div className="text-sm text-muted-foreground mb-4">
           Note: Invoices are automatically generated on the monthly renewal date of each active tenancy.
-          Manual invoice creation should only be used by administrators for special cases like one-time charges or adjustments.
+          Manual invoice creation should only be used for special cases.
         </div>
         <InvoiceForm onSuccess={handleInvoiceCreated} />
       </DialogContent>
