@@ -35,13 +35,13 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
       console.log("useProperties - User Role:", userRole);
 
       if (userRole === "landlord") {
-        // For landlords, fetch properties with their active tenancies
+        // For landlords, fetch all their properties with optional tenancies
         console.log("Executing landlord properties query...");
         const { data, error } = await supabase
           .from("properties")
           .select(`
             *,
-            tenancies!inner (
+            tenancies (
               id,
               start_date,
               end_date,
