@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 
 interface InvoiceFormValues {
-  amount: number;
   property_id: string;
+  utility_id: string;
   details?: string;
   document?: File;
   tenant_email?: string;
@@ -20,14 +20,24 @@ interface InvoiceFormProps {
   onSuccess?: () => void;
 }
 
+interface Utility {
+  id: string;
+  amount: number;
+  type: string;
+  due_date: string;
+}
+
 export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [properties, setProperties] = useState<Array<{ id: string; name: string }>>([]);
+  const [utilities, setUtilities] = useState<Utility[]>([]);
   const { toast } = useToast();
   const form = useForm<InvoiceFormValues>();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const [selectedUtilityId, setSelectedUtilityId] = useState<string | null>(null);
   const [tenantEmail, setTenantEmail] = useState<string | null>(null);
+  const [selectedUtilityAmount, setSelectedUtilityAmount] = useState<number | null>(null);
 
   // Fetch properties when component mounts
   useEffect(() => {
@@ -54,6 +64,31 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
     fetchProperties();
   }, []);
+
+  // Fetch utilities when property is selected
+  useEffect(() => {
+    const fetchUtilities = async () => {
+      if (!selectedPropertyId) {
+        setUtilities([]);
+        return;
+      }
+
+      const { data: utilities, error: utilitiesError } = await supabase
+        .from("utilities")
+        .select("*")
+        .eq("property_id", selectedPropertyId)
+        .eq("status", "pending");
+
+      if (utilitiesError) {
+        console.error("Error fetching utilities:", utilitiesError);
+        return;
+      }
+
+      setUtilities(utilities || []);
+    };
+
+    fetchUtilities();
+  }, [selectedPropertyId]);
 
   // Fetch tenant email when property is selected
   useEffect(() => {
@@ -93,6 +128,15 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   };
 
   const onSubmit = async (values: InvoiceFormValues) => {
+    if (!selectedUtilityAmount) {
+      toast({
+        title: "Error",
+        description: "Please select a utility bill",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       console.log("Submitting invoice with values:", values);
@@ -139,7 +183,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       const { data: invoice, error: invoiceError } = await supabase
         .from("invoices")
         .insert({
-          amount: values.amount,
+          amount: selectedUtilityAmount,
           due_date: dueDate,
           landlord_id: user.id,
           property_id: values.property_id,
@@ -151,14 +195,14 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
       if (invoiceError) throw invoiceError;
 
-      // Create invoice items for the amount
+      // Create invoice items for the utility bill
       const { error: itemError } = await supabase
         .from("invoice_items")
         .insert({
           invoice_id: invoice.id,
-          description: values.details || "Invoice payment",
-          amount: values.amount,
-          type: "rent"
+          description: values.details || "Utility bill payment",
+          amount: selectedUtilityAmount,
+          type: "utility"
         });
 
       if (itemError) throw itemError;
@@ -175,6 +219,14 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
         if (uploadError) throw uploadError;
       }
 
+      // Update utility status to invoiced
+      const { error: utilityUpdateError } = await supabase
+        .from("utilities")
+        .update({ status: "invoiced" })
+        .eq("id", values.utility_id);
+
+      if (utilityUpdateError) throw utilityUpdateError;
+
       toast({
         title: "Success",
         description: "Invoice created successfully",
@@ -188,6 +240,8 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       setSelectedFile(null);
       setTenantEmail(null);
       setSelectedPropertyId(null);
+      setSelectedUtilityId(null);
+      setSelectedUtilityAmount(null);
     } catch (error) {
       console.error("Error creating invoice:", error);
       toast({
@@ -226,6 +280,32 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
 
       {selectedPropertyId && (
         <div className="space-y-2">
+          <Label htmlFor="utility">Utility Bill</Label>
+          <Select 
+            onValueChange={(value) => {
+              form.setValue("utility_id", value);
+              setSelectedUtilityId(value);
+              const selectedUtility = utilities.find(u => u.id === value);
+              setSelectedUtilityAmount(selectedUtility?.amount || null);
+            }}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a utility bill" />
+            </SelectTrigger>
+            <SelectContent>
+              {utilities.map((utility) => (
+                <SelectItem key={utility.id} value={utility.id}>
+                  {utility.type} - ${utility.amount} (Due: {new Date(utility.due_date).toLocaleDateString()})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {selectedPropertyId && (
+        <div className="space-y-2">
           <Label htmlFor="tenant_email">Tenant Email</Label>
           <Input
             id="tenant_email"
@@ -236,20 +316,6 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
           />
         </div>
       )}
-
-      <div className="space-y-2">
-        <Label htmlFor="amount">Amount</Label>
-        <Input
-          id="amount"
-          type="number"
-          step="0.01"
-          {...form.register("amount", { 
-            required: true,
-            valueAsNumber: true,
-            min: 0
-          })}
-        />
-      </div>
 
       <div className="space-y-2">
         <Label htmlFor="details">Details</Label>
