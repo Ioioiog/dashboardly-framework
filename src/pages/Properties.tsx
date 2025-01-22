@@ -7,7 +7,6 @@ import { Property } from "@/utils/propertyUtils";
 import { PropertyDialog } from "@/components/properties/PropertyDialog";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 
 export default function Properties() {
@@ -84,7 +83,7 @@ export default function Properties() {
     <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
       <main className="flex-1 overflow-auto">
-        <div className="ml-64 p-8">
+        <div className="p-8">
           <div className="space-y-6">
             <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
