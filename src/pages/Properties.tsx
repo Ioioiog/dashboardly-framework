@@ -83,10 +83,10 @@ export default function Properties() {
   return (
     <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="p-8">
-          <div className="space-y-6">
-            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <main className="flex-1 overflow-y-auto">
+        <div className="container mx-auto px-4 py-8">
+          <div className="space-y-8">
+            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white rounded-lg p-6 shadow-sm">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight text-gray-900">
                   {t(`properties.title.${userRole}`)}
@@ -99,7 +99,7 @@ export default function Properties() {
               {userRole === "landlord" && (
                 <Button 
                   onClick={() => setShowDialog(true)}
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary/90"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   {t("properties.addProperty")}
@@ -107,7 +107,7 @@ export default function Properties() {
               )}
             </header>
 
-            <div className="rounded-lg border bg-white shadow">
+            <div className="bg-white rounded-lg shadow-sm">
               <div className="p-6">
                 <DashboardProperties 
                   userRole={userRole}
