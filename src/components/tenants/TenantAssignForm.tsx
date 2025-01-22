@@ -19,9 +19,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProfileSchema } from "@/integrations/supabase/database-types/profile";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
-  propertyId: z.string().min(1, "Property is required"),
+  propertyIds: z.array(z.string()).min(1, "Select at least one property"),
   tenantId: z.string().min(1, "Tenant is required"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().optional(),
@@ -43,7 +45,7 @@ export function TenantAssignForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      propertyId: "",
+      propertyIds: [],
       tenantId: "",
       startDate: new Date().toISOString().split("T")[0],
       endDate: "",
@@ -53,31 +55,6 @@ export function TenantAssignForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="propertyId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Property</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a property" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {properties.map((property) => (
-                    <SelectItem key={property.id} value={property.id}>
-                      {property.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="tenantId"
@@ -98,6 +75,56 @@ export function TenantAssignForm({
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="propertyIds"
+          render={() => (
+            <FormItem>
+              <FormLabel>Properties</FormLabel>
+              <ScrollArea className="h-[200px] border rounded-md p-4">
+                {properties.map((property) => (
+                  <FormField
+                    key={property.id}
+                    control={form.control}
+                    name="propertyIds"
+                    render={({ field }) => {
+                      return (
+                        <FormItem
+                          key={property.id}
+                          className="flex flex-row items-start space-x-3 space-y-0 py-2"
+                        >
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(property.id)}
+                              onCheckedChange={(checked) => {
+                                const value = field.value || [];
+                                if (checked) {
+                                  field.onChange([...value, property.id]);
+                                } else {
+                                  field.onChange(value.filter((id) => id !== property.id));
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-sm font-medium leading-none">
+                              {property.name}
+                            </FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              {property.address}
+                            </p>
+                          </div>
+                        </FormItem>
+                      );
+                    }}
+                  />
+                ))}
+              </ScrollArea>
               <FormMessage />
             </FormItem>
           )}

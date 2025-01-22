@@ -84,18 +84,30 @@ const TenantRegistration = () => {
 
             if (profileError) throw profileError;
 
-            // Create the tenancy
-            const { error: tenancyError } = await supabase
-              .from('tenancies')
-              .insert({
-                property_id: invitation.property_id,
-                tenant_id: session.user.id,
-                start_date: invitation.start_date,
-                end_date: invitation.end_date,
-                status: 'active'
-              });
+            // Get all properties assigned to this invitation
+            const { data: propertyAssignments, error: assignmentsError } = await supabase
+              .from('tenant_invitation_properties')
+              .select('property_id')
+              .eq('invitation_id', invitation.id);
 
-            if (tenancyError) throw tenancyError;
+            if (assignmentsError) throw assignmentsError;
+
+            // Create tenancies for each property
+            const tenancyPromises = propertyAssignments.map(async (assignment) => {
+              const { error: tenancyError } = await supabase
+                .from('tenancies')
+                .insert({
+                  property_id: assignment.property_id,
+                  tenant_id: session.user.id,
+                  start_date: invitation.start_date,
+                  end_date: invitation.end_date,
+                  status: 'active'
+                });
+
+              if (tenancyError) throw tenancyError;
+            });
+
+            await Promise.all(tenancyPromises);
 
             // Update invitation status
             const { error: updateError } = await supabase

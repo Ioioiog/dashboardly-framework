@@ -59,26 +59,31 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
 
   const handleSubmit = async (data: any) => {
     try {
-      console.log("Creating tenancy with data:", data);
+      console.log("Creating tenancies with data:", data);
       
-      const { error: tenancyError } = await supabase
-        .from('tenancies')
-        .insert({
-          property_id: data.propertyId,
-          tenant_id: data.tenantId,
-          start_date: data.startDate,
-          end_date: data.endDate || null,
-          status: 'active'
-        });
+      // Create tenancies for each selected property
+      const tenancyPromises = data.propertyIds.map(async (propertyId: string) => {
+        const { error: tenancyError } = await supabase
+          .from('tenancies')
+          .insert({
+            property_id: propertyId,
+            tenant_id: data.tenantId,
+            start_date: data.startDate,
+            end_date: data.endDate || null,
+            status: 'active'
+          });
 
-      if (tenancyError) {
-        console.error("Error creating tenancy:", tenancyError);
-        throw tenancyError;
-      }
+        if (tenancyError) {
+          console.error("Error creating tenancy:", tenancyError);
+          throw tenancyError;
+        }
+      });
+
+      await Promise.all(tenancyPromises);
 
       toast({
         title: "Success",
-        description: "Tenant assigned successfully.",
+        description: "Tenant assigned successfully to selected properties.",
       });
 
       onOpenChange(false);
@@ -96,7 +101,7 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Assign Tenant to Property</DialogTitle>
+          <DialogTitle>Assign Tenant to Properties</DialogTitle>
         </DialogHeader>
         <TenantAssignForm 
           properties={properties}
