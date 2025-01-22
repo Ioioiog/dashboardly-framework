@@ -85,7 +85,7 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
         .select("*")
         .eq("tenant_id", data.tenantId)
         .eq("status", "active")
-        .overlaps("start_date", data.startDate, data.endDate || "infinity");
+        .overlaps("start_date", [data.startDate, data.endDate || "infinity"]);
 
       if (validationError) {
         throw validationError;
