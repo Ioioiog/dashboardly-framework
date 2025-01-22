@@ -63,9 +63,9 @@ export function useChat(selectedTenantId: string | null) {
             .eq('tenant_id', selectedTenantId);
         }
 
-        const { data: conversation, error: conversationError } = await query.single();
+        const { data: conversation, error: conversationError } = await query.maybeSingle();
 
-        if (conversationError && conversationError.code !== 'PGRST116') {
+        if (conversationError) {
           throw conversationError;
         }
 
