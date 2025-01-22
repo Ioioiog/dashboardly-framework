@@ -71,16 +71,22 @@ export function TenantAssignForm({
         .eq('status', 'active');
 
       if (endDate) {
-        // For fixed-term tenancies
+        // For fixed-term tenancies, check:
+        // 1. Existing tenancy starts before new end date AND ends after new start date
+        // 2. Existing tenancy is within the new tenancy period
+        // 3. New tenancy is within the existing tenancy period
         query = query.or(
           `and(start_date.lte.${endDate},end_date.gte.${startDate}),` +
-          `and(start_date.gte.${startDate},end_date.lte.${endDate}),` +
-          `and(start_date.lte.${startDate},end_date.gte.${endDate})`
+          `and(start_date.gte.${startDate},start_date.lte.${endDate}),` +
+          `and(end_date.gte.${startDate},end_date.lte.${endDate})`
         );
       } else {
-        // For indefinite tenancies
+        // For indefinite tenancies, check if any existing tenancy:
+        // 1. Has no end date and starts before or on the new start date
+        // 2. Has an end date after the new start date
         query = query.or(
-          `and(start_date.lte.${startDate},or(end_date.is.null,end_date.gte.${startDate}))`
+          `and(start_date.lte.${startDate},end_date.is.null),` +
+          `and(start_date.lte.${startDate},end_date.gte.${startDate})`
         );
       }
 
