@@ -28,6 +28,45 @@
       "noData": "No hay datos de ingresos disponibles"
     }
   },
+  "properties": {
+    "title": "Propiedades",
+    "description": "Gestione su cartera de propiedades",
+    "addProperty": "Agregar Propiedad",
+    "empty": {
+      "landlord": "Aún no ha agregado ninguna propiedad. Haga clic en el botón de arriba para agregar su primera propiedad.",
+      "tenant": "Aún no tiene propiedades asignadas.",
+      "tenant.contact": "Póngase en contacto con su arrendador si cree que esto es un error."
+    },
+    "error": {
+      "fetch": "Error al cargar las propiedades"
+    },
+    "toast": {
+      "updated": {
+        "title": "Propiedad Actualizada",
+        "description": "La propiedad se ha actualizado correctamente"
+      },
+      "deleted": {
+        "title": "Propiedad Eliminada",
+        "description": "La propiedad se ha eliminado correctamente"
+      },
+      "error": "Error al realizar la acción solicitada"
+    },
+    "rent": {
+      "period": "mes"
+    },
+    "type": "Tipo de Propiedad",
+    "filters": {
+      "search": "Buscar propiedades...",
+      "type": {
+        "label": "Tipo de Propiedad",
+        "all": "Todos los tipos",
+        "apartment": "Apartamento",
+        "house": "Casa",
+        "condo": "Condominio",
+        "commercial": "Comercial"
+      }
+    }
+  },
   "tenants": {
     "title": {
       "landlord": "Gestionar Inquilinos",
@@ -54,11 +93,5 @@
     "error": {
       "loading": "Error al cargar inquilinos"
     }
-  },
-  "properties": {
-    "rent": {
-      "period": "mes"
-    },
-    "type": "Tipo de Propiedad"
   }
 }

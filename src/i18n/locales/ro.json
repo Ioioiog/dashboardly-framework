@@ -28,6 +28,45 @@
       "noData": "Nu există date despre venituri"
     }
   },
+  "properties": {
+    "title": "Proprietăți",
+    "description": "Gestionați portofoliul dvs. de proprietăți",
+    "addProperty": "Adăugare Proprietate",
+    "empty": {
+      "landlord": "Nu ați adăugat încă nicio proprietate. Faceți clic pe butonul de mai sus pentru a adăuga prima proprietate.",
+      "tenant": "Nu aveți încă proprietăți atribuite.",
+      "tenant.contact": "Vă rugăm să contactați proprietarul dacă credeți că aceasta este o eroare."
+    },
+    "error": {
+      "fetch": "Eroare la încărcarea proprietăților"
+    },
+    "toast": {
+      "updated": {
+        "title": "Proprietate Actualizată",
+        "description": "Proprietatea a fost actualizată cu succes"
+      },
+      "deleted": {
+        "title": "Proprietate Ștearsă",
+        "description": "Proprietatea a fost ștearsă cu succes"
+      },
+      "error": "Eroare la efectuarea acțiunii solicitate"
+    },
+    "rent": {
+      "period": "lună"
+    },
+    "type": "Tip Proprietate",
+    "filters": {
+      "search": "Căutare proprietăți...",
+      "type": {
+        "label": "Tip Proprietate",
+        "all": "Toate tipurile",
+        "apartment": "Apartament",
+        "house": "Casă",
+        "condo": "Condominium",
+        "commercial": "Comercial"
+      }
+    }
+  },
   "tenants": {
     "title": {
       "landlord": "Gestionare Chiriași",
@@ -54,11 +93,5 @@
     "error": {
       "loading": "Eroare la încărcarea chiriașilor"
     }
-  },
-  "properties": {
-    "rent": {
-      "period": "lună"
-    },
-    "type": "Tip Proprietate"
   }
 }

@@ -28,6 +28,45 @@
       "noData": "No revenue data available"
     }
   },
+  "properties": {
+    "title": "Properties",
+    "description": "Manage your property portfolio",
+    "addProperty": "Add Property",
+    "empty": {
+      "landlord": "You haven't added any properties yet. Click the button above to add your first property.",
+      "tenant": "You don't have any properties assigned to you yet.",
+      "tenant.contact": "Please contact your landlord if you believe this is an error."
+    },
+    "error": {
+      "fetch": "Failed to load properties"
+    },
+    "toast": {
+      "updated": {
+        "title": "Property Updated",
+        "description": "The property has been updated successfully"
+      },
+      "deleted": {
+        "title": "Property Deleted",
+        "description": "The property has been deleted successfully"
+      },
+      "error": "Failed to perform the requested action"
+    },
+    "rent": {
+      "period": "month"
+    },
+    "type": "Property Type",
+    "filters": {
+      "search": "Search properties...",
+      "type": {
+        "label": "Property Type",
+        "all": "All types",
+        "apartment": "Apartment",
+        "house": "House",
+        "condo": "Condo",
+        "commercial": "Commercial"
+      }
+    }
+  },
   "tenants": {
     "title": {
       "landlord": "Manage Tenants",
@@ -54,11 +93,5 @@
     "error": {
       "loading": "Failed to load tenants"
     }
-  },
-  "properties": {
-    "rent": {
-      "period": "month"
-    },
-    "type": "Property Type"
   }
 }

@@ -28,6 +28,45 @@
       "noData": "Aucune donnée de revenus disponible"
     }
   },
+  "properties": {
+    "title": "Propriétés",
+    "description": "Gérez votre portefeuille immobilier",
+    "addProperty": "Ajouter une Propriété",
+    "empty": {
+      "landlord": "Vous n'avez pas encore ajouté de propriétés. Cliquez sur le bouton ci-dessus pour ajouter votre première propriété.",
+      "tenant": "Vous n'avez pas encore de propriétés assignées.",
+      "tenant.contact": "Veuillez contacter votre propriétaire si vous pensez qu'il s'agit d'une erreur."
+    },
+    "error": {
+      "fetch": "Échec du chargement des propriétés"
+    },
+    "toast": {
+      "updated": {
+        "title": "Propriété Mise à Jour",
+        "description": "La propriété a été mise à jour avec succès"
+      },
+      "deleted": {
+        "title": "Propriété Supprimée",
+        "description": "La propriété a été supprimée avec succès"
+      },
+      "error": "Échec de l'action demandée"
+    },
+    "rent": {
+      "period": "mois"
+    },
+    "type": "Type de Propriété",
+    "filters": {
+      "search": "Rechercher des propriétés...",
+      "type": {
+        "label": "Type de Propriété",
+        "all": "Tous les types",
+        "apartment": "Appartement",
+        "house": "Maison",
+        "condo": "Copropriété",
+        "commercial": "Commercial"
+      }
+    }
+  },
   "tenants": {
     "title": {
       "landlord": "Gérer les Locataires",
@@ -54,11 +93,5 @@
     "error": {
       "loading": "Échec du chargement des locataires"
     }
-  },
-  "properties": {
-    "rent": {
-      "period": "mois"
-    },
-    "type": "Type de Propriété"
   }
 }
