@@ -41,16 +41,33 @@ export function TenantAssignDialog({ open, onOpenChange, properties }: TenantAss
     queryKey: ["available-tenants"],
     queryFn: async () => {
       console.log("Fetching available tenants");
-      const { data: profiles, error } = await supabase
+      
+      // First get all active tenancy tenant IDs
+      const { data: activeTenancies, error: tenancyError } = await supabase
+        .from("tenancies")
+        .select("tenant_id")
+        .eq("status", "active");
+
+      if (tenancyError) {
+        console.error("Error fetching active tenancies:", tenancyError);
+        throw tenancyError;
+      }
+
+      const activeTenantIds = activeTenancies?.map(t => t.tenant_id) || [];
+      console.log("Active tenant IDs:", activeTenantIds);
+
+      // Then fetch available tenants
+      const query = supabase
         .from("profiles")
         .select("id, first_name, last_name, email")
-        .eq("role", "tenant")
-        .not("id", "in", (
-          await supabase
-            .from("tenancies")
-            .select("tenant_id")
-            .eq("status", "active")
-        ).data?.map(t => t.tenant_id) || []);
+        .eq("role", "tenant");
+
+      // Only add the not-in filter if there are active tenants
+      if (activeTenantIds.length > 0) {
+        query.not('id', 'in', `(${activeTenantIds.join(',')})`);
+      }
+
+      const { data: profiles, error } = await query;
 
       if (error) {
         console.error("Error fetching available tenants:", error);
