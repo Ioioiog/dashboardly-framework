@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-export function DashboardSidebar() {
+const DashboardSidebar = () => {
   const { userRole } = useUserRole();
   const location = useLocation();
   const { toast } = useToast();
@@ -151,4 +151,6 @@ export function DashboardSidebar() {
       </div>
     </div>
   );
-}
+};
+
+export default DashboardSidebar;
