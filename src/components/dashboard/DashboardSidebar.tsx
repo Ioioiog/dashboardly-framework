@@ -9,6 +9,8 @@ import {
   Droplets,
   LogOut,
   MessageCircle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -16,11 +18,18 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 export const DashboardSidebar = () => {
   const { userRole } = useUserRole();
   const location = useLocation();
   const { toast } = useToast();
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const handleSignOut = async () => {
     try {
@@ -116,7 +125,14 @@ export const DashboardSidebar = () => {
   );
 
   return (
-    <div className="h-screen w-64 bg-dashboard-sidebar border-r border-gray-200 flex flex-col">
+    <Collapsible
+      open={isExpanded}
+      onOpenChange={setIsExpanded}
+      className={cn(
+        "relative h-screen bg-dashboard-sidebar border-r border-gray-200 flex flex-col transition-all duration-300",
+        isExpanded ? "w-64" : "w-20"
+      )}
+    >
       <div className="p-4">
         <div className="flex items-center gap-2">
           <img 
@@ -124,9 +140,26 @@ export const DashboardSidebar = () => {
             alt="AdminChirii.ro Logo" 
             className="h-8"
           />
+          {isExpanded && <span className="font-semibold">AdminChirii.ro</span>}
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute -right-3 top-6 h-6 w-6 rounded-full border bg-background"
+        >
+          {isExpanded ? (
+            <ChevronLeft className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent
+        forceMount
+        className="flex-1 overflow-y-auto"
+      >
         <nav className="px-2 py-4 space-y-1">
           {filteredMenuItems.map((item) => (
             <Link
@@ -140,11 +173,11 @@ export const DashboardSidebar = () => {
               )}
             >
               <item.icon className="mr-3 h-5 w-5" />
-              {item.title}
+              {isExpanded && item.title}
             </Link>
           ))}
         </nav>
-      </div>
+      </CollapsibleContent>
       <div className="p-4 border-t border-gray-200">
         <Button
           variant="ghost"
@@ -152,10 +185,10 @@ export const DashboardSidebar = () => {
           onClick={handleSignOut}
         >
           <LogOut className="mr-3 h-5 w-5" />
-          Sign Out
+          {isExpanded && "Sign Out"}
         </Button>
       </div>
-    </div>
+    </Collapsible>
   );
 };
 
