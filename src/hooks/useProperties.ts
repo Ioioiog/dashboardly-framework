@@ -54,7 +54,8 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
                 )
               )
             `)
-            .eq("landlord_id", user.id);
+            .eq("landlord_id", user.id)
+            .order('created_at', { ascending: false });
 
           if (error) {
             console.error("Error fetching landlord properties:", error);
@@ -115,7 +116,7 @@ export function useProperties({ userRole }: UsePropertiesProps): UsePropertiesRe
       }
     },
     retry: 1,
-    staleTime: 30000,
+    staleTime: 30000, // Cache data for 30 seconds
   });
 
   return { properties: properties as Property[], isLoading };
