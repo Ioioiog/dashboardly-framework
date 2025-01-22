@@ -19,10 +19,10 @@ const Chat = () => {
   };
 
   return (
-    <div className="flex bg-dashboard-background min-h-screen">
+    <div className="flex bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 min-h-screen">
       <DashboardSidebar />
-      <main className="flex-1 p-8">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md h-[calc(100vh-8rem)]">
+      <main className="flex-1 p-8 animate-fade-in">
+        <div className="max-w-4xl mx-auto bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 backdrop-blur-sm h-[calc(100vh-8rem)] transition-all duration-200 hover:shadow-xl">
           <div className="flex flex-col h-full">
             <ChatHeader
               onTenantSelect={setSelectedTenantId}
