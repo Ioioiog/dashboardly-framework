@@ -1,12 +1,12 @@
 "use client";
 
-import * as React from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Property } from "@/utils/propertyUtils";
 import { TenantInviteForm } from "./TenantInviteForm";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { TenantInviteConfirmDialog } from "./TenantInviteConfirmDialog";
 
 interface TenantInviteDialogProps {
   properties: Property[];
@@ -222,22 +222,11 @@ export function TenantInviteDialog({
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={showResendConfirm} onOpenChange={setShowResendConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Resend Invitation?</AlertDialogTitle>
-            <AlertDialogDescription>
-              An active invitation already exists for this email address. Would you like to resend it with a new expiration date?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleResendConfirm}>
-              Resend Invitation
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <TenantInviteConfirmDialog
+        open={showResendConfirm}
+        onOpenChange={setShowResendConfirm}
+        onConfirm={handleResendConfirm}
+      />
     </>
   );
 }
