@@ -16,12 +16,20 @@ export function TenantsHeader({ properties, userRole }: TenantsHeaderProps) {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
 
+  const title = userRole === "landlord" 
+    ? t('tenants.title.landlord') 
+    : t('tenants.title.tenant');
+
+  const description = userRole === "landlord"
+    ? t('tenants.description.landlord')
+    : t('tenants.description.tenant');
+
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">{t('tenants.title')}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
         <p className="text-muted-foreground">
-          {t('tenants.description')}
+          {description}
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
