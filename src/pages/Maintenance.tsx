@@ -7,29 +7,64 @@ import { MaintenanceList } from "@/components/maintenance/MaintenanceList";
 import { MaintenanceDialog } from "@/components/maintenance/MaintenanceDialog";
 import { useMaintenanceRequests } from "@/hooks/useMaintenanceRequests";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const Maintenance = () => {
   const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { data: requests, isLoading } = useMaintenanceRequests();
   const [isLandlord, setIsLandlord] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { data: requests, isLoading } = useMaintenanceRequests();
 
   useEffect(() => {
-    const checkUserRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    const checkSession = async () => {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: "Please sign in again.",
+        });
+        navigate("/auth");
+        return;
+      }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+      if (!session) {
+        console.log("No active session, redirecting to auth");
+        navigate("/auth");
+        return;
+      }
 
-      setIsLandlord(profile?.role === 'landlord');
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          throw profileError;
+        }
+
+        console.log("User role:", profile?.role);
+        setIsLandlord(profile?.role === 'landlord');
+      } catch (error) {
+        console.error("Error checking user role:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load user profile.",
+        });
+      }
     };
 
-    checkUserRole();
-  }, []);
+    checkSession();
+  }, [navigate, toast]);
 
   return (
     <div className="flex h-screen bg-gray-100">
