@@ -77,18 +77,24 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       return profile;
     },
     retry: 1,
+    enabled: true
   });
 
   // Fetch tenant's active property if they're a tenant
   const { data: tenantProperty } = useQuery({
     queryKey: ["tenant-property", userProfile?.id],
     queryFn: async () => {
-      if (!userProfile || userProfile.role !== "tenant") {
-        console.log("User is not a tenant or profile not loaded yet");
+      if (!userProfile?.id) {
+        console.log("No user profile ID available");
+        return null;
+      }
+
+      if (userProfile.role !== "tenant") {
+        console.log("User is not a tenant");
         return null;
       }
       
-      console.log("Fetching tenant's active property...");
+      console.log("Fetching tenant's active property for user:", userProfile.id);
       const { data, error } = await supabase
         .from("tenancies")
         .select(`
@@ -110,13 +116,13 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       console.log("Tenant property fetched:", data);
       return data?.properties;
     },
-    enabled: !!userProfile && userProfile.role === "tenant",
+    enabled: !!userProfile?.id && userProfile.role === "tenant"
   });
 
   const { data: properties } = useQuery({
-    queryKey: ["landlord-properties"],
+    queryKey: ["landlord-properties", userProfile?.id],
     queryFn: async () => {
-      if (!userProfile || userProfile.role !== "landlord") {
+      if (!userProfile?.id || userProfile.role !== "landlord") {
         console.log("User is not a landlord or profile not loaded yet");
         return [];
       }
@@ -134,7 +140,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       console.log("Properties fetched:", data);
       return data;
     },
-    enabled: !!userProfile && userProfile.role === "landlord",
+    enabled: !!userProfile?.id && userProfile.role === "landlord"
   });
 
   const form = useForm<MaintenanceFormValues>({
@@ -145,7 +151,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       issue_type: request?.issue_type ?? "",
       priority: request?.priority ?? "",
       notes: request?.notes ?? "",
-      property_id: request?.property_id ?? "",
+      property_id: request?.property_id ?? (tenantProperty?.id ?? ""),
     },
   });
 
