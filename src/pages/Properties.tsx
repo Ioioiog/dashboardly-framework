@@ -18,17 +18,42 @@ export default function Properties() {
   const { userRole } = useUserRole();
 
   console.log("Properties page - User Role:", userRole);
-  console.log("Properties page - Rendering with userRole:", userRole);
 
   const handleEdit = async (property: Property, data: any): Promise<boolean> => {
     try {
+      if (!property.id) {
+        console.error("No property ID provided for update");
+        toast({
+          variant: "destructive",
+          title: t("common.error"),
+          description: "Invalid property data",
+        });
+        return false;
+      }
+
       console.log("Attempting to edit property:", property.id, data);
+      
+      // Ensure we're sending a properly formatted update object
+      const updateData = {
+        name: data.name,
+        address: data.address,
+        monthly_rent: data.monthly_rent,
+        type: data.type,
+        description: data.description || null,
+        available_from: data.available_from || null
+      };
+
+      console.log("Formatted update data:", updateData);
+
       const { error } = await supabase
         .from("properties")
-        .update(data)
+        .update(updateData)
         .eq("id", property.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating property:", error);
+        throw error;
+      }
 
       toast({
         title: t("properties.toast.success.updated"),
