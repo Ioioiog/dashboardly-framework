@@ -10,6 +10,7 @@ interface MaintenanceHistoryProps {
 
 interface HistoryEntry {
   id: string;
+  maintenance_request_id: string;
   title: string;
   description: string;
   notes: string | null;
@@ -21,7 +22,6 @@ interface HistoryEntry {
   images: string[] | null;
   issue_type: string | null;
   priority: string | null;
-  maintenance_request_id: string;
   edited_by: string;
 }
 
@@ -79,7 +79,7 @@ export function MaintenanceHistory({ requestId }: MaintenanceHistoryProps) {
                   {format(new Date(entry.edited_at), 'PPp')}
                 </p>
                 <p className="text-xs text-gray-400">
-                  by {entry.editor?.first_name} {entry.editor?.last_name}
+                  by {entry.editor?.first_name || ''} {entry.editor?.last_name || ''}
                 </p>
               </div>
             </div>
