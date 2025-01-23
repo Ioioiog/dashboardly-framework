@@ -73,7 +73,6 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       const { data: currentUser } = await supabase.auth.getUser();
       if (!currentUser.user) throw new Error("Not authenticated");
 
-      // First, create a history record
       const { error: historyError } = await supabase
         .from("maintenance_request_history")
         .insert({
@@ -89,7 +88,6 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
 
       if (historyError) throw historyError;
 
-      // Then update the request
       const { data, error } = await supabase
         .from("maintenance_requests")
         .update({
@@ -160,12 +158,11 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
     let propertyId = values.property_id;
     let tenantId = userData.user.id;
     
-    // If user is a tenant, get their active tenancy's property
     if (userProfile?.role === "tenant") {
       console.log("Fetching active tenancy for tenant...");
       const { data: tenancy, error: tenancyError } = await supabase
         .from("tenancies")
-        .select("property_id, tenant_id")
+        .select("property_id")
         .eq("tenant_id", userData.user.id)
         .eq("status", "active")
         .maybeSingle();
@@ -191,7 +188,6 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       }
 
       propertyId = tenancy.property_id;
-      tenantId = tenancy.tenant_id;
     }
 
     console.log("Creating maintenance request with data:", {
@@ -210,23 +206,6 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       priority: values.priority,
       notes: values.notes,
       images: uploadedImages,
-    }, {
-      onSuccess: () => {
-        console.log("Maintenance request created successfully");
-        toast({
-          title: "Success",
-          description: "Maintenance request created successfully",
-        });
-        onSuccess();
-      },
-      onError: (error) => {
-        console.error("Error creating maintenance request:", error);
-        toast({
-          title: "Error",
-          description: "Failed to create maintenance request",
-          variant: "destructive",
-        });
-      },
     });
   };
 
