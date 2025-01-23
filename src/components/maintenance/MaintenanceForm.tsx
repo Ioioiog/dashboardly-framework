@@ -14,6 +14,7 @@ import { useMaintenanceFormSubmit } from "@/hooks/useMaintenanceFormSubmit";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface MaintenanceFormProps {
   onSuccess: () => void;
@@ -24,6 +25,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const [uploadedImages, setUploadedImages] = useState<string[]>(request?.images || []);
   const { handleSubmit: submitForm, isSubmitting } = useMaintenanceFormSubmit(onSuccess);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Check session on component mount
   useEffect(() => {
@@ -31,39 +33,44 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error || !session) {
         console.error("Session error:", error);
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: "Please sign in to continue.",
+        });
         navigate("/auth");
         return;
       }
     };
     
     checkSession();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const { data: userProfile, isError: isProfileError } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
       console.log("Fetching user profile...");
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (userError) {
-        console.error("Auth error:", userError);
-        throw userError;
-      }
-      
-      if (!user) {
-        console.error("No authenticated user found");
+      if (sessionError || !session) {
+        console.error("Session error:", sessionError);
         throw new Error("Not authenticated");
       }
       
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", user.id)
+        .eq("id", session.user.id)
         .maybeSingle();
         
       if (profileError) {
         console.error("Error fetching profile:", profileError);
         throw profileError;
+      }
+      
+      if (!profile) {
+        console.error("No profile found");
+        throw new Error("Profile not found");
       }
       
       console.log("User profile fetched:", profile);
@@ -73,6 +80,11 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
     meta: {
       onError: (error: Error) => {
         console.error("Error in profile query:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load user profile.",
+        });
         navigate("/auth");
       }
     }
@@ -82,7 +94,10 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const { data: tenantProperty } = useQuery({
     queryKey: ["tenant-property", userProfile?.id],
     queryFn: async () => {
-      if (userProfile?.role !== "tenant") return null;
+      if (!userProfile || userProfile.role !== "tenant") {
+        console.log("User is not a tenant or profile not loaded yet");
+        return null;
+      }
       
       console.log("Fetching tenant's active property...");
       const { data, error } = await supabase
@@ -112,11 +127,16 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const { data: properties } = useQuery({
     queryKey: ["landlord-properties"],
     queryFn: async () => {
+      if (!userProfile || userProfile.role !== "landlord") {
+        console.log("User is not a landlord or profile not loaded yet");
+        return [];
+      }
+
       console.log("Fetching landlord properties...");
       const { data, error } = await supabase
         .from("properties")
         .select("*")
-        .eq("landlord_id", userProfile?.id);
+        .eq("landlord_id", userProfile.id);
         
       if (error) {
         console.error("Error fetching properties:", error);
@@ -125,7 +145,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       console.log("Properties fetched:", data);
       return data;
     },
-    enabled: !!userProfile && userProfile?.role === "landlord",
+    enabled: !!userProfile && userProfile.role === "landlord",
   });
 
   const form = useForm<MaintenanceFormValues>({
@@ -141,10 +161,25 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   });
 
   const onSubmit = async (values: MaintenanceFormValues) => {
+    if (!userProfile) {
+      console.error("No user profile available");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please sign in to submit a maintenance request.",
+      });
+      return;
+    }
+
     // If user is a tenant, use their active property
-    const propertyId = userProfile?.role === "tenant" ? tenantProperty?.id : values.property_id;
+    const propertyId = userProfile.role === "tenant" ? tenantProperty?.id : values.property_id;
     if (!propertyId) {
       console.error("No property ID available");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a property for the maintenance request.",
+      });
       return;
     }
     await submitForm(values, uploadedImages, propertyId);
