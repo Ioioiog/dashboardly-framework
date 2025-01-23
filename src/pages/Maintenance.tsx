@@ -1,66 +1,86 @@
-import { useQuery } from "@tanstack/react-query";
-import { MaintenanceList } from "@/components/maintenance/MaintenanceList";
+import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { MaintenanceDialog } from "@/components/maintenance/MaintenanceDialog";
 import { MaintenanceFilters } from "@/components/maintenance/MaintenanceFilters";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
+import { MaintenanceList } from "@/components/maintenance/MaintenanceList";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { useUserRole } from "@/hooks/use-user-role";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Maintenance() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<MaintenanceRequest | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [priorityFilter, setPriorityFilter] = useState<string>("all");
-  const [propertyFilter, setPropertyFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [priorityFilter, setPriorityFilter] = useState<string>("");
+  const [propertyFilter, setPropertyFilter] = useState<string>("");
   const { toast } = useToast();
+  const { userRole } = useUserRole();
 
   const { data: requests, isLoading } = useQuery({
-    queryKey: ["maintenance-requests"],
+    queryKey: ['maintenance-requests', userRole],
     queryFn: async () => {
-      console.log("Fetching maintenance requests...");
-      const { data: maintenanceRequests, error } = await supabase
-        .from("maintenance_requests")
-        .select(`
-          *,
-          property:properties(
-            id,
-            name,
-            address
-          ),
-          tenant:profiles!maintenance_requests_tenant_id_fkey(
-            id,
-            first_name,
-            last_name,
-            email
-          ),
-          assignee:profiles!maintenance_requests_assigned_to_fkey(
-            id,
-            first_name,
-            last_name
-          )
-        `)
-        .order("created_at", { ascending: false });
+      console.log('Fetching maintenance requests for role:', userRole);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('No authenticated user');
 
-      if (error) {
-        console.error("Error fetching maintenance requests:", error);
-        throw error;
+        const query = supabase
+          .from('maintenance_requests')
+          .select(`
+            *,
+            property:properties(
+              id,
+              name,
+              address
+            ),
+            tenant:profiles!maintenance_requests_tenant_id_fkey(
+              id,
+              first_name,
+              last_name,
+              email
+            ),
+            assignee:profiles!maintenance_requests_assigned_to_fkey(
+              id,
+              first_name,
+              last_name
+            )
+          `);
+
+        // If user is a tenant, only show their requests
+        if (userRole === 'tenant') {
+          query.eq('tenant_id', user.id);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error('Error fetching maintenance requests:', error);
+          throw error;
+        }
+
+        console.log('Fetched maintenance requests:', data);
+        return data as MaintenanceRequest[];
+      } catch (error) {
+        console.error('Error in maintenance requests query:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch maintenance requests",
+          variant: "destructive",
+        });
+        return [];
       }
-
-      console.log("Fetched maintenance requests:", maintenanceRequests);
-      return maintenanceRequests as MaintenanceRequest[];
-    },
+    }
   });
 
   const filteredRequests = requests?.filter((request) => {
-    const matchesStatus = statusFilter === "all" || request.status === statusFilter;
-    const matchesPriority = priorityFilter === "all" || request.priority === priorityFilter;
-    const matchesProperty =
-      propertyFilter === "all" || request.property_id === propertyFilter;
+    const matchesStatus = !statusFilter || request.status === statusFilter;
+    const matchesPriority = !priorityFilter || request.priority === priorityFilter;
+    const matchesProperty = !propertyFilter || request.property_id === propertyFilter;
     return matchesStatus && matchesPriority && matchesProperty;
   });
 
@@ -83,20 +103,22 @@ export default function Maintenance() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-4">
-              <h3 className="font-semibold mb-2">Pending</h3>
-              <p className="text-2xl">{requestsByStatus.pending}</p>
-            </Card>
-            <Card className="p-4">
-              <h3 className="font-semibold mb-2">In Progress</h3>
-              <p className="text-2xl">{requestsByStatus.in_progress}</p>
-            </Card>
-            <Card className="p-4">
-              <h3 className="font-semibold mb-2">Completed</h3>
-              <p className="text-2xl">{requestsByStatus.completed}</p>
-            </Card>
-          </div>
+          {userRole === 'landlord' && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="p-4">
+                <h3 className="font-semibold mb-2">Pending</h3>
+                <p className="text-2xl">{requestsByStatus.pending}</p>
+              </Card>
+              <Card className="p-4">
+                <h3 className="font-semibold mb-2">In Progress</h3>
+                <p className="text-2xl">{requestsByStatus.in_progress}</p>
+              </Card>
+              <Card className="p-4">
+                <h3 className="font-semibold mb-2">Completed</h3>
+                <p className="text-2xl">{requestsByStatus.completed}</p>
+              </Card>
+            </div>
+          )}
 
           <MaintenanceFilters
             statusFilter={statusFilter}
@@ -105,6 +127,7 @@ export default function Maintenance() {
             onStatusChange={setStatusFilter}
             onPriorityChange={setPriorityFilter}
             onPropertyChange={setPropertyFilter}
+            userRole={userRole}
           />
 
           <MaintenanceList
