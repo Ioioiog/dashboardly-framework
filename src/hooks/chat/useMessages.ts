@@ -53,7 +53,12 @@ export function useMessages(conversationId: string | null) {
       }
 
       console.log("Fetched messages:", data);
-      setMessages(data || []);
+      // Type cast the status to ensure it matches our Message interface
+      const typedMessages = data?.map(msg => ({
+        ...msg,
+        status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read'
+      })) || [];
+      setMessages(typedMessages);
     };
 
     fetchMessages();
@@ -97,11 +102,17 @@ export function useMessages(conversationId: string | null) {
             return;
           }
 
+          // Type cast the new message status
+          const typedMessage = {
+            ...newMessage,
+            status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read'
+          };
+
           if (payload.eventType === 'INSERT') {
-            setMessages(prev => [...prev, newMessage]);
+            setMessages(prev => [...prev, typedMessage]);
           } else if (payload.eventType === 'UPDATE') {
             setMessages(prev => 
-              prev.map(msg => msg.id === newMessage.id ? newMessage : msg)
+              prev.map(msg => msg.id === typedMessage.id ? typedMessage : msg)
             );
           }
         }
