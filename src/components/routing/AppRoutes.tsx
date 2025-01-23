@@ -31,6 +31,14 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
         element={<TenantRegistration />}
       />
       <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Index />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/properties"
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
