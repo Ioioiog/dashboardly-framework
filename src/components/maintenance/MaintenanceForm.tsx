@@ -1,19 +1,23 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { MaintenanceBasicInfo } from "./form/MaintenanceBasicInfo";
 import { MaintenanceDescription } from "./form/MaintenanceDescription";
-import { maintenanceFormSchema, MaintenanceFormValues } from "./types";
 import { ImageUpload } from "./form/ImageUpload";
-import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMaintenanceFormSubmit } from "@/hooks/useMaintenanceFormSubmit";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { maintenanceFormSchema, MaintenanceFormValues } from "./types";
 
 interface MaintenanceFormProps {
   onSuccess: () => void;
@@ -25,6 +29,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const { handleSubmit: submitForm, isSubmitting } = useMaintenanceFormSubmit(onSuccess);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
 
   // Check session on component mount
   useEffect(() => {
@@ -79,9 +84,9 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
     enabled: true
   });
 
-  // Fetch tenant's active property if they're a tenant
-  const { data: tenantProperty } = useQuery({
-    queryKey: ["tenant-property", userProfile?.id],
+  // Fetch tenant's active properties
+  const { data: tenantProperties } = useQuery({
+    queryKey: ["tenant-properties", userProfile?.id],
     queryFn: async () => {
       if (!userProfile?.id) {
         console.log("No user profile ID available");
@@ -93,27 +98,27 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
         return null;
       }
       
-      console.log("Fetching tenant's active property for user:", userProfile.id);
+      console.log("Fetching tenant's active properties for user:", userProfile.id);
       const { data, error } = await supabase
         .from("tenancies")
         .select(`
-          property_id,
-          properties (
+          property:properties(
             id,
-            name
+            name,
+            address
           )
         `)
         .eq("tenant_id", userProfile.id)
-        .eq("status", "active")
-        .maybeSingle();
+        .eq("status", "active");
 
       if (error) {
-        console.error("Error fetching tenant property:", error);
+        console.error("Error fetching tenant properties:", error);
         throw error;
       }
 
-      console.log("Tenant property fetched:", data);
-      return data?.properties;
+      const properties = data.map(item => item.property);
+      console.log("Tenant properties fetched:", properties);
+      return properties;
     },
     enabled: !!userProfile?.id && userProfile.role === "tenant"
   });
@@ -126,7 +131,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       issue_type: request?.issue_type ?? "",
       priority: request?.priority ?? "",
       notes: request?.notes ?? "",
-      property_id: request?.property_id ?? (tenantProperty?.id ?? ""),
+      property_id: request?.property_id ?? selectedPropertyId,
     },
   });
 
@@ -141,8 +146,18 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       return;
     }
 
-    // If user is a tenant, use their active property
-    const propertyId = userProfile.role === "tenant" ? tenantProperty?.id : values.property_id;
+    // If user is a tenant and has multiple properties, ensure a property is selected
+    if (userProfile.role === "tenant" && tenantProperties && tenantProperties.length > 1 && !selectedPropertyId) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a property for the maintenance request.",
+      });
+      return;
+    }
+
+    // Use the selected property ID or the property from the existing request
+    const propertyId = request?.property_id || selectedPropertyId;
     if (!propertyId) {
       console.error("No property ID available");
       toast({
@@ -152,6 +167,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       });
       return;
     }
+
     await submitForm(values, uploadedImages, propertyId);
   };
 
@@ -162,6 +178,26 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {userProfile?.role === "tenant" && tenantProperties && tenantProperties.length > 1 && !request && (
+          <div className="space-y-2">
+            <Label htmlFor="property">Select Property</Label>
+            <Select
+              value={selectedPropertyId}
+              onValueChange={setSelectedPropertyId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a property" />
+              </SelectTrigger>
+              <SelectContent>
+                {tenantProperties.map((property) => (
+                  <SelectItem key={property.id} value={property.id}>
+                    {property.name} - {property.address}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <MaintenanceBasicInfo form={form} />
         <MaintenanceDescription form={form} />
         <ImageUpload
