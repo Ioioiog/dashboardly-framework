@@ -28,7 +28,12 @@ export function PropertyDialog({
 }: PropertyDialogProps) {
   const handleSubmit = async (data: any) => {
     if (mode === "edit" && property) {
-      await (onSubmit as (property: Property, data: any) => Promise<boolean>)(property, data);
+      // Ensure property ID is included in the data
+      const updatedData = {
+        ...data,
+        id: property.id // Include the property ID
+      };
+      await (onSubmit as (property: Property, data: any) => Promise<boolean>)(property, updatedData);
     } else {
       (onSubmit as (data: any) => void)(data);
     }
