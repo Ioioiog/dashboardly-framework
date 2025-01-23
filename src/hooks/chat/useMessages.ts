@@ -7,7 +7,7 @@ interface Message {
   sender_id: string;
   content: string;
   created_at: string;
-  status?: 'sent' | 'delivered' | 'read';
+  status: 'sent' | 'delivered' | 'read';
   sender: {
     first_name: string | null;
     last_name: string | null;
