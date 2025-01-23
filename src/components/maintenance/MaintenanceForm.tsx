@@ -7,12 +7,13 @@ import { MaintenanceBasicInfo } from "./form/MaintenanceBasicInfo";
 import { MaintenanceDescription } from "./form/MaintenanceDescription";
 import { maintenanceFormSchema, MaintenanceFormValues } from "./types";
 import { ImageUpload } from "./form/ImageUpload";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertySelect } from "./form/PropertySelect";
 import { useMaintenanceFormSubmit } from "@/hooks/useMaintenanceFormSubmit";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface MaintenanceFormProps {
   onSuccess: () => void;
@@ -22,26 +23,56 @@ interface MaintenanceFormProps {
 export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const [uploadedImages, setUploadedImages] = useState<string[]>(request?.images || []);
   const { handleSubmit: submitForm, isSubmitting } = useMaintenanceFormSubmit(onSuccess);
+  const navigate = useNavigate();
 
-  const { data: userProfile } = useQuery({
+  // Check session on component mount
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
+        console.error("Session error:", error);
+        navigate("/auth");
+        return;
+      }
+    };
+    
+    checkSession();
+  }, [navigate]);
+
+  const { data: userProfile, isError: isProfileError } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
       console.log("Fetching user profile...");
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      const { data: profile, error } = await supabase
+      if (userError) {
+        console.error("Auth error:", userError);
+        throw userError;
+      }
+      
+      if (!user) {
+        console.error("No authenticated user found");
+        throw new Error("Not authenticated");
+      }
+      
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
         
-      if (error) {
-        console.error("Error fetching profile:", error);
-        throw error;
+      if (profileError) {
+        console.error("Error fetching profile:", profileError);
+        throw profileError;
       }
+      
       console.log("User profile fetched:", profile);
       return profile;
+    },
+    retry: 1,
+    onError: (error) => {
+      console.error("Error in profile query:", error);
+      navigate("/auth");
     }
   });
 
@@ -61,7 +92,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       console.log("Properties fetched:", data);
       return data;
     },
-    enabled: userProfile?.role === "landlord",
+    enabled: !!userProfile && userProfile?.role === "landlord",
   });
 
   const form = useForm<MaintenanceFormValues>({
@@ -79,6 +110,10 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const onSubmit = async (values: MaintenanceFormValues) => {
     await submitForm(values, uploadedImages);
   };
+
+  if (isProfileError) {
+    return null;
+  }
 
   return (
     <Form {...form}>
