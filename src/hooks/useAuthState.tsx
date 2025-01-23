@@ -6,6 +6,7 @@ export function useAuthState() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -20,6 +21,7 @@ export function useAuthState() {
           console.error('Error with existing session:', sessionError);
           if (mounted) {
             setIsAuthenticated(false);
+            setCurrentUserId(null);
             setIsLoading(false);
           }
           return;
@@ -29,11 +31,13 @@ export function useAuthState() {
           console.log("Valid session found:", session.user.id);
           if (mounted) {
             setIsAuthenticated(true);
+            setCurrentUserId(session.user.id);
           }
         } else {
           console.log("No active session found");
           if (mounted) {
             setIsAuthenticated(false);
+            setCurrentUserId(null);
           }
         }
 
@@ -46,6 +50,7 @@ export function useAuthState() {
         if (mounted) {
           setIsLoading(false);
           setIsAuthenticated(false);
+          setCurrentUserId(null);
         }
       }
     };
@@ -59,6 +64,7 @@ export function useAuthState() {
         console.log("User signed out or session expired");
         if (mounted) {
           setIsAuthenticated(false);
+          setCurrentUserId(null);
         }
         
         toast({
@@ -71,6 +77,7 @@ export function useAuthState() {
         console.log("User signed in successfully");
         if (mounted) {
           setIsAuthenticated(true);
+          setCurrentUserId(session.user.id);
         }
       } else if (event === 'TOKEN_REFRESHED') {
         console.log("Session token refreshed");
@@ -83,5 +90,5 @@ export function useAuthState() {
     };
   }, [toast]);
 
-  return { isLoading, isAuthenticated };
+  return { isLoading, isAuthenticated, currentUserId };
 }
