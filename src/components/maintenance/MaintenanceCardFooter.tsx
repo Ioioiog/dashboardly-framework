@@ -6,6 +6,7 @@ import { History, ImageIcon, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface MaintenanceCardFooterProps {
   request: MaintenanceRequest;
@@ -18,6 +19,10 @@ export function MaintenanceCardFooter({ request, onImageClick, onHistoryClick, o
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { userRole } = useUserRole();
+
+  // Only tenants can edit and delete their own requests
+  const canEditDelete = userRole === "tenant" && request.tenant_id === request.tenant?.id;
 
   const handleDelete = async () => {
     try {
@@ -74,24 +79,28 @@ export function MaintenanceCardFooter({ request, onImageClick, onHistoryClick, o
           <History className="w-3 h-3 mr-1" />
           {t('maintenance.details.viewHistory')}
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onEditClick}
-          className="h-7 text-xs"
-        >
-          <Pencil className="w-3 h-3 mr-1" />
-          {t('maintenance.details.edit')}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleDelete}
-          className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <Trash2 className="w-3 h-3 mr-1" />
-          Delete
-        </Button>
+        {canEditDelete && (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onEditClick}
+              className="h-7 text-xs"
+            >
+              <Pencil className="w-3 h-3 mr-1" />
+              {t('maintenance.details.edit')}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDelete}
+              className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="w-3 h-3 mr-1" />
+              Delete
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );
