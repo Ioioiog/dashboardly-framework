@@ -40,6 +40,7 @@ export function useMaintenanceRequests() {
 
         console.log("User role:", userProfile?.role);
 
+        // Build the query to include all necessary relations
         const query = supabase
           .from("maintenance_requests")
           .select(`
@@ -47,9 +48,15 @@ export function useMaintenanceRequests() {
             property:properties(
               id,
               name,
-              address
+              address,
+              landlord_id
             ),
             tenant:profiles!maintenance_requests_tenant_id_fkey(
+              id,
+              first_name,
+              last_name
+            ),
+            assignee:profiles(
               id,
               first_name,
               last_name
@@ -57,6 +64,7 @@ export function useMaintenanceRequests() {
           `)
           .order("created_at", { ascending: false });
 
+        console.log("Executing maintenance requests query...");
         const { data, error } = await query;
 
         if (error) {
@@ -65,6 +73,13 @@ export function useMaintenanceRequests() {
         }
 
         console.log("Fetched maintenance requests:", data);
+        
+        // Additional check to see if we're getting the expected data structure
+        if (data && data.length > 0) {
+          console.log("Sample request property:", data[0].property);
+          console.log("Sample request tenant:", data[0].tenant);
+        }
+
         return data as MaintenanceRequest[];
       } catch (error: any) {
         console.error("Error in maintenance requests query:", error);
