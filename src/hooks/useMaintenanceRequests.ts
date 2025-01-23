@@ -41,7 +41,7 @@ export function useMaintenanceRequests() {
         console.log("User role:", userProfile?.role);
 
         // Build the query with explicit foreign key references
-        const query = supabase
+        let query = supabase
           .from("maintenance_requests")
           .select(`
             *,
@@ -67,7 +67,8 @@ export function useMaintenanceRequests() {
         // If user is a landlord, fetch all maintenance requests for their properties
         if (userProfile?.role === "landlord") {
           // First get the property IDs
-          const { data: propertyIds, error: propertyError } = await supabase
+          console.log("Fetching properties for landlord:", session.user.id);
+          const { data: properties, error: propertyError } = await supabase
             .from("properties")
             .select("id")
             .eq("landlord_id", session.user.id);
@@ -77,11 +78,19 @@ export function useMaintenanceRequests() {
             throw propertyError;
           }
 
+          if (!properties || properties.length === 0) {
+            console.log("No properties found for landlord");
+            return [];
+          }
+
+          const propertyIds = properties.map(p => p.id);
+          console.log("Found property IDs:", propertyIds);
+
           // Then use those IDs in the maintenance requests query
-          query.in("property_id", propertyIds.map(p => p.id));
+          query = query.in("property_id", propertyIds);
         } else {
           // If user is a tenant, only fetch their own maintenance requests
-          query.eq("tenant_id", session.user.id);
+          query = query.eq("tenant_id", session.user.id);
         }
 
         console.log("Executing maintenance requests query...");
@@ -93,14 +102,6 @@ export function useMaintenanceRequests() {
         }
 
         console.log("Fetched maintenance requests:", data);
-        
-        // Additional check to see if we're getting the expected data structure
-        if (data && data.length > 0) {
-          console.log("Sample request property:", data[0].property);
-          console.log("Sample request tenant:", data[0].tenant);
-          console.log("Sample request assignee:", data[0].assignee);
-        }
-
         return data as MaintenanceRequest[];
       } catch (error: any) {
         console.error("Error in maintenance requests query:", error);
