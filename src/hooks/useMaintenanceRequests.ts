@@ -7,10 +7,22 @@ export function useMaintenanceRequests() {
     queryKey: ["maintenance-requests"],
     queryFn: async () => {
       console.log("Fetching maintenance requests");
-      const { data: userProfile } = await supabase
+      
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No authenticated user");
+
+      // Get user's profile with role
+      const { data: userProfile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
+        .eq("id", user.id)
         .single();
+
+      if (profileError) {
+        console.error("Error fetching user profile:", profileError);
+        throw profileError;
+      }
 
       console.log("User role:", userProfile?.role);
 
