@@ -1,117 +1,62 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { MaintenanceRequest } from "@/types/maintenance";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export function useMaintenanceRequests() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const { userRole } = useUserRole();
 
   return useQuery({
     queryKey: ["maintenance-requests"],
     queryFn: async () => {
-      try {
-        console.log("Checking authentication status...");
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Session error:", sessionError);
-          throw sessionError;
-        }
+      console.log("Fetching maintenance requests for role:", userRole);
 
-        if (!session) {
-          console.log("No active session found, redirecting to auth");
-          navigate("/auth");
-          throw new Error("No authenticated session");
-        }
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error("Error getting user:", userError);
+        throw userError;
+      }
 
-        console.log("Fetching user profile...");
-        const { data: userProfile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", session.user.id)
-          .single();
+      if (!user) {
+        console.error("No authenticated user found");
+        return [];
+      }
 
-        if (profileError) {
-          console.error("Error fetching user profile:", profileError);
-          throw profileError;
-        }
+      console.log("Fetching maintenance requests for user:", user.id);
 
-        console.log("User role:", userProfile?.role);
+      const query = supabase
+        .from("maintenance_requests")
+        .select(`
+          *,
+          property:properties (
+            id,
+            name,
+            address
+          ),
+          tenant:profiles (
+            id,
+            first_name,
+            last_name,
+            email
+          )
+        `)
+        .order('created_at', { ascending: false });
 
-        // Build the query with explicit foreign key references
-        let query = supabase
-          .from("maintenance_requests")
-          .select(`
-            *,
-            property:properties(
-              id,
-              name,
-              address,
-              landlord_id
-            ),
-            tenant:profiles!maintenance_requests_tenant_id_fkey(
-              id,
-              first_name,
-              last_name
-            ),
-            assignee:profiles!maintenance_requests_assigned_to_fkey(
-              id,
-              first_name,
-              last_name
-            )
-          `)
-          .order("created_at", { ascending: false });
+      // If user is a tenant, only show their requests
+      if (userRole === "tenant") {
+        console.log("Filtering requests for tenant:", user.id);
+        query.eq("tenant_id", user.id);
+      }
 
-        // If user is a landlord, fetch all maintenance requests for their properties
-        if (userProfile?.role === "landlord") {
-          // First get the property IDs
-          console.log("Fetching properties for landlord:", session.user.id);
-          const { data: properties, error: propertyError } = await supabase
-            .from("properties")
-            .select("id")
-            .eq("landlord_id", session.user.id);
+      const { data, error } = await query;
 
-          if (propertyError) {
-            console.error("Error fetching property IDs:", propertyError);
-            throw propertyError;
-          }
-
-          if (!properties || properties.length === 0) {
-            console.log("No properties found for landlord");
-            return [];
-          }
-
-          const propertyIds = properties.map(p => p.id);
-          console.log("Found property IDs:", propertyIds);
-
-          // Then use those IDs in the maintenance requests query
-          query = query.in("property_id", propertyIds);
-        } else {
-          // If user is a tenant, only fetch their own maintenance requests
-          query = query.eq("tenant_id", session.user.id);
-        }
-
-        console.log("Executing maintenance requests query...");
-        const { data, error } = await query;
-
-        if (error) {
-          console.error("Error fetching maintenance requests:", error);
-          throw error;
-        }
-
-        console.log("Fetched maintenance requests:", data);
-        return data as MaintenanceRequest[];
-      } catch (error: any) {
-        console.error("Error in maintenance requests query:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch maintenance requests. Please try again.",
-        });
+      if (error) {
+        console.error("Error fetching maintenance requests:", error);
         throw error;
       }
+
+      console.log("Fetched maintenance requests:", data);
+      return data;
     },
   });
 }
