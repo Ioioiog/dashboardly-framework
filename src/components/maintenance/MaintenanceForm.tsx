@@ -26,7 +26,6 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const [uploadedImages, setUploadedImages] = useState<string[]>(request?.images || []);
   const { mutate: createRequest, isPending: isCreating } = useCreateMaintenanceRequest();
 
-  // Fetch user role
   const { data: userProfile } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
@@ -49,7 +48,6 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
     }
   });
 
-  // Fetch properties for landlord
   const { data: properties } = useQuery({
     queryKey: ["landlord-properties"],
     queryFn: async () => {
@@ -271,7 +269,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
         <Button
           type="submit"
           className="w-full"
-          disabled={isCreating || isUpdating}
+          disabled={isCreating || isUpdating || form.formState.isSubmitting}
         >
           {isCreating || isUpdating
             ? request
