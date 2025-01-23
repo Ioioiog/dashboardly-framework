@@ -50,7 +50,14 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
       if (error) {
         console.error("Storage download error:", error);
-        if (error.message.includes("Object not found")) {
+        console.error("Full error details:", {
+          message: error.message,
+          details: error.details,
+          statusCode: error.statusCode,
+          name: error.name
+        });
+        
+        if (error.message?.includes("Object not found") || error.statusCode === 404) {
           throw new Error("The document file could not be found. Please contact support.");
         }
         throw new Error("Could not download the document. Please try again later.");
