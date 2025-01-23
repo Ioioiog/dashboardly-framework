@@ -24,12 +24,7 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
         // First get all active tenancy tenant IDs
         const { data: activeTenancies, error: tenancyError } = await supabase
           .from("tenancies")
-          .select(`
-            tenant_id,
-            property_id,
-            start_date,
-            end_date
-          `)
+          .select("tenant_id")
           .eq("status", "active");
 
         if (tenancyError) {
@@ -48,28 +43,9 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
           throw profileError;
         }
 
-        // Filter out tenants who have active tenancies with overlapping dates
-        const availableTenants = profiles.filter(profile => {
-          // Check if tenant has any active tenancies
-          const tenantTenancies = activeTenancies?.filter(t => t.tenant_id === profile.id) || [];
-          
-          // If tenant has no tenancies, they are available
-          if (tenantTenancies.length === 0) {
-            return true;
-          }
-
-          // Check for each tenancy if it's currently active (no end date or end date in future)
-          const hasActiveOverlappingTenancy = tenantTenancies.some(tenancy => {
-            const today = new Date();
-            const endDate = tenancy.end_date ? new Date(tenancy.end_date) : null;
-            
-            // If there's no end date or the end date is in the future, tenant is not available
-            return !endDate || endDate > today;
-          });
-
-          // Tenant is available if they don't have any active overlapping tenancies
-          return !hasActiveOverlappingTenancy;
-        });
+        // Filter out tenants who have active tenancies
+        const activeTenantIds = activeTenancies?.map(t => t.tenant_id) || [];
+        const availableTenants = profiles.filter(profile => !activeTenantIds.includes(profile.id));
 
         console.log("Available tenants:", availableTenants);
         return availableTenants;
@@ -85,23 +61,6 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
     try {
       console.log("Creating tenancies with data:", data);
       
-      // Additional validation before creating tenancies
-      const { data: existingTenancies, error: validationError } = await supabase
-        .from("tenancies")
-        .select("*")
-        .eq("tenant_id", data.tenantId)
-        .eq("status", "active")
-        .overlaps("start_date", [data.startDate, data.endDate || "infinity"]);
-
-      if (validationError) {
-        console.error("Validation error:", validationError);
-        throw new Error("Failed to validate tenancy dates");
-      }
-
-      if (existingTenancies && existingTenancies.length > 0) {
-        throw new Error("This tenant already has an active tenancy during the selected period");
-      }
-
       // Get current user (landlord) ID
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
@@ -109,24 +68,6 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
 
       // Create tenancies for each selected property
       const tenancyPromises = data.propertyIds.map(async (propertyId: string) => {
-        // Check for existing tenancies on the property
-        const { data: propertyTenancies, error: propertyCheckError } = await supabase
-          .from("tenancies")
-          .select("*")
-          .eq("property_id", propertyId)
-          .eq("status", "active")
-          .overlaps("start_date", [data.startDate, data.endDate || "infinity"]);
-
-        if (propertyCheckError) {
-          console.error("Property check error:", propertyCheckError);
-          throw new Error(`Failed to check property ${propertyId} availability`);
-        }
-
-        if (propertyTenancies && propertyTenancies.length > 0) {
-          const property = properties.find(p => p.id === propertyId);
-          throw new Error(`${property?.name || 'Property'} is already occupied during this period`);
-        }
-
         const { error: tenancyError } = await supabase
           .from('tenancies')
           .insert({
