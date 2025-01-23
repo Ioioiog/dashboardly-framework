@@ -49,7 +49,7 @@ export function MaintenanceHistory({ requestId }: MaintenanceHistoryProps) {
       }
       
       console.log('Fetched maintenance history:', data);
-      return data as HistoryEntry[];
+      return data as unknown as HistoryEntry[];
     },
   });
 
