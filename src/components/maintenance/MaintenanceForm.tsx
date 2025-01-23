@@ -56,7 +56,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
       description: request?.description || "",
       property_id: request?.property_id || "",
       priority: request?.priority as "Low" | "Medium" | "High" || "Low",
-      status: request?.status || "pending",
+      status: userRole === "tenant" ? "pending" : (request?.status || "pending"),
       notes: request?.notes || "",
       assigned_to: request?.assigned_to || null,
     },
@@ -75,7 +75,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
         description: data.description,
         property_id: data.property_id,
         priority: data.priority,
-        status: data.status,
+        status: userRole === "tenant" ? "pending" : data.status,
         notes: data.notes || null,
         assigned_to: data.assigned_to,
         tenant_id: user.id,
@@ -211,32 +211,34 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {userRole !== "tenant" && (
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </div>
 
         <FormField
