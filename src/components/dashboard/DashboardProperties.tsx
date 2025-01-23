@@ -37,19 +37,27 @@ export function DashboardProperties({
       setIsSubmitting(true);
       console.log("Editing property:", property.id, data);
 
+      // Ensure data is properly formatted before sending to Supabase
+      const updateData = {
+        name: data.name,
+        address: data.address,
+        monthly_rent: data.monthly_rent,
+        type: data.type,
+        description: data.description || null,
+        available_from: data.available_from || null
+      };
+
+      console.log("Formatted update data:", updateData);
+
       const { error } = await supabase
         .from("properties")
-        .update({
-          name: data.name,
-          address: data.address,
-          monthly_rent: data.monthly_rent,
-          type: data.type,
-          description: data.description,
-          available_from: data.available_from
-        })
+        .update(updateData)
         .eq("id", property.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase update error:", error);
+        throw error;
+      }
 
       toast({
         title: "Success",
