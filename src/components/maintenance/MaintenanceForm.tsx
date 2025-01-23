@@ -23,6 +23,18 @@ import { MaintenanceRequest } from "@/types/maintenance";
 import { useProperties } from "@/hooks/useProperties";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useState } from "react";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  property_id: z.string().uuid("Please select a property"),
+  priority: z.string(),
+  status: z.string(),
+  notes: z.string().optional(),
+  assigned_to: z.string().optional(),
+});
 
 interface MaintenanceFormProps {
   request?: MaintenanceRequest | null;
@@ -36,6 +48,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       title: request?.title || "",
       description: request?.description || "",
@@ -47,14 +60,25 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       setIsSubmitting(true);
+      
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No authenticated user');
+
+      const submitData = {
+        ...data,
+        tenant_id: user.id,
+      };
+
+      console.log('Submitting maintenance request:', submitData);
       
       if (request) {
         const { error } = await supabase
           .from("maintenance_requests")
-          .update(data)
+          .update(submitData)
           .eq("id", request.id);
 
         if (error) throw error;
@@ -66,7 +90,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
       } else {
         const { error } = await supabase
           .from("maintenance_requests")
-          .insert([data]);
+          .insert([submitData]);
 
         if (error) throw error;
 
