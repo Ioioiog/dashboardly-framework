@@ -30,10 +30,10 @@ const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   property_id: z.string().uuid("Please select a property"),
-  priority: z.string(),
-  status: z.string(),
+  priority: z.enum(["Low", "Medium", "High"]),
+  status: z.enum(["pending", "in_progress", "completed", "cancelled"]),
   notes: z.string().optional(),
-  assigned_to: z.string().optional(),
+  assigned_to: z.string().uuid().optional(),
 });
 
 interface MaintenanceFormProps {
@@ -71,7 +71,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
       const submitData = {
         ...data,
         tenant_id: user.id,
-      };
+      } as MaintenanceRequest;
 
       console.log('Submitting maintenance request:', submitData);
       
@@ -222,6 +222,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="in_progress">In Progress</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
