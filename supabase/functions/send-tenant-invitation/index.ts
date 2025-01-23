@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { Resend } from 'https://esm.sh/resend@2.0.0'
 
 const corsHeaders = {
@@ -53,7 +52,7 @@ serve(async (req) => {
     const resend = new Resend(RESEND_API_KEY)
     
     // Use the correct domain in the invitation URL
-    const inviteUrl = `${req.headers.get('origin')}/tenant-registration?token=${token}`
+    const inviteUrl = `${req.headers.get('origin')}/tenant-registration?invitation=${token}`
 
     console.log('Sending invitation email to:', email)
     console.log('Using invite URL:', inviteUrl)
@@ -90,29 +89,23 @@ serve(async (req) => {
 
     console.log('Email sent successfully:', emailResponse)
 
-    return new Response(
-      JSON.stringify({ 
-        success: true,
-        message: 'Invitation sent successfully',
-        data: emailResponse 
-      }), 
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
-    )
+    return new Response(JSON.stringify({ 
+      success: true,
+      message: 'Invitation sent successfully',
+      data: emailResponse 
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    })
 
   } catch (error: any) {
     console.error('Error in send-tenant-invitation function:', error)
-    return new Response(
-      JSON.stringify({ 
-        success: false,
-        error: error instanceof Error ? error.message : 'An unknown error occurred'
-      }), 
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      }
-    )
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: error instanceof Error ? error.message : 'An unknown error occurred'
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+    })
   }
 })

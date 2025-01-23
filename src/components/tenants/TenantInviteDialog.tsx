@@ -44,6 +44,8 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
         throw new Error(invitationError.message);
       }
 
+      console.log("Created invitation:", invitation);
+
       // Insert property assignments
       const propertyAssignments = data.propertyIds.map((propertyId: string) => ({
         invitation_id: invitation.id,
