@@ -36,7 +36,7 @@ export function MaintenanceFilters({
           <SelectValue placeholder="Filter by status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Statuses</SelectItem>
+          <SelectItem value="all">All Statuses</SelectItem>
           <SelectItem value="pending">Pending</SelectItem>
           <SelectItem value="in_progress">In Progress</SelectItem>
           <SelectItem value="completed">Completed</SelectItem>
@@ -48,7 +48,7 @@ export function MaintenanceFilters({
           <SelectValue placeholder="Filter by priority" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Priorities</SelectItem>
+          <SelectItem value="all">All Priorities</SelectItem>
           <SelectItem value="Low">Low</SelectItem>
           <SelectItem value="Medium">Medium</SelectItem>
           <SelectItem value="High">High</SelectItem>
@@ -61,7 +61,7 @@ export function MaintenanceFilters({
             <SelectValue placeholder="Filter by property" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Properties</SelectItem>
+            <SelectItem value="all">All Properties</SelectItem>
             {properties.map((property) => (
               <SelectItem key={property.id} value={property.id}>
                 {property.name}

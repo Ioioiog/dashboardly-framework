@@ -17,6 +17,11 @@ interface HistoryEntry {
     first_name: string | null;
     last_name: string | null;
   } | null;
+  images: string[] | null;
+  issue_type: string | null;
+  priority: string | null;
+  maintenance_request_id: string;
+  edited_by: string;
 }
 
 export function MaintenanceHistory({ requestId }: MaintenanceHistoryProps) {
