@@ -1,5 +1,9 @@
 export type MaintenanceRequestStatus = "pending" | "in_progress" | "completed" | "cancelled";
 
+export type MaintenancePriority = "Low" | "Medium" | "High";
+
+export type MaintenanceIssueType = "Plumbing" | "Electrical" | "HVAC" | "Structural" | "Appliance" | "Other";
+
 export interface MaintenanceRequest {
   id: string;
   property_id: string;
