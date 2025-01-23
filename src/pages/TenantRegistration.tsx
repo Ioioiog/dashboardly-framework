@@ -4,7 +4,6 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { tenantAuditService } from "@/services/tenantAuditService";
 
 const TenantRegistration = () => {
   const navigate = useNavigate();
@@ -12,13 +11,11 @@ const TenantRegistration = () => {
   const { toast } = useToast();
   const invitationToken = searchParams.get('invitation');
   const [invitation, setInvitation] = useState<any>(null);
-  const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchInvitation = async () => {
       if (!invitationToken) {
         console.log("No invitation token found");
-        setValidationError("No invitation token provided");
         navigate("/auth");
         return;
       }
@@ -36,38 +33,28 @@ const TenantRegistration = () => {
           .eq('token', invitationToken)
           .single();
 
-        if (error) {
-          console.error("Error fetching invitation:", error);
-          throw new Error("Invalid invitation");
-        }
+        if (error) throw error;
 
         if (!data) {
           console.log("Invalid or expired invitation");
-          setValidationError("This invitation link is invalid or has expired");
+          toast({
+            title: "Invalid Invitation",
+            description: "This invitation link is invalid or has expired.",
+            variant: "destructive",
+          });
           navigate("/auth");
           return;
         }
 
-        // Check if invitation is expired or used
-        if (new Date(data.expiration_date) < new Date()) {
-          console.log("Invitation has expired");
-          setValidationError("This invitation has expired");
-          navigate("/auth");
-          return;
-        }
-
-        if (data.used) {
-          console.log("Invitation has already been used");
-          setValidationError("This invitation has already been used");
-          navigate("/auth");
-          return;
-        }
-
-        console.log("Valid invitation found:", data);
+        console.log("Invitation found:", data);
         setInvitation(data);
       } catch (error) {
-        console.error("Error validating invitation:", error);
-        setValidationError("Failed to verify invitation");
+        console.error("Error fetching invitation:", error);
+        toast({
+          title: "Error",
+          description: "Failed to verify invitation. Please try again.",
+          variant: "destructive",
+        });
         navigate("/auth");
       }
     };
@@ -84,17 +71,6 @@ const TenantRegistration = () => {
           try {
             console.log("Processing new tenant registration");
             
-            // Mark invitation as used
-            const { error: updateError } = await supabase
-              .from('tenant_invitations')
-              .update({ 
-                status: 'accepted',
-                used: true 
-              })
-              .eq('token', invitationToken);
-
-            if (updateError) throw updateError;
-            
             // Update the profile
             const { error: profileError } = await supabase
               .from('profiles')
@@ -108,43 +84,26 @@ const TenantRegistration = () => {
 
             if (profileError) throw profileError;
 
-            // Get property assignments
-            const { data: propertyAssignments, error: assignmentsError } = await supabase
-              .from('tenant_invitation_properties')
-              .select('property_id')
-              .eq('invitation_id', invitation.id);
-
-            if (assignmentsError) throw assignmentsError;
-
-            // Create tenancies for each property
-            const tenancyPromises = propertyAssignments.map(async (assignment) => {
-              const { error: tenancyError } = await supabase
-                .from('tenancies')
-                .insert({
-                  property_id: assignment.property_id,
-                  tenant_id: session.user.id,
-                  start_date: invitation.start_date,
-                  end_date: invitation.end_date,
-                  status: 'active'
-                });
-
-              if (tenancyError) throw tenancyError;
-            });
-
-            await Promise.all(tenancyPromises);
-
-            // Log the invitation acceptance
-            await tenantAuditService.logTenantAction({
-              action_type: 'invitation_accepted',
-              landlord_id: invitation.landlord_id,
-              tenant_id: session.user.id,
-              tenant_email: invitation.email,
-              property_ids: propertyAssignments.map(pa => pa.property_id),
-              metadata: {
+            // Create the tenancy
+            const { error: tenancyError } = await supabase
+              .from('tenancies')
+              .insert({
+                property_id: invitation.property_id,
+                tenant_id: session.user.id,
                 start_date: invitation.start_date,
-                end_date: invitation.end_date
-              }
-            });
+                end_date: invitation.end_date,
+                status: 'active'
+              });
+
+            if (tenancyError) throw tenancyError;
+
+            // Update invitation status
+            const { error: updateError } = await supabase
+              .from('tenant_invitations')
+              .update({ status: 'accepted' })
+              .eq('token', invitationToken);
+
+            if (updateError) throw updateError;
 
             toast({
               title: "Welcome!",
@@ -170,23 +129,6 @@ const TenantRegistration = () => {
 
     return () => subscription.unsubscribe();
   }, [invitation, invitationToken, navigate, toast]);
-
-  if (validationError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold text-red-600 mb-4">Invalid Invitation</h2>
-          <p className="text-gray-600 mb-4">{validationError}</p>
-          <button
-            onClick={() => navigate("/auth")}
-            className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
-          >
-            Return to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   if (!invitation) {
     return (

@@ -1,116 +1,127 @@
-import React from "react";
+"use client";
+
+import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import { Property } from "@/utils/propertyUtils";
 import { TenantInviteForm } from "./TenantInviteForm";
-import { TenantInviteConfirmDialog } from "./TenantInviteConfirmDialog";
-import { useInvitation } from "@/hooks/useInvitation";
-import { tenantAuditService } from "@/services/tenantAuditService";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TenantInviteDialogProps {
   properties: Property[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  existingInvitation?: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    propertyIds: string[];
-    startDate: string;
-    endDate?: string;
-  };
 }
 
-export function TenantInviteDialog({ 
-  properties, 
-  open, 
-  onOpenChange, 
-  existingInvitation 
-}: TenantInviteDialogProps) {
-  const {
-    isSubmitting,
-    showResendConfirm,
-    setShowResendConfirm,
-    handleSubmit: originalHandleSubmit,
-    handleResendConfirm: originalHandleResendConfirm,
-  } = useInvitation();
+export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInviteDialogProps) {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmit = async (data: any) => {
-    console.log("Handling new invitation submission:", data);
-    const success = await originalHandleSubmit(data);
-    
-    if (success) {
-      // Get current user (landlord) ID
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        console.log("Logging tenant invitation action");
-        await tenantAuditService.logTenantAction({
-          action_type: 'invitation_sent',
-          landlord_id: user.id,
-          tenant_email: data.email,
-          property_ids: data.propertyIds,
-          metadata: {
-            first_name: data.firstName,
-            last_name: data.lastName,
-            start_date: data.startDate,
-            end_date: data.endDate
-          }
-        });
-      }
-      onOpenChange(false);
-    }
-  };
+    setIsSubmitting(true);
+    try {
+      console.log("Creating tenant with data:", data);
+      
+      // Generate a unique token
+      const token = crypto.randomUUID();
 
-  const handleResendConfirm = async () => {
-    console.log("Handling invitation resend");
-    const success = await originalHandleResendConfirm();
-    
-    if (success) {
-      // Get current user (landlord) ID
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user && existingInvitation) {
-        console.log("Logging tenant invitation resend action");
-        await tenantAuditService.logTenantAction({
-          action_type: 'invitation_resent',
-          landlord_id: user.id,
-          tenant_email: existingInvitation.email,
-          property_ids: existingInvitation.propertyIds,
-          metadata: {
-            first_name: existingInvitation.firstName,
-            last_name: existingInvitation.lastName,
-            start_date: existingInvitation.startDate,
-            end_date: existingInvitation.endDate
-          }
-        });
+      // Insert the invitation
+      const { data: invitation, error: invitationError } = await supabase
+        .from('tenant_invitations')
+        .insert({
+          email: data.email,
+          first_name: data.firstName,
+          last_name: data.lastName,
+          token: token,
+          start_date: data.startDate,
+          end_date: data.endDate || null,
+        })
+        .select()
+        .single();
+
+      if (invitationError) {
+        console.error("Error creating invitation:", invitationError);
+        throw new Error(invitationError.message);
       }
+
+      // Insert property assignments
+      const propertyAssignments = data.propertyIds.map((propertyId: string) => ({
+        invitation_id: invitation.id,
+        property_id: propertyId,
+      }));
+
+      const { error: propertyAssignmentError } = await supabase
+        .from('tenant_invitation_properties')
+        .insert(propertyAssignments);
+
+      if (propertyAssignmentError) {
+        console.error("Error assigning properties:", propertyAssignmentError);
+        throw new Error(propertyAssignmentError.message);
+      }
+
+      // Get property details for the email
+      const { data: propertyDetails, error: propertyError } = await supabase
+        .from('properties')
+        .select('name, address')
+        .in('id', data.propertyIds);
+
+      if (propertyError) {
+        console.error("Error fetching property details:", propertyError);
+        throw new Error(propertyError.message);
+      }
+
+      // Send invitation email
+      const { error: emailError } = await supabase.functions.invoke(
+        'send-tenant-invitation',
+        {
+          body: {
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            propertyIds: data.propertyIds,
+            properties: propertyDetails,
+            token: token,
+            startDate: data.startDate,
+            endDate: data.endDate
+          }
+        }
+      );
+
+      if (emailError) {
+        console.error("Error sending invitation email:", emailError);
+        throw new Error("Failed to send invitation email");
+      }
+
+      toast({
+        title: "Success",
+        description: "Tenant invitation sent successfully.",
+      });
+
       onOpenChange(false);
+    } catch (error) {
+      console.error("Error creating tenant:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create tenant. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              {existingInvitation ? "Resend Invitation" : "Create Tenant Account"}
-            </DialogTitle>
-          </DialogHeader>
-          <TenantInviteForm 
-            properties={properties}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-            defaultValues={existingInvitation}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <TenantInviteConfirmDialog
-        open={showResendConfirm}
-        onOpenChange={setShowResendConfirm}
-        onConfirm={handleResendConfirm}
-      />
-    </>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create Tenant Account</DialogTitle>
+        </DialogHeader>
+        <TenantInviteForm 
+          properties={properties}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }

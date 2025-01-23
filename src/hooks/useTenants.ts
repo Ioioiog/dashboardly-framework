@@ -38,7 +38,7 @@ export function useTenants() {
 
         console.log("User profile:", profile);
 
-        // First get all active tenancies
+        // Fetch all tenancies (both active and inactive) with related data
         const { data: tenantsData, error: tenantsError } = await supabase
           .from('tenancies')
           .select(`
@@ -69,49 +69,26 @@ export function useTenants() {
           throw new Error("Failed to fetch tenants");
         }
 
-        // Then get all pending invitations
-        const { data: invitationsData, error: invitationsError } = await supabase
-          .from('tenant_invitations')
-          .select(`
-            id,
-            email,
-            first_name,
-            last_name,
-            status,
-            start_date,
-            end_date,
-            expiration_date,
-            tenant_invitation_properties!inner (
-              property:properties (
-                id,
-                name,
-                address
-              )
-            )
-          `)
-          .eq('status', 'pending')
-          .eq('used', false)
-          .gt('expiration_date', new Date().toISOString());
-
-        if (invitationsError) {
-          console.error("Error fetching invitations:", invitationsError);
-          throw new Error("Failed to fetch invitations");
+        if (!tenantsData) {
+          console.log("No tenants data returned");
+          return [];
         }
 
         console.log("Raw tenants data:", tenantsData);
-        console.log("Raw invitations data:", invitationsData);
 
         // Filter out tenancies with missing tenant or property data
-        const validTenancies = tenantsData?.filter(tenancy => {
+        const validTenancies = tenantsData.filter(tenancy => {
           if (!tenancy.tenant || !tenancy.properties) {
             console.log("Found invalid tenancy:", tenancy);
             return false;
           }
           return true;
-        }) || [];
+        });
 
-        // Transform tenancies data
-        const tenancyTenants = validTenancies.map(tenancy => ({
+        console.log("Number of valid tenancies:", validTenancies.length);
+
+        // Transform the data to match our Tenant interface
+        const formattedTenants = validTenancies.map(tenancy => ({
           id: tenancy.tenant.id,
           first_name: tenancy.tenant.first_name,
           last_name: tenancy.tenant.last_name,
@@ -132,37 +109,8 @@ export function useTenants() {
           },
         }));
 
-        // Transform invitations data
-        const invitationTenants = (invitationsData || []).map(invitation => ({
-          id: invitation.id, // Using invitation ID as temporary tenant ID
-          first_name: invitation.first_name,
-          last_name: invitation.last_name,
-          email: invitation.email,
-          phone: null,
-          role: 'tenant',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          property: {
-            id: invitation.tenant_invitation_properties[0].property.id,
-            name: invitation.tenant_invitation_properties[0].property.name,
-            address: invitation.tenant_invitation_properties[0].property.address,
-          },
-          tenancy: {
-            start_date: invitation.start_date,
-            end_date: invitation.end_date,
-            status: 'pending',
-          },
-          invitation: {
-            id: invitation.id,
-            expiration_date: invitation.expiration_date,
-            status: invitation.status,
-          },
-        }));
-
-        // Combine both sets of data
-        const allTenants = [...tenancyTenants, ...invitationTenants];
-        console.log("Final formatted tenants:", allTenants);
-        return allTenants;
+        console.log("Final formatted tenants:", formattedTenants);
+        return formattedTenants;
       } catch (error) {
         console.error("Unexpected error in useTenants:", error);
         throw error;

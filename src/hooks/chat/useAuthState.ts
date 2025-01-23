@@ -5,25 +5,15 @@ import { useToast } from "@/hooks/use-toast";
 
 export function useAuthState() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     let mounted = true;
 
-    const initializeAuth = async () => {
+    const checkAuth = async () => {
       try {
-        console.log("Initializing auth state...");
-        
-        // Clear any potentially invalid session data
-        const currentSession = localStorage.getItem('sb-wecmvyohaxizmnhuvjly-auth-token');
-        if (currentSession && !JSON.parse(currentSession).access_token) {
-          console.log("Clearing invalid session data");
-          localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
-        }
-        
+        console.log("Checking auth state...");
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -34,17 +24,17 @@ export function useAuthState() {
           return;
         }
 
-        if (!session?.access_token) {
-          console.log("No valid session found");
+        if (!session) {
+          console.log("No active session found");
           if (mounted) {
             handleAuthError();
           }
           return;
         }
 
-        // Verify the session is still valid with a fresh API call
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
+        // Verify the session is still valid
+        const { error: userError } = await supabase.auth.getUser();
+        if (userError) {
           console.error("User verification error:", userError);
           if (mounted) {
             handleAuthError();
@@ -52,36 +42,31 @@ export function useAuthState() {
           return;
         }
 
-        if (mounted && user) {
-          console.log("Setting authenticated state for user:", user.id);
-          setIsAuthenticated(true);
-          setCurrentUserId(user.id);
+        if (mounted && session.user) {
+          console.log("Setting current user ID:", session.user.id);
+          setCurrentUserId(session.user.id);
         }
-
       } catch (error) {
-        console.error("Authentication initialization error:", error);
+        console.error("Auth check error:", error);
         if (mounted) {
           handleAuthError();
-        }
-      } finally {
-        if (mounted) {
-          setIsLoading(false);
         }
       }
     };
 
     const handleAuthError = async () => {
-      setIsAuthenticated(false);
       setCurrentUserId(null);
-      setIsLoading(false);
       
       // Clean up the session
-      localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
       try {
         await supabase.auth.signOut();
       } catch (error) {
         console.error("Error during signout:", error);
       }
+
+      // Clear any stored tokens
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
 
       toast({
         title: "Session Expired",
@@ -92,34 +77,21 @@ export function useAuthState() {
       navigate('/auth');
     };
 
-    initializeAuth();
+    checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event);
       
       if (event === 'SIGNED_OUT' || !session) {
         if (mounted) {
-          setIsAuthenticated(false);
-          setCurrentUserId(null);
-          localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
+          handleAuthError();
         }
-        
-        toast({
-          title: "Signed Out",
-          description: "You have been signed out.",
-          variant: "default",
-        });
-        
-        navigate('/auth');
       } else if (event === 'SIGNED_IN' && session?.user) {
         if (mounted) {
-          setIsAuthenticated(true);
           setCurrentUserId(session.user.id);
         }
-      } else if (event === 'TOKEN_REFRESHED' && session) {
-        console.log("Session token refreshed");
+      } else if (event === 'TOKEN_REFRESHED' && session?.user) {
         if (mounted) {
-          setIsAuthenticated(true);
           setCurrentUserId(session.user.id);
         }
       }
@@ -131,5 +103,5 @@ export function useAuthState() {
     };
   }, [navigate, toast]);
 
-  return { currentUserId, isAuthenticated, isLoading };
+  return { currentUserId };
 }

@@ -24,24 +24,17 @@ interface TenantInviteFormProps {
   properties: Property[];
   onSubmit: (data: TenantFormValues) => Promise<void>;
   isSubmitting: boolean;
-  defaultValues?: Partial<TenantFormValues>;
 }
 
-export function TenantInviteForm({ 
-  properties, 
-  onSubmit, 
-  isSubmitting,
-  defaultValues 
-}: TenantInviteFormProps) {
+export function TenantInviteForm({ properties, onSubmit, isSubmitting }: TenantInviteFormProps) {
   const form = useForm<TenantFormValues>({
     resolver: zodResolver(tenantFormSchema),
     defaultValues: {
-      email: defaultValues?.email || "",
-      firstName: defaultValues?.firstName || "",
-      lastName: defaultValues?.lastName || "",
-      propertyIds: defaultValues?.propertyIds || [],
-      startDate: defaultValues?.startDate || format(new Date(), "yyyy-MM-dd"),
-      endDate: defaultValues?.endDate || undefined,
+      email: "",
+      firstName: "",
+      lastName: "",
+      propertyIds: [],
+      startDate: format(new Date(), "yyyy-MM-dd"),
     },
   });
 
@@ -55,11 +48,7 @@ export function TenantInviteForm({
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="tenant@example.com" 
-                  {...field} 
-                  disabled={!!defaultValues}
-                />
+                <Input placeholder="tenant@example.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -72,7 +61,7 @@ export function TenantInviteForm({
             <FormItem>
               <FormLabel>First Name</FormLabel>
               <FormControl>
-                <Input {...field} disabled={!!defaultValues} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -85,7 +74,7 @@ export function TenantInviteForm({
             <FormItem>
               <FormLabel>Last Name</FormLabel>
               <FormControl>
-                <Input {...field} disabled={!!defaultValues} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -167,10 +156,7 @@ export function TenantInviteForm({
           )}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting 
-            ? (defaultValues ? "Resending Invitation..." : "Creating Tenant...") 
-            : (defaultValues ? "Resend Invitation" : "Create Tenant")
-          }
+          {isSubmitting ? "Creating Tenant..." : "Create Tenant"}
         </Button>
       </form>
     </Form>

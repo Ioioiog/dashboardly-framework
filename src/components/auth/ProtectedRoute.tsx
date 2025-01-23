@@ -22,58 +22,51 @@ export function ProtectedRoute({
     const checkSession = async () => {
       try {
         console.log("Verifying session validity...");
-        
-        // First try to get the session from storage
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (!mounted) return;
 
-        if (sessionError) {
-          console.error("Session verification error:", sessionError);
-          handleSessionError();
+        if (error) {
+          console.error("Session verification error:", error);
+          toast({
+            title: "Session Error",
+            description: "There was a problem verifying your session. Please sign in again.",
+            variant: "destructive",
+          });
+          await supabase.auth.signOut();
           return;
         }
 
-        if (!session?.access_token) {
+        if (!session) {
           console.log("No valid session found");
-          handleSessionError();
+          await supabase.auth.signOut();
           return;
         }
 
-        // Refresh the session to ensure it's valid
-        const { error: refreshError } = await supabase.auth.refreshSession();
-        if (refreshError) {
-          console.error("Session refresh error:", refreshError);
-          handleSessionError();
+        // Verify the session is still valid by attempting to get the user
+        const { error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error("User verification error:", userError);
+          toast({
+            title: "Session Expired",
+            description: "Your session has expired. Please sign in again.",
+            variant: "destructive",
+          });
+          await supabase.auth.signOut();
           return;
         }
 
-        console.log("Session verified and refreshed successfully");
+        console.log("Session verified successfully for user:", session.user.id);
       } catch (error) {
         console.error("Session verification error:", error);
         if (mounted) {
-          handleSessionError();
+          toast({
+            title: "Authentication Error",
+            description: "There was a problem verifying your session. Please sign in again.",
+            variant: "destructive",
+          });
+          await supabase.auth.signOut();
         }
-      }
-    };
-
-    const handleSessionError = async () => {
-      // Clear any stored session data
-      localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
-      
-      try {
-        // Sign out the user
-        await supabase.auth.signOut();
-      } catch (error) {
-        console.error("Error during signout:", error);
-      }
-      
-      if (mounted) {
-        toast({
-          title: "Session Expired",
-          description: "Your session has expired. Please sign in again.",
-          variant: "destructive",
-        });
       }
     };
 
@@ -87,7 +80,6 @@ export function ProtectedRoute({
       
       if (event === 'SIGNED_OUT' || !session) {
         console.log("User signed out or session expired");
-        localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
       } else if (event === 'TOKEN_REFRESHED') {
         console.log("Session token refreshed successfully");
       }

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -34,14 +34,11 @@ import {
 export const DashboardSidebar = () => {
   const { userRole } = useUserRole();
   const location = useLocation();
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(true);
-  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
     try {
-      setIsSigningOut(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
@@ -49,12 +46,6 @@ export const DashboardSidebar = () => {
         title: "Signed out successfully",
         description: "You have been signed out of your account.",
       });
-      
-      // Clear any stored auth data
-      localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
-      
-      // Navigate to auth page
-      navigate('/auth');
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
@@ -62,8 +53,6 @@ export const DashboardSidebar = () => {
         description: "There was a problem signing out. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsSigningOut(false);
     }
   };
 
@@ -271,10 +260,9 @@ export const DashboardSidebar = () => {
             variant="ghost"
             className="w-full justify-start text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
             onClick={handleSignOut}
-            disabled={isSigningOut}
           >
             <LogOut className="mr-3 h-5 w-5" />
-            {isSigningOut ? "Signing out..." : "Sign Out"}
+            Sign Out
           </Button>
         ) : (
           <TooltipProvider>
@@ -285,14 +273,11 @@ export const DashboardSidebar = () => {
                   size="icon"
                   className="w-full text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   onClick={handleSignOut}
-                  disabled={isSigningOut}
                 >
                   <LogOut className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="right" className="bg-white dark:bg-gray-900 text-sm">
-                {isSigningOut ? "Signing out..." : "Sign Out"}
-              </TooltipContent>
+              <TooltipContent side="right" className="bg-white dark:bg-gray-900 text-sm">Sign Out</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}
