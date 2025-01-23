@@ -102,7 +102,38 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       return;
     }
 
-    await submitForm(values, uploadedImages, values.property_id);
+    try {
+      if (request) {
+        // Update existing request
+        console.log("Updating maintenance request:", request.id);
+        const { error } = await supabase
+          .from("maintenance_requests")
+          .update({
+            ...values,
+            images: uploadedImages,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", request.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Maintenance request updated successfully",
+        });
+      } else {
+        // Create new request
+        await submitForm(values, uploadedImages, values.property_id);
+      }
+      onSuccess();
+    } catch (error) {
+      console.error("Error submitting maintenance request:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to submit maintenance request",
+      });
+    }
   };
 
   if (isProfileError) {
