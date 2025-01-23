@@ -33,7 +33,7 @@ const formSchema = z.object({
   priority: z.enum(["Low", "Medium", "High"]),
   status: z.enum(["pending", "in_progress", "completed", "cancelled"]),
   notes: z.string().optional(),
-  assigned_to: z.string().uuid().optional().nullable(),
+  assigned_to: z.string().uuid().nullable().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -55,7 +55,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
       title: request?.title || "",
       description: request?.description || "",
       property_id: request?.property_id || "",
-      priority: request?.priority || "Low",
+      priority: request?.priority as "Low" | "Medium" | "High" || "Low",
       status: request?.status || "pending",
       notes: request?.notes || "",
       assigned_to: request?.assigned_to || null,
@@ -71,7 +71,13 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
       if (!user) throw new Error('No authenticated user');
 
       const submitData = {
-        ...data,
+        title: data.title,
+        description: data.description,
+        property_id: data.property_id,
+        priority: data.priority,
+        status: data.status,
+        notes: data.notes || null,
+        assigned_to: data.assigned_to,
         tenant_id: user.id,
       };
 
