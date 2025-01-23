@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PropertySelect } from "./form/PropertySelect";
 import { useMaintenanceFormSubmit } from "@/hooks/useMaintenanceFormSubmit";
 import { MaintenanceRequest } from "@/types/maintenance";
+import { Loader2 } from "lucide-react";
 
 interface MaintenanceFormProps {
   onSuccess: () => void;
@@ -96,7 +97,10 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
           type="submit"
           className="w-full"
           disabled={isSubmitting}
+          variant="default"
+          size="lg"
         >
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isSubmitting
             ? request
               ? "Updating..."
