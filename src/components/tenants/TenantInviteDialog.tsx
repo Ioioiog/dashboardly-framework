@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Property } from "@/utils/propertyUtils";
 import { TenantInviteForm } from "./TenantInviteForm";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TenantInviteDialogProps {
   properties: Property[];
@@ -15,15 +16,17 @@ interface TenantInviteDialogProps {
 
 export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInviteDialogProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmit = async (data: any) => {
+    console.log("Starting tenant invitation process with data:", data);
     setIsSubmitting(true);
+    
     try {
-      console.log("Creating tenant with data:", data);
-      
       // Generate a unique token
       const token = crypto.randomUUID();
+      console.log("Generated invitation token:", token);
 
       // Insert the invitation
       const { data: invitation, error: invitationError } = await supabase
@@ -35,6 +38,8 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
           token: token,
           start_date: data.startDate,
           end_date: data.endDate || null,
+          status: 'pending',
+          expiration_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
         })
         .select()
         .single();
@@ -61,6 +66,8 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
         throw new Error(propertyAssignmentError.message);
       }
 
+      console.log("Created property assignments:", propertyAssignments);
+
       // Get property details for the email
       const { data: propertyDetails, error: propertyError } = await supabase
         .from('properties')
@@ -72,6 +79,8 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
         throw new Error(propertyError.message);
       }
 
+      console.log("Fetched property details for email:", propertyDetails);
+
       // Send invitation email
       const { error: emailError } = await supabase.functions.invoke(
         'send-tenant-invitation',
@@ -80,7 +89,6 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
             email: data.email,
             firstName: data.firstName,
             lastName: data.lastName,
-            propertyIds: data.propertyIds,
             properties: propertyDetails,
             token: token,
             startDate: data.startDate,
@@ -94,17 +102,25 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
         throw new Error("Failed to send invitation email");
       }
 
+      console.log("Successfully sent invitation email");
+
+      // Show success message
       toast({
         title: "Success",
         description: "Tenant invitation sent successfully.",
       });
 
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ["tenants"] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-invitations"] });
+
+      // Close the dialog
       onOpenChange(false);
     } catch (error) {
-      console.error("Error creating tenant:", error);
+      console.error("Error in tenant invitation process:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create tenant. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create tenant invitation. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -116,7 +132,7 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create Tenant Account</DialogTitle>
+          <DialogTitle>Invite New Tenant</DialogTitle>
           <DialogDescription>
             Fill in the details below to invite a new tenant. They will receive an email with instructions to complete their registration.
           </DialogDescription>
