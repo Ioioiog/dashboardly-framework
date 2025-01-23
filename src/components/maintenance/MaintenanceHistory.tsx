@@ -1,7 +1,8 @@
+import React from "react";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface MaintenanceHistoryProps {
   requestId: string;
