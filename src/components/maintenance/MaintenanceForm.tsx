@@ -70,9 +70,11 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       return profile;
     },
     retry: 1,
-    onError: (error) => {
-      console.error("Error in profile query:", error);
-      navigate("/auth");
+    meta: {
+      onError: (error: Error) => {
+        console.error("Error in profile query:", error);
+        navigate("/auth");
+      }
     }
   });
 
