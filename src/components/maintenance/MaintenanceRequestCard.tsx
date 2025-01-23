@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MaintenanceRequest } from "@/types/maintenance";
+import { MaintenanceRequest, MaintenanceRequestStatus } from "@/types/maintenance";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { MaintenanceCardHeader } from "./MaintenanceCardHeader";
 import { MaintenanceCardContent } from "./MaintenanceCardContent";
 import { MaintenanceCardFooter } from "./MaintenanceCardFooter";
@@ -18,7 +19,6 @@ interface MaintenanceRequestCardProps {
 }
 
 export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceRequestCardProps) {
-  const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { toast } = useToast();
@@ -67,13 +67,11 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
   return (
     <>
       <Card className="bg-white border-gray-100 shadow-sm hover:shadow-md transition-all duration-200">
-        <CardHeader className="p-3">
-          <MaintenanceCardHeader 
-            request={request} 
-            isLandlord={isLandlord} 
-            onStatusChange={handleStatusChange} 
-          />
-        </CardHeader>
+        <MaintenanceCardHeader 
+          request={request} 
+          isLandlord={isLandlord} 
+          onStatusChange={handleStatusChange} 
+        />
         <CardContent className="p-3 pt-0">
           <MaintenanceCardContent 
             request={request} 
@@ -84,16 +82,9 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
           <MaintenanceCardFooter 
             request={request}
             onImageClick={() => setIsImageDialogOpen(true)}
-            onHistoryClick={() => setIsHistoryDialogOpen(true)}
           />
         </CardFooter>
       </Card>
-
-      <MaintenanceHistoryDialog
-        open={isHistoryDialogOpen}
-        onOpenChange={setIsHistoryDialogOpen}
-        request={request}
-      />
 
       <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
         <DialogContent className="sm:max-w-3xl">

@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { format } from "date-fns";
-import { History, ImageIcon, Trash2 } from "lucide-react";
+import { ImageIcon, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,10 +11,9 @@ import { useUserRole } from "@/hooks/use-user-role";
 interface MaintenanceCardFooterProps {
   request: MaintenanceRequest;
   onImageClick: () => void;
-  onHistoryClick: () => void;
 }
 
-export function MaintenanceCardFooter({ request, onImageClick, onHistoryClick }: MaintenanceCardFooterProps) {
+export function MaintenanceCardFooter({ request, onImageClick }: MaintenanceCardFooterProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -69,15 +68,6 @@ export function MaintenanceCardFooter({ request, onImageClick, onHistoryClick }:
             {t('maintenance.details.viewImages')}
           </Button>
         )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onHistoryClick}
-          className="h-7 text-xs"
-        >
-          <History className="w-3 h-3 mr-1" />
-          {t('maintenance.details.viewHistory')}
-        </Button>
         {canDelete && (
           <Button
             variant="ghost"
