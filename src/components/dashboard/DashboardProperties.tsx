@@ -45,7 +45,8 @@ export function DashboardProperties({
       }
 
       setIsSubmitting(true);
-      console.log("Editing property:", property.id, data);
+      console.log("Editing property with ID:", property.id);
+      console.log("Update data:", data);
 
       // Ensure data is properly formatted before sending to Supabase
       const updateData = {
@@ -57,12 +58,11 @@ export function DashboardProperties({
         available_from: data.available_from || null
       };
 
-      console.log("Formatted update data:", updateData);
-
       const { error } = await supabase
         .from("properties")
         .update(updateData)
-        .eq("id", property.id);
+        .eq("id", property.id)
+        .select();
 
       if (error) {
         console.error("Supabase update error:", error);
@@ -100,6 +100,7 @@ export function DashboardProperties({
       });
       return;
     }
+    console.log("Setting selected property for edit:", property);
     setSelectedProperty(property);
     setShowEditDialog(true);
   };
@@ -156,7 +157,7 @@ export function DashboardProperties({
         <PropertyDialog
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
-          onSubmit={handleEdit}
+          onSubmit={(data) => handleEdit(selectedProperty, data)}
           property={selectedProperty}
           isSubmitting={isSubmitting}
           mode="edit"
