@@ -64,6 +64,19 @@ export function useMaintenanceRequests() {
           `)
           .order("created_at", { ascending: false });
 
+        // If user is a landlord, fetch all maintenance requests for their properties
+        if (userProfile?.role === "landlord") {
+          query.in("property_id", (
+            supabase
+              .from("properties")
+              .select("id")
+              .eq("landlord_id", session.user.id)
+          ));
+        } else {
+          // If user is a tenant, only fetch their own maintenance requests
+          query.eq("tenant_id", session.user.id);
+        }
+
         console.log("Executing maintenance requests query...");
         const { data, error } = await query;
 

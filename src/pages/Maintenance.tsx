@@ -74,10 +74,12 @@ const Maintenance = () => {
           <h1 className="text-2xl font-semibold text-gray-900">
             {t('maintenance.title')}
           </h1>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            {t('maintenance.newRequest')}
-          </Button>
+          {!isLandlord && (
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              {t('maintenance.newRequest')}
+            </Button>
+          )}
         </div>
 
         <MaintenanceList 
