@@ -51,8 +51,11 @@ serve(async (req: Request): Promise<Response> => {
     // Initialize Resend
     const resend = new Resend(RESEND_API_KEY);
     
-    // Use the correct domain in the invitation URL
-    const inviteUrl = `${req.headers.get('origin')}/tenant-registration?invitation=${token}`;
+    // Get the origin from the request headers or use a default
+    const origin = req.headers.get('origin') || 'https://adminchirii.ro';
+    
+    // Construct the invitation URL - explicitly using /tenant-registration
+    const inviteUrl = `${origin}/tenant-registration?invitation=${token}`;
 
     console.log('Sending invitation email to:', email);
     console.log('Using invite URL:', inviteUrl);
