@@ -125,6 +125,7 @@ const Index = () => {
                 <DashboardMetrics userId={userId} userRole={userRole} />
               </section>
 
+              {/* Only show revenue section for landlords */}
               {userRole === "landlord" && (
                 <RevenueSection userId={userId} />
               )}
