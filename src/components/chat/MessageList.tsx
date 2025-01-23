@@ -12,7 +12,7 @@ interface Message {
   sender_id: string;
   content: string;
   created_at: string;
-  status?: 'sent' | 'delivered' | 'read';
+  status: 'sent' | 'delivered' | 'read';
   sender: {
     first_name: string | null;
     last_name: string | null;
@@ -42,7 +42,7 @@ export function MessageList({ messages, currentUserId, messagesEndRef, typingUse
     const updateMessageStatus = async () => {
       try {
         const unreadMessages = messages.filter(
-          msg => msg.sender_id !== currentUserId && (!msg.status || msg.status === 'sent')
+          msg => msg.sender_id !== currentUserId && msg.status !== 'read'
         );
 
         if (unreadMessages.length > 0) {
@@ -61,7 +61,7 @@ export function MessageList({ messages, currentUserId, messagesEndRef, typingUse
     updateMessageStatus();
   }, [messages, currentUserId]);
 
-  const renderMessageStatus = (status?: string) => {
+  const renderMessageStatus = (status: 'sent' | 'delivered' | 'read') => {
     switch (status) {
       case 'delivered':
         return <Check className="h-4 w-4 text-blue-500" />;
