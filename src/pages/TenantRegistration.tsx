@@ -79,7 +79,7 @@ const TenantRegistration = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth state changed:", event);
+        console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
         
         if (event === 'SIGNED_IN' && session && invitation) {
           try {
