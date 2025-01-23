@@ -19,6 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProfileSchema } from "@/integrations/supabase/database-types/profile";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   propertyId: z.string().min(1, "Property is required"),
@@ -27,19 +30,23 @@ const formSchema = z.object({
   endDate: z.string().optional(),
 });
 
-interface TenantAssignFormProps {
+export interface TenantAssignFormProps {
   properties: Property[];
   availableTenants: ProfileSchema["Tables"]["profiles"]["Row"][];
-  onSubmit: (data: z.infer<typeof formSchema>) => void;
-  isLoading: boolean;
+  onSubmit?: (data: z.infer<typeof formSchema>) => void;
+  isLoading?: boolean;
+  onClose: () => void;
 }
 
 export function TenantAssignForm({
   properties,
   availableTenants,
   onSubmit,
-  isLoading,
+  isLoading = false,
+  onClose,
 }: TenantAssignFormProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,9 +57,38 @@ export function TenantAssignForm({
     },
   });
 
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      const { error } = await supabase.from("tenancies").insert({
+        property_id: data.propertyId,
+        tenant_id: data.tenantId,
+        start_date: data.startDate,
+        end_date: data.endDate || null,
+        status: "active",
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Tenant assigned successfully",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["tenants"] });
+      onClose();
+    } catch (error: any) {
+      console.error("Error assigning tenant:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to assign tenant",
+      });
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="propertyId"
@@ -139,7 +175,7 @@ export function TenantAssignForm({
           )}
         />
 
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading ? "Assigning..." : "Assign Tenant"}
         </Button>
       </form>
