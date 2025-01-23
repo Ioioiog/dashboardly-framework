@@ -83,7 +83,7 @@ const TenantRegistration = () => {
         
         if (event === 'SIGNED_IN' && session && invitation) {
           try {
-            console.log("Processing new tenant registration");
+            console.log("Processing new tenant registration with session:", session.user.id);
             
             // Update the profile
             const { error: profileError } = await supabase
@@ -96,11 +96,18 @@ const TenantRegistration = () => {
               })
               .eq('id', session.user.id);
 
-            if (profileError) throw profileError;
+            if (profileError) {
+              console.error("Profile update error:", profileError);
+              throw profileError;
+            }
+
+            console.log("Profile updated successfully");
 
             // Create tenancies for all assigned properties
-            const tenancyPromises = invitation.tenant_invitation_properties.map(tip => (
-              supabase
+            const tenancyPromises = invitation.tenant_invitation_properties.map(async (tip: any) => {
+              console.log("Creating tenancy for property:", tip.property.id);
+              
+              const { error } = await supabase
                 .from('tenancies')
                 .insert({
                   property_id: tip.property.id,
@@ -108,16 +115,19 @@ const TenantRegistration = () => {
                   start_date: invitation.start_date,
                   end_date: invitation.end_date,
                   status: 'active'
-                })
-            ));
+                });
 
+              if (error) {
+                console.error("Error creating tenancy:", error);
+                throw error;
+              }
+              
+              return { success: true };
+            });
+
+            console.log("Waiting for all tenancies to be created...");
             const results = await Promise.all(tenancyPromises);
-            const errors = results.filter(r => r.error);
-            
-            if (errors.length > 0) {
-              console.error("Errors creating tenancies:", errors);
-              throw new Error("Failed to create some tenancies");
-            }
+            console.log("Tenancy creation results:", results);
 
             // Update invitation status
             const { error: updateError } = await supabase
@@ -128,7 +138,12 @@ const TenantRegistration = () => {
               })
               .eq('token', invitationToken);
 
-            if (updateError) throw updateError;
+            if (updateError) {
+              console.error("Error updating invitation status:", updateError);
+              throw updateError;
+            }
+
+            console.log("Invitation status updated successfully");
 
             toast({
               title: "Welcome!",
@@ -140,7 +155,7 @@ const TenantRegistration = () => {
               navigate("/dashboard");
             }, 1500);
             
-          } catch (error) {
+          } catch (error: any) {
             console.error("Error setting up tenant account:", error);
             toast({
               title: "Error",
@@ -180,7 +195,7 @@ const TenantRegistration = () => {
   }
 
   const propertyNames = invitation.tenant_invitation_properties
-    .map(tip => tip.property.name)
+    .map((tip: any) => tip.property.name)
     .join(', ');
 
   return (
