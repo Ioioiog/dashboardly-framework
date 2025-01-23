@@ -70,12 +70,13 @@ export function TenantAssignForm({
         .eq('property_id', propertyId)
         .eq('status', 'active');
 
+      // Add date range conditions
       if (endDate) {
-        // For fixed-term tenancies
-        query = query.or(`start_date.lte.${endDate},end_date.gte.${startDate},end_date.is.null`);
+        // For fixed-term tenancies, check if there's any overlap
+        query = query.or(`start_date.lte.${endDate},end_date.gte.${startDate},and(start_date.lte.${endDate},end_date.is.null)`);
       } else {
         // For indefinite tenancies
-        query = query.or(`start_date.lte.${startDate},end_date.is.null,end_date.gte.${startDate}`);
+        query = query.or(`start_date.lte.${startDate},and(end_date.gte.${startDate},or(end_date.is.null))`);
       }
 
       const { data: overlappingTenancies, error } = await query;
