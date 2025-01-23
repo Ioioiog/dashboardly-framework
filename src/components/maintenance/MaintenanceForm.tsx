@@ -59,7 +59,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
         
       if (profileError) {
         console.error("Error fetching profile:", profileError);
@@ -76,6 +76,37 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
         navigate("/auth");
       }
     }
+  });
+
+  // Fetch tenant's active property if they're a tenant
+  const { data: tenantProperty } = useQuery({
+    queryKey: ["tenant-property", userProfile?.id],
+    queryFn: async () => {
+      if (userProfile?.role !== "tenant") return null;
+      
+      console.log("Fetching tenant's active property...");
+      const { data, error } = await supabase
+        .from("tenancies")
+        .select(`
+          property_id,
+          properties (
+            id,
+            name
+          )
+        `)
+        .eq("tenant_id", userProfile.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching tenant property:", error);
+        throw error;
+      }
+
+      console.log("Tenant property fetched:", data);
+      return data?.properties;
+    },
+    enabled: !!userProfile && userProfile.role === "tenant"
   });
 
   const { data: properties } = useQuery({
@@ -105,12 +136,18 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       issue_type: request?.issue_type ?? "",
       priority: request?.priority ?? "",
       notes: request?.notes ?? "",
-      property_id: request?.property_id ?? "",
+      property_id: request?.property_id ?? tenantProperty?.id ?? "",
     },
   });
 
   const onSubmit = async (values: MaintenanceFormValues) => {
-    await submitForm(values, uploadedImages);
+    // If user is a tenant, use their active property
+    const propertyId = userProfile?.role === "tenant" ? tenantProperty?.id : values.property_id;
+    if (!propertyId) {
+      console.error("No property ID available");
+      return;
+    }
+    await submitForm(values, uploadedImages, propertyId);
   };
 
   if (isProfileError) {
