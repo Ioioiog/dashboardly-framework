@@ -7,7 +7,14 @@ export function useMaintenanceRequests() {
     queryKey: ["maintenance-requests"],
     queryFn: async () => {
       console.log("Fetching maintenance requests");
-      const { data, error } = await supabase
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("role")
+        .single();
+
+      console.log("User role:", userProfile?.role);
+
+      const query = supabase
         .from("maintenance_requests")
         .select(`
           *,
@@ -23,6 +30,8 @@ export function useMaintenanceRequests() {
           )
         `)
         .order("created_at", { ascending: false });
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching maintenance requests:", error);
