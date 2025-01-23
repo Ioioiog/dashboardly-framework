@@ -58,43 +58,10 @@ export function useAuthState() {
 
     initializeAuth();
 
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
-      
-      if (event === 'SIGNED_OUT' || !session) {
-        console.log("User signed out or session expired");
-        if (mounted) {
-          setIsAuthenticated(false);
-          setCurrentUserId(null);
-        }
-        
-        toast({
-          title: "Session Ended",
-          description: "Your session has ended. Please sign in again.",
-          variant: "destructive",
-        });
-
-      } else if (event === 'SIGNED_IN' && session) {
-        console.log("User signed in successfully");
-        if (mounted) {
-          setIsAuthenticated(true);
-          setCurrentUserId(session.user.id);
-        }
-      } else if (event === 'TOKEN_REFRESHED') {
-        console.log("Session token refreshed");
-        if (mounted && session) {
-          setIsAuthenticated(true);
-          setCurrentUserId(session.user.id);
-        }
-      }
-    });
-
     return () => {
       mounted = false;
-      subscription.unsubscribe();
     };
   }, [toast]);
 
-  return { isLoading, isAuthenticated, currentUserId };
+  return { isLoading, isAuthenticated, setIsAuthenticated, currentUserId };
 }
