@@ -28,16 +28,22 @@ export function useMaintenanceRequests() {
         .from("maintenance_requests")
         .select(`
           *,
-          property:properties (
+          property:properties!maintenance_requests_property_id_fkey (
             id,
             name,
-            address
+            address,
+            landlord_id
           ),
-          tenant:profiles (
+          tenant:profiles!maintenance_requests_tenant_id_fkey (
             id,
             first_name,
             last_name,
             email
+          ),
+          assignee:profiles!maintenance_requests_assigned_to_fkey (
+            id,
+            first_name,
+            last_name
           )
         `)
         .order('created_at', { ascending: false });
