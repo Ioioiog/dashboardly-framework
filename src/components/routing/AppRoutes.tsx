@@ -10,10 +10,10 @@ import Utilities from "@/pages/Utilities";
 import Chat from "@/pages/Chat";
 import Invoices from "@/pages/Invoices";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { TenantRegistration } from "@/pages/TenantRegistration";
+import TenantRegistration from "@/pages/TenantRegistration";
 import { ResetPassword } from "@/components/auth/ResetPassword";
 import { UpdatePassword } from "@/components/auth/UpdatePassword";
-import { Index } from "@/pages/Index";
+import Index from "@/pages/Index";
 
 interface AppRoutesProps {
   isAuthenticated: boolean;

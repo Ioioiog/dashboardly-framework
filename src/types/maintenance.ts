@@ -1,39 +1,42 @@
-export type MaintenanceRequestStatus = "pending" | "in_progress" | "completed" | "cancelled";
-
-export type MaintenancePriority = "Low" | "Medium" | "High";
-
-export type MaintenanceIssueType = "Plumbing" | "Electrical" | "HVAC" | "Structural" | "Appliance" | "Other";
-
 export interface MaintenanceRequest {
   id: string;
   property_id: string;
   tenant_id: string;
   title: string;
   description: string;
-  status: MaintenanceRequestStatus;
+  status: 'pending' | 'in_progress' | 'completed';
   created_at: string;
   updated_at: string;
   issue_type?: string;
-  priority?: string;
+  priority?: 'low' | 'medium' | 'high';
   images?: string[];
   notes?: string;
-  assigned_to?: string | null;
-  service_provider_notes?: string | null;
+  assigned_to?: string;
+  service_provider_notes?: string;
   property?: {
     id: string;
     name: string;
     address: string;
-    landlord_id: string;
-  } | null;
+  };
   tenant?: {
     id: string;
     first_name: string | null;
     last_name: string | null;
     email: string | null;
-  } | null;
+  };
   assignee?: {
     id: string;
     first_name: string | null;
     last_name: string | null;
-  } | null;
+  };
+}
+
+export interface MaintenanceFormData {
+  title: string;
+  description: string;
+  property_id: string;
+  tenant_id: string;
+  priority: 'low' | 'medium' | 'high';
+  issue_type?: string;
+  images?: File[];
 }
