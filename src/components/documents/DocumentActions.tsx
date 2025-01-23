@@ -52,12 +52,11 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
         console.error("Storage download error:", error);
         console.error("Full error details:", {
           message: error.message,
-          details: error.details,
-          statusCode: error.statusCode,
-          name: error.name
+          name: error.name,
+          status: error.status
         });
         
-        if (error.message?.includes("Object not found") || error.statusCode === 404) {
+        if (error.message?.includes("Object not found") || error.status === 404) {
           throw new Error("The document file could not be found. Please contact support.");
         }
         throw new Error("Could not download the document. Please try again later.");
