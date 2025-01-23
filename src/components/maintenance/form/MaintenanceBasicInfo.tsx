@@ -11,37 +11,58 @@ interface MaintenanceBasicInfoProps {
 }
 
 export function MaintenanceBasicInfo({ form }: MaintenanceBasicInfoProps) {
-  // Fetch user role
+  // Fetch user profile
   const { data: userProfile } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
+      console.log("Fetching user profile...");
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No authenticated user");
+      if (!user) {
+        console.log("No authenticated user");
+        throw new Error("No authenticated user");
+      }
 
       const { data: profile, error } = await supabase
         .from("profiles")
-        .select("role")
+        .select("*")
         .eq("id", user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
+      }
+
+      console.log("User profile fetched:", profile);
       return profile;
     },
+    retry: 1
   });
 
   // Fetch properties based on user role
   const { data: properties } = useQuery({
-    queryKey: ["properties", userProfile?.role],
+    queryKey: ["properties", userProfile?.id, userProfile?.role],
     queryFn: async () => {
-      if (!userProfile) return [];
+      if (!userProfile?.id) {
+        console.log("No user profile available");
+        return [];
+      }
+
+      console.log("Fetching properties for user role:", userProfile.role);
 
       if (userProfile.role === "landlord") {
         const { data, error } = await supabase
           .from("properties")
           .select("*")
+          .eq("landlord_id", userProfile.id)
           .order("name");
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching landlord properties:", error);
+          throw error;
+        }
+
+        console.log("Landlord properties fetched:", data);
         return data;
       } else {
         // For tenants, fetch only properties they're assigned to
@@ -54,14 +75,20 @@ export function MaintenanceBasicInfo({ form }: MaintenanceBasicInfoProps) {
               address
             )
           `)
-          .eq("tenant_id", (await supabase.auth.getUser()).data.user?.id)
+          .eq("tenant_id", userProfile.id)
           .eq("status", "active");
 
-        if (error) throw error;
-        return data.map(t => t.property);
+        if (error) {
+          console.error("Error fetching tenant properties:", error);
+          throw error;
+        }
+
+        const tenantProperties = data.map(t => t.property).filter(Boolean);
+        console.log("Tenant properties fetched:", tenantProperties);
+        return tenantProperties;
       }
     },
-    enabled: !!userProfile,
+    enabled: !!userProfile?.id
   });
 
   return (
@@ -72,7 +99,7 @@ export function MaintenanceBasicInfo({ form }: MaintenanceBasicInfoProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Property</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value || ""}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a property" />
@@ -111,7 +138,7 @@ export function MaintenanceBasicInfo({ form }: MaintenanceBasicInfoProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Issue Type</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value || ""}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select issue type" />
@@ -137,7 +164,7 @@ export function MaintenanceBasicInfo({ form }: MaintenanceBasicInfoProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Priority</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value || ""}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select priority level" />
