@@ -71,13 +71,16 @@ export function TenantAssignForm({
         .eq('status', 'active');
 
       if (endDate) {
-        // For fixed-term tenancies, check:
-        // 1. Any existing tenancy that overlaps with the new period
+        // For fixed-term tenancies:
+        // Check if there's any overlap between the new tenancy period and existing tenancies
         query = query.or(`start_date.lte.${endDate},end_date.gte.${startDate}`);
       } else {
-        // For indefinite tenancies, check:
-        // 1. Any active tenancy that starts before or on the new start date
-        query = query.lte('start_date', startDate);
+        // For indefinite tenancies:
+        // Check if there are any active tenancies that would conflict
+        query = query.or(
+          `start_date.lte.${startDate},end_date.is.null`,
+          `start_date.lte.${startDate},end_date.gte.${startDate}`
+        );
       }
 
       const { data: overlappingTenancies, error } = await query;
