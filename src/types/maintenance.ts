@@ -23,15 +23,16 @@ export interface MaintenanceRequest {
     id: string;
     name: string;
     address: string;
-  };
+    landlord_id: string;
+  } | null;
   tenant?: {
     id: string;
     first_name: string | null;
     last_name: string | null;
-  };
+  } | null;
   assignee?: {
     id: string;
     first_name: string | null;
     last_name: string | null;
-  };
+  } | null;
 }

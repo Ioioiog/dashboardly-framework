@@ -40,7 +40,7 @@ export function useMaintenanceRequests() {
 
         console.log("User role:", userProfile?.role);
 
-        // Build the query to include all necessary relations
+        // Build the query to include all necessary relations with explicit foreign key references
         const query = supabase
           .from("maintenance_requests")
           .select(`
@@ -56,7 +56,7 @@ export function useMaintenanceRequests() {
               first_name,
               last_name
             ),
-            assignee:profiles(
+            assignee:profiles!maintenance_requests_assigned_to_fkey(
               id,
               first_name,
               last_name
@@ -78,6 +78,7 @@ export function useMaintenanceRequests() {
         if (data && data.length > 0) {
           console.log("Sample request property:", data[0].property);
           console.log("Sample request tenant:", data[0].tenant);
+          console.log("Sample request assignee:", data[0].assignee);
         }
 
         return data as MaintenanceRequest[];
