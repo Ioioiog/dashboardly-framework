@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { format } from "date-fns";
-import { History, ImageIcon, Pencil, Trash2 } from "lucide-react";
+import { History, ImageIcon, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -12,17 +12,16 @@ interface MaintenanceCardFooterProps {
   request: MaintenanceRequest;
   onImageClick: () => void;
   onHistoryClick: () => void;
-  onEditClick: () => void;
 }
 
-export function MaintenanceCardFooter({ request, onImageClick, onHistoryClick, onEditClick }: MaintenanceCardFooterProps) {
+export function MaintenanceCardFooter({ request, onImageClick, onHistoryClick }: MaintenanceCardFooterProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { userRole } = useUserRole();
 
-  // Only tenants can edit and delete their own requests
-  const canEditDelete = userRole === "tenant" && request.tenant_id === request.tenant?.id;
+  // Only tenants can delete their own requests
+  const canDelete = userRole === "tenant" && request.tenant_id === request.tenant?.id;
 
   const handleDelete = async () => {
     try {
@@ -46,11 +45,6 @@ export function MaintenanceCardFooter({ request, onImageClick, onHistoryClick, o
         variant: "destructive",
       });
     }
-  };
-
-  const handleEdit = async () => {
-    console.log("Editing maintenance request:", request.id);
-    onEditClick();
   };
 
   return (
@@ -84,27 +78,16 @@ export function MaintenanceCardFooter({ request, onImageClick, onHistoryClick, o
           <History className="w-3 h-3 mr-1" />
           {t('maintenance.details.viewHistory')}
         </Button>
-        {canEditDelete && (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleEdit}
-              className="h-7 text-xs"
-            >
-              <Pencil className="w-3 h-3 mr-1" />
-              {t('maintenance.details.edit')}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDelete}
-              className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <Trash2 className="w-3 h-3 mr-1" />
-              Delete
-            </Button>
-          </>
+        {canDelete && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDelete}
+            className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="w-3 h-3 mr-1" />
+            Delete
+          </Button>
         )}
       </div>
     </div>
