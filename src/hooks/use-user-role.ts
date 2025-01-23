@@ -7,6 +7,8 @@ export function useUserRole() {
   const [userRole, setUserRole] = useState<UserRole>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     async function getUserRole() {
       try {
         const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -29,30 +31,34 @@ export function useUserRole() {
           .from("profiles")
           .select("role")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
         if (profileError) {
           console.error("Error fetching user profile:", profileError);
-          setUserRole(null);
+          if (mounted) setUserRole(null);
           return;
         }
 
         console.log("User profile data:", profile);
         
-        if (profile?.role) {
+        if (profile?.role && mounted) {
           console.log("Setting user role to:", profile.role);
           setUserRole(profile.role as UserRole);
         } else {
           console.log("No role found in profile");
-          setUserRole(null);
+          if (mounted) setUserRole(null);
         }
       } catch (error) {
         console.error("Unexpected error in getUserRole:", error);
-        setUserRole(null);
+        if (mounted) setUserRole(null);
       }
     }
 
     getUserRole();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return { userRole };

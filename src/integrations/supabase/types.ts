@@ -565,6 +565,61 @@ export type Database = {
           },
         ]
       }
+      tenant_audit_logs: {
+        Row: {
+          action_type: Database["public"]["Enums"]["tenant_action_type"]
+          created_at: string
+          id: string
+          landlord_id: string
+          metadata: Json | null
+          property_ids: string[]
+          tenant_email: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          action_type: Database["public"]["Enums"]["tenant_action_type"]
+          created_at?: string
+          id?: string
+          landlord_id: string
+          metadata?: Json | null
+          property_ids: string[]
+          tenant_email?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          action_type?: Database["public"]["Enums"]["tenant_action_type"]
+          created_at?: string
+          id?: string
+          landlord_id?: string
+          metadata?: Json | null
+          property_ids?: string[]
+          tenant_email?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_audit_logs_landlord_fk"
+            columns: ["landlord_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_audit_logs_landlord_id_fkey"
+            columns: ["landlord_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_audit_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_interactions: {
         Row: {
           created_at: string
@@ -642,6 +697,7 @@ export type Database = {
           created_at: string
           email: string
           end_date: string | null
+          expiration_date: string
           first_name: string | null
           id: string
           last_name: string | null
@@ -649,11 +705,13 @@ export type Database = {
           status: string
           token: string
           updated_at: string
+          used: boolean
         }
         Insert: {
           created_at?: string
           email: string
           end_date?: string | null
+          expiration_date?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -661,11 +719,13 @@ export type Database = {
           status?: string
           token: string
           updated_at?: string
+          used?: boolean
         }
         Update: {
           created_at?: string
           email?: string
           end_date?: string | null
+          expiration_date?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -673,6 +733,7 @@ export type Database = {
           status?: string
           token?: string
           updated_at?: string
+          used?: boolean
         }
         Relationships: []
       }
@@ -870,6 +931,12 @@ export type Database = {
         | "cancelled"
       property_type: "Apartment" | "House" | "Condo" | "Commercial"
       scraping_status: "pending" | "in_progress" | "completed" | "failed"
+      tenant_action_type:
+        | "invitation_sent"
+        | "invitation_resent"
+        | "invitation_accepted"
+        | "tenant_assigned"
+        | "tenancy_ended"
     }
     CompositeTypes: {
       [_ in never]: never

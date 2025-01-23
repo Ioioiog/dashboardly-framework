@@ -22,12 +22,11 @@ export function useAuthState() {
             setIsAuthenticated(false);
             setIsLoading(false);
           }
-          await supabase.auth.signOut();
           return;
         }
 
         if (session?.user) {
-          console.log("Valid session found for user:", session.user.id);
+          console.log("Valid session found:", session.user.id);
           if (mounted) {
             setIsAuthenticated(true);
           }
@@ -36,7 +35,6 @@ export function useAuthState() {
           if (mounted) {
             setIsAuthenticated(false);
           }
-          await supabase.auth.signOut();
         }
 
         if (mounted) {
@@ -49,7 +47,6 @@ export function useAuthState() {
           setIsLoading(false);
           setIsAuthenticated(false);
         }
-        await supabase.auth.signOut();
       }
     };
 
