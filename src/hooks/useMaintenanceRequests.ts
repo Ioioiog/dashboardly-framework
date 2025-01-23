@@ -66,12 +66,19 @@ export function useMaintenanceRequests() {
 
         // If user is a landlord, fetch all maintenance requests for their properties
         if (userProfile?.role === "landlord") {
-          query.in("property_id", (
-            supabase
-              .from("properties")
-              .select("id")
-              .eq("landlord_id", session.user.id)
-          ));
+          // First get the property IDs
+          const { data: propertyIds, error: propertyError } = await supabase
+            .from("properties")
+            .select("id")
+            .eq("landlord_id", session.user.id);
+
+          if (propertyError) {
+            console.error("Error fetching property IDs:", propertyError);
+            throw propertyError;
+          }
+
+          // Then use those IDs in the maintenance requests query
+          query.in("property_id", propertyIds.map(p => p.id));
         } else {
           // If user is a tenant, only fetch their own maintenance requests
           query.eq("tenant_id", session.user.id);
