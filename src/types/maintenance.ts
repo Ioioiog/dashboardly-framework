@@ -1,3 +1,5 @@
+export type MaintenanceRequestStatus = "pending" | "in_progress" | "completed" | "cancelled";
+
 export interface MaintenanceRequest {
   id: string;
   property_id: string;
@@ -11,8 +13,8 @@ export interface MaintenanceRequest {
   priority?: string;
   images?: string[];
   notes?: string;
-  assigned_to?: string;
-  service_provider_notes?: string;
+  assigned_to?: string | null;
+  service_provider_notes?: string | null;
   property?: {
     id: string;
     name: string;
@@ -23,8 +25,9 @@ export interface MaintenanceRequest {
     first_name: string | null;
     last_name: string | null;
   };
+  assignee?: {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+  };
 }
-
-export type MaintenanceRequestStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
-export type MaintenancePriority = 'Low' | 'Medium' | 'High';
-export type MaintenanceIssueType = 'Plumbing' | 'Electrical' | 'HVAC' | 'Structural' | 'Appliance' | 'Other';
