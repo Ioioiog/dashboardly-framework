@@ -4,6 +4,8 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const TenantRegistration = () => {
   const navigate = useNavigate();
@@ -11,11 +13,17 @@ const TenantRegistration = () => {
   const { toast } = useToast();
   const invitationToken = searchParams.get('invitation');
   const [invitation, setInvitation] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchInvitation = async () => {
       if (!invitationToken) {
         console.log("No invitation token found");
+        toast({
+          title: "Invalid Invitation",
+          description: "No invitation token provided.",
+          variant: "destructive",
+        });
         navigate("/auth");
         return;
       }
@@ -29,11 +37,15 @@ const TenantRegistration = () => {
         console.log("Fetching invitation details");
         const { data, error } = await supabase
           .from('tenant_invitations')
-          .select('*, property:properties(name)')
+          .select('*, tenant_invitation_properties!inner(property:properties(*))')
           .eq('token', invitationToken)
+          .eq('status', 'pending')
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching invitation:", error);
+          throw error;
+        }
 
         if (!data) {
           console.log("Invalid or expired invitation");
@@ -49,13 +61,15 @@ const TenantRegistration = () => {
         console.log("Invitation found:", data);
         setInvitation(data);
       } catch (error) {
-        console.error("Error fetching invitation:", error);
+        console.error("Error in invitation process:", error);
         toast({
           title: "Error",
           description: "Failed to verify invitation. Please try again.",
           variant: "destructive",
         });
         navigate("/auth");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -84,23 +98,34 @@ const TenantRegistration = () => {
 
             if (profileError) throw profileError;
 
-            // Create the tenancy
-            const { error: tenancyError } = await supabase
-              .from('tenancies')
-              .insert({
-                property_id: invitation.property_id,
-                tenant_id: session.user.id,
-                start_date: invitation.start_date,
-                end_date: invitation.end_date,
-                status: 'active'
-              });
+            // Create tenancies for all assigned properties
+            const tenancyPromises = invitation.tenant_invitation_properties.map(tip => (
+              supabase
+                .from('tenancies')
+                .insert({
+                  property_id: tip.property.id,
+                  tenant_id: session.user.id,
+                  start_date: invitation.start_date,
+                  end_date: invitation.end_date,
+                  status: 'active'
+                })
+            ));
 
-            if (tenancyError) throw tenancyError;
+            const results = await Promise.all(tenancyPromises);
+            const errors = results.filter(r => r.error);
+            
+            if (errors.length > 0) {
+              console.error("Errors creating tenancies:", errors);
+              throw new Error("Failed to create some tenancies");
+            }
 
             // Update invitation status
             const { error: updateError } = await supabase
               .from('tenant_invitations')
-              .update({ status: 'accepted' })
+              .update({ 
+                status: 'accepted',
+                used: true 
+              })
               .eq('token', invitationToken);
 
             if (updateError) throw updateError;
@@ -130,57 +155,77 @@ const TenantRegistration = () => {
     return () => subscription.unsubscribe();
   }, [invitation, invitationToken, navigate, toast]);
 
-  if (!invitation) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-full max-w-md p-8">
-          <p className="text-center text-gray-600">Verifying invitation...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-center">
+              <Skeleton className="h-8 w-3/4 mx-auto" />
+            </CardTitle>
+            <CardDescription className="text-center">
+              <Skeleton className="h-4 w-1/2 mx-auto mt-2" />
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[400px] w-full" />
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
+  if (!invitation) {
+    return null;
+  }
+
+  const propertyNames = invitation.tenant_invitation_properties
+    .map(tip => tip.property.name)
+    .join(', ');
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-2xl font-semibold text-center mb-2 text-gray-900">
-          Complete Your Registration
-        </h1>
-        <p className="text-center text-gray-600 mb-6">
-          You've been invited to join {invitation.property.name} as a tenant
-        </p>
-        <Auth
-          supabaseClient={supabase}
-          view="sign_up"
-          appearance={{
-            theme: ThemeSupa,
-            variables: {
-              default: {
-                colors: {
-                  brand: '#0F172A',
-                  brandAccent: '#1E293B',
-                  brandButtonText: 'white',
-                },
-                borderWidths: {
-                  buttonBorderWidth: '1px',
-                },
-                radii: {
-                  borderRadiusButton: '0.5rem',
-                  inputBorderRadius: '0.5rem',
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center">Complete Your Registration</CardTitle>
+          <CardDescription className="text-center">
+            You've been invited to join {propertyNames} as a tenant
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Auth
+            supabaseClient={supabase}
+            view="sign_up"
+            appearance={{
+              theme: ThemeSupa,
+              variables: {
+                default: {
+                  colors: {
+                    brand: '#0F172A',
+                    brandAccent: '#1E293B',
+                    brandButtonText: 'white',
+                  },
+                  borderWidths: {
+                    buttonBorderWidth: '1px',
+                  },
+                  radii: {
+                    borderRadiusButton: '0.5rem',
+                    inputBorderRadius: '0.5rem',
+                  },
                 },
               },
-            },
-            className: {
-              container: 'w-full',
-              button: 'w-full px-4 py-2 rounded-lg',
-              input: 'rounded-lg border-gray-300',
-              label: 'text-sm font-medium text-gray-700',
-            },
-          }}
-          providers={[]}
-          redirectTo={window.location.origin}
-        />
-      </div>
+              className: {
+                container: 'w-full',
+                button: 'w-full px-4 py-2 rounded-lg',
+                input: 'rounded-lg border-gray-300',
+                label: 'text-sm font-medium text-gray-700',
+              },
+            }}
+            providers={[]}
+            redirectTo={window.location.origin}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };
