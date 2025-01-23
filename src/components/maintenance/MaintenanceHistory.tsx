@@ -7,10 +7,24 @@ interface MaintenanceHistoryProps {
   requestId: string;
 }
 
+interface HistoryEntry {
+  id: string;
+  title: string;
+  description: string;
+  notes: string | null;
+  edited_at: string;
+  editor: {
+    first_name: string | null;
+    last_name: string | null;
+  } | null;
+}
+
 export function MaintenanceHistory({ requestId }: MaintenanceHistoryProps) {
   const { data: history, isLoading } = useQuery({
     queryKey: ['maintenance-history', requestId],
     queryFn: async () => {
+      console.log('Fetching maintenance history for request:', requestId);
+      
       const { data, error } = await supabase
         .from('maintenance_request_history')
         .select(`
@@ -23,8 +37,13 @@ export function MaintenanceHistory({ requestId }: MaintenanceHistoryProps) {
         .eq('maintenance_request_id', requestId)
         .order('edited_at', { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error('Error fetching maintenance history:', error);
+        throw error;
+      }
+      
+      console.log('Fetched maintenance history:', data);
+      return data as HistoryEntry[];
     },
   });
 
