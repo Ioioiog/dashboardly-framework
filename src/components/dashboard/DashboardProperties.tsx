@@ -34,6 +34,16 @@ export function DashboardProperties({
 
   const handleEdit = async (property: Property, data: any) => {
     try {
+      if (!property?.id) {
+        console.error("No property ID provided for update");
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Invalid property data",
+        });
+        return false;
+      }
+
       setIsSubmitting(true);
       console.log("Editing property:", property.id, data);
 
@@ -81,6 +91,15 @@ export function DashboardProperties({
   };
 
   const handleEditClick = (property: Property) => {
+    if (!property?.id) {
+      console.error("Invalid property data");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Cannot edit this property",
+      });
+      return;
+    }
     setSelectedProperty(property);
     setShowEditDialog(true);
   };
