@@ -42,7 +42,7 @@ export function MaintenanceCardHeader({ request, isLandlord, onStatusChange }: M
       const { error } = await supabase
         .from("maintenance_requests")
         .update({ 
-          assigned_to: assigneeId || null, // Handle unassignment case
+          assigned_to: assigneeId,
           updated_at: new Date().toISOString()
         })
         .eq("id", request.id);
@@ -107,14 +107,13 @@ export function MaintenanceCardHeader({ request, isLandlord, onStatusChange }: M
           </Select>
 
           <Select
-            value={request.assigned_to || "unassigned"}
+            value={request.assigned_to || undefined}
             onValueChange={handleAssigneeChange}
           >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Assign to..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="unassigned">Unassigned</SelectItem>
               {serviceProviders?.map((provider) => (
                 <SelectItem key={provider.id} value={provider.id}>
                   <div className="flex items-center gap-2">
