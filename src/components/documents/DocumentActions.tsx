@@ -32,7 +32,8 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
     try {
       console.log("Starting download process for document:", {
         id: doc.id,
-        file_path: doc.file_path
+        file_path: doc.file_path,
+        bucket: 'documents'
       });
 
       // Verify session before download
@@ -40,6 +41,22 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
       if (sessionError || !session) {
         console.error("Session error before download:", sessionError);
         throw new Error("Please sign in again to download documents");
+      }
+
+      // First check if the file exists
+      const { data: fileExists, error: existsError } = await supabase.storage
+        .from('documents')
+        .list(doc.file_path.split('/')[0]);
+
+      if (existsError) {
+        console.error("Error checking file existence:", existsError);
+        throw new Error("Could not verify file existence");
+      }
+
+      const fileName = doc.file_path.split('/').pop();
+      if (!fileExists?.some(f => f.name === fileName)) {
+        console.error("File not found in storage:", fileName);
+        throw new Error("The requested file could not be found");
       }
 
       // Get the file data from Supabase Storage
@@ -62,7 +79,7 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = doc.file_path.split('/').pop() || 'document';
+      a.download = fileName || 'document';
       document.body.appendChild(a);
       a.click();
       
