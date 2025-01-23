@@ -24,7 +24,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [uploadedImages, setUploadedImages] = useState<string[]>(request?.images || []);
-  const { mutate: createRequest, isPending: isCreating } = useCreateMaintenanceRequest();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: userProfile } = useQuery({
     queryKey: ["user-profile"],
@@ -67,22 +67,23 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
     enabled: userProfile?.role === "landlord",
   });
 
-  const { mutate: updateRequest, isPending: isUpdating } = useMutation({
+  const { mutate: updateRequest } = useMutation({
     mutationFn: async (values: MaintenanceFormValues) => {
-      console.log("Updating maintenance request:", values);
+      if (!request) return null;
+      
       const { data: currentUser } = await supabase.auth.getUser();
       if (!currentUser.user) throw new Error("Not authenticated");
 
       const { error: historyError } = await supabase
         .from("maintenance_request_history")
         .insert({
-          maintenance_request_id: request!.id,
-          title: request!.title,
-          description: request!.description,
-          issue_type: request!.issue_type,
-          priority: request!.priority,
-          notes: request!.notes,
-          images: request!.images,
+          maintenance_request_id: request.id,
+          title: request.title,
+          description: request.description,
+          issue_type: request.issue_type,
+          priority: request.priority,
+          notes: request.notes,
+          images: request.images,
           edited_by: currentUser.user.id,
         });
 
@@ -99,7 +100,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
           images: uploadedImages,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", request!.id)
+        .eq("id", request.id)
         .select()
         .single();
 
@@ -137,76 +138,101 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
   });
 
   const onSubmit = async (values: MaintenanceFormValues) => {
-    console.log("Form submitted with values:", values);
-    
-    if (request) {
-      updateRequest(values);
-      return;
-    }
+    try {
+      setIsSubmitting(true);
+      console.log("Form submitted with values:", values);
+      
+      if (request) {
+        updateRequest(values);
+        return;
+      }
 
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) {
-      console.error("No authenticated user found");
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        console.error("No authenticated user found");
+        toast({
+          title: "Error",
+          description: "You must be logged in to create a maintenance request",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      let propertyId = values.property_id;
+      
+      if (userProfile?.role === "tenant") {
+        console.log("Fetching active tenancy for tenant...");
+        const { data: tenancy, error: tenancyError } = await supabase
+          .from("tenancies")
+          .select("property_id")
+          .eq("tenant_id", userData.user.id)
+          .eq("status", "active")
+          .maybeSingle();
+
+        if (tenancyError) {
+          console.error("Error fetching tenancy:", tenancyError);
+          toast({
+            title: "Error",
+            description: "Failed to fetch tenancy information",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (!tenancy) {
+          console.error("No active tenancy found");
+          toast({
+            title: "Error",
+            description: "You don't have an active tenancy. Please contact your landlord.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        propertyId = tenancy.property_id;
+      }
+
+      console.log("Creating maintenance request with data:", {
+        ...values,
+        property_id: propertyId,
+        tenant_id: userData.user.id,
+        images: uploadedImages,
+      });
+
+      const { error: insertError } = await supabase
+        .from("maintenance_requests")
+        .insert({
+          title: values.title,
+          description: values.description,
+          property_id: propertyId,
+          tenant_id: userData.user.id,
+          issue_type: values.issue_type,
+          priority: values.priority,
+          notes: values.notes,
+          images: uploadedImages,
+        });
+
+      if (insertError) {
+        console.error("Error inserting maintenance request:", insertError);
+        throw insertError;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["maintenance-requests"] });
+      toast({
+        title: "Success",
+        description: "Maintenance request created successfully",
+      });
+      onSuccess();
+    } catch (error) {
+      console.error("Error in form submission:", error);
       toast({
         title: "Error",
-        description: "You must be logged in to create a maintenance request",
+        description: "Failed to create maintenance request",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    let propertyId = values.property_id;
-    let tenantId = userData.user.id;
-    
-    if (userProfile?.role === "tenant") {
-      console.log("Fetching active tenancy for tenant...");
-      const { data: tenancy, error: tenancyError } = await supabase
-        .from("tenancies")
-        .select("property_id")
-        .eq("tenant_id", userData.user.id)
-        .eq("status", "active")
-        .maybeSingle();
-
-      if (tenancyError) {
-        console.error("Error fetching tenancy:", tenancyError);
-        toast({
-          title: "Error",
-          description: "Failed to fetch tenancy information",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (!tenancy) {
-        console.error("No active tenancy found");
-        toast({
-          title: "Error",
-          description: "You don't have an active tenancy. Please contact your landlord.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      propertyId = tenancy.property_id;
-    }
-
-    console.log("Creating maintenance request with data:", {
-      ...values,
-      property_id: propertyId,
-      tenant_id: tenantId,
-      images: uploadedImages,
-    });
-
-    createRequest({
-      title: values.title,
-      description: values.description,
-      property_id: propertyId,
-      tenant_id: tenantId,
-      issue_type: values.issue_type,
-      priority: values.priority,
-      notes: values.notes,
-      images: uploadedImages,
-    });
   };
 
   return (
@@ -248,9 +274,9 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
         <Button
           type="submit"
           className="w-full"
-          disabled={isCreating || isUpdating || form.formState.isSubmitting}
+          disabled={isSubmitting}
         >
-          {isCreating || isUpdating
+          {isSubmitting
             ? request
               ? "Updating..."
               : "Creating..."
