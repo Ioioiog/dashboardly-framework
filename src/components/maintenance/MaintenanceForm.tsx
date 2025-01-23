@@ -11,6 +11,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertySelect } from "./form/PropertySelect";
 import { useMaintenanceFormSubmit } from "@/hooks/useMaintenanceFormSubmit";
+import { MaintenanceRequest } from "@/types/maintenance";
 
 interface MaintenanceFormProps {
   onSuccess: () => void;
