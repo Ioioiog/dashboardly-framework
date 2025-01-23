@@ -15,10 +15,11 @@ export function useAuthState() {
       try {
         console.log("Initializing authentication state...");
         
+        // Get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
-          console.error('Error with existing session:', sessionError);
+          console.error('Error getting session:', sessionError);
           if (mounted) {
             setIsAuthenticated(false);
             setCurrentUserId(null);
@@ -57,7 +58,8 @@ export function useAuthState() {
 
     initializeAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, "Session:", session ? "exists" : "null");
       
       if (event === 'SIGNED_OUT' || !session) {
@@ -81,6 +83,10 @@ export function useAuthState() {
         }
       } else if (event === 'TOKEN_REFRESHED') {
         console.log("Session token refreshed");
+        if (mounted && session) {
+          setIsAuthenticated(true);
+          setCurrentUserId(session.user.id);
+        }
       }
     });
 
