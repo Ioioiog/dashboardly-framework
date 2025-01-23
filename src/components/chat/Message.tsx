@@ -88,29 +88,33 @@ export function Message({
             <p className="break-words">{content}</p>
           )}
         </div>
-        <div className="flex justify-end mt-1 space-x-2">
-          {isCurrentUser && !isEditing && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-                onClick={() => onEditStart(id, content)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-                onClick={() => onDelete(id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-              {renderMessageStatus(status)}
-            </>
-          )}
-        </div>
+        {isCurrentUser && (
+          <div className="flex justify-end mt-1 space-x-2 items-center">
+            {!isEditing && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={() => onEditStart(id, content)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={() => onDelete(id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+                <div className="flex items-center">
+                  {renderMessageStatus(status)}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
