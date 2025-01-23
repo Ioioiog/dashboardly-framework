@@ -61,6 +61,18 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
     try {
       console.log("Creating tenancies with data:", data);
       
+      // First verify the tenant exists in profiles
+      const { data: tenantProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', data.tenantId)
+        .single();
+
+      if (profileError || !tenantProfile) {
+        console.error("Error verifying tenant profile:", profileError);
+        throw new Error("Selected tenant profile not found");
+      }
+
       // Get current user (landlord) ID
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
