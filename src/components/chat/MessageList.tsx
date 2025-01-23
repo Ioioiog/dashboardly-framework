@@ -35,6 +35,32 @@ export function MessageList({ messages, currentUserId, messagesEndRef, typingUse
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, messagesEndRef]);
 
+  // Update message status when they become visible
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const updateMessageStatus = async () => {
+      try {
+        const unreadMessages = messages.filter(
+          msg => msg.sender_id !== currentUserId && (!msg.status || msg.status === 'sent')
+        );
+
+        if (unreadMessages.length > 0) {
+          const { error } = await supabase
+            .from('messages')
+            .update({ status: 'read' })
+            .in('id', unreadMessages.map(msg => msg.id));
+
+          if (error) throw error;
+        }
+      } catch (error) {
+        console.error('Error updating message status:', error);
+      }
+    };
+
+    updateMessageStatus();
+  }, [messages, currentUserId]);
+
   const renderMessageStatus = (status?: string) => {
     switch (status) {
       case 'delivered':

@@ -7,6 +7,7 @@ interface Message {
   sender_id: string;
   content: string;
   created_at: string;
+  status?: 'sent' | 'delivered' | 'read';
   sender: {
     first_name: string | null;
     last_name: string | null;
@@ -33,6 +34,7 @@ export function useMessages(conversationId: string | null) {
           sender_id,
           content,
           created_at,
+          status,
           profile_id,
           conversation_id,
           sender:profiles(first_name, last_name)
@@ -56,19 +58,25 @@ export function useMessages(conversationId: string | null) {
 
     fetchMessages();
 
-    // Subscribe to new messages
+    // Subscribe to new messages and status updates
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*", // Listen to all changes (INSERT, UPDATE, DELETE)
           schema: "public",
           table: "messages",
           filter: `conversation_id=eq.${conversationId}`,
         },
         async (payload) => {
-          console.log("New message received:", payload);
+          console.log("Message change received:", payload);
+          
+          if (payload.eventType === 'DELETE') {
+            setMessages(prev => prev.filter(msg => msg.id !== payload.old.id));
+            return;
+          }
+
           const { data: newMessage, error } = await supabase
             .from("messages")
             .select(`
@@ -76,6 +84,7 @@ export function useMessages(conversationId: string | null) {
               sender_id,
               content,
               created_at,
+              status,
               profile_id,
               conversation_id,
               sender:profiles(first_name, last_name)
@@ -84,11 +93,17 @@ export function useMessages(conversationId: string | null) {
             .single();
 
           if (error) {
-            console.error("Error fetching new message:", error);
+            console.error("Error fetching updated message:", error);
             return;
           }
 
-          setMessages((prev) => [...prev, newMessage]);
+          if (payload.eventType === 'INSERT') {
+            setMessages(prev => [...prev, newMessage]);
+          } else if (payload.eventType === 'UPDATE') {
+            setMessages(prev => 
+              prev.map(msg => msg.id === newMessage.id ? newMessage : msg)
+            );
+          }
         }
       )
       .subscribe((status) => {
@@ -124,6 +139,7 @@ export function useMessages(conversationId: string | null) {
         sender_id: currentUserId,
         profile_id: currentUserId,
         conversation_id: conversationId,
+        status: 'sent'
       });
 
     if (error) {
