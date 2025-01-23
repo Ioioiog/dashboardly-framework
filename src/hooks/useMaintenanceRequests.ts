@@ -40,7 +40,7 @@ export function useMaintenanceRequests() {
 
         console.log("User role:", userProfile?.role);
 
-        // Build the query to include all necessary relations with explicit foreign key references
+        // Build the query with explicit foreign key references
         const query = supabase
           .from("maintenance_requests")
           .select(`
