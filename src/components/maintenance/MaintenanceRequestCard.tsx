@@ -1,17 +1,16 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { MaintenanceRequest, MaintenanceRequestStatus } from "@/types/maintenance";
-import { useState } from "react";
-import { MaintenanceDialog } from "./MaintenanceDialog";
-import { MaintenanceHistoryDialog } from "./MaintenanceHistoryDialog";
-import { supabase } from "@/integrations/supabase/client";
+import React, { useState } from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { MaintenanceRequest } from "@/types/maintenance";
+import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { MaintenanceCardHeader } from "./MaintenanceCardHeader";
 import { MaintenanceCardContent } from "./MaintenanceCardContent";
 import { MaintenanceCardFooter } from "./MaintenanceCardFooter";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface MaintenanceRequestCardProps {
   request: MaintenanceRequest;
@@ -19,7 +18,6 @@ interface MaintenanceRequestCardProps {
 }
 
 export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceRequestCardProps) {
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -28,6 +26,7 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
 
   const handleStatusChange = async (newStatus: MaintenanceRequestStatus) => {
     try {
+      console.log('Updating maintenance request status:', { requestId: request.id, newStatus });
       const { error } = await supabase
         .from("maintenance_requests")
         .update({ 
@@ -86,17 +85,10 @@ export function MaintenanceRequestCard({ request, isLandlord }: MaintenanceReque
             request={request}
             onImageClick={() => setIsImageDialogOpen(true)}
             onHistoryClick={() => setIsHistoryDialogOpen(true)}
-            onEditClick={() => setIsEditDialogOpen(true)}
           />
         </CardFooter>
       </Card>
 
-      <MaintenanceDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        request={request}
-      />
-      
       <MaintenanceHistoryDialog
         open={isHistoryDialogOpen}
         onOpenChange={setIsHistoryDialogOpen}
