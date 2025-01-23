@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Property } from "@/utils/propertyUtils";
 import { TenantInviteForm } from "./TenantInviteForm";
@@ -117,6 +117,9 @@ export function TenantInviteDialog({ properties, open, onOpenChange }: TenantInv
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create Tenant Account</DialogTitle>
+          <DialogDescription>
+            Fill in the details below to invite a new tenant. They will receive an email with instructions to complete their registration.
+          </DialogDescription>
         </DialogHeader>
         <TenantInviteForm 
           properties={properties}
