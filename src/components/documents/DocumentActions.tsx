@@ -50,14 +50,21 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
       if (error) {
         console.error("Storage download error:", error);
-        console.error("Full error details:", {
-          message: error.message,
-          name: error.name
-        });
+        console.error("Error message:", error.message);
         
-        if (error.message?.includes("Object not found")) {
-          throw new Error("The document file could not be found. Please contact support.");
+        // Try to parse the error message if it's JSON
+        try {
+          const errorBody = JSON.parse(error.message);
+          if (errorBody.statusCode === "404" || errorBody.error === "not_found") {
+            throw new Error("The document file could not be found. Please contact support.");
+          }
+        } catch (parseError) {
+          // If parsing fails, check the raw message
+          if (error.message?.includes("not_found") || error.message?.includes("404")) {
+            throw new Error("The document file could not be found. Please contact support.");
+          }
         }
+        
         throw new Error("Could not download the document. Please try again later.");
       }
 
