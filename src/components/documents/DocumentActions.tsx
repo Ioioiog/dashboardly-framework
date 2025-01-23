@@ -49,7 +49,7 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
 
       if (error) {
         console.error("Storage download error:", error);
-        throw error;
+        throw new Error("Could not download the document. Please try again later.");
       }
 
       if (!data) {
@@ -57,15 +57,12 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
         throw new Error("No data received from storage");
       }
 
-      // Extract filename from path and sanitize it
-      const fileName = doc.file_path.split('/').pop() || 'document';
-      console.log("Using filename for download:", fileName);
-
-      // Create a download link
-      const url = window.URL.createObjectURL(data);
+      // Create a blob URL and trigger download
+      const blob = new Blob([data], { type: 'application/octet-stream' });
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = fileName;
+      a.download = doc.file_path.split('/').pop() || 'document';
       document.body.appendChild(a);
       a.click();
       
@@ -82,7 +79,6 @@ export function DocumentActions({ document: doc, userRole, onDocumentUpdated }: 
     } catch (error: any) {
       console.error("Error downloading document:", error);
       
-      // Check if it's an auth error
       if (error.message?.includes("sign in")) {
         await supabase.auth.signOut();
         window.location.href = "/auth";
