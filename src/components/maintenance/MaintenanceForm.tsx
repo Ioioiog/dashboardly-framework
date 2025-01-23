@@ -77,17 +77,6 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       return profile;
     },
     retry: 1,
-    meta: {
-      onError: (error: Error) => {
-        console.error("Error in profile query:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load user profile.",
-        });
-        navigate("/auth");
-      }
-    }
   });
 
   // Fetch tenant's active property if they're a tenant
@@ -121,7 +110,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       console.log("Tenant property fetched:", data);
       return data?.properties;
     },
-    enabled: !!userProfile && userProfile.role === "tenant"
+    enabled: !!userProfile && userProfile.role === "tenant",
   });
 
   const { data: properties } = useQuery({
@@ -156,7 +145,7 @@ export function MaintenanceForm({ onSuccess, request }: MaintenanceFormProps) {
       issue_type: request?.issue_type ?? "",
       priority: request?.priority ?? "",
       notes: request?.notes ?? "",
-      property_id: request?.property_id ?? tenantProperty?.id ?? "",
+      property_id: request?.property_id ?? "",
     },
   });
 
