@@ -33,8 +33,10 @@ const formSchema = z.object({
   priority: z.enum(["Low", "Medium", "High"]),
   status: z.enum(["pending", "in_progress", "completed", "cancelled"]),
   notes: z.string().optional(),
-  assigned_to: z.string().uuid().optional(),
+  assigned_to: z.string().uuid().optional().nullable(),
 });
+
+type FormData = z.infer<typeof formSchema>;
 
 interface MaintenanceFormProps {
   request?: MaintenanceRequest | null;
@@ -47,7 +49,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
   const { properties } = useProperties({ userRole });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: request?.title || "",
@@ -56,11 +58,11 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
       priority: request?.priority || "Low",
       status: request?.status || "pending",
       notes: request?.notes || "",
-      assigned_to: request?.assigned_to || "",
+      assigned_to: request?.assigned_to || null,
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
       
@@ -71,7 +73,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
       const submitData = {
         ...data,
         tenant_id: user.id,
-      } as MaintenanceRequest;
+      };
 
       console.log('Submitting maintenance request:', submitData);
       
