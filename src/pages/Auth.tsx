@@ -11,29 +11,46 @@ const AuthPage = () => {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("Session check error:", error);
-        return;
-      }
+      try {
+        console.log("Checking for existing session...");
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session check error:", error);
+          return;
+        }
 
-      if (session) {
-        console.log("Active session found, redirecting to dashboard");
-        navigate("/dashboard", { replace: true });
+        if (session) {
+          console.log("Active session found, redirecting to dashboard");
+          navigate("/dashboard", { replace: true });
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
       }
     };
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
+      
       if (event === 'SIGNED_IN' && session) {
         console.log("Sign in successful, redirecting to dashboard");
         navigate("/dashboard", { replace: true });
+      } else if (event === 'SIGNED_OUT') {
+        console.log("User signed out");
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+        });
+      } else if (event === 'USER_UPDATED') {
+        console.log("User profile updated");
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate, toast]);
 
   return (
@@ -78,11 +95,31 @@ const AuthPage = () => {
           }}
           providers={[]}
           redirectTo={window.location.origin}
+          onError={(error) => {
+            console.error("Auth error:", error);
+            toast({
+              title: "Authentication Error",
+              description: error.message || "An error occurred during authentication",
+              variant: "destructive",
+            });
+          }}
           localization={{
             variables: {
               sign_in: {
                 email_label: 'Email',
                 password_label: 'Password',
+                email_input_placeholder: 'Your email address',
+                password_input_placeholder: 'Your password',
+                button_label: 'Sign in',
+                loading_button_label: 'Signing in ...',
+              },
+              sign_up: {
+                email_label: 'Email',
+                password_label: 'Password',
+                email_input_placeholder: 'Your email address',
+                password_input_placeholder: 'Create a password',
+                button_label: 'Sign up',
+                loading_button_label: 'Signing up ...',
               },
             },
           }}
