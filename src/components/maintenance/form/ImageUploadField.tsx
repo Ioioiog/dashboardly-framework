@@ -1,6 +1,5 @@
 import { FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 
 interface ImageUploadFieldProps {
   onImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
