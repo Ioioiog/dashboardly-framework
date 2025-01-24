@@ -153,7 +153,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
           </div>
           <div className="space-y-2">
             <Label>Start Date</Label>
-            <Popover>
+            <Popover modal>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -182,7 +182,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
           </div>
           <div className="space-y-2">
             <Label>End Date</Label>
-            <Popover>
+            <Popover modal>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
