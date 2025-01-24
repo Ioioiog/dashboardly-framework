@@ -1,9 +1,10 @@
 import React from "react";
 import { format } from "date-fns";
-import { Check, CheckCheck, Trash2, Pencil, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { MessageActions } from "./MessageActions";
 
 interface MessageProps {
   id: string;
@@ -37,17 +38,6 @@ export function Message({
   onDelete,
 }: MessageProps) {
   const messageTime = format(new Date(createdAt), 'HH:mm');
-
-  const renderMessageStatus = (status: 'sent' | 'delivered' | 'read') => {
-    switch (status) {
-      case 'delivered':
-        return <Check className="h-4 w-4 text-blue-500" />;
-      case 'read':
-        return <CheckCheck className="h-4 w-4 text-blue-500" />;
-      default:
-        return <Check className="h-4 w-4 text-gray-400" />;
-    }
-  };
 
   return (
     <div className={cn("flex mb-4", isCurrentUser ? "justify-end" : "justify-start")}>
@@ -93,35 +83,12 @@ export function Message({
             <p className="break-words whitespace-pre-wrap">{content}</p>
           )}
         </div>
-        {isCurrentUser && (
-          <div className={cn(
-            "flex justify-end mt-1 space-x-1 items-center opacity-0 group-hover:opacity-100 transition-opacity",
-            isEditing && "opacity-100"
-          )}>
-            {!isEditing && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={() => onEditStart(id, content)}
-                >
-                  <Pencil className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={() => onDelete(id)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-                <div className="flex items-center ml-1">
-                  {renderMessageStatus(status)}
-                </div>
-              </>
-            )}
-          </div>
+        {isCurrentUser && !isEditing && (
+          <MessageActions
+            status={status}
+            onEdit={() => onEditStart(id, content)}
+            onDelete={() => onDelete(id)}
+          />
         )}
       </div>
     </div>

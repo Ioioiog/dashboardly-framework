@@ -8,13 +8,14 @@ import { useMessages } from "@/hooks/chat/useMessages";
 import { useAuthState } from "@/hooks/useAuthState";
 import { Loader2 } from "lucide-react";
 import { useUserRole } from "@/hooks/use-user-role";
+import { ConversationContainer } from "@/components/chat/ConversationContainer";
 
 const Chat = () => {
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const { isAuthenticated, currentUserId } = useAuthState();
+  const { currentUserId } = useAuthState();
   const { conversationId, isLoading: isConversationLoading } = useConversation(currentUserId, selectedTenantId);
   const { messages, sendMessage } = useMessages(conversationId);
   const { userRole } = useUserRole();
@@ -83,17 +84,13 @@ const Chat = () => {
   return (
     <div className="flex bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 min-h-screen">
       <DashboardSidebar />
-      <main className="flex-1 p-8 animate-fade-in">
-        <div className="max-w-4xl mx-auto bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 backdrop-blur-sm h-[calc(100vh-8rem)] transition-all duration-200 hover:shadow-xl">
-          <div className="flex flex-col h-full">
-            <ChatHeader
-              onTenantSelect={setSelectedTenantId}
-              selectedTenantId={selectedTenantId}
-            />
-            {renderContent()}
-          </div>
-        </div>
-      </main>
+      <ConversationContainer>
+        <ChatHeader
+          onTenantSelect={setSelectedTenantId}
+          selectedTenantId={selectedTenantId}
+        />
+        {renderContent()}
+      </ConversationContainer>
     </div>
   );
 };
