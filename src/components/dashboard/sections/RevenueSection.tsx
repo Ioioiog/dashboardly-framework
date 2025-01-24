@@ -12,17 +12,21 @@ export function RevenueSection({ userId }: RevenueSectionProps) {
   const [activeView, setActiveView] = useState<"history" | "predictions">("history");
 
   return (
-    <section className="bg-white rounded-lg shadow-sm p-4">
-      <div className="space-y-4">
-        <div className="border-b pb-4">
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+    <section className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-6 transition-all duration-200 hover:shadow-xl">
+      <div className="space-y-6">
+        <div className="border-b border-gray-100 pb-5">
+          <h2 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
             Track your money
           </h2>
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex flex-wrap gap-3">
             <Button
               variant={activeView === "history" ? "default" : "outline"}
               onClick={() => setActiveView("history")}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 transition-all duration-200 ${
+                activeView === "history" 
+                  ? "shadow-md hover:shadow-lg" 
+                  : "hover:bg-gray-50"
+              }`}
               size="sm"
             >
               <BarChart2 className="w-4 h-4" />
@@ -31,7 +35,11 @@ export function RevenueSection({ userId }: RevenueSectionProps) {
             <Button
               variant={activeView === "predictions" ? "default" : "outline"}
               onClick={() => setActiveView("predictions")}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 transition-all duration-200 ${
+                activeView === "predictions" 
+                  ? "shadow-md hover:shadow-lg" 
+                  : "hover:bg-gray-50"
+              }`}
               size="sm"
             >
               <TrendingUp className="w-4 h-4" />
@@ -40,29 +48,32 @@ export function RevenueSection({ userId }: RevenueSectionProps) {
           </div>
         </div>
         
-        <div className="space-y-4">
+        <div className="space-y-6">
           {activeView === "history" ? (
-            <div>
-              <div className="mb-3">
+            <div className="animate-fade-in">
+              <div className="mb-4">
                 <h3 className="text-xl font-semibold text-gray-800">
                   Revenue History
                 </h3>
-                <p className="text-sm text-dashboard-text-muted">
+                <p className="text-sm text-gray-500 mt-1">
                   Historical view of your monthly revenue performance
                 </p>
               </div>
-              <div className="bg-dashboard-accent rounded-lg">
+              <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <RevenueChart userId={userId} />
               </div>
             </div>
           ) : (
-            <div>
-              <div className="mb-3">
+            <div className="animate-fade-in">
+              <div className="mb-4">
                 <h3 className="text-xl font-semibold text-gray-800">
                   Revenue Predictions
                 </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Projected revenue based on historical data
+                </p>
               </div>
-              <div className="bg-dashboard-accent rounded-lg">
+              <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
                 <RevenuePrediction userId={userId} />
               </div>
             </div>
