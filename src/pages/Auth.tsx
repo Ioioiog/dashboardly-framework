@@ -17,6 +17,11 @@ const AuthPage = () => {
         
         if (error) {
           console.error("Session check error:", error);
+          toast({
+            title: "Session Error",
+            description: error.message,
+            variant: "destructive",
+          });
           return;
         }
 
@@ -24,8 +29,13 @@ const AuthPage = () => {
           console.log("Active session found, redirecting to dashboard");
           navigate("/dashboard", { replace: true });
         }
-      } catch (error) {
-        console.error("Error checking session:", error);
+      } catch (err) {
+        console.error("Error checking session:", err);
+        toast({
+          title: "Unexpected Error",
+          description: "An error occurred while checking your session",
+          variant: "destructive",
+        });
       }
     };
 
@@ -95,14 +105,6 @@ const AuthPage = () => {
           }}
           providers={[]}
           redirectTo={window.location.origin}
-          onError={(error) => {
-            console.error("Auth error:", error);
-            toast({
-              title: "Authentication Error",
-              description: error.message || "An error occurred during authentication",
-              variant: "destructive",
-            });
-          }}
           localization={{
             variables: {
               sign_in: {
