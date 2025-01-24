@@ -9,6 +9,8 @@ import {
 import { MaintenanceRequest } from "@/types/maintenance";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 
 interface MaintenanceListProps {
   requests: MaintenanceRequest[];
@@ -65,14 +67,14 @@ export function MaintenanceList({
           <TableHead>Status</TableHead>
           <TableHead>Priority</TableHead>
           <TableHead>Created</TableHead>
+          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {requests.map((request) => (
           <TableRow
             key={request.id}
-            className="cursor-pointer hover:bg-gray-100"
-            onClick={() => onRequestClick(request)}
+            className="hover:bg-gray-100"
           >
             <TableCell>{request.property?.name}</TableCell>
             <TableCell>
@@ -91,6 +93,17 @@ export function MaintenanceList({
             </TableCell>
             <TableCell>
               {format(new Date(request.created_at), "PPP")}
+            </TableCell>
+            <TableCell>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onRequestClick(request)}
+                className="flex items-center gap-2"
+              >
+                <Eye className="h-4 w-4" />
+                See Request
+              </Button>
             </TableCell>
           </TableRow>
         ))}
