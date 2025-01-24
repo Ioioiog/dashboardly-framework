@@ -28,7 +28,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
     phone: tenant.phone || "",
     startDate: tenant.tenancy?.start_date ? new Date(tenant.tenancy.start_date) : null,
     endDate: tenant.tenancy?.end_date ? new Date(tenant.tenancy.end_date) : null,
-    monthlyPayDay: tenant.tenancy?.monthly_pay_day || "1",
+    monthlyPayDay: tenant.tenancy?.monthly_pay_day?.toString() || "1",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
