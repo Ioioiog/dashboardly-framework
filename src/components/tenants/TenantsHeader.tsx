@@ -25,31 +25,36 @@ export function TenantsHeader({ properties, userRole }: TenantsHeaderProps) {
     : t('tenants.description.tenant');
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-        <p className="text-muted-foreground">
-          {description}
-        </p>
-      </div>
-      {userRole === "landlord" && (
-        <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={() => setShowAssignDialog(true)}
-            className="flex items-center gap-2"
-          >
-            <UserPlus className="h-4 w-4" />
-            Assign Existing Tenant
-          </Button>
-          <Button
-            onClick={() => setShowInviteDialog(true)}
-            className="flex items-center gap-2"
-          >
-            <Mail className="h-4 w-4" />
-            Invite New Tenant
-          </Button>
+    <div className="bg-white p-8 rounded-lg shadow-sm mb-6 animate-fade-in">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-1">
+            {title}
+          </h1>
+          <p className="text-gray-500 max-w-2xl">
+            {description}
+          </p>
         </div>
-      )}
+        {userRole === "landlord" && (
+          <div className="flex flex-wrap gap-3 sm:flex-nowrap">
+            <Button
+              onClick={() => setShowAssignDialog(true)}
+              variant="outline"
+              className="w-full sm:w-auto flex items-center gap-2 hover:bg-gray-50 transition-colors"
+            >
+              <UserPlus className="h-4 w-4 text-gray-600" />
+              <span>Assign Existing Tenant</span>
+            </Button>
+            <Button
+              onClick={() => setShowInviteDialog(true)}
+              className="w-full sm:w-auto flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-colors"
+            >
+              <Mail className="h-4 w-4" />
+              <span>Invite New Tenant</span>
+            </Button>
+          </div>
+        )}
+      </div>
 
       <TenantInviteDialog
         properties={properties}
