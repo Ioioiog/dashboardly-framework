@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-import { Property } from "@/types/property";
+import { Property } from "@/utils/propertyUtils";
 
 interface MaintenanceFormFieldsProps {
   form: UseFormReturn<any>;
