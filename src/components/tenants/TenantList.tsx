@@ -7,32 +7,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { EditTenantDialog } from "./EditTenantDialog";
-import { TenantObservationDialog } from "./TenantObservationDialog";
-import { TenantInteractionHistory } from "./TenantInteractionHistory";
 import { Tenant } from "@/types/tenant";
-import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Trash2, LayoutGrid, List, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { TenantListHeader } from "./TenantListHeader";
+import { TenantCard } from "./TenantCard";
+import { TenantRow } from "./TenantRow";
+import { PendingInvitationCard } from "./PendingInvitationCard";
+import { PendingInvitationRow } from "./PendingInvitationRow";
 
 interface TenantListProps {
   tenants: Tenant[];
@@ -159,225 +142,70 @@ export function TenantList({ tenants }: TenantListProps) {
     return matchesSearch && matchesStatus;
   });
 
-  const renderPendingInvitations = () => {
-    if (!showInactive || pendingInvitations.length === 0) return null;
-
-    return pendingInvitations.map((invitation) => {
-      const property = invitation.tenant_invitation_properties?.[0]?.properties;
-      
-      return viewMode === "grid" ? (
-        <Card key={invitation.id}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <h3 className="font-semibold">
-              {invitation.first_name} {invitation.last_name}
-            </h3>
-            <Badge className="bg-yellow-500">Pending Invitation</Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">{invitation.email}</p>
-              {property && (
-                <p className="text-sm">{property.name} ({property.address})</p>
-              )}
-              <div className="text-sm">
-                <p>Start: {format(new Date(invitation.start_date), "MMM d, yyyy")}</p>
-                <p>End: {invitation.end_date ? format(new Date(invitation.end_date), "MMM d, yyyy") : "Ongoing"}</p>
-                <p>Expires: {format(new Date(invitation.expiration_date), "MMM d, yyyy")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <TableRow key={invitation.id}>
-          <TableCell>{`${invitation.first_name || ''} ${invitation.last_name || ''}`}</TableCell>
-          <TableCell>{invitation.email}</TableCell>
-          <TableCell>N/A</TableCell>
-          <TableCell>
-            {property ? `${property.name} (${property.address})` : 'N/A'}
-          </TableCell>
-          <TableCell>
-            {format(new Date(invitation.start_date), "MMM d, yyyy")}
-          </TableCell>
-          <TableCell>
-            {invitation.end_date ? format(new Date(invitation.end_date), "MMM d, yyyy") : "Ongoing"}
-          </TableCell>
-          <TableCell>
-            <Badge className="bg-yellow-500">Pending Invitation</Badge>
-          </TableCell>
-          <TableCell className="text-right">
-            Expires: {format(new Date(invitation.expiration_date), "MMM d, yyyy")}
-          </TableCell>
-        </TableRow>
-      );
-    });
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-end mb-4">
-        <div className="space-y-2">
-          <Label htmlFor="search">Search Tenants</Label>
-          <Input
-            id="search"
-            placeholder="Search by name, email, or property..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-md"
-          />
-        </div>
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowInactive(!showInactive)}
-            className="flex items-center gap-2"
-          >
-            <Users className="h-4 w-4" />
-            {showInactive ? "Hide Inactive & Pending" : "Show Inactive & Pending"}
-          </Button>
-          <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={cn(
-                "inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-l-full px-4 py-2",
-                viewMode === "grid" ? "bg-white text-blue-400" : ""
-              )}
-            >
-              <LayoutGrid className="w-4 h-4 mr-2" />
-              <span>Grid</span>
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={cn(
-                "inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2",
-                viewMode === "list" ? "bg-white text-blue-400" : ""
-              )}
-            >
-              <List className="w-4 h-4 mr-2" />
-              <span>List</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <TenantListHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        showInactive={showInactive}
+        onShowInactiveChange={setShowInactive}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
 
-      <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : ""}>
-        {renderPendingInvitations()}
-        {filteredTenants.map((tenant) => {
-          if (!tenant || !tenant.property) return null;
-          
-          return viewMode === "grid" ? (
-            <Card key={tenant.id}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <h3 className="font-semibold">{getTenantDisplayName(tenant)}</h3>
-                {tenant.tenancy && (
-                  <Badge className={getStatusBadgeColor(tenant.tenancy.status)}>
-                    {tenant.tenancy.status}
-                  </Badge>
-                )}
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">{tenant.email || "N/A"}</p>
-                  <p className="text-sm text-muted-foreground">{tenant.phone || "N/A"}</p>
-                  <p className="text-sm">{tenant.property.name} ({tenant.property.address})</p>
-                  <div className="text-sm">
-                    <p>Start: {tenant.tenancy?.start_date ? format(new Date(tenant.tenancy.start_date), "MMM d, yyyy") : "N/A"}</p>
-                    <p>End: {tenant.tenancy?.end_date ? format(new Date(tenant.tenancy.end_date), "MMM d, yyyy") : "Ongoing"}</p>
-                  </div>
-                  <div className="flex justify-end space-x-2 mt-4">
-                    <TenantObservationDialog
-                      tenantId={tenant.id}
-                      tenantName={getTenantDisplayName(tenant)}
-                    />
-                    <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="icon">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Tenant</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete this tenant? This action will remove all tenant observations and interactions, and mark their tenancy as inactive.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteTenant(tenant.id)}
-                            className="bg-red-600 hover:bg-red-700"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <TableRow key={tenant.id}>
-              <TableCell>{getTenantDisplayName(tenant)}</TableCell>
-              <TableCell>{tenant.email || "N/A"}</TableCell>
-              <TableCell>{tenant.phone || "N/A"}</TableCell>
-              <TableCell>
-                {tenant.property.name} ({tenant.property.address})
-              </TableCell>
-              <TableCell>
-                {tenant.tenancy?.start_date
-                  ? format(new Date(tenant.tenancy.start_date), "MMM d, yyyy")
-                  : "N/A"}
-              </TableCell>
-              <TableCell>
-                {tenant.tenancy?.end_date
-                  ? format(new Date(tenant.tenancy.end_date), "MMM d, yyyy")
-                  : "Ongoing"}
-              </TableCell>
-              <TableCell>
-                {tenant.tenancy && (
-                  <Badge className={getStatusBadgeColor(tenant.tenancy.status)}>
-                    {tenant.tenancy.status}
-                  </Badge>
-                )}
-              </TableCell>
-              <TableCell className="text-right space-x-2">
-                <TenantObservationDialog
-                  tenantId={tenant.id}
-                  tenantName={getTenantDisplayName(tenant)}
-                />
-                <EditTenantDialog tenant={tenant} onUpdate={handleTenantUpdate} />
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="icon">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Tenant</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete this tenant? This action will remove all tenant observations and interactions, and mark their tenancy as inactive.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDeleteTenant(tenant.id)}
-                        className="bg-red-600 hover:bg-red-700"
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </TableCell>
+      {viewMode === "grid" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {showInactive && pendingInvitations.map((invitation) => (
+            <PendingInvitationCard
+              key={invitation.id}
+              invitation={invitation}
+            />
+          ))}
+          {filteredTenants.map((tenant) => (
+            <TenantCard
+              key={tenant.id}
+              tenant={tenant}
+              onDelete={handleDeleteTenant}
+              onUpdate={handleTenantUpdate}
+              getTenantDisplayName={getTenantDisplayName}
+              getStatusBadgeColor={getStatusBadgeColor}
+            />
+          ))}
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>Property</TableHead>
+              <TableHead>Start Date</TableHead>
+              <TableHead>End Date</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
-          );
-        })}
-      </div>
+          </TableHeader>
+          <TableBody>
+            {showInactive && pendingInvitations.map((invitation) => (
+              <PendingInvitationRow
+                key={invitation.id}
+                invitation={invitation}
+              />
+            ))}
+            {filteredTenants.map((tenant) => (
+              <TenantRow
+                key={tenant.id}
+                tenant={tenant}
+                onDelete={handleDeleteTenant}
+                onUpdate={handleTenantUpdate}
+                getTenantDisplayName={getTenantDisplayName}
+                getStatusBadgeColor={getStatusBadgeColor}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </div>
   );
 }
