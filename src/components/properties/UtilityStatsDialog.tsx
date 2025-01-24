@@ -15,13 +15,20 @@ interface UtilityStatsDialogProps {
   propertyName: string;
 }
 
+interface UtilityStats {
+  average_monthly_cost: number;
+  total_utilities: number;
+  highest_bill: number;
+  lowest_bill: number;
+}
+
 export function UtilityStatsDialog({
   open,
   onOpenChange,
   propertyId,
   propertyName,
 }: UtilityStatsDialogProps) {
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading } = useQuery<UtilityStats>({
     queryKey: ["utilityStats", propertyId],
     queryFn: async () => {
       console.log("Fetching utility stats for property:", propertyId);
@@ -36,7 +43,7 @@ export function UtilityStatsDialog({
       }
 
       console.log("Utility stats:", data);
-      return data;
+      return data as UtilityStats;
     },
     enabled: open,
   });
