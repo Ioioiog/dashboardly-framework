@@ -21,6 +21,18 @@ export function PendingInvitationRow({ invitation }: PendingInvitationRowProps) 
     try {
       console.log("Deleting invitation:", invitation.id);
       
+      // First delete the related records in tenant_invitation_properties
+      const { error: propertiesDeleteError } = await supabase
+        .from('tenant_invitation_properties')
+        .delete()
+        .eq('invitation_id', invitation.id);
+
+      if (propertiesDeleteError) {
+        console.error("Error deleting invitation properties:", propertiesDeleteError);
+        throw propertiesDeleteError;
+      }
+
+      // Then delete the invitation itself
       const { error: deleteError } = await supabase
         .from('tenant_invitations')
         .delete()
