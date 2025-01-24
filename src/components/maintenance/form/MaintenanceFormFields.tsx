@@ -37,7 +37,7 @@ export function MaintenanceFormFields({ form, properties, userRole }: Maintenanc
               defaultValue={field.value}
             >
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white">
                   <SelectValue placeholder="Select property" />
                 </SelectTrigger>
               </FormControl>
@@ -61,7 +61,7 @@ export function MaintenanceFormFields({ form, properties, userRole }: Maintenanc
           <FormItem>
             <FormLabel>Title</FormLabel>
             <FormControl>
-              <Input placeholder="Enter title" {...field} />
+              <Input placeholder="Enter title" {...field} className="bg-white" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -77,7 +77,7 @@ export function MaintenanceFormFields({ form, properties, userRole }: Maintenanc
             <FormControl>
               <Textarea
                 placeholder="Enter description"
-                className="min-h-[100px]"
+                className="min-h-[100px] bg-white"
                 {...field}
               />
             </FormControl>
@@ -98,7 +98,7 @@ export function MaintenanceFormFields({ form, properties, userRole }: Maintenanc
                 defaultValue={field.value}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white">
                     <SelectValue placeholder="Select priority" />
                   </SelectTrigger>
                 </FormControl>
@@ -125,7 +125,7 @@ export function MaintenanceFormFields({ form, properties, userRole }: Maintenanc
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                   </FormControl>
@@ -152,7 +152,7 @@ export function MaintenanceFormFields({ form, properties, userRole }: Maintenanc
             <FormControl>
               <Textarea
                 placeholder="Add notes"
-                className="min-h-[100px]"
+                className="min-h-[100px] bg-white"
                 {...field}
               />
             </FormControl>

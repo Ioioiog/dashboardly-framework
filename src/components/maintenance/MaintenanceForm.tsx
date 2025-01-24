@@ -8,6 +8,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { ImageUploadField } from "./form/ImageUploadField";
 import { MaintenanceFormFields } from "./form/MaintenanceFormFields";
 import { useMaintenanceForm } from "./form/useMaintenanceForm";
+import { Card } from "@/components/ui/card";
 
 interface MaintenanceFormProps {
   request?: MaintenanceRequest | null;
@@ -96,26 +97,40 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <MaintenanceFormFields
-          form={form}
-          properties={properties}
-          userRole={userRole}
-        />
-        
-        <ImageUploadField
-          onImageChange={handleImageChange}
-          selectedImages={selectedImages}
-          existingImages={request?.images}
-        />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="p-4 space-y-4">
+            <h3 className="text-lg font-medium">Request Details</h3>
+            <MaintenanceFormFields
+              form={form}
+              properties={properties}
+              userRole={userRole}
+            />
+          </Card>
+          
+          <Card className="p-4">
+            <h3 className="text-lg font-medium mb-4">Request Images</h3>
+            <ImageUploadField
+              onImageChange={handleImageChange}
+              selectedImages={selectedImages}
+              existingImages={request?.images}
+            />
+          </Card>
+        </div>
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? "Saving..."
-            : request
-            ? "Update Request"
-            : "Create Request"}
-        </Button>
+        <div className="flex justify-end">
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="min-w-[150px]"
+          >
+            {isSubmitting
+              ? "Saving..."
+              : request
+              ? "Update Request"
+              : "Create Request"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
