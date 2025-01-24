@@ -29,12 +29,12 @@ export function PropertyList({
     return (
       <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} gap-6 max-w-7xl mx-auto animate-fade-in`}>
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="p-6 animate-pulse bg-gradient-to-br from-[#F6F6F7] to-white border border-[#eee]">
+          <Card key={i} className="p-6 animate-pulse bg-gradient-to-br from-gray-50 to-white">
             <div className="space-y-4">
-              <div className="h-4 bg-[#eee] rounded-full w-3/4"></div>
-              <div className="h-4 bg-[#eee] rounded-full w-1/2"></div>
-              <div className="h-4 bg-[#eee] rounded-full w-2/3"></div>
-              <div className="h-32 bg-[#eee] rounded-lg"></div>
+              <div className="h-4 bg-gray-200 rounded-full w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded-full w-1/2"></div>
+              <div className="h-4 bg-gray-200 rounded-full w-2/3"></div>
+              <div className="h-32 bg-gray-200 rounded-lg"></div>
             </div>
           </Card>
         ))}
@@ -45,10 +45,10 @@ export function PropertyList({
   if (properties === undefined) {
     return (
       <div className="max-w-7xl mx-auto animate-fade-in">
-        <Alert variant="destructive" className="bg-[#F6F6F7] border-[#ea384c] text-[#ea384c]">
+        <Alert variant="destructive" className="bg-red-50 border-red-200">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle className="font-semibold">{t('common.error')}</AlertTitle>
-          <AlertDescription>
+          <AlertDescription className="text-red-800">
             {t('properties.error.fetch')}
           </AlertDescription>
         </Alert>
@@ -59,15 +59,15 @@ export function PropertyList({
   if (!properties.length) {
     return (
       <div className="max-w-7xl mx-auto animate-fade-in">
-        <Card className="p-8 bg-gradient-to-br from-[#F6F6F7] to-white border border-[#eee]">
+        <Card className="p-8 bg-gradient-to-br from-gray-50 to-white">
           <div className="text-center space-y-3">
-            <p className="text-[#888888] text-lg">
+            <p className="text-gray-600 text-lg">
               {userRole === "landlord" 
                 ? t('properties.empty.landlord')
                 : t('properties.empty.tenant')}
             </p>
             {userRole === "tenant" && (
-              <p className="text-sm text-[#999999]">
+              <p className="text-sm text-gray-500">
                 {t('properties.empty.tenant.contact')}
               </p>
             )}
