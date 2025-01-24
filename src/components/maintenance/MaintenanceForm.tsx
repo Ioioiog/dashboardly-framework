@@ -36,6 +36,11 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
       if (!user) throw new Error('No authenticated user');
 
       const imageUrls = selectedImages.length > 0 ? await uploadImages() : [];
+      
+      // Combine existing images with new ones if editing
+      const allImages = request?.images 
+        ? [...request.images, ...imageUrls]
+        : imageUrls;
 
       const submitData = {
         title: data.title,
@@ -46,7 +51,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
         notes: data.notes || null,
         assigned_to: data.assigned_to,
         tenant_id: user.id,
-        images: imageUrls,
+        images: allImages,
       };
 
       console.log('Submitting maintenance request:', submitData);
@@ -101,6 +106,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
         <ImageUploadField
           onImageChange={handleImageChange}
           selectedImages={selectedImages}
+          existingImages={request?.images}
         />
 
         <Button type="submit" disabled={isSubmitting}>
