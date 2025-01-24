@@ -16,33 +16,25 @@ export function ImageUploadField({
   const safeExistingImages = existingImages || [];
   
   return (
-    <div className="space-y-2">
-      <FormLabel>Images</FormLabel>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={onImageChange}
-            className="cursor-pointer"
-          />
-          {selectedImages.length > 0 && (
-            <p className="text-sm text-muted-foreground">
-              {selectedImages.length} new image(s) selected
-            </p>
-          )}
-        </div>
-        
-        {safeExistingImages.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Existing Images</p>
-            <div className="grid grid-cols-2 gap-2">
-              {safeExistingImages.map((imageUrl, index) => (
-                <div key={index} className="relative aspect-square rounded-md overflow-hidden border">
+    <div className="space-y-4">
+      <div>
+        <FormLabel>Upload New Images</FormLabel>
+        <Input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={onImageChange}
+          className="cursor-pointer mt-2"
+        />
+        {selectedImages.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-medium mb-2">New Images to Upload</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {selectedImages.map((file, index) => (
+                <div key={index} className="relative aspect-square rounded-md overflow-hidden border bg-gray-50">
                   <img
-                    src={imageUrl}
-                    alt={`Maintenance request image ${index + 1}`}
+                    src={URL.createObjectURL(file)}
+                    alt={`Selected image ${index + 1}`}
                     className="object-cover w-full h-full"
                   />
                 </div>
@@ -51,6 +43,24 @@ export function ImageUploadField({
           </div>
         )}
       </div>
+      
+      {safeExistingImages.length > 0 && (
+        <div>
+          <p className="text-sm font-medium mb-2">Existing Request Images</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {safeExistingImages.map((imageUrl, index) => (
+              <div key={index} className="relative aspect-square rounded-md overflow-hidden border">
+                <img
+                  src={imageUrl}
+                  alt={`Maintenance request image ${index + 1}`}
+                  className="object-cover w-full h-full hover:scale-105 transition-transform cursor-pointer"
+                  onClick={() => window.open(imageUrl, '_blank')}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
