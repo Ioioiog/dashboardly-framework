@@ -43,7 +43,8 @@ export function UtilityStatsDialog({
       }
 
       console.log("Utility stats:", data);
-      return data as UtilityStats;
+      // First cast to unknown, then to UtilityStats to safely handle the JSON response
+      return (data as unknown) as UtilityStats;
     },
     enabled: open,
   });
