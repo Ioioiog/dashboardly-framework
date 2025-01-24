@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { Check, CheckCheck, Trash2, Pencil, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface MessageProps {
   id: string;
@@ -49,15 +50,17 @@ export function Message({
   };
 
   return (
-    <div className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}>
-      <div className="max-w-[70%]">
-        <div
-          className={`rounded-lg p-3 ${
-            isCurrentUser
-              ? "bg-blue-500 text-white"
-              : "bg-gray-100 dark:bg-gray-800"
-          }`}
-        >
+    <div className={cn("flex mb-4", isCurrentUser ? "justify-end" : "justify-start")}>
+      <div className={cn(
+        "max-w-[70%] group",
+        isCurrentUser ? "items-end" : "items-start"
+      )}>
+        <div className={cn(
+          "rounded-2xl p-4",
+          isCurrentUser
+            ? "bg-blue-500 text-white"
+            : "bg-slate-100 dark:bg-slate-800"
+        )}>
           <div className="flex justify-between items-center mb-1">
             <p className="text-sm font-semibold">{senderName}</p>
             <span className="text-xs opacity-70">{messageTime}</span>
@@ -73,6 +76,7 @@ export function Message({
                 size="sm"
                 variant="ghost"
                 onClick={() => onEditSave(id)}
+                className="h-8 w-8 p-0"
               >
                 <Check className="h-4 w-4" />
               </Button>
@@ -80,16 +84,20 @@ export function Message({
                 size="sm"
                 variant="ghost"
                 onClick={onEditCancel}
+                className="h-8 w-8 p-0"
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
           ) : (
-            <p className="break-words">{content}</p>
+            <p className="break-words whitespace-pre-wrap">{content}</p>
           )}
         </div>
         {isCurrentUser && (
-          <div className="flex justify-end mt-1 space-x-2 items-center">
+          <div className={cn(
+            "flex justify-end mt-1 space-x-1 items-center opacity-0 group-hover:opacity-100 transition-opacity",
+            isEditing && "opacity-100"
+          )}>
             {!isEditing && (
               <>
                 <Button
@@ -98,7 +106,7 @@ export function Message({
                   className="h-6 w-6 p-0"
                   onClick={() => onEditStart(id, content)}
                 >
-                  <Pencil className="h-4 w-4" />
+                  <Pencil className="h-3 w-3" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -106,9 +114,9 @@ export function Message({
                   className="h-6 w-6 p-0"
                   onClick={() => onDelete(id)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3" />
                 </Button>
-                <div className="flex items-center">
+                <div className="flex items-center ml-1">
                   {renderMessageStatus(status)}
                 </div>
               </>

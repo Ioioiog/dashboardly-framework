@@ -50,17 +50,17 @@ export function MessageInput({
 
   return (
     <TooltipProvider>
-      <form onSubmit={handleSendMessage} className="p-4 border-t dark:border-gray-700 bg-white dark:bg-gray-900">
-        <div className="flex items-center gap-2">
+      <form onSubmit={handleSendMessage} className="p-6 border-t dark:border-gray-700 bg-slate-50/50 dark:bg-slate-800/50 rounded-b-2xl">
+        <div className="flex items-center gap-3">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9"
+                className="h-10 w-10 shrink-0"
               >
-                <Paperclip className="h-4 w-4" />
+                <Paperclip className="h-5 w-5" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -81,9 +81,9 @@ export function MessageInput({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9"
+                className="h-10 w-10 shrink-0"
               >
-                <Smile className="h-4 w-4" />
+                <Smile className="h-5 w-5" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0" align="end">
@@ -100,10 +100,10 @@ export function MessageInput({
               <Button 
                 type="submit"
                 size="icon"
-                className="h-9 w-9"
+                className="h-10 w-10 shrink-0"
                 disabled={!newMessage.trim()}
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-5 w-5" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
