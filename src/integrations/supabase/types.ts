@@ -923,6 +923,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_property_utility_stats: {
+        Args: {
+          property_id: string
+        }
+        Returns: Json
+      }
       set_claim: {
         Args: {
           params: Json

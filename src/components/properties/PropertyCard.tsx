@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Calendar, DollarSign, UserMinus } from "lucide-react";
+import { Edit, Trash2, Calendar, DollarSign, UserMinus, BarChart2 } from "lucide-react";
 import { Property } from "@/utils/propertyUtils";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { UtilityStatsDialog } from "./UtilityStatsDialog";
 
 interface PropertyCardProps {
   property: Property;
@@ -24,6 +25,7 @@ export function PropertyCard({
   viewMode = "grid" 
 }: PropertyCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showUtilityStats, setShowUtilityStats] = useState(false);
   const { t } = useTranslation();
   const { toast } = useToast();
 
@@ -140,29 +142,47 @@ export function PropertyCard({
             )}
           </div>
         </CardContent>
-        {userRole === "landlord" && (
-          <CardFooter className={`px-6 py-4 bg-gray-50 gap-2 flex-wrap ${viewMode === "list" ? "border-l" : ""}`}>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit?.(property, {})}
-              className="flex items-center gap-2"
-            >
-              <Edit className="h-4 w-4" />
-              Edit
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDelete?.(property)}
-              className="flex items-center gap-2 text-red-600 hover:text-red-700"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </Button>
-          </CardFooter>
-        )}
+        <CardFooter className={`px-6 py-4 bg-gray-50 gap-2 flex-wrap ${viewMode === "list" ? "border-l" : ""}`}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowUtilityStats(true)}
+            className="flex items-center gap-2"
+          >
+            <BarChart2 className="h-4 w-4" />
+            Analyze Invoice History
+          </Button>
+          {userRole === "landlord" && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit?.(property, {})}
+                className="flex items-center gap-2"
+              >
+                <Edit className="h-4 w-4" />
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDelete?.(property)}
+                className="flex items-center gap-2 text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>
+            </>
+          )}
+        </CardFooter>
       </Card>
+
+      <UtilityStatsDialog
+        open={showUtilityStats}
+        onOpenChange={setShowUtilityStats}
+        propertyId={property.id}
+        propertyName={property.name}
+      />
     </>
   );
 }
