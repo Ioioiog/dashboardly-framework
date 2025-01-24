@@ -32,17 +32,25 @@ export function MetricCard({
 
   return (
     <Card 
-      className={cn("", className, route && "cursor-pointer hover:bg-accent transition-colors")}
+      className={cn(
+        "overflow-hidden", 
+        className,
+        route && "cursor-pointer hover:scale-105 transform transition-all duration-300"
+      )}
       onClick={handleClick}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{t(title)}</CardTitle>
+        <CardTitle className="text-sm font-medium">
+          {t(title)}
+        </CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
         {description && (
-          <p className="text-xs text-muted-foreground">{t(description)}</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {t(description)}
+          </p>
         )}
       </CardContent>
     </Card>

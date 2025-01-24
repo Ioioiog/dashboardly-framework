@@ -156,14 +156,14 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-fade-in">
         {[...Array(4)].map((_, i) => (
           <MetricCard
             key={i}
             title="Loading..."
             value="..."
             icon={Home}
-            className="animate-pulse"
+            className="bg-gradient-to-br from-white to-gray-50 shadow-md hover:shadow-lg transition-all duration-300"
           />
         ))}
       </div>
@@ -174,54 +174,67 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
 
   if (userRole === "landlord") {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-fade-in">
         <MetricCard
           title={t('dashboard.metrics.totalProperties')}
           value={metrics.totalProperties}
           icon={Home}
           route="/properties"
+          className="bg-gradient-to-br from-white to-blue-50 shadow-md hover:shadow-lg transition-all duration-300"
+          description="Total managed properties"
         />
         <MetricCard
           title={t('dashboard.metrics.monthlyRevenue')}
           value={`$${metrics.monthlyRevenue?.toLocaleString()}`}
           icon={Wallet}
           description={t('dashboard.revenue.title')}
+          className="bg-gradient-to-br from-white to-green-50 shadow-md hover:shadow-lg transition-all duration-300"
         />
         <MetricCard
           title={t('dashboard.metrics.activeTenants')}
           value={metrics.activeTenants}
           icon={Users}
           route="/tenants"
+          className="bg-gradient-to-br from-white to-purple-50 shadow-md hover:shadow-lg transition-all duration-300"
+          description="Currently active tenants"
         />
         <MetricCard
           title={t('dashboard.metrics.pendingMaintenance')}
           value={metrics.pendingMaintenance}
           icon={Settings}
           route="/maintenance"
+          className="bg-gradient-to-br from-white to-orange-50 shadow-md hover:shadow-lg transition-all duration-300"
+          description="Pending maintenance requests"
         />
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-6 md:grid-cols-3 animate-fade-in">
       <MetricCard
         title={t('dashboard.metrics.totalProperties')}
         value={metrics.totalProperties}
         icon={Home}
         route="/properties"
+        className="bg-gradient-to-br from-white to-blue-50 shadow-md hover:shadow-lg transition-all duration-300"
+        description="Your rented properties"
       />
       <MetricCard
         title={t('dashboard.metrics.pendingMaintenance')}
         value={metrics.pendingMaintenance}
         icon={Settings}
         route="/maintenance"
+        className="bg-gradient-to-br from-white to-orange-50 shadow-md hover:shadow-lg transition-all duration-300"
+        description="Open maintenance requests"
       />
       <MetricCard
         title={t('dashboard.metrics.paymentStatus')}
         value={metrics.paymentStatus}
         icon={Wallet}
         route="/invoices"
+        className="bg-gradient-to-br from-white to-green-50 shadow-md hover:shadow-lg transition-all duration-300"
+        description="Current payment status"
       />
     </div>
   );
