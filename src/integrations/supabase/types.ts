@@ -913,6 +913,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_tenant_invitation: {
+        Args: {
+          invitation_id: string
+        }
+        Returns: undefined
+      }
       generate_monthly_invoices: {
         Args: Record<PropertyKey, never>
         Returns: undefined

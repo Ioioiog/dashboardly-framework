@@ -21,10 +21,10 @@ export function PendingInvitationCard({ invitation }: PendingInvitationCardProps
     try {
       console.log("Deleting invitation:", invitation.id);
       
-      // Start a Supabase transaction
-      const { data, error: deleteError } = await supabase.rpc('delete_tenant_invitation', {
-        invitation_id: invitation.id
-      });
+      const { error: deleteError } = await supabase
+        .from('tenant_invitations')
+        .delete()
+        .eq('id', invitation.id);
 
       if (deleteError) {
         console.error("Error deleting invitation:", deleteError);
