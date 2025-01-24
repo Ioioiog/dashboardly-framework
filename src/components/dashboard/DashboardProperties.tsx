@@ -157,6 +157,7 @@ export function DashboardProperties({
           setTypeFilter={setTypeFilter}
           showOccupied={showOccupied}
           setShowOccupied={setShowOccupied}
+          userRole={userRole}
         />
         
         <div className="flex items-center gap-2">

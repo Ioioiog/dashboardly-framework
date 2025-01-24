@@ -10,6 +10,7 @@ interface PropertyFiltersProps {
   setTypeFilter: (value: string) => void;
   showOccupied: boolean;
   setShowOccupied: (value: boolean) => void;
+  userRole?: "landlord" | "tenant";
 }
 
 export function PropertyFilters({
@@ -19,6 +20,7 @@ export function PropertyFilters({
   setTypeFilter,
   showOccupied,
   setShowOccupied,
+  userRole,
 }: PropertyFiltersProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -46,14 +48,16 @@ export function PropertyFilters({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex items-center space-x-2 pt-8">
-        <Switch
-          id="occupied"
-          checked={showOccupied}
-          onCheckedChange={setShowOccupied}
-        />
-        <Label htmlFor="occupied">Show only occupied properties</Label>
-      </div>
+      {userRole === 'landlord' && (
+        <div className="flex items-center space-x-2 pt-8">
+          <Switch
+            id="occupied"
+            checked={showOccupied}
+            onCheckedChange={setShowOccupied}
+          />
+          <Label htmlFor="occupied">Show only occupied properties</Label>
+        </div>
+      )}
     </div>
   );
 }
