@@ -204,7 +204,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-3">
       <MetricCard
         title={t('dashboard.metrics.totalProperties')}
         value={metrics.totalProperties}
@@ -221,6 +221,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
         title={t('dashboard.metrics.paymentStatus')}
         value={metrics.paymentStatus}
         icon={Wallet}
+        route="/invoices"
       />
     </div>
   );
