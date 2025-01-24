@@ -7,11 +7,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+type SortOption = "name-asc" | "name-desc" | "rent-asc" | "rent-desc" | "date-asc" | "date-desc";
+
 interface PropertyListHeaderProps {
   viewMode: "grid" | "list";
   setViewMode: (mode: "grid" | "list") => void;
-  sortBy: string;
-  setSortBy: (sort: string) => void;
+  sortBy: SortOption;
+  setSortBy: (sort: SortOption) => void;
 }
 
 export function PropertyListHeader({
