@@ -179,21 +179,25 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           title={t('dashboard.metrics.totalProperties')}
           value={metrics.totalProperties}
           icon={Home}
+          route="/properties"
         />
         <MetricCard
           title={t('dashboard.metrics.monthlyRevenue')}
           value={`$${metrics.monthlyRevenue?.toLocaleString()}`}
           icon={Wallet}
+          description={t('dashboard.revenue.title')}
         />
         <MetricCard
           title={t('dashboard.metrics.activeTenants')}
           value={metrics.activeTenants}
           icon={Users}
+          route="/tenants"
         />
         <MetricCard
           title={t('dashboard.metrics.pendingMaintenance')}
           value={metrics.pendingMaintenance}
           icon={Settings}
+          route="/maintenance"
         />
       </div>
     );
@@ -205,11 +209,13 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
         title={t('dashboard.metrics.totalProperties')}
         value={metrics.totalProperties}
         icon={Home}
+        route="/properties"
       />
       <MetricCard
         title={t('dashboard.metrics.pendingMaintenance')}
         value={metrics.pendingMaintenance}
         icon={Settings}
+        route="/maintenance"
       />
       <MetricCard
         title={t('dashboard.metrics.paymentStatus')}
