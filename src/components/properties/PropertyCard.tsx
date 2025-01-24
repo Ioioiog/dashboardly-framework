@@ -81,7 +81,7 @@ export function PropertyCard({
         <CardContent className={`p-6 ${contentClassName} space-y-6`}>
           <div className="space-y-4">
             <div className="space-y-3">
-              <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+              <h3 className="text-xl font-semibold text-black">
                 {property.name}
               </h3>
               <p className="text-gray-600 flex items-center gap-2">
