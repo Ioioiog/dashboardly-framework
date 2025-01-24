@@ -172,10 +172,10 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
                   selected={formData.startDate || undefined}
                   onSelect={(date) => setFormData((prev) => ({ ...prev, startDate: date }))}
                   initialFocus
-                  fromYear={2020}
-                  toYear={2030}
-                  showOutsideDays={false}
-                  fixedWeeks
+                  showOutsideDays
+                  disabled={(date) =>
+                    date < new Date("2020-01-01") || date > new Date("2030-12-31")
+                  }
                 />
               </PopoverContent>
             </Popover>
@@ -201,10 +201,10 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
                   selected={formData.endDate || undefined}
                   onSelect={(date) => setFormData((prev) => ({ ...prev, endDate: date }))}
                   initialFocus
-                  fromYear={2020}
-                  toYear={2030}
-                  showOutsideDays={false}
-                  fixedWeeks
+                  showOutsideDays
+                  disabled={(date) =>
+                    date < new Date("2020-01-01") || date > new Date("2030-12-31")
+                  }
                 />
               </PopoverContent>
             </Popover>
