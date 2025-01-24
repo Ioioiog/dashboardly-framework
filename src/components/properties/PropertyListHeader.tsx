@@ -1,5 +1,5 @@
+import { Grid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ArrowDownAZ, ArrowUpAZ, Grid, List } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type SortOption = "name-asc" | "name-desc" | "rent-asc" | "rent-desc" | "date-asc" | "date-desc";
+export type SortOption = "name-asc" | "name-desc" | "rent-asc" | "rent-desc" | "date-asc" | "date-desc";
 
 interface PropertyListHeaderProps {
   viewMode: "grid" | "list";
@@ -20,14 +20,13 @@ export function PropertyListHeader({
   viewMode,
   setViewMode,
   sortBy,
-  setSortBy
+  setSortBy,
 }: PropertyListHeaderProps) {
   return (
     <div className="flex items-center gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9">
-            {sortBy.includes("asc") ? <ArrowDownAZ className="mr-2 h-4 w-4" /> : <ArrowUpAZ className="mr-2 h-4 w-4" />}
+          <Button variant="outline" size="sm">
             Sort
           </Button>
         </DropdownMenuTrigger>
@@ -53,25 +52,21 @@ export function PropertyListHeader({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex">
-        <button
+      <div className="flex items-center gap-1 border rounded-md">
+        <Button
+          variant={viewMode === "grid" ? "secondary" : "ghost"}
+          size="sm"
           onClick={() => setViewMode("grid")}
-          className={`inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-l-full px-4 py-2 ${
-            viewMode === "grid" ? "bg-white text-blue-400" : ""
-          }`}
         >
-          <Grid className="w-4 h-4 mr-2" />
-          <span>Grid</span>
-        </button>
-        <button
+          <Grid className="h-4 w-4" />
+        </Button>
+        <Button
+          variant={viewMode === "list" ? "secondary" : "ghost"}
+          size="sm"
           onClick={() => setViewMode("list")}
-          className={`inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2 ${
-            viewMode === "list" ? "bg-white text-blue-400" : ""
-          }`}
         >
-          <List className="w-4 h-4 mr-2" />
-          <span>List</span>
-        </button>
+          <List className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { useProperties } from "@/hooks/useProperties";
 import { useState } from "react";
 import { PropertyDialog } from "@/components/properties/PropertyDialog";
 import { PropertyFilters } from "@/components/properties/PropertyFilters";
-import { PropertyListHeader } from "@/components/properties/PropertyListHeader";
+import { PropertyListHeader, SortOption } from "@/components/properties/PropertyListHeader";
 import { usePropertyOperations } from "@/hooks/usePropertyOperations";
 
 interface DashboardPropertiesProps {
@@ -12,8 +12,6 @@ interface DashboardPropertiesProps {
   onEdit?: (property: Property, data: any) => void;
   onDelete?: (property: Property) => void;
 }
-
-type SortOption = "name-asc" | "name-desc" | "rent-asc" | "rent-desc" | "date-asc" | "date-desc";
 
 export function DashboardProperties({ 
   userRole,
