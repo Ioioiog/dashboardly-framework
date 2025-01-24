@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Calendar, DollarSign, UserMinus, BarChart2 } from "lucide-react";
+import { Edit, Trash2, Calendar, DollarSign, UserMinus, BarChart2, UserPlus } from "lucide-react";
 import { Property } from "@/utils/propertyUtils";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UtilityStatsDialog } from "./UtilityStatsDialog";
+import { TenantAssignDialog } from "@/components/tenants/TenantAssignDialog";
 
 interface PropertyCardProps {
   property: Property;
@@ -26,6 +27,7 @@ export function PropertyCard({
 }: PropertyCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showUtilityStats, setShowUtilityStats] = useState(false);
+  const [showAssignTenant, setShowAssignTenant] = useState(false);
   const { t } = useTranslation();
   const { toast } = useToast();
 
@@ -130,33 +132,48 @@ export function PropertyCard({
             )}
 
             {/* Landlord Section */}
-            {userRole === "landlord" && property.tenancy && (
+            {userRole === "landlord" && (
               <div className="space-y-4 pt-4 border-t border-gray-100">
                 <h4 className="font-medium text-gray-900">Current Tenant</h4>
-                <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-600 flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-blue-500" />
-                      Start Date: {format(new Date(property.tenancy.start_date), 'PPP')}
-                    </p>
-                    {property.tenancy.end_date && (
+                {property.tenancy ? (
+                  <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                    <div className="space-y-2">
                       <p className="text-sm text-gray-600 flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-blue-500" />
-                        End Date: {format(new Date(property.tenancy.end_date), 'PPP')}
+                        Start Date: {format(new Date(property.tenancy.start_date), 'PPP')}
                       </p>
-                    )}
+                      {property.tenancy.end_date && (
+                        <p className="text-sm text-gray-600 flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-blue-500" />
+                          End Date: {format(new Date(property.tenancy.end_date), 'PPP')}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDeleteTenancy}
+                      disabled={isDeleting}
+                      className="flex items-center gap-2 hover:bg-red-600 transition-colors"
+                    >
+                      <UserMinus className="h-4 w-4" />
+                      {isDeleting ? "Removing..." : "Remove Tenant"}
+                    </Button>
                   </div>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleDeleteTenancy}
-                    disabled={isDeleting}
-                    className="flex items-center gap-2 hover:bg-red-600 transition-colors"
-                  >
-                    <UserMinus className="h-4 w-4" />
-                    {isDeleting ? "Removing..." : "Remove Tenant"}
-                  </Button>
-                </div>
+                ) : (
+                  <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-600">No tenant assigned</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAssignTenant(true)}
+                      className="flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Assign Tenant
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -204,6 +221,15 @@ export function PropertyCard({
         propertyId={property.id}
         propertyName={property.name}
       />
+
+      {showAssignTenant && (
+        <TenantAssignDialog
+          open={showAssignTenant}
+          onOpenChange={setShowAssignTenant}
+          properties={[property]}
+          onClose={() => setShowAssignTenant(false)}
+        />
+      )}
     </>
   );
 }
