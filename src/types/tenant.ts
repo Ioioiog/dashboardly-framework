@@ -16,6 +16,7 @@ export interface Tenant {
     start_date: string;
     end_date: string | null;
     status: string;
+    monthly_pay_day?: number;
   };
 }
 

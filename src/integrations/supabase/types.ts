@@ -525,6 +525,7 @@ export type Database = {
           created_at: string
           end_date: string | null
           id: string
+          monthly_pay_day: number | null
           property_id: string
           start_date: string
           status: string
@@ -535,6 +536,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          monthly_pay_day?: number | null
           property_id: string
           start_date: string
           status?: string
@@ -545,6 +547,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          monthly_pay_day?: number | null
           property_id?: string
           start_date?: string
           status?: string
