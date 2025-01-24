@@ -52,6 +52,9 @@ export function useMaintenanceForm({ request, userRole, onSuccess }: UseMaintena
     for (const file of selectedImages) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      
+      console.log('Uploading image:', fileName);
+      
       const { error: uploadError, data } = await supabase.storage
         .from('maintenance-images')
         .upload(fileName, file);
@@ -65,6 +68,8 @@ export function useMaintenanceForm({ request, userRole, onSuccess }: UseMaintena
         const { data: { publicUrl } } = supabase.storage
           .from('maintenance-images')
           .getPublicUrl(fileName);
+        
+        console.log('Image uploaded successfully:', publicUrl);
         uploadedUrls.push(publicUrl);
       }
     }
