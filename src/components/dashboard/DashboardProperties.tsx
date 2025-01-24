@@ -45,8 +45,8 @@ export function DashboardProperties({
 
   const handleEdit = async (property: Property, data: any) => {
     try {
-      if (!property?.id) {
-        console.error("No property ID provided for update");
+      if (!property?.id || typeof property.id !== 'string') {
+        console.error("Invalid property ID:", property?.id);
         toast({
           variant: "destructive",
           title: "Error",
@@ -102,8 +102,8 @@ export function DashboardProperties({
   };
 
   const handleEditClick = (property: Property) => {
-    if (!property?.id) {
-      console.error("Invalid property data");
+    if (!property?.id || typeof property.id !== 'string') {
+      console.error("Invalid property data:", property);
       toast({
         variant: "destructive",
         title: "Error",
