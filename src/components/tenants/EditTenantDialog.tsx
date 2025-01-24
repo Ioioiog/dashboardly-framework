@@ -174,6 +174,8 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
                   initialFocus
                   fromYear={2020}
                   toYear={2030}
+                  showOutsideDays={false}
+                  fixedWeeks
                 />
               </PopoverContent>
             </Popover>
@@ -201,6 +203,8 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
                   initialFocus
                   fromYear={2020}
                   toYear={2030}
+                  showOutsideDays={false}
+                  fixedWeeks
                 />
               </PopoverContent>
             </Popover>
