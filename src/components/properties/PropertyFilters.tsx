@@ -1,12 +1,15 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface PropertyFiltersProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
   typeFilter: string;
   setTypeFilter: (value: string) => void;
+  showOccupied: boolean;
+  setShowOccupied: (value: boolean) => void;
 }
 
 export function PropertyFilters({
@@ -14,9 +17,11 @@ export function PropertyFilters({
   setSearchTerm,
   typeFilter,
   setTypeFilter,
+  showOccupied,
+  setShowOccupied,
 }: PropertyFiltersProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div>
         <Label htmlFor="search">Search</Label>
         <Input
@@ -40,6 +45,14 @@ export function PropertyFilters({
             <SelectItem value="Commercial">Commercial</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+      <div className="flex items-center space-x-2 pt-8">
+        <Switch
+          id="occupied"
+          checked={showOccupied}
+          onCheckedChange={setShowOccupied}
+        />
+        <Label htmlFor="occupied">Show only occupied properties</Label>
       </div>
     </div>
   );

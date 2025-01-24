@@ -36,6 +36,7 @@ export function DashboardProperties({
   const [typeFilter, setTypeFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [showOccupied, setShowOccupied] = useState(false);
   const { toast } = useToast();
 
   console.log("DashboardProperties - userRole:", userRole);
@@ -140,7 +141,8 @@ export function DashboardProperties({
     const matchesSearch = property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          property.address.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === "all" || property.type === typeFilter;
-    return matchesSearch && matchesType;
+    const matchesOccupied = !showOccupied || (property.tenancy !== undefined);
+    return matchesSearch && matchesType && matchesOccupied;
   });
 
   const sortedAndFilteredProperties = filteredProperties ? sortProperties(filteredProperties) : [];
@@ -153,6 +155,8 @@ export function DashboardProperties({
           setSearchTerm={setSearchTerm}
           typeFilter={typeFilter}
           setTypeFilter={setTypeFilter}
+          showOccupied={showOccupied}
+          setShowOccupied={setShowOccupied}
         />
         
         <div className="flex items-center gap-2">
