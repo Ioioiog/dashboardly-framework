@@ -166,12 +166,14 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
                   {formData.startDate ? format(formData.startDate, "PPP") : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={formData.startDate || undefined}
                   onSelect={(date) => setFormData((prev) => ({ ...prev, startDate: date }))}
                   initialFocus
+                  fromYear={2020}
+                  toYear={2030}
                 />
               </PopoverContent>
             </Popover>
@@ -191,12 +193,14 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
                   {formData.endDate ? format(formData.endDate, "PPP") : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={formData.endDate || undefined}
                   onSelect={(date) => setFormData((prev) => ({ ...prev, endDate: date }))}
                   initialFocus
+                  fromYear={2020}
+                  toYear={2030}
                 />
               </PopoverContent>
             </Popover>
