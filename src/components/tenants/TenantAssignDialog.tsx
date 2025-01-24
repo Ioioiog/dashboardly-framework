@@ -8,9 +8,10 @@ interface TenantAssignDialogProps {
   properties: Property[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onClose?: () => void; // Made optional to maintain backward compatibility
 }
 
-export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAssignDialogProps) {
+export function TenantAssignDialog({ properties, open, onOpenChange, onClose }: TenantAssignDialogProps) {
   const { data: availableTenants = [] } = useQuery({
     queryKey: ["available-tenants"],
     queryFn: async () => {
@@ -24,8 +25,15 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
     },
   });
 
+  const handleOpenChange = (newOpen: boolean) => {
+    onOpenChange(newOpen);
+    if (!newOpen && onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Assign Existing Tenant</DialogTitle>
@@ -36,7 +44,7 @@ export function TenantAssignDialog({ properties, open, onOpenChange }: TenantAss
         <TenantAssignForm 
           properties={properties} 
           availableTenants={availableTenants}
-          onClose={() => onOpenChange(false)}
+          onClose={() => handleOpenChange(false)}
         />
       </DialogContent>
     </Dialog>
