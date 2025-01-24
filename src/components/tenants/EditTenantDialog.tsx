@@ -6,6 +6,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tenant } from "@/types/tenant";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 
 interface EditTenantDialogProps {
   tenant: Tenant;
@@ -21,6 +26,9 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
     lastName: tenant.last_name || "",
     email: tenant.email || "",
     phone: tenant.phone || "",
+    startDate: tenant.tenancy?.start_date ? new Date(tenant.tenancy.start_date) : null,
+    endDate: tenant.tenancy?.end_date ? new Date(tenant.tenancy.end_date) : null,
+    monthlyPayDay: tenant.tenancy?.monthly_pay_day || "1",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,7 +36,8 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      console.log("Updating tenant profile...");
+      const { error: profileError } = await supabase
         .from("profiles")
         .update({
           first_name: formData.firstName,
@@ -38,7 +47,20 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
         })
         .eq("id", tenant.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      console.log("Updating tenancy...");
+      const { error: tenancyError } = await supabase
+        .from("tenancies")
+        .update({
+          start_date: formData.startDate ? format(formData.startDate, 'yyyy-MM-dd') : null,
+          end_date: formData.endDate ? format(formData.endDate, 'yyyy-MM-dd') : null,
+          monthly_pay_day: parseInt(formData.monthlyPayDay),
+        })
+        .eq("tenant_id", tenant.id)
+        .eq("status", "active");
+
+      if (tenancyError) throw tenancyError;
 
       toast({
         title: "Success",
@@ -83,7 +105,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
         <DialogHeader>
           <DialogTitle>Edit Tenant Information</DialogTitle>
           <DialogDescription>
-            Update the tenant's personal information. This will not affect their tenancy details.
+            Update the tenant's personal information and tenancy details.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -126,6 +148,69 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
               value={formData.phone}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, phone: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Start Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.startDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.startDate ? format(formData.startDate, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={formData.startDate || undefined}
+                  onSelect={(date) => setFormData((prev) => ({ ...prev, startDate: date }))}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="space-y-2">
+            <Label>End Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.endDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.endDate ? format(formData.endDate, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={formData.endDate || undefined}
+                  onSelect={(date) => setFormData((prev) => ({ ...prev, endDate: date }))}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="monthlyPayDay">Monthly Pay Day</Label>
+            <Input
+              id="monthlyPayDay"
+              type="number"
+              min="1"
+              max="31"
+              value={formData.monthlyPayDay}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, monthlyPayDay: e.target.value }))
               }
             />
           </div>
