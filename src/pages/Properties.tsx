@@ -106,33 +106,35 @@ export default function Properties() {
   }
 
   return (
-    <div className="flex h-screen bg-dashboard-background">
+    <div className="flex h-screen bg-gradient-to-br from-dashboard-background to-gray-50">
       <DashboardSidebar />
       <main className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-8">
-          <div className="space-y-8">
-            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white rounded-lg p-6 shadow-sm">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                  {t(`properties.title.${userRole}`)}
-                </h1>
-                <p className="mt-2 text-sm text-gray-500">
-                  {t(`properties.description.${userRole}`)}
-                </p>
-              </div>
+          <div className="space-y-6">
+            <header className="bg-white rounded-xl shadow-lg p-8 transition-all duration-300 hover:shadow-xl animate-fade-in">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+                    {t(`properties.title.${userRole}`)}
+                  </h1>
+                  <p className="mt-2 text-gray-500 leading-relaxed max-w-2xl">
+                    {t(`properties.description.${userRole}`)}
+                  </p>
+                </div>
 
-              {userRole === "landlord" && (
-                <Button 
-                  onClick={() => setShowDialog(true)}
-                  className="w-full sm:w-auto bg-primary hover:bg-primary/90"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t("properties.addProperty")}
-                </Button>
-              )}
+                {userRole === "landlord" && (
+                  <Button 
+                    onClick={() => setShowDialog(true)}
+                    className="w-full sm:w-auto bg-gradient-to-r from-primary/90 to-primary hover:from-primary hover:to-primary/90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t("properties.addProperty")}
+                  </Button>
+                )}
+              </div>
             </header>
 
-            <div className="bg-white rounded-lg shadow-sm">
+            <div className="bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
               <div className="p-6">
                 <DashboardProperties 
                   userRole={userRole}

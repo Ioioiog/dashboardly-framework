@@ -25,17 +25,16 @@ export function PropertyList({
 }: PropertyListProps) {
   const { t } = useTranslation();
 
-  // Show loading skeleton
   if (isLoading) {
     return (
-      <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} gap-4 max-w-7xl mx-auto`}>
+      <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} gap-6 max-w-7xl mx-auto animate-fade-in`}>
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="p-6 animate-pulse">
-            <div className="space-y-3">
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-              <div className="h-32 bg-gray-200 rounded"></div>
+          <Card key={i} className="p-6 animate-pulse bg-gradient-to-br from-gray-50 to-white">
+            <div className="space-y-4">
+              <div className="h-4 bg-gray-200 rounded-full w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded-full w-1/2"></div>
+              <div className="h-4 bg-gray-200 rounded-full w-2/3"></div>
+              <div className="h-32 bg-gray-200 rounded-lg"></div>
             </div>
           </Card>
         ))}
@@ -43,14 +42,13 @@ export function PropertyList({
     );
   }
 
-  // Show error state if properties is undefined
   if (properties === undefined) {
     return (
-      <div className="max-w-7xl mx-auto">
-        <Alert variant="destructive">
+      <div className="max-w-7xl mx-auto animate-fade-in">
+        <Alert variant="destructive" className="bg-red-50 border-red-200">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{t('common.error')}</AlertTitle>
-          <AlertDescription>
+          <AlertTitle className="font-semibold">{t('common.error')}</AlertTitle>
+          <AlertDescription className="text-red-800">
             {t('properties.error.fetch')}
           </AlertDescription>
         </Alert>
@@ -58,19 +56,18 @@ export function PropertyList({
     );
   }
 
-  // Show empty state
   if (!properties.length) {
     return (
-      <div className="max-w-7xl mx-auto">
-        <Card className="p-6">
-          <div className="text-center space-y-2">
-            <p className="text-gray-500">
+      <div className="max-w-7xl mx-auto animate-fade-in">
+        <Card className="p-8 bg-gradient-to-br from-gray-50 to-white">
+          <div className="text-center space-y-3">
+            <p className="text-gray-600 text-lg">
               {userRole === "landlord" 
                 ? t('properties.empty.landlord')
                 : t('properties.empty.tenant')}
             </p>
             {userRole === "tenant" && (
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-500">
                 {t('properties.empty.tenant.contact')}
               </p>
             )}
@@ -80,9 +77,8 @@ export function PropertyList({
     );
   }
 
-  // Show property grid/list
   return (
-    <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} gap-4 max-w-7xl mx-auto`}>
+    <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'} gap-6 max-w-7xl mx-auto animate-fade-in`}>
       {properties.map((property) => (
         <PropertyCard
           key={property.id}
