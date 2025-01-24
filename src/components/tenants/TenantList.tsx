@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -43,7 +43,45 @@ export function TenantList({ tenants }: TenantListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [showInactive, setShowInactive] = useState(false);
+  const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchPendingInvitations = async () => {
+      if (showInactive) {
+        try {
+          const { data: invitations, error } = await supabase
+            .from('tenant_invitations')
+            .select(`
+              *,
+              tenant_invitation_properties (
+                property_id,
+                properties:property_id (
+                  id,
+                  name,
+                  address
+                )
+              )
+            `)
+            .eq('status', 'pending')
+            .eq('used', false);
+
+          if (error) throw error;
+          console.log("Pending invitations:", invitations);
+          setPendingInvitations(invitations || []);
+        } catch (error) {
+          console.error("Error fetching pending invitations:", error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch pending invitations",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+
+    fetchPendingInvitations();
+  }, [showInactive, toast]);
 
   const handleTenantUpdate = () => {
     queryClient.invalidateQueries({ queryKey: ["tenants"] });
@@ -121,6 +159,59 @@ export function TenantList({ tenants }: TenantListProps) {
     return matchesSearch && matchesStatus;
   });
 
+  const renderPendingInvitations = () => {
+    if (!showInactive || pendingInvitations.length === 0) return null;
+
+    return pendingInvitations.map((invitation) => {
+      const property = invitation.tenant_invitation_properties?.[0]?.properties;
+      
+      return viewMode === "grid" ? (
+        <Card key={invitation.id}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <h3 className="font-semibold">
+              {invitation.first_name} {invitation.last_name}
+            </h3>
+            <Badge className="bg-yellow-500">Pending Invitation</Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">{invitation.email}</p>
+              {property && (
+                <p className="text-sm">{property.name} ({property.address})</p>
+              )}
+              <div className="text-sm">
+                <p>Start: {format(new Date(invitation.start_date), "MMM d, yyyy")}</p>
+                <p>End: {invitation.end_date ? format(new Date(invitation.end_date), "MMM d, yyyy") : "Ongoing"}</p>
+                <p>Expires: {format(new Date(invitation.expiration_date), "MMM d, yyyy")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <TableRow key={invitation.id}>
+          <TableCell>{`${invitation.first_name || ''} ${invitation.last_name || ''}`}</TableCell>
+          <TableCell>{invitation.email}</TableCell>
+          <TableCell>N/A</TableCell>
+          <TableCell>
+            {property ? `${property.name} (${property.address})` : 'N/A'}
+          </TableCell>
+          <TableCell>
+            {format(new Date(invitation.start_date), "MMM d, yyyy")}
+          </TableCell>
+          <TableCell>
+            {invitation.end_date ? format(new Date(invitation.end_date), "MMM d, yyyy") : "Ongoing"}
+          </TableCell>
+          <TableCell>
+            <Badge className="bg-yellow-500">Pending Invitation</Badge>
+          </TableCell>
+          <TableCell className="text-right">
+            Expires: {format(new Date(invitation.expiration_date), "MMM d, yyyy")}
+          </TableCell>
+        </TableRow>
+      );
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-end mb-4">
@@ -142,7 +233,7 @@ export function TenantList({ tenants }: TenantListProps) {
             className="flex items-center gap-2"
           >
             <Users className="h-4 w-4" />
-            {showInactive ? "Hide Inactive Tenants" : "Show Inactive Tenants"}
+            {showInactive ? "Hide Inactive & Pending" : "Show Inactive & Pending"}
           </Button>
           <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex">
             <button
@@ -170,6 +261,7 @@ export function TenantList({ tenants }: TenantListProps) {
       </div>
 
       <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : ""}>
+        {renderPendingInvitations()}
         {filteredTenants.map((tenant) => {
           if (!tenant || !tenant.property) return null;
           
