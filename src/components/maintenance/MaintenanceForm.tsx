@@ -48,6 +48,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
   const { userRole } = useUserRole();
   const { properties } = useProperties({ userRole });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -62,6 +63,39 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
     },
   });
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      setSelectedImages(Array.from(files));
+    }
+  };
+
+  const uploadImages = async () => {
+    const uploadedUrls: string[] = [];
+    
+    for (const file of selectedImages) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const { error: uploadError, data } = await supabase.storage
+        .from('maintenance-images')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        throw new Error('Failed to upload image');
+      }
+
+      if (data) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('maintenance-images')
+          .getPublicUrl(fileName);
+        uploadedUrls.push(publicUrl);
+      }
+    }
+
+    return uploadedUrls;
+  };
+
   const onSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
@@ -69,6 +103,9 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
+
+      // Upload images if any are selected
+      const imageUrls = selectedImages.length > 0 ? await uploadImages() : [];
 
       const submitData = {
         title: data.title,
@@ -79,6 +116,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
         notes: data.notes || null,
         assigned_to: data.assigned_to,
         tenant_id: user.id,
+        images: imageUrls,
       };
 
       console.log('Submitting maintenance request:', submitData);
@@ -258,6 +296,22 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
             </FormItem>
           )}
         />
+
+        <div className="space-y-2">
+          <FormLabel>Images</FormLabel>
+          <Input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageChange}
+            className="cursor-pointer"
+          />
+          {selectedImages.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {selectedImages.length} image(s) selected
+            </p>
+          )}
+        </div>
 
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting
