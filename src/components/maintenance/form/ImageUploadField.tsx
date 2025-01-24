@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 interface ImageUploadFieldProps {
   onImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   selectedImages: File[];
-  existingImages?: string[];
+  existingImages?: string[] | null;
 }
 
 export function ImageUploadField({ 
@@ -12,6 +12,9 @@ export function ImageUploadField({
   selectedImages,
   existingImages = [] 
 }: ImageUploadFieldProps) {
+  // Ensure existingImages is always an array
+  const safeExistingImages = existingImages || [];
+  
   return (
     <div className="space-y-2">
       <FormLabel>Images</FormLabel>
@@ -31,11 +34,11 @@ export function ImageUploadField({
           )}
         </div>
         
-        {existingImages.length > 0 && (
+        {safeExistingImages.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm font-medium">Existing Images</p>
             <div className="grid grid-cols-2 gap-2">
-              {existingImages.map((imageUrl, index) => (
+              {safeExistingImages.map((imageUrl, index) => (
                 <div key={index} className="relative aspect-square rounded-md overflow-hidden border">
                   <img
                     src={imageUrl}
