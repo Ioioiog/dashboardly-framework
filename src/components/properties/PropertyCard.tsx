@@ -68,8 +68,8 @@ export function PropertyCard({
   };
 
   const cardClassName = viewMode === "list" 
-    ? "flex flex-row items-start gap-6 hover:shadow-lg transition-all duration-300 animate-fade-in" 
-    : "hover:shadow-lg transition-all duration-300 animate-fade-in";
+    ? "flex flex-row items-start gap-6 hover:shadow-lg transition-all duration-300 animate-fade-in border border-gray-100" 
+    : "hover:shadow-lg transition-all duration-300 animate-fade-in border border-gray-100";
 
   const contentClassName = viewMode === "list"
     ? "flex-1"
@@ -78,63 +78,70 @@ export function PropertyCard({
   return (
     <>
       <Card className={cardClassName}>
-        <CardContent className={`p-6 ${contentClassName} space-y-6`}>
-          <div className="space-y-4">
-            <div className="space-y-3">
+        <CardContent className={`p-6 ${contentClassName}`}>
+          <div className="space-y-6">
+            {/* Header Section */}
+            <div className="space-y-4">
               <h3 className="text-xl font-semibold text-black">
                 {property.name}
               </h3>
-              <p className="text-gray-600 flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                {property.address}
-              </p>
-              <p className="text-lg font-medium flex items-center gap-2 text-emerald-600">
-                <DollarSign className="h-5 w-5" />
-                ${property.monthly_rent}/{t('properties.rent.period')}
-              </p>
-              {property.type && (
-                <p className="text-sm text-gray-500 bg-gray-50 rounded-full px-4 py-1 inline-block">
-                  {t('properties.type')}: {property.type}
+              <div className="flex flex-col gap-2">
+                <p className="text-gray-600 flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-gray-400" />
+                  {property.address}
                 </p>
+                <p className="text-lg font-medium flex items-center gap-2 text-emerald-600">
+                  <DollarSign className="h-5 w-5" />
+                  ${property.monthly_rent}/{t('properties.rent.period')}
+                </p>
+              </div>
+              {property.type && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+                  {t('properties.type')}: {property.type}
+                </span>
               )}
               {property.description && (
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-gray-600 leading-relaxed mt-2">
                   {property.description}
                 </p>
               )}
             </div>
 
+            {/* Tenant Section */}
             {userRole === "tenant" && (
               <div className="space-y-3 pt-4 border-t border-gray-100">
-                <div className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">
-                  <Calendar className="h-4 w-4" />
-                  <span>Contract Start: {format(new Date(property.available_from || new Date()), 'PPP')}</span>
-                </div>
-                {property.tenancy?.end_date && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">
-                    <Calendar className="h-4 w-4" />
-                    <span>Contract End: {format(new Date(property.tenancy.end_date), 'PPP')}</span>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar className="h-4 w-4 text-gray-400" />
+                    <span>Contract Start: {format(new Date(property.available_from || new Date()), 'PPP')}</span>
                   </div>
-                )}
-                <div className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">
-                  <DollarSign className="h-4 w-4" />
-                  <span>Next Payment Due: {format(nextPaymentDate, 'PPP')}</span>
+                  {property.tenancy?.end_date && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Calendar className="h-4 w-4 text-gray-400" />
+                      <span>Contract End: {format(new Date(property.tenancy.end_date), 'PPP')}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <DollarSign className="h-4 w-4 text-gray-400" />
+                    <span>Next Payment Due: {format(nextPaymentDate, 'PPP')}</span>
+                  </div>
                 </div>
               </div>
             )}
 
+            {/* Landlord Section */}
             {userRole === "landlord" && property.tenancy && (
-              <div className="space-y-3 pt-4 border-t border-gray-100">
+              <div className="space-y-4 pt-4 border-t border-gray-100">
                 <h4 className="font-medium text-gray-800">Current Tenant</h4>
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
+                    <p className="text-sm text-gray-600 flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-gray-400" />
                       Start Date: {format(new Date(property.tenancy.start_date), 'PPP')}
                     </p>
                     {property.tenancy.end_date && (
-                      <p className="text-sm text-gray-600 hover:text-gray-800 transition-colors flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
+                      <p className="text-sm text-gray-600 flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-gray-400" />
                         End Date: {format(new Date(property.tenancy.end_date), 'PPP')}
                       </p>
                     )}
@@ -154,7 +161,9 @@ export function PropertyCard({
             )}
           </div>
         </CardContent>
-        <CardFooter className={`px-6 py-4 bg-gray-50 gap-2 flex-wrap ${viewMode === "list" ? "border-l" : "rounded-b-lg"}`}>
+
+        {/* Footer Section */}
+        <CardFooter className={`px-6 py-4 bg-gray-50 gap-2 flex-wrap ${viewMode === "list" ? "border-l" : "rounded-b-lg"} border-t border-gray-100`}>
           <Button
             variant="outline"
             size="sm"
