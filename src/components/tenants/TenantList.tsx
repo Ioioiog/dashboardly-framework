@@ -143,7 +143,7 @@ export function TenantList({ tenants }: TenantListProps) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <TenantListHeader
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -154,7 +154,7 @@ export function TenantList({ tenants }: TenantListProps) {
       />
 
       {viewMode === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
           {showInactive && pendingInvitations.map((invitation) => (
             <PendingInvitationCard
               key={invitation.id}
@@ -173,38 +173,40 @@ export function TenantList({ tenants }: TenantListProps) {
           ))}
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Property</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {showInactive && pendingInvitations.map((invitation) => (
-              <PendingInvitationRow
-                key={invitation.id}
-                invitation={invitation}
-              />
-            ))}
-            {filteredTenants.map((tenant) => (
-              <TenantRow
-                key={tenant.id}
-                tenant={tenant}
-                onDelete={handleDeleteTenant}
-                onUpdate={handleTenantUpdate}
-                getTenantDisplayName={getTenantDisplayName}
-                getStatusBadgeColor={getStatusBadgeColor}
-              />
-            ))}
-          </TableBody>
-        </Table>
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden animate-fade-in">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50 hover:bg-gray-50">
+                <TableHead className="font-semibold">Name</TableHead>
+                <TableHead className="font-semibold">Email</TableHead>
+                <TableHead className="font-semibold">Phone</TableHead>
+                <TableHead className="font-semibold">Property</TableHead>
+                <TableHead className="font-semibold">Start Date</TableHead>
+                <TableHead className="font-semibold">End Date</TableHead>
+                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="text-right font-semibold">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {showInactive && pendingInvitations.map((invitation) => (
+                <PendingInvitationRow
+                  key={invitation.id}
+                  invitation={invitation}
+                />
+              ))}
+              {filteredTenants.map((tenant) => (
+                <TenantRow
+                  key={tenant.id}
+                  tenant={tenant}
+                  onDelete={handleDeleteTenant}
+                  onUpdate={handleTenantUpdate}
+                  getTenantDisplayName={getTenantDisplayName}
+                  getStatusBadgeColor={getStatusBadgeColor}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </div>
   );

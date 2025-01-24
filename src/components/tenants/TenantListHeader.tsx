@@ -23,46 +23,53 @@ export function TenantListHeader({
   onViewModeChange,
 }: TenantListHeaderProps) {
   return (
-    <div className="flex justify-between items-end mb-4">
-      <div className="space-y-2">
-        <Label htmlFor="search">Search Tenants</Label>
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6 bg-white p-6 rounded-lg shadow-sm">
+      <div className="w-full md:w-auto space-y-2">
+        <Label htmlFor="search" className="text-sm font-medium text-gray-700">Search Tenants</Label>
         <Input
           id="search"
           placeholder="Search by name, email, or property..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="max-w-md"
+          className="w-full md:w-[300px] border-gray-200 focus:border-blue-500 focus:ring-blue-500"
         />
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
         <Button
           variant="outline"
           size="sm"
           onClick={() => onShowInactiveChange(!showInactive)}
-          className="flex items-center gap-2"
+          className={cn(
+            "flex items-center gap-2 w-full sm:w-auto transition-colors",
+            showInactive ? "bg-blue-50 text-blue-600 border-blue-200" : ""
+          )}
         >
           <Users className="h-4 w-4" />
           {showInactive ? "Hide Inactive & Pending" : "Show Inactive & Pending"}
         </Button>
-        <div className="bg-gray-200 text-sm text-gray-500 leading-none border-2 border-gray-200 rounded-full inline-flex">
+        <div className="bg-gray-100 rounded-lg p-1 flex items-center gap-1 w-full sm:w-auto">
           <button
             onClick={() => onViewModeChange("grid")}
             className={cn(
-              "inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-l-full px-4 py-2",
-              viewMode === "grid" ? "bg-white text-blue-400" : ""
+              "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+              viewMode === "grid"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
             )}
           >
-            <LayoutGrid className="w-4 h-4 mr-2" />
+            <LayoutGrid className="w-4 h-4" />
             <span>Grid</span>
           </button>
           <button
             onClick={() => onViewModeChange("list")}
             className={cn(
-              "inline-flex items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2",
-              viewMode === "list" ? "bg-white text-blue-400" : ""
+              "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all",
+              viewMode === "list"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
             )}
           >
-            <List className="w-4 h-4 mr-2" />
+            <List className="w-4 h-4" />
             <span>List</span>
           </button>
         </div>
