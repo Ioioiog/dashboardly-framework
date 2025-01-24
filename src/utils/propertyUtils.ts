@@ -11,7 +11,9 @@ export interface Property {
   description?: string;
   available_from?: string;
   landlord_id?: string;
-  end_date?: string; // Added for tenant view
+  end_date?: string;
+  created_at: string; // Added this field
+  updated_at: string; // Added this for completeness since it exists in the DB
   tenancy?: {
     end_date: string | null;
     start_date: string;
