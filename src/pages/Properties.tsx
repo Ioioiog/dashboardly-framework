@@ -106,18 +106,18 @@ export default function Properties() {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-dashboard-background to-gray-50">
+    <div className="flex h-screen bg-[#F6F6F7]">
       <DashboardSidebar />
       <main className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-8">
           <div className="space-y-6">
-            <header className="bg-white rounded-xl shadow-lg p-8 transition-all duration-300 hover:shadow-xl animate-fade-in">
+            <header className="bg-white rounded-xl shadow-md transition-all duration-300 hover:shadow-lg p-8 animate-fade-in border border-[#eee]">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+                  <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-[#1EAEDB] to-[#0FA0CE] bg-clip-text text-transparent">
                     {t(`properties.title.${userRole}`)}
                   </h1>
-                  <p className="mt-2 text-gray-500 leading-relaxed max-w-2xl">
+                  <p className="mt-2 text-[#888888] leading-relaxed max-w-2xl">
                     {t(`properties.description.${userRole}`)}
                   </p>
                 </div>
@@ -125,7 +125,7 @@ export default function Properties() {
                 {userRole === "landlord" && (
                   <Button 
                     onClick={() => setShowDialog(true)}
-                    className="w-full sm:w-auto bg-gradient-to-r from-primary/90 to-primary hover:from-primary hover:to-primary/90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    className="w-full sm:w-auto bg-[#1EAEDB] hover:bg-[#0FA0CE] transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     {t("properties.addProperty")}
@@ -134,7 +134,7 @@ export default function Properties() {
               </div>
             </header>
 
-            <div className="bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
+            <div className="bg-white rounded-xl shadow-md transition-all duration-300 hover:shadow-lg border border-[#eee]">
               <div className="p-6">
                 <DashboardProperties 
                   userRole={userRole}
