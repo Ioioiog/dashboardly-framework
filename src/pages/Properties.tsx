@@ -19,6 +19,47 @@ export default function Properties() {
 
   console.log("Properties page - User Role:", userRole);
 
+  const handleAdd = async (data: any): Promise<boolean> => {
+    try {
+      console.log("Attempting to add new property:", data);
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("No authenticated user found");
+      }
+
+      const propertyData = {
+        ...data,
+        landlord_id: user.id
+      };
+
+      const { error } = await supabase
+        .from("properties")
+        .insert(propertyData);
+
+      if (error) {
+        console.error("Error adding property:", error);
+        throw error;
+      }
+
+      toast({
+        title: t("properties.toast.success.added"),
+        description: t("properties.toast.success.propertyAdded"),
+      });
+      
+      setShowDialog(false);
+      return true;
+    } catch (error) {
+      console.error("Error adding property:", error);
+      toast({
+        variant: "destructive",
+        title: t("common.error"),
+        description: t("properties.toast.error.add"),
+      });
+      return false;
+    }
+  };
+
   const handleEdit = async (property: Property, data: any): Promise<boolean> => {
     try {
       if (!property.id) {
@@ -33,7 +74,6 @@ export default function Properties() {
 
       console.log("Attempting to edit property:", property.id, data);
       
-      // Ensure we're sending a properly formatted update object
       const updateData = {
         name: data.name,
         address: data.address,
@@ -124,7 +164,10 @@ export default function Properties() {
 
                 {userRole === "landlord" && (
                   <Button 
-                    onClick={() => setShowDialog(true)}
+                    onClick={() => {
+                      setSelectedProperty(null);
+                      setShowDialog(true);
+                    }}
                     className="w-full sm:w-auto bg-gradient-to-r from-primary/90 to-primary hover:from-primary hover:to-primary/90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                   >
                     <Plus className="mr-2 h-4 w-4" />
@@ -151,7 +194,7 @@ export default function Properties() {
         open={showDialog}
         onOpenChange={setShowDialog}
         property={selectedProperty}
-        onSubmit={handleEdit}
+        onSubmit={selectedProperty ? handleEdit : handleAdd}
         mode={selectedProperty ? "edit" : "add"}
       />
     </div>
