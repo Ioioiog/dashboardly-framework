@@ -95,30 +95,37 @@ export default function Maintenance() {
       <DashboardSidebar />
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto py-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Maintenance Requests</h1>
-            <Button onClick={() => setIsDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Request
-            </Button>
-          </div>
-
-          {userRole === 'landlord' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="p-4">
-                <h3 className="font-semibold mb-2">Pending</h3>
-                <p className="text-2xl">{requestsByStatus.pending}</p>
-              </Card>
-              <Card className="p-4">
-                <h3 className="font-semibold mb-2">In Progress</h3>
-                <p className="text-2xl">{requestsByStatus.in_progress}</p>
-              </Card>
-              <Card className="p-4">
-                <h3 className="font-semibold mb-2">Completed</h3>
-                <p className="text-2xl">{requestsByStatus.completed}</p>
-              </Card>
+          <div className="bg-white rounded-lg shadow-sm p-6 animate-fade-in">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                Maintenance Requests
+              </h1>
+              <Button 
+                onClick={() => setIsDialogOpen(true)}
+                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                New Request
+              </Button>
             </div>
-          )}
+
+            {userRole === 'landlord' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <Card className="p-6 bg-white hover:shadow-md transition-shadow duration-200">
+                  <h3 className="font-semibold text-gray-700 mb-2">Pending</h3>
+                  <p className="text-2xl font-bold text-blue-600">{requestsByStatus.pending}</p>
+                </Card>
+                <Card className="p-6 bg-white hover:shadow-md transition-shadow duration-200">
+                  <h3 className="font-semibold text-gray-700 mb-2">In Progress</h3>
+                  <p className="text-2xl font-bold text-yellow-600">{requestsByStatus.in_progress}</p>
+                </Card>
+                <Card className="p-6 bg-white hover:shadow-md transition-shadow duration-200">
+                  <h3 className="font-semibold text-gray-700 mb-2">Completed</h3>
+                  <p className="text-2xl font-bold text-green-600">{requestsByStatus.completed}</p>
+                </Card>
+              </div>
+            )}
+          </div>
 
           <MaintenanceFilters
             statusFilter={statusFilter}
