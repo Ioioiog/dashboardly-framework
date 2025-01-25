@@ -120,7 +120,7 @@ export function useMessages(conversationId: string | null) {
         }
       )
       .subscribe((status) => {
-        console.log("Subscription status:", status);
+        console.log("Real-time subscription status:", status);
       });
 
     return () => {
