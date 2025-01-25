@@ -43,7 +43,20 @@ export function ProtectedRoute({
           return;
         }
 
-        console.log("Session verified successfully for user:", session.user.id);
+        // Refresh session if it exists
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.error("Session refresh error:", refreshError);
+          toast({
+            title: "Session Error",
+            description: "Unable to refresh your session. Please sign in again.",
+            variant: "destructive",
+          });
+          await supabase.auth.signOut();
+          return;
+        }
+
+        console.log("Session verified successfully");
       } catch (error) {
         console.error("Session verification error:", error);
         if (mounted) {
@@ -61,8 +74,24 @@ export function ProtectedRoute({
       checkSession();
     }
 
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
+      if (event === 'SIGNED_OUT' || !session) {
+        console.log("User signed out or session expired");
+        if (mounted) {
+          toast({
+            title: "Session Ended",
+            description: "Your session has ended. Please sign in again.",
+            variant: "destructive",
+          });
+        }
+      }
+    });
+
     return () => {
       mounted = false;
+      subscription.unsubscribe();
     };
   }, [isAuthenticated, toast]);
 
