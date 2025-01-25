@@ -13,24 +13,24 @@ export function ChatHeader({ onTenantSelect, selectedTenantId }: ChatHeaderProps
   const { userRole } = useUserRole();
 
   return (
-    <div className="p-6 border-b bg-gradient-to-r from-slate-50/90 to-slate-100/90 dark:from-slate-800/90 dark:to-slate-900/90 rounded-t-2xl backdrop-blur-sm">
+    <div className="p-4 border-b bg-white dark:bg-slate-900 rounded-t-xl backdrop-blur-sm">
       <div className={cn(
-        "flex items-center gap-3 mb-4",
+        "flex items-center gap-3 mb-2",
         "animate-fade-in"
       )}>
-        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-          <MessageSquare className="h-6 w-6 text-blue-500 dark:text-blue-400" />
+        <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+          <MessageSquare className="h-5 w-5 text-blue-500 dark:text-blue-400" />
         </div>
-        <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
+        <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
           {userRole === "landlord" ? "Chat with Tenants" : "Chat with Landlord"}
         </h1>
       </div>
       {userRole === "landlord" && (
         <div className={cn(
-          "mt-4 flex items-center gap-3",
+          "mt-3 flex items-center gap-2",
           "animate-fade-in delay-100"
         )}>
-          <Users className="h-5 w-5 text-slate-400" />
+          <Users className="h-4 w-4 text-slate-400" />
           <TenantSelect
             onTenantSelect={onTenantSelect}
             selectedTenantId={selectedTenantId || undefined}

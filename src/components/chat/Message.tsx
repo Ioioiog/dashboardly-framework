@@ -40,27 +40,31 @@ export function Message({
   const messageTime = format(new Date(createdAt), 'HH:mm');
 
   return (
-    <div className={cn("flex mb-4", isCurrentUser ? "justify-end" : "justify-start")}>
+    <div className={cn(
+      "flex mb-2 px-4",
+      isCurrentUser ? "justify-end" : "justify-start"
+    )}>
       <div className={cn(
         "max-w-[70%] group",
         isCurrentUser ? "items-end" : "items-start"
       )}>
         <div className={cn(
-          "rounded-2xl p-4",
+          "rounded-2xl px-4 py-2",
+          "shadow-sm",
           isCurrentUser
-            ? "bg-blue-500 text-white"
-            : "bg-slate-100 dark:bg-slate-800"
+            ? "bg-blue-500 text-white rounded-br-sm"
+            : "bg-slate-100 dark:bg-slate-800 rounded-bl-sm"
         )}>
           <div className="flex justify-between items-center mb-1">
-            <p className="text-sm font-semibold">{senderName}</p>
-            <span className="text-xs opacity-70">{messageTime}</span>
+            <p className="text-xs font-medium opacity-75">{senderName}</p>
+            <span className="text-[10px] opacity-50 ml-2">{messageTime}</span>
           </div>
           {isEditing ? (
             <div className="flex gap-2">
               <Input
                 value={editedContent}
                 onChange={(e) => onEditChange(e.target.value)}
-                className="flex-1 bg-white dark:bg-gray-700"
+                className="flex-1 h-8 text-sm bg-white/90 dark:bg-slate-900/90"
               />
               <Button
                 size="sm"
@@ -80,7 +84,7 @@ export function Message({
               </Button>
             </div>
           ) : (
-            <p className="break-words whitespace-pre-wrap">{content}</p>
+            <p className="break-words whitespace-pre-wrap text-sm">{content}</p>
           )}
         </div>
         {isCurrentUser && !isEditing && (
