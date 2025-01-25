@@ -322,6 +322,7 @@ export type Database = {
           created_at: string
           id: string
           profile_id: string
+          read: boolean | null
           receiver_id: string | null
           room_id: string | null
           sender_id: string
@@ -334,6 +335,7 @@ export type Database = {
           created_at?: string
           id?: string
           profile_id: string
+          read?: boolean | null
           receiver_id?: string | null
           room_id?: string | null
           sender_id: string
@@ -346,6 +348,7 @@ export type Database = {
           created_at?: string
           id?: string
           profile_id?: string
+          read?: boolean | null
           receiver_id?: string | null
           room_id?: string | null
           sender_id?: string

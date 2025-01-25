@@ -11,6 +11,7 @@ interface Message {
   content: string;
   created_at: string;
   status: 'sent' | 'delivered' | 'read';
+  read: boolean;
   sender: {
     first_name: string | null;
     last_name: string | null;
@@ -44,13 +45,13 @@ export function MessageList({
     const updateMessageStatus = async () => {
       try {
         const unreadMessages = messages.filter(
-          msg => msg.sender_id !== currentUserId && msg.status !== 'read'
+          msg => msg.sender_id !== currentUserId && !msg.read
         );
 
         if (unreadMessages.length > 0) {
           const { error } = await supabase
             .from('messages')
-            .update({ status: 'read' })
+            .update({ status: 'read', read: true })
             .in('id', unreadMessages.map(msg => msg.id));
 
           if (error) throw error;

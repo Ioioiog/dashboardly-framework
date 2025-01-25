@@ -23,7 +23,7 @@ export function useSidebarNotifications() {
       .from('messages')
       .select('*', { count: 'exact', head: true })
       .eq('receiver_id', currentUserId)
-      .eq('status', 'sent');
+      .eq('read', false);
 
     if (messagesError) {
       console.error('Error fetching messages count:', messagesError);
@@ -37,40 +37,44 @@ export function useSidebarNotifications() {
       .select('id')
       .eq('landlord_id', currentUserId);
 
-    const propertyIds = properties?.map(p => p.id) || [];
+    if (properties) {
+      const propertyIds = properties.map(p => p.id);
 
-    // Fetch pending maintenance requests
-    const { count: maintenanceCount, error: maintenanceError } = await supabase
-      .from('maintenance_requests')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending')
-      .in('property_id', propertyIds);
+      // Fetch pending maintenance requests
+      const { count: maintenanceCount, error: maintenanceError } = await supabase
+        .from('maintenance_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending')
+        .in('property_id', propertyIds);
 
-    if (maintenanceError) {
-      console.error('Error fetching maintenance count:', maintenanceError);
-    } else {
-      notifications.push({ type: 'maintenance', count: maintenanceCount || 0 });
-    }
+      if (maintenanceError) {
+        console.error('Error fetching maintenance count:', maintenanceError);
+      } else {
+        notifications.push({ type: 'maintenance', count: maintenanceCount || 0 });
+      }
 
-    // Get tenancy IDs for the properties
-    const { data: tenancies } = await supabase
-      .from('tenancies')
-      .select('id')
-      .in('property_id', propertyIds);
+      // Get tenancy IDs for the properties
+      const { data: tenancies } = await supabase
+        .from('tenancies')
+        .select('id')
+        .in('property_id', propertyIds);
 
-    const tenancyIds = tenancies?.map(t => t.id) || [];
+      if (tenancies) {
+        const tenancyIds = tenancies.map(t => t.id);
 
-    // Fetch pending payments
-    const { count: paymentsCount, error: paymentsError } = await supabase
-      .from('payments')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending')
-      .in('tenancy_id', tenancyIds);
+        // Fetch pending payments
+        const { count: paymentsCount, error: paymentsError } = await supabase
+          .from('payments')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending')
+          .in('tenancy_id', tenancyIds);
 
-    if (paymentsError) {
-      console.error('Error fetching payments count:', paymentsError);
-    } else {
-      notifications.push({ type: 'payments', count: paymentsCount || 0 });
+        if (paymentsError) {
+          console.error('Error fetching payments count:', paymentsError);
+        } else {
+          notifications.push({ type: 'payments', count: paymentsCount || 0 });
+        }
+      }
     }
 
     return notifications;
