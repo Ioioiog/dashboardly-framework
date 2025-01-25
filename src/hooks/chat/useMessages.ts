@@ -55,19 +55,12 @@ export function useMessages(conversationId: string | null) {
       }
 
       console.log("Initial messages loaded:", data?.length);
-      if (data) {
-        const typedMessages: Message[] = data.map(msg => ({
-          id: msg.id,
-          sender_id: msg.sender_id,
-          content: msg.content,
-          created_at: msg.created_at,
-          status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read',
-          profile_id: msg.profile_id,
-          conversation_id: msg.conversation_id,
-          sender: msg.sender || { first_name: null, last_name: null }
-        }));
-        setMessages(typedMessages);
-      }
+      const typedMessages = data?.map(msg => ({
+        ...msg,
+        status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read',
+        sender: msg.sender || { first_name: null, last_name: null }
+      })) || [];
+      setMessages(typedMessages);
     };
 
     // Initial fetch
@@ -114,34 +107,27 @@ export function useMessages(conversationId: string | null) {
             return;
           }
 
-          if (newMessage) {
-            console.log("Processed new/updated message:", newMessage);
+          console.log("Processed new/updated message:", newMessage);
 
-            const typedMessage: Message = {
-              id: newMessage.id,
-              sender_id: newMessage.sender_id,
-              content: newMessage.content,
-              created_at: newMessage.created_at,
-              status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
-              profile_id: newMessage.profile_id,
-              conversation_id: newMessage.conversation_id,
-              sender: newMessage.sender || { first_name: null, last_name: null }
-            };
+          const typedMessage = {
+            ...newMessage,
+            status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
+            sender: newMessage.sender || { first_name: null, last_name: null }
+          };
 
-            setMessages(prev => {
-              const existingMessageIndex = prev.findIndex(msg => msg.id === typedMessage.id);
-              
-              if (existingMessageIndex === -1) {
-                // Message doesn't exist, add it
-                return [...prev, typedMessage];
-              } else {
-                // Message exists, update it
-                const updatedMessages = [...prev];
-                updatedMessages[existingMessageIndex] = typedMessage;
-                return updatedMessages;
-              }
-            });
-          }
+          setMessages(prev => {
+            const existingMessageIndex = prev.findIndex(msg => msg.id === typedMessage.id);
+            
+            if (existingMessageIndex === -1) {
+              // Message doesn't exist, add it
+              return [...prev, typedMessage];
+            } else {
+              // Message exists, update it
+              const updatedMessages = [...prev];
+              updatedMessages[existingMessageIndex] = typedMessage;
+              return updatedMessages;
+            }
+          });
         }
       )
       .subscribe((status) => {
@@ -188,7 +174,7 @@ export function useMessages(conversationId: string | null) {
           status,
           profile_id,
           conversation_id,
-          sender:profiles!sender_id(first_name, last_name)
+          sender:profiles!profile_id(first_name, last_name)
         `)
         .single();
 
