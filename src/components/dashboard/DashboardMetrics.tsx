@@ -1,210 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Home, Settings, Users, Wallet } from "lucide-react";
 import { MetricCard } from "./MetricCard";
-import { supabase } from "@/integrations/supabase/client";
+import { useMetrics } from "@/hooks/useMetrics";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-interface Metrics {
-  totalProperties?: number;
-  monthlyRevenue?: number;
-  activeTenants?: number;
-  pendingMaintenance: number;
-  paymentStatus?: string;
-  revenueDetails?: Array<{
-    property_name: string;
-    amount: number;
-    due_date: string;
-    status: string;
-  }>;
-}
-
-async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
-  console.log("Fetching landlord metrics for user:", userId);
-  
-  const currentDate = new Date();
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-
-  // Get properties with active tenancies and their monthly rents
-  const { data: properties, error } = await supabase
-    .from("properties")
-    .select(`
-      id,
-      name,
-      monthly_rent,
-      tenancies (
-        id,
-        status,
-        start_date,
-        end_date,
-        tenant_id
-      )
-    `)
-    .eq("landlord_id", userId);
-
-  if (error) {
-    console.error("Error fetching properties:", error);
-    throw error;
-  }
-
-  if (!properties) {
-    console.log("No properties found for landlord");
-    return {
-      totalProperties: 0,
-      monthlyRevenue: 0,
-      activeTenants: 0,
-      pendingMaintenance: 0,
-      revenueDetails: []
-    };
-  }
-
-  // Calculate monthly revenue and collect revenue details
-  const revenueDetails: Array<{ property_name: string; amount: number; due_date: string; status: string }> = [];
-  let totalMonthlyRevenue = 0;
-  let activeTenanciesCount = 0;
-
-  for (const property of properties) {
-    const hasActiveTenancy = property.tenancies?.some(tenancy => 
-      tenancy.status === 'active' && 
-      tenancy.start_date <= currentDate.toISOString() &&
-      (!tenancy.end_date || tenancy.end_date > currentDate.toISOString())
-    );
-    
-    if (hasActiveTenancy) {
-      totalMonthlyRevenue += Number(property.monthly_rent);
-      activeTenanciesCount++;
-
-      // Get payment status for this property
-      const { data: payments } = await supabase
-        .from("payments")
-        .select("status")
-        .eq("tenancy_id", property.tenancies[0].id)
-        .gte("due_date", firstDayOfMonth.toISOString())
-        .lte("due_date", lastDayOfMonth.toISOString())
-        .maybeSingle();
-
-      revenueDetails.push({
-        property_name: property.name,
-        amount: Number(property.monthly_rent),
-        due_date: firstDayOfMonth.toISOString(),
-        status: payments?.status || "pending"
-      });
-    }
-  }
-
-  console.log("Revenue details:", revenueDetails);
-
-  const propertyIds = properties.map(p => p.id);
-  const [maintenanceCount] = await Promise.all([
-    supabase
-      .from("maintenance_requests")
-      .select("id", { count: "exact" })
-      .eq("status", "pending")
-      .in("property_id", propertyIds),
-  ]);
-
-  return {
-    totalProperties: properties.length,
-    monthlyRevenue: totalMonthlyRevenue,
-    activeTenants: activeTenanciesCount,
-    pendingMaintenance: maintenanceCount.count || 0,
-    revenueDetails: revenueDetails
-  };
-}
-
-async function fetchTenantMetrics(userId: string): Promise<Metrics> {
-  console.log("Fetching tenant metrics for user:", userId);
-  
-  const currentDate = new Date();
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-
-  // Get count of active tenancies for this tenant
-  const { count: propertiesCount, error: tenancyError } = await supabase
-    .from("tenancies")
-    .select("id", { count: "exact" })
-    .eq("tenant_id", userId)
-    .eq("status", "active");
-
-  console.log("Active tenancies count:", propertiesCount);
-
-  if (tenancyError) {
-    console.error("Error fetching tenancies:", tenancyError);
-    throw tenancyError;
-  }
-
-  // Get the latest payment and revenue details
-  const { data: tenancies } = await supabase
-    .from("tenancies")
-    .select("id, property:properties(id, name, monthly_rent)")
-    .eq("tenant_id", userId)
-    .eq("status", "active");
-
-  const tenancyIds = tenancies?.map(t => t.id) || [];
-
-  const [maintenanceCount, latestPayment, revenueDetails] = await Promise.all([
-    supabase
-      .from("maintenance_requests")
-      .select("id", { count: "exact" })
-      .eq("tenant_id", userId)
-      .eq("status", "pending"),
-    supabase
-      .from("payments")
-      .select("status")
-      .in("tenancy_id", tenancyIds)
-      .order("due_date", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from("payments")
-      .select(`
-        amount,
-        due_date,
-        status,
-        tenancy:tenancies(
-          property:properties(name)
-        )
-      `)
-      .in("tenancy_id", tenancyIds)
-      .gte("due_date", firstDayOfMonth.toISOString())
-      .lte("due_date", lastDayOfMonth.toISOString())
-  ]);
-
-  const formattedRevenueDetails = revenueDetails.data?.map(payment => ({
-    property_name: payment.tenancy.property.name,
-    amount: payment.amount,
-    due_date: payment.due_date,
-    status: payment.status
-  })) || [];
-
-  console.log("Tenant metrics calculated:", {
-    properties: propertiesCount,
-    maintenance: maintenanceCount.count,
-    payment: latestPayment.data?.status,
-    revenueDetails: formattedRevenueDetails
-  });
-
-  return {
-    totalProperties: propertiesCount || 0,
-    pendingMaintenance: maintenanceCount.count || 0,
-    paymentStatus: latestPayment.data?.status || "No payments",
-    revenueDetails: formattedRevenueDetails
-  };
-}
+import { RevenueDetailsModal } from "./RevenueDetailsModal";
 
 export function DashboardMetrics({ userId, userRole }: { userId: string; userRole: "landlord" | "tenant" }) {
   const { t } = useTranslation();
   const [showRevenueDetails, setShowRevenueDetails] = useState(false);
   
-  const { data: metrics, isLoading } = useQuery({
-    queryKey: ["dashboard-metrics", userId, userRole],
-    queryFn: () =>
-      userRole === "landlord"
-        ? fetchLandlordMetrics(userId)
-        : fetchTenantMetrics(userId),
-  });
+  const { data: metrics, isLoading } = useMetrics(userId, userRole);
 
   if (isLoading) {
     return (
@@ -266,48 +71,11 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           />
         </div>
 
-        <Dialog open={showRevenueDetails} onOpenChange={setShowRevenueDetails}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Monthly Revenue Details</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              {metrics.revenueDetails && metrics.revenueDetails.length > 0 ? (
-                metrics.revenueDetails.map((detail, index) => (
-                  <div 
-                    key={index}
-                    className="p-4 rounded-lg bg-gradient-to-br from-white to-gray-50 shadow-sm"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-medium">{detail.property_name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Due: {new Date(detail.due_date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">${detail.amount.toLocaleString()}</p>
-                        <span className={`text-sm ${
-                          detail.status === 'paid' 
-                            ? 'text-green-600' 
-                            : detail.status === 'pending' 
-                              ? 'text-orange-600' 
-                              : 'text-red-600'
-                        }`}>
-                          {detail.status.charAt(0).toUpperCase() + detail.status.slice(1)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-center text-muted-foreground py-4">
-                  No revenue details available for this month
-                </p>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
+        <RevenueDetailsModal
+          open={showRevenueDetails}
+          onOpenChange={setShowRevenueDetails}
+          revenueDetails={metrics.revenueDetails}
+        />
       </>
     );
   }
@@ -341,47 +109,11 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
         />
       </div>
 
-      <Dialog open={showRevenueDetails} onOpenChange={setShowRevenueDetails}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Monthly Revenue Details</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {metrics.revenueDetails?.map((detail, index) => (
-              <div 
-                key={index}
-                className="p-4 rounded-lg bg-gradient-to-br from-white to-gray-50 shadow-sm"
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-medium">{detail.property_name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Due: {new Date(detail.due_date).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">${detail.amount.toLocaleString()}</p>
-                    <span className={`text-sm ${
-                      detail.status === 'paid' 
-                        ? 'text-green-600' 
-                        : detail.status === 'pending' 
-                          ? 'text-orange-600' 
-                          : 'text-red-600'
-                    }`}>
-                      {detail.status.charAt(0).toUpperCase() + detail.status.slice(1)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {(!metrics.revenueDetails || metrics.revenueDetails.length === 0) && (
-              <p className="text-center text-muted-foreground py-4">
-                No revenue details available for this month
-              </p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <RevenueDetailsModal
+        open={showRevenueDetails}
+        onOpenChange={setShowRevenueDetails}
+        revenueDetails={metrics.revenueDetails}
+      />
     </>
   );
 }
