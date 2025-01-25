@@ -55,7 +55,12 @@ export function useMessages(conversationId: string | null) {
       }
 
       console.log("Initial messages loaded:", data?.length);
-      setMessages(data || []);
+      const typedMessages = data?.map(msg => ({
+        ...msg,
+        status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read',
+        sender: msg.sender || { first_name: null, last_name: null }
+      })) || [];
+      setMessages(typedMessages);
     };
 
     // Initial fetch
@@ -104,16 +109,22 @@ export function useMessages(conversationId: string | null) {
 
           console.log("Processed new/updated message:", newMessage);
 
+          const typedMessage = {
+            ...newMessage,
+            status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
+            sender: newMessage.sender || { first_name: null, last_name: null }
+          };
+
           setMessages(prev => {
-            const existingMessageIndex = prev.findIndex(msg => msg.id === newMessage.id);
+            const existingMessageIndex = prev.findIndex(msg => msg.id === typedMessage.id);
             
             if (existingMessageIndex === -1) {
               // Message doesn't exist, add it
-              return [...prev, newMessage];
+              return [...prev, typedMessage];
             } else {
               // Message exists, update it
               const updatedMessages = [...prev];
-              updatedMessages[existingMessageIndex] = newMessage;
+              updatedMessages[existingMessageIndex] = typedMessage;
               return updatedMessages;
             }
           });
