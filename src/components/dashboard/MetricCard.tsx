@@ -11,6 +11,7 @@ interface MetricCardProps {
   description?: string;
   className?: string;
   route?: string;
+  onClick?: () => void; // Added onClick prop
 }
 
 export function MetricCard({
@@ -20,12 +21,15 @@ export function MetricCard({
   description,
   className,
   route,
+  onClick,
 }: MetricCardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if (route) {
+    if (onClick) {
+      onClick();
+    } else if (route) {
       navigate(route);
     }
   };
@@ -35,7 +39,7 @@ export function MetricCard({
       className={cn(
         "overflow-hidden", 
         className,
-        route && "cursor-pointer hover:scale-105 transform transition-all duration-300"
+        (route || onClick) && "cursor-pointer hover:scale-105 transform transition-all duration-300"
       )}
       onClick={handleClick}
     >
