@@ -53,7 +53,7 @@ export const useSidebarNotifications = () => {
               .gte("due_date", new Date().toISOString())
               .in(
                 "tenancy_id",
-                `(SELECT id FROM tenancies WHERE tenant_id = '${currentUserId}' AND status = 'active')`
+                [`(SELECT id FROM tenancies WHERE tenant_id = '${currentUserId}' AND status = 'active')`]
               )
       ]);
 
