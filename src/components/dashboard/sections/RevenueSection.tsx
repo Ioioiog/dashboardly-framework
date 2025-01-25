@@ -10,8 +10,8 @@ interface RevenueSectionProps {
 }
 
 export function RevenueSection({ userId }: RevenueSectionProps) {
-  const [activeView, setActiveView] = useState<"history" | "predictions">("history");
   const [showRevenueModal, setShowRevenueModal] = useState(false);
+  const [showPredictionsModal, setShowPredictionsModal] = useState(false);
 
   return (
     <section className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-6 transition-all duration-200 hover:shadow-xl">
@@ -31,37 +31,15 @@ export function RevenueSection({ userId }: RevenueSectionProps) {
               Revenue History
             </Button>
             <Button
-              variant={activeView === "predictions" ? "default" : "outline"}
-              onClick={() => setActiveView("predictions")}
-              className={`flex items-center gap-2 transition-all duration-200 ${
-                activeView === "predictions" 
-                  ? "shadow-md hover:shadow-lg" 
-                  : "hover:bg-gray-50"
-              }`}
+              variant="outline"
+              onClick={() => setShowPredictionsModal(true)}
+              className="flex items-center gap-2 transition-all duration-200 hover:bg-gray-50"
               size="sm"
             >
               <TrendingUp className="w-4 h-4" />
               Revenue Predictions
             </Button>
           </div>
-        </div>
-        
-        <div className="space-y-6">
-          {activeView === "predictions" && (
-            <div className="animate-fade-in">
-              <div className="mb-4">
-                <h3 className="text-xl font-semibold text-gray-800">
-                  Revenue Predictions
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Projected revenue based on historical data
-                </p>
-              </div>
-              <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
-                <RevenuePrediction userId={userId} />
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -73,6 +51,19 @@ export function RevenueSection({ userId }: RevenueSectionProps) {
             </h3>
             <div className="bg-white rounded-lg">
               <RevenueChart userId={userId} />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPredictionsModal} onOpenChange={setShowPredictionsModal}>
+        <DialogContent className="sm:max-w-[900px]">
+          <div className="py-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              Revenue Predictions
+            </h3>
+            <div className="bg-white rounded-lg">
+              <RevenuePrediction userId={userId} />
             </div>
           </div>
         </DialogContent>
