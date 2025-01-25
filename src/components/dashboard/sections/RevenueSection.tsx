@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { RevenueChart } from "../RevenueChart";
 import { RevenuePrediction } from "../RevenuePrediction";
 import { Button } from "@/components/ui/button";
 import { BarChart2, TrendingUp } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { RevenueChart } from "../RevenueChart";
 
 interface RevenueSectionProps {
   userId: string;
@@ -10,6 +11,7 @@ interface RevenueSectionProps {
 
 export function RevenueSection({ userId }: RevenueSectionProps) {
   const [activeView, setActiveView] = useState<"history" | "predictions">("history");
+  const [showRevenueModal, setShowRevenueModal] = useState(false);
 
   return (
     <section className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-6 transition-all duration-200 hover:shadow-xl">
@@ -20,13 +22,9 @@ export function RevenueSection({ userId }: RevenueSectionProps) {
           </h2>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button
-              variant={activeView === "history" ? "default" : "outline"}
-              onClick={() => setActiveView("history")}
-              className={`flex items-center gap-2 transition-all duration-200 ${
-                activeView === "history" 
-                  ? "shadow-md hover:shadow-lg" 
-                  : "hover:bg-gray-50"
-              }`}
+              variant="outline"
+              onClick={() => setShowRevenueModal(true)}
+              className="flex items-center gap-2 transition-all duration-200 hover:bg-gray-50"
               size="sm"
             >
               <BarChart2 className="w-4 h-4" />
@@ -49,21 +47,7 @@ export function RevenueSection({ userId }: RevenueSectionProps) {
         </div>
         
         <div className="space-y-6">
-          {activeView === "history" ? (
-            <div className="animate-fade-in">
-              <div className="mb-4">
-                <h3 className="text-xl font-semibold text-gray-800">
-                  Revenue History
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Historical view of your monthly revenue performance
-                </p>
-              </div>
-              <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
-                <RevenueChart userId={userId} />
-              </div>
-            </div>
-          ) : (
+          {activeView === "predictions" && (
             <div className="animate-fade-in">
               <div className="mb-4">
                 <h3 className="text-xl font-semibold text-gray-800">
@@ -80,6 +64,19 @@ export function RevenueSection({ userId }: RevenueSectionProps) {
           )}
         </div>
       </div>
+
+      <Dialog open={showRevenueModal} onOpenChange={setShowRevenueModal}>
+        <DialogContent className="sm:max-w-[900px]">
+          <div className="py-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              Revenue History
+            </h3>
+            <div className="bg-white rounded-lg">
+              <RevenueChart userId={userId} />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
