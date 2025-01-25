@@ -33,6 +33,8 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
     ? notifications?.find(n => n.type === item.notificationType)?.count || 0
     : 0;
 
+  console.log(`Notification count for ${item.title}:`, notificationCount); // Debug log
+
   const linkContent = (
     <div
       className={cn(
@@ -46,7 +48,7 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
       <div className="relative">
         <Icon className={cn("h-5 w-5", isActive && "text-blue-600 dark:text-blue-400")} />
         {notificationCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white ring-2 ring-white dark:ring-gray-900">
+          <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-medium text-white">
             {notificationCount}
           </span>
         )}
@@ -69,7 +71,7 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
           <div className="flex items-center gap-2">
             {item.title}
             {notificationCount > 0 && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-medium text-white">
                 {notificationCount}
               </span>
             )}
