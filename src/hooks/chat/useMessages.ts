@@ -52,7 +52,7 @@ export function useMessages(conversationId: string | null) {
         return;
       }
 
-      console.log("Fetched messages:", data);
+      console.log("Initial messages loaded:", data?.length);
       const typedMessages = data?.map(msg => ({
         ...msg,
         status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read'
@@ -60,9 +60,10 @@ export function useMessages(conversationId: string | null) {
       setMessages(typedMessages);
     };
 
+    // Initial fetch
     fetchMessages();
 
-    // Subscribe to ALL changes (INSERT, UPDATE, DELETE) in the messages table
+    // Set up real-time subscription
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
@@ -74,9 +75,10 @@ export function useMessages(conversationId: string | null) {
           filter: `conversation_id=eq.${conversationId}`,
         },
         async (payload) => {
-          console.log("Message change received:", payload);
+          console.log("Real-time message update received:", payload);
           
           if (payload.eventType === 'DELETE') {
+            console.log("Removing deleted message:", payload.old.id);
             setMessages(prev => prev.filter(msg => msg.id !== payload.old.id));
             return;
           }
@@ -110,12 +112,12 @@ export function useMessages(conversationId: string | null) {
           };
 
           setMessages(prev => {
+            // For INSERT, add to the end
             if (payload.eventType === 'INSERT') {
               return [...prev, typedMessage];
-            } else if (payload.eventType === 'UPDATE') {
-              return prev.map(msg => msg.id === typedMessage.id ? typedMessage : msg);
             }
-            return prev;
+            // For UPDATE, replace the existing message
+            return prev.map(msg => msg.id === typedMessage.id ? typedMessage : msg);
           });
         }
       )
@@ -171,14 +173,7 @@ export function useMessages(conversationId: string | null) {
         throw error;
       }
 
-      // Optimistically add the new message to the state
-      const typedMessage = {
-        ...data,
-        status: 'sent' as const
-      };
-      
-      setMessages(prev => [...prev, typedMessage]);
-      console.log("Message sent successfully:", typedMessage);
+      console.log("Message sent successfully:", data);
 
     } catch (error) {
       console.error("Error sending message:", error);
