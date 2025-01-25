@@ -8,8 +8,6 @@ interface Message {
   content: string;
   created_at: string;
   status: 'sent' | 'delivered' | 'read';
-  profile_id: string;
-  conversation_id: string | null;
   sender: {
     first_name: string | null;
     last_name: string | null;
@@ -26,70 +24,64 @@ export function useMessages(conversationId: string | null) {
       return;
     }
 
-    console.log("Setting up real-time subscription for conversation:", conversationId);
+    console.log("Fetching messages for conversation:", conversationId);
 
-    // Initial messages fetch
     const fetchMessages = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("messages")
-          .select(`
-            id,
-            sender_id,
-            content,
-            created_at,
-            status,
-            profile_id,
-            conversation_id,
-            sender:profiles!profile_id(first_name, last_name)
-          `)
-          .eq('conversation_id', conversationId)
-          .order("created_at", { ascending: true });
+      const { data, error } = await supabase
+        .from("messages")
+        .select(`
+          id,
+          sender_id,
+          content,
+          created_at,
+          status,
+          profile_id,
+          conversation_id,
+          sender:profiles(first_name, last_name)
+        `)
+        .eq('conversation_id', conversationId)
+        .order("created_at", { ascending: true });
 
-        if (error) throw error;
-
-        console.log("Initial messages loaded:", data?.length);
-        
-        const typedMessages = data?.map(msg => ({
-          ...msg,
-          status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read',
-          sender: msg.sender || { first_name: null, last_name: null }
-        })) || [];
-        
-        setMessages(typedMessages);
-      } catch (error) {
+      if (error) {
         console.error("Error fetching messages:", error);
         toast({
           title: "Error",
           description: "Failed to load messages",
           variant: "destructive",
         });
+        return;
       }
+
+      console.log("Fetched messages:", data);
+      // Type cast the status to ensure it matches our Message interface
+      const typedMessages = data?.map(msg => ({
+        ...msg,
+        status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read'
+      })) || [];
+      setMessages(typedMessages);
     };
 
     fetchMessages();
 
-    // Set up real-time subscription
+    // Subscribe to new messages and status updates
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "*", // Listen to all changes (INSERT, UPDATE, DELETE)
           schema: "public",
           table: "messages",
           filter: `conversation_id=eq.${conversationId}`,
         },
         async (payload) => {
-          console.log("Real-time message update received:", payload);
-
+          console.log("Message change received:", payload);
+          
           if (payload.eventType === 'DELETE') {
-            console.log("Removing deleted message:", payload.old.id);
             setMessages(prev => prev.filter(msg => msg.id !== payload.old.id));
             return;
           }
 
-          // For both INSERT and UPDATE, fetch the complete message with sender info
           const { data: newMessage, error } = await supabase
             .from("messages")
             .select(`
@@ -100,7 +92,7 @@ export function useMessages(conversationId: string | null) {
               status,
               profile_id,
               conversation_id,
-              sender:profiles!profile_id(first_name, last_name)
+              sender:profiles(first_name, last_name)
             `)
             .eq("id", payload.new.id)
             .single();
@@ -110,31 +102,23 @@ export function useMessages(conversationId: string | null) {
             return;
           }
 
-          console.log("Processed new/updated message:", newMessage);
-
+          // Type cast the new message status
           const typedMessage = {
             ...newMessage,
-            status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
-            sender: newMessage.sender || { first_name: null, last_name: null }
+            status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read'
           };
 
-          setMessages(prev => {
-            const existingMessageIndex = prev.findIndex(msg => msg.id === typedMessage.id);
-            
-            if (existingMessageIndex === -1) {
-              // Message doesn't exist, add it
-              return [...prev, typedMessage];
-            } else {
-              // Message exists, update it
-              const updatedMessages = [...prev];
-              updatedMessages[existingMessageIndex] = typedMessage;
-              return updatedMessages;
-            }
-          });
+          if (payload.eventType === 'INSERT') {
+            setMessages(prev => [...prev, typedMessage]);
+          } else if (payload.eventType === 'UPDATE') {
+            setMessages(prev => 
+              prev.map(msg => msg.id === typedMessage.id ? typedMessage : msg)
+            );
+          }
         }
       )
       .subscribe((status) => {
-        console.log("Real-time subscription status:", status);
+        console.log("Subscription status:", status);
       });
 
     return () => {
@@ -159,22 +143,17 @@ export function useMessages(conversationId: string | null) {
       content
     });
 
-    try {
-      const { error } = await supabase
-        .from("messages")
-        .insert({
-          content: content.trim(),
-          sender_id: currentUserId,
-          profile_id: currentUserId,
-          conversation_id: conversationId,
-          status: 'sent'
-        });
+    const { error } = await supabase
+      .from("messages")
+      .insert({
+        content: content.trim(),
+        sender_id: currentUserId,
+        profile_id: currentUserId,
+        conversation_id: conversationId,
+        status: 'sent'
+      });
 
-      if (error) throw error;
-
-      console.log("Message sent successfully");
-
-    } catch (error) {
+    if (error) {
       console.error("Error sending message:", error);
       toast({
         title: "Error",

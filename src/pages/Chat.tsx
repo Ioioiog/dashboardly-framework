@@ -5,7 +5,6 @@ import { MessageList } from "@/components/chat/MessageList";
 import { MessageInput } from "@/components/chat/MessageInput";
 import { useConversation } from "@/hooks/chat/useConversation";
 import { useMessages } from "@/hooks/chat/useMessages";
-import { useUnreadMessages } from "@/hooks/chat/useUnreadMessages";
 import { useAuthState } from "@/hooks/useAuthState";
 import { Loader2 } from "lucide-react";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -19,7 +18,6 @@ const Chat = () => {
   const { currentUserId } = useAuthState();
   const { conversationId, isLoading: isConversationLoading } = useConversation(currentUserId, selectedTenantId);
   const { messages, sendMessage } = useMessages(conversationId);
-  const { unreadCount } = useUnreadMessages(conversationId, currentUserId);
   const { userRole } = useUserRole();
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -90,7 +88,6 @@ const Chat = () => {
         <ChatHeader
           onTenantSelect={setSelectedTenantId}
           selectedTenantId={selectedTenantId}
-          unreadCount={unreadCount}
         />
         {renderContent()}
       </ConversationContainer>
