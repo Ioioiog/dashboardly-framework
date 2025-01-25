@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { BarChart3, TrendingUp } from "lucide-react";
-import { RevenueChart } from "../RevenueChart";
 import { RevenuePrediction } from "../RevenuePrediction";
+import { Button } from "@/components/ui/button";
+import { BarChart2, TrendingUp } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { RevenueChart } from "../RevenueChart";
 
 interface RevenueSectionProps {
   userId: string;
@@ -14,25 +14,20 @@ export function RevenueSection({ userId }: RevenueSectionProps) {
   const [showPredictionsModal, setShowPredictionsModal] = useState(false);
 
   return (
-    <section className="bg-white rounded-xl shadow-md p-6 transition-all duration-200 hover:shadow-lg">
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-800">
-              Revenue Overview
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Track and analyze your revenue data
-            </p>
-          </div>
-          <div className="flex gap-2">
+    <section className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-6 transition-all duration-200 hover:shadow-xl">
+      <div className="space-y-6">
+        <div className="border-b border-gray-100 pb-5">
+          <h2 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+            Track your money
+          </h2>
+          <div className="mt-4 flex flex-wrap gap-3">
             <Button
               variant="outline"
               onClick={() => setShowRevenueModal(true)}
               className="flex items-center gap-2 transition-all duration-200 hover:bg-gray-50"
               size="sm"
             >
-              <BarChart3 className="w-4 h-4" />
+              <BarChart2 className="w-4 h-4" />
               Revenue History
             </Button>
             <Button
