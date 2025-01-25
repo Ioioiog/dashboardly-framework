@@ -9,9 +9,9 @@ export function useUnreadMessages(conversationId: string | null, currentUserId: 
 
     const fetchUnreadCount = async () => {
       try {
-        const { count, error } = await supabase
+        const { data, error } = await supabase
           .from('messages')
-          .select('*', { count: 'exact', head: true })
+          .select('id')
           .eq('conversation_id', conversationId)
           .neq('sender_id', currentUserId)
           .eq('status', 'sent');
@@ -21,7 +21,7 @@ export function useUnreadMessages(conversationId: string | null, currentUserId: 
           return;
         }
 
-        setUnreadCount(count || 0);
+        setUnreadCount(data?.length || 0);
       } catch (error) {
         console.error('Error in useUnreadMessages:', error);
       }
