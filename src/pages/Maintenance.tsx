@@ -49,7 +49,8 @@ export default function Maintenance() {
               first_name,
               last_name
             )
-          `);
+          `)
+          .order('created_at', { ascending: false }); // Sort by created_at in descending order
 
         // If user is a tenant, only show their requests
         if (userRole === 'tenant') {
