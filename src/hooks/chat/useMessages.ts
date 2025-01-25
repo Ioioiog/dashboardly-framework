@@ -8,6 +8,7 @@ interface Message {
   content: string;
   created_at: string;
   status: 'sent' | 'delivered' | 'read';
+  read: boolean;
   sender: {
     first_name: string | null;
     last_name: string | null;
@@ -35,6 +36,7 @@ export function useMessages(conversationId: string | null) {
           content,
           created_at,
           status,
+          read,
           profile_id,
           conversation_id,
           sender:profiles!messages_profile_id_fkey(first_name, last_name)
@@ -56,7 +58,8 @@ export function useMessages(conversationId: string | null) {
       // Type cast the status to ensure it matches our Message interface
       const typedMessages = data?.map(msg => ({
         ...msg,
-        status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read'
+        status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read',
+        read: msg.read || false
       })) || [];
       setMessages(typedMessages);
     };
@@ -90,6 +93,7 @@ export function useMessages(conversationId: string | null) {
               content,
               created_at,
               status,
+              read,
               profile_id,
               conversation_id,
               sender:profiles!messages_profile_id_fkey(first_name, last_name)
@@ -102,10 +106,11 @@ export function useMessages(conversationId: string | null) {
             return;
           }
 
-          // Type cast the new message status
+          // Type cast the new message status and read property
           const typedMessage = {
             ...newMessage,
-            status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read'
+            status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
+            read: newMessage.read || false
           };
 
           if (payload.eventType === 'INSERT') {
@@ -150,7 +155,8 @@ export function useMessages(conversationId: string | null) {
         sender_id: currentUserId,
         profile_id: currentUserId,
         conversation_id: conversationId,
-        status: 'sent'
+        status: 'sent',
+        read: false
       });
 
     if (error) {
