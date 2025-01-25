@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { DashboardHeader } from "@/components/dashboard/sections/DashboardHeader";
 import { RevenueSection } from "@/components/dashboard/sections/RevenueSection";
+import { UpcomingIncomeSection } from "@/components/dashboard/sections/UpcomingIncomeSection";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -125,9 +126,11 @@ const Index = () => {
                 <DashboardMetrics userId={userId} userRole={userRole} />
               </section>
 
-              {/* Only show revenue section for landlords */}
               {userRole === "landlord" && (
-                <RevenueSection userId={userId} />
+                <>
+                  <RevenueSection userId={userId} />
+                  <UpcomingIncomeSection userId={userId} />
+                </>
               )}
             </div>
           )}

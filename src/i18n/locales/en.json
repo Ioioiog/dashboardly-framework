@@ -102,7 +102,9 @@
       "history": {
         "title": "Revenue History",
         "description": "Historical view of your monthly revenue performance"
-      }
+      },
+      "upcomingPayments": "Upcoming Payments",
+      "noUpcomingPayments": "No upcoming payments"
     },
     "performance": {
       "title": "Performance",
