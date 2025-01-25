@@ -48,21 +48,34 @@ export function MessageList({
           msg => msg.sender_id !== currentUserId && !msg.read
         );
 
-        if (unreadMessages.length > 0) {
+        if (unreadMessages.length === 0) return;
+
+        // Update messages in smaller batches to avoid URL length issues
+        const batchSize = 10;
+        for (let i = 0; i < unreadMessages.length; i += batchSize) {
+          const batch = unreadMessages.slice(i, i + batchSize);
           const { error } = await supabase
             .from('messages')
             .update({ status: 'read', read: true })
-            .in('id', unreadMessages.map(msg => msg.id));
+            .in('id', batch.map(msg => msg.id));
 
-          if (error) throw error;
+          if (error) {
+            console.error('Error updating message batch:', error);
+            throw error;
+          }
         }
       } catch (error) {
         console.error('Error updating message status:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update message status",
+          variant: "destructive",
+        });
       }
     };
 
     updateMessageStatus();
-  }, [messages, currentUserId]);
+  }, [messages, currentUserId, toast]);
 
   const handleEditMessage = (messageId: string, content: string) => {
     setEditingMessageId(messageId);
