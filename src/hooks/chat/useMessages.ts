@@ -106,18 +106,18 @@ export function useMessages(conversationId: string | null) {
 
           console.log("Processed new/updated message:", newMessage);
 
-          const typedMessage = {
-            ...newMessage,
-            status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read'
-          };
-
           setMessages(prev => {
-            // For INSERT, add to the end
-            if (payload.eventType === 'INSERT') {
-              return [...prev, typedMessage];
+            const existingMessageIndex = prev.findIndex(msg => msg.id === newMessage.id);
+            
+            if (existingMessageIndex === -1) {
+              // Message doesn't exist, add it
+              return [...prev, newMessage];
+            } else {
+              // Message exists, update it
+              const updatedMessages = [...prev];
+              updatedMessages[existingMessageIndex] = newMessage;
+              return updatedMessages;
             }
-            // For UPDATE, replace the existing message
-            return prev.map(msg => msg.id === typedMessage.id ? typedMessage : msg);
           });
         }
       )
