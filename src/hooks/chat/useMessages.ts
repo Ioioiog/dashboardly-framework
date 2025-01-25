@@ -102,6 +102,8 @@ export function useMessages(conversationId: string | null) {
             return;
           }
 
+          console.log("Processed new/updated message:", newMessage);
+
           const typedMessage = {
             ...newMessage,
             status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read'
@@ -144,7 +146,7 @@ export function useMessages(conversationId: string | null) {
     });
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("messages")
         .insert({
           content: content.trim(),
@@ -152,11 +154,32 @@ export function useMessages(conversationId: string | null) {
           profile_id: currentUserId,
           conversation_id: conversationId,
           status: 'sent'
-        });
+        })
+        .select(`
+          id,
+          sender_id,
+          content,
+          created_at,
+          status,
+          profile_id,
+          conversation_id,
+          sender:profiles(first_name, last_name)
+        `)
+        .single();
 
       if (error) {
         throw error;
       }
+
+      // Optimistically add the new message to the state
+      const typedMessage = {
+        ...data,
+        status: 'sent' as const
+      };
+      
+      setMessages(prev => [...prev, typedMessage]);
+      console.log("Message sent successfully:", typedMessage);
+
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
