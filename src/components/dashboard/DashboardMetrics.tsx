@@ -209,46 +209,89 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
   if (!metrics) return null;
 
   const handleRevenueClick = () => {
-    if (userRole === "tenant" && metrics.revenueDetails?.length) {
-      setShowRevenueDetails(true);
-    }
+    setShowRevenueDetails(true);
   };
 
   if (userRole === "landlord") {
     return (
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-fade-in">
-        <MetricCard
-          title={t('dashboard.metrics.totalProperties')}
-          value={metrics.totalProperties}
-          icon={Home}
-          route="/properties"
-          className="bg-gradient-to-br from-white to-blue-50 shadow-md hover:shadow-lg transition-all duration-300"
-          description="Total managed properties"
-        />
-        <MetricCard
-          title={t('dashboard.metrics.monthlyRevenue')}
-          value={`$${metrics.monthlyRevenue?.toLocaleString()}`}
-          icon={Wallet}
-          description={t('dashboard.revenue.title')}
-          className="bg-gradient-to-br from-white to-green-50 shadow-md hover:shadow-lg transition-all duration-300"
-        />
-        <MetricCard
-          title={t('dashboard.metrics.activeTenants')}
-          value={metrics.activeTenants}
-          icon={Users}
-          route="/tenants"
-          className="bg-gradient-to-br from-white to-purple-50 shadow-md hover:shadow-lg transition-all duration-300"
-          description="Currently active tenants"
-        />
-        <MetricCard
-          title={t('dashboard.metrics.pendingMaintenance')}
-          value={metrics.pendingMaintenance}
-          icon={Settings}
-          route="/maintenance"
-          className="bg-gradient-to-br from-white to-orange-50 shadow-md hover:shadow-lg transition-all duration-300"
-          description="Pending maintenance requests"
-        />
-      </div>
+      <>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-fade-in">
+          <MetricCard
+            title={t('dashboard.metrics.totalProperties')}
+            value={metrics.totalProperties}
+            icon={Home}
+            route="/properties"
+            className="bg-gradient-to-br from-white to-blue-50 shadow-md hover:shadow-lg transition-all duration-300"
+            description="Total managed properties"
+          />
+          <MetricCard
+            title={t('dashboard.metrics.monthlyRevenue')}
+            value={`$${metrics.monthlyRevenue?.toLocaleString()}`}
+            icon={Wallet}
+            onClick={handleRevenueClick}
+            description={t('dashboard.revenue.title')}
+            className="bg-gradient-to-br from-white to-green-50 shadow-md hover:shadow-lg transition-all duration-300"
+          />
+          <MetricCard
+            title={t('dashboard.metrics.activeTenants')}
+            value={metrics.activeTenants}
+            icon={Users}
+            route="/tenants"
+            className="bg-gradient-to-br from-white to-purple-50 shadow-md hover:shadow-lg transition-all duration-300"
+            description="Currently active tenants"
+          />
+          <MetricCard
+            title={t('dashboard.metrics.pendingMaintenance')}
+            value={metrics.pendingMaintenance}
+            icon={Settings}
+            route="/maintenance"
+            className="bg-gradient-to-br from-white to-orange-50 shadow-md hover:shadow-lg transition-all duration-300"
+            description="Pending maintenance requests"
+          />
+        </div>
+
+        <Dialog open={showRevenueDetails} onOpenChange={setShowRevenueDetails}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Monthly Revenue Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {metrics.revenueDetails?.map((detail, index) => (
+                <div 
+                  key={index}
+                  className="p-4 rounded-lg bg-gradient-to-br from-white to-gray-50 shadow-sm"
+                >
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-medium">{detail.property_name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Due: {new Date(detail.due_date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">${detail.amount.toLocaleString()}</p>
+                      <span className={`text-sm ${
+                        detail.status === 'paid' 
+                          ? 'text-green-600' 
+                          : detail.status === 'pending' 
+                            ? 'text-orange-600' 
+                            : 'text-red-600'
+                      }`}>
+                        {detail.status.charAt(0).toUpperCase() + detail.status.slice(1)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {(!metrics.revenueDetails || metrics.revenueDetails.length === 0) && (
+                <p className="text-center text-muted-foreground py-4">
+                  No revenue details available for this month
+                </p>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 
