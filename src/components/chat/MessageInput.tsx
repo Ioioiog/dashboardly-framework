@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Send, Paperclip, Smile } from "lucide-react";
+import { Send, Smile } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -52,22 +52,6 @@ export function MessageInput({
     <TooltipProvider>
       <form onSubmit={handleSendMessage} className="p-6 border-t dark:border-gray-700 bg-slate-50/50 dark:bg-slate-800/50 rounded-b-2xl">
         <div className="flex items-center gap-3">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 shrink-0"
-              >
-                <Paperclip className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Attach file</p>
-            </TooltipContent>
-          </Tooltip>
-          
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
