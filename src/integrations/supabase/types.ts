@@ -322,6 +322,8 @@ export type Database = {
           created_at: string
           id: string
           profile_id: string
+          receiver_id: string | null
+          room_id: string | null
           sender_id: string
           status: string | null
           updated_at: string
@@ -332,6 +334,8 @@ export type Database = {
           created_at?: string
           id?: string
           profile_id: string
+          receiver_id?: string | null
+          room_id?: string | null
           sender_id: string
           status?: string | null
           updated_at?: string
@@ -342,6 +346,8 @@ export type Database = {
           created_at?: string
           id?: string
           profile_id?: string
+          receiver_id?: string | null
+          room_id?: string | null
           sender_id?: string
           status?: string | null
           updated_at?: string
@@ -359,6 +365,20 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
