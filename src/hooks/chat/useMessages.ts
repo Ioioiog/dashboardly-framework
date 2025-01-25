@@ -53,7 +53,6 @@ export function useMessages(conversationId: string | null) {
       }
 
       console.log("Fetched messages:", data);
-      // Type cast the status to ensure it matches our Message interface
       const typedMessages = data?.map(msg => ({
         ...msg,
         status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read'
@@ -63,13 +62,13 @@ export function useMessages(conversationId: string | null) {
 
     fetchMessages();
 
-    // Subscribe to new messages and status updates
+    // Subscribe to ALL changes (INSERT, UPDATE, DELETE) in the messages table
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
         "postgres_changes",
         {
-          event: "*", // Listen to all changes (INSERT, UPDATE, DELETE)
+          event: "*",
           schema: "public",
           table: "messages",
           filter: `conversation_id=eq.${conversationId}`,
@@ -82,6 +81,7 @@ export function useMessages(conversationId: string | null) {
             return;
           }
 
+          // For both INSERT and UPDATE, fetch the complete message with sender info
           const { data: newMessage, error } = await supabase
             .from("messages")
             .select(`
@@ -102,19 +102,19 @@ export function useMessages(conversationId: string | null) {
             return;
           }
 
-          // Type cast the new message status
           const typedMessage = {
             ...newMessage,
             status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read'
           };
 
-          if (payload.eventType === 'INSERT') {
-            setMessages(prev => [...prev, typedMessage]);
-          } else if (payload.eventType === 'UPDATE') {
-            setMessages(prev => 
-              prev.map(msg => msg.id === typedMessage.id ? typedMessage : msg)
-            );
-          }
+          setMessages(prev => {
+            if (payload.eventType === 'INSERT') {
+              return [...prev, typedMessage];
+            } else if (payload.eventType === 'UPDATE') {
+              return prev.map(msg => msg.id === typedMessage.id ? typedMessage : msg);
+            }
+            return prev;
+          });
         }
       )
       .subscribe((status) => {
@@ -143,17 +143,21 @@ export function useMessages(conversationId: string | null) {
       content
     });
 
-    const { error } = await supabase
-      .from("messages")
-      .insert({
-        content: content.trim(),
-        sender_id: currentUserId,
-        profile_id: currentUserId,
-        conversation_id: conversationId,
-        status: 'sent'
-      });
+    try {
+      const { error } = await supabase
+        .from("messages")
+        .insert({
+          content: content.trim(),
+          sender_id: currentUserId,
+          profile_id: currentUserId,
+          conversation_id: conversationId,
+          status: 'sent'
+        });
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
       console.error("Error sending message:", error);
       toast({
         title: "Error",
