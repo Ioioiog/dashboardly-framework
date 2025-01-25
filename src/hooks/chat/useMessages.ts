@@ -39,7 +39,7 @@ export function useMessages(conversationId: string | null) {
           status,
           profile_id,
           conversation_id,
-          sender:profiles!sender_id(first_name, last_name)
+          sender:profiles!profile_id(first_name, last_name)
         `)
         .eq('conversation_id', conversationId)
         .order("created_at", { ascending: true });
@@ -104,7 +104,7 @@ export function useMessages(conversationId: string | null) {
               status,
               profile_id,
               conversation_id,
-              sender:profiles!sender_id(first_name, last_name)
+              sender:profiles!profile_id(first_name, last_name)
             `)
             .eq("id", payload.new.id)
             .single();
