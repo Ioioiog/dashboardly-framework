@@ -1,94 +1,137 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuthState } from "@/hooks/useAuthState";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useEffect } from "react";
+import { useAuthState } from "./useAuthState";
 
 export interface Notification {
   type: string;
   count: number;
 }
 
-export const useSidebarNotifications = () => {
-  const { isAuthenticated, currentUserId } = useAuthState();
-  const { userRole } = useUserRole();
+export function useSidebarNotifications() {
+  const { currentUserId } = useAuthState();
 
-  return useQuery({
-    queryKey: ["notifications", currentUserId, userRole],
-    queryFn: async () => {
-      if (!isAuthenticated || !currentUserId) {
-        console.log("User not authenticated, skipping notifications fetch");
-        return [];
-      }
+  const fetchNotifications = async (): Promise<Notification[]> => {
+    if (!currentUserId) return [];
 
-      console.log("Fetching notifications for user:", currentUserId, "with role:", userRole);
-      
-      const [maintenanceResponse, messagesResponse, paymentsResponse] = await Promise.all([
-        // Get pending maintenance requests
-        // For landlords: get requests for their properties
-        // For tenants: get their own requests
+    console.log("Fetching notifications for user:", currentUserId);
+
+    const notifications: Notification[] = [];
+
+    // Fetch unread messages count
+    const { count: messagesCount, error: messagesError } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('receiver_id', currentUserId)
+      .eq('status', 'sent');
+
+    if (messagesError) {
+      console.error('Error fetching messages count:', messagesError);
+    } else {
+      notifications.push({ type: 'messages', count: messagesCount || 0 });
+    }
+
+    // Fetch pending maintenance requests
+    const { count: maintenanceCount, error: maintenanceError } = await supabase
+      .from('maintenance_requests')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending')
+      .in('property_id', 
         supabase
-          .from("maintenance_requests")
-          .select("id, property_id, tenant_id")
-          .eq("status", "pending")
-          .eq(userRole === "landlord" ? "assigned_to" : "tenant_id", currentUserId),
-        
-        // Get unread messages
-        supabase
-          .from("messages")
-          .select("id")
-          .eq("status", "sent")
-          .eq("receiver_id", currentUserId),
-        
-        // Get pending payments based on role
-        userRole === "landlord" 
-          ? supabase
-              .from("payments")
-              .select("id, tenancy_id")
-              .eq("status", "pending")
-              .gte("due_date", new Date().toISOString())
-          : supabase
-              .from("payments")
-              .select("id")
-              .eq("status", "pending")
-              .gte("due_date", new Date().toISOString())
-              .in(
-                "tenancy_id",
-                [`(SELECT id FROM tenancies WHERE tenant_id = '${currentUserId}' AND status = 'active')`]
-              )
-      ]);
+          .from('properties')
+          .select('id')
+          .eq('landlord_id', currentUserId)
+      );
 
-      console.log("Notifications fetched:", {
-        maintenance: {
-          count: maintenanceResponse.data?.length || 0,
-          error: maintenanceResponse.error
+    if (maintenanceError) {
+      console.error('Error fetching maintenance count:', maintenanceError);
+    } else {
+      notifications.push({ type: 'maintenance', count: maintenanceCount || 0 });
+    }
+
+    // Fetch pending payments
+    const { count: paymentsCount, error: paymentsError } = await supabase
+      .from('payments')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending')
+      .in('tenancy_id',
+        supabase
+          .from('tenancies')
+          .select('id')
+          .in('property_id',
+            supabase
+              .from('properties')
+              .select('id')
+              .eq('landlord_id', currentUserId)
+          )
+      );
+
+    if (paymentsError) {
+      console.error('Error fetching payments count:', paymentsError);
+    } else {
+      notifications.push({ type: 'payments', count: paymentsCount || 0 });
+    }
+
+    return notifications;
+  };
+
+  const { data, refetch } = useQuery({
+    queryKey: ['sidebarNotifications', currentUserId],
+    queryFn: fetchNotifications,
+    enabled: !!currentUserId,
+  });
+
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    // Subscribe to real-time updates for messages
+    const channel = supabase
+      .channel('sidebar-notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${currentUserId}`,
         },
-        messages: {
-          count: messagesResponse.data?.length || 0,
-          error: messagesResponse.error
-        },
-        payments: {
-          count: paymentsResponse.data?.length || 0,
-          error: paymentsResponse.error
+        () => {
+          console.log('Message received, refetching notifications');
+          refetch();
         }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'maintenance_requests',
+        },
+        () => {
+          console.log('Maintenance request updated, refetching notifications');
+          refetch();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'payments',
+        },
+        () => {
+          console.log('Payment updated, refetching notifications');
+          refetch();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
       });
 
-      if (maintenanceResponse.error) {
-        console.error("Maintenance fetch error:", maintenanceResponse.error);
-      }
-      if (messagesResponse.error) {
-        console.error("Messages fetch error:", messagesResponse.error);
-      }
-      if (paymentsResponse.error) {
-        console.error("Payments fetch error:", paymentsResponse.error);
-      }
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUserId, refetch]);
 
-      return [
-        { type: "maintenance", count: maintenanceResponse.data?.length || 0 },
-        { type: "messages", count: messagesResponse.data?.length || 0 },
-        { type: "payments", count: paymentsResponse.data?.length || 0 }
-      ] as Notification[];
-    },
-    enabled: isAuthenticated && !!currentUserId && !!userRole,
-    refetchInterval: 30000 // Refetch every 30 seconds
-  });
-};
+  return { data: data || [] };
+}
