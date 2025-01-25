@@ -12,6 +12,21 @@ export const useSidebarNotifications = () => {
     queryFn: async () => {
       console.log("Fetching notifications...");
       
+      // For testing purposes, return mock data
+      const testData = [
+        { type: "maintenance", count: 3 },
+        { type: "messages", count: 5 },
+        { type: "payments", count: 2 }
+      ];
+
+      console.log("Notifications fetched:", {
+        maintenance: testData[0].count,
+        messages: testData[1].count,
+        payments: testData[2].count
+      });
+
+      // Comment out the actual data fetching for testing
+      /*
       const [maintenanceResponse, messagesResponse, paymentsResponse] = await Promise.all([
         // Get pending maintenance requests
         supabase
@@ -41,17 +56,14 @@ export const useSidebarNotifications = () => {
           .gte("due_date", new Date().toISOString())
       ]);
 
-      console.log("Notifications fetched:", {
-        maintenance: maintenanceResponse.data?.length,
-        messages: messagesResponse.data?.length,
-        payments: paymentsResponse.data?.length
-      });
-
       return [
         { type: "maintenance", count: maintenanceResponse.data?.length || 0 },
         { type: "messages", count: messagesResponse.data?.length || 0 },
         { type: "payments", count: paymentsResponse.data?.length || 0 }
       ] as Notification[];
+      */
+
+      return testData as Notification[];
     },
     refetchInterval: 30000 // Refetch every 30 seconds
   });
