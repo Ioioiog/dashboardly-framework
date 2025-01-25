@@ -276,7 +276,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           value={metrics.paymentStatus}
           icon={Wallet}
           onClick={handleRevenueClick}
-          className="bg-gradient-to-br from-white to-green-50 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+          className="bg-gradient-to-br from-white to-green-50 shadow-md hover:shadow-lg transition-all duration-300"
           description="Click to view monthly payments"
         />
       </div>

@@ -11,7 +11,7 @@ interface MetricCardProps {
   description?: string;
   className?: string;
   route?: string;
-  onClick?: () => void; // Added onClick prop
+  onClick?: () => void;
 }
 
 export function MetricCard({
