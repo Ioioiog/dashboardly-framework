@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthState } from "@/hooks/useAuthState";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export interface Notification {
   type: string;
@@ -9,24 +10,27 @@ export interface Notification {
 
 export const useSidebarNotifications = () => {
   const { isAuthenticated, currentUserId } = useAuthState();
+  const { userRole } = useUserRole();
 
   return useQuery({
-    queryKey: ["notifications", currentUserId],
+    queryKey: ["notifications", currentUserId, userRole],
     queryFn: async () => {
       if (!isAuthenticated || !currentUserId) {
         console.log("User not authenticated, skipping notifications fetch");
         return [];
       }
 
-      console.log("Fetching notifications for user:", currentUserId);
+      console.log("Fetching notifications for user:", currentUserId, "with role:", userRole);
       
       const [maintenanceResponse, messagesResponse, paymentsResponse] = await Promise.all([
         // Get pending maintenance requests
+        // For landlords: get requests for their properties
+        // For tenants: get their own requests
         supabase
           .from("maintenance_requests")
-          .select("id")
+          .select("id, property_id, tenant_id")
           .eq("status", "pending")
-          .eq("assigned_to", currentUserId),
+          .eq(userRole === "landlord" ? "assigned_to" : "tenant_id", currentUserId),
         
         // Get unread messages
         supabase
@@ -35,22 +39,52 @@ export const useSidebarNotifications = () => {
           .eq("status", "sent")
           .eq("receiver_id", currentUserId),
         
-        // Get pending payments
-        supabase
-          .from("payments")
-          .select("id")
-          .eq("status", "pending")
-          .gte("due_date", new Date().toISOString())
+        // Get pending payments based on role
+        userRole === "landlord" 
+          ? supabase
+              .from("payments")
+              .select("id, tenancy_id")
+              .eq("status", "pending")
+              .gte("due_date", new Date().toISOString())
+          : supabase
+              .from("payments")
+              .select("id")
+              .eq("status", "pending")
+              .gte("due_date", new Date().toISOString())
+              .in(
+                "tenancy_id",
+                supabase
+                  .from("tenancies")
+                  .select("id")
+                  .eq("tenant_id", currentUserId)
+                  .eq("status", "active")
+              )
       ]);
 
       console.log("Notifications fetched:", {
-        maintenance: maintenanceResponse.data?.length || 0,
-        messages: messagesResponse.data?.length || 0,
-        payments: paymentsResponse.data?.length || 0,
-        maintenanceError: maintenanceResponse.error,
-        messagesError: messagesResponse.error,
-        paymentsError: paymentsResponse.error
+        maintenance: {
+          count: maintenanceResponse.data?.length || 0,
+          error: maintenanceResponse.error
+        },
+        messages: {
+          count: messagesResponse.data?.length || 0,
+          error: messagesResponse.error
+        },
+        payments: {
+          count: paymentsResponse.data?.length || 0,
+          error: paymentsResponse.error
+        }
       });
+
+      if (maintenanceResponse.error) {
+        console.error("Maintenance fetch error:", maintenanceResponse.error);
+      }
+      if (messagesResponse.error) {
+        console.error("Messages fetch error:", messagesResponse.error);
+      }
+      if (paymentsResponse.error) {
+        console.error("Payments fetch error:", paymentsResponse.error);
+      }
 
       return [
         { type: "maintenance", count: maintenanceResponse.data?.length || 0 },
@@ -58,7 +92,7 @@ export const useSidebarNotifications = () => {
         { type: "payments", count: paymentsResponse.data?.length || 0 }
       ] as Notification[];
     },
-    enabled: isAuthenticated && !!currentUserId,
+    enabled: isAuthenticated && !!currentUserId && !!userRole,
     refetchInterval: 30000 // Refetch every 30 seconds
   });
 };
