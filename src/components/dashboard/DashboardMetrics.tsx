@@ -23,16 +23,11 @@ interface Metrics {
 async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
   console.log("Fetching landlord metrics for user:", userId);
   
-  const currentDate = new Date();
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-
   // Get properties with active tenancies and their monthly rents
   const { data: properties, error } = await supabase
     .from("properties")
     .select(`
       id,
-      name,
       monthly_rent,
       tenancies (
         id,
@@ -55,35 +50,25 @@ async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
       monthlyRevenue: 0,
       activeTenants: 0,
       pendingMaintenance: 0,
-      revenueDetails: []
     };
   }
 
-  // Calculate monthly revenue and prepare revenue details
-  const revenueDetails: Array<{ property_name: string; amount: number; due_date: string; status: string }> = [];
-  let totalMonthlyRevenue = 0;
-
-  properties.forEach(property => {
+  // Calculate monthly revenue only from properties with active tenancies
+  const currentDate = new Date().toISOString();
+  const monthlyRevenue = properties.reduce((sum, property) => {
     const hasActiveTenancy = property.tenancies?.some(tenancy => 
       tenancy.status === 'active' && 
-      tenancy.start_date <= currentDate.toISOString() &&
-      (!tenancy.end_date || tenancy.end_date > currentDate.toISOString())
+      tenancy.start_date <= currentDate &&
+      (!tenancy.end_date || tenancy.end_date > currentDate)
     );
     
-    if (hasActiveTenancy) {
-      totalMonthlyRevenue += Number(property.monthly_rent);
-      revenueDetails.push({
-        property_name: property.name,
-        amount: Number(property.monthly_rent),
-        due_date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString(),
-        status: 'pending'
-      });
-    }
-  });
+    return hasActiveTenancy ? sum + Number(property.monthly_rent) : sum;
+  }, 0);
 
-  console.log("Monthly revenue details:", revenueDetails);
+  console.log("Monthly revenue from active tenancies:", monthlyRevenue);
 
   const propertyIds = properties.map(p => p.id);
+  console.log("Found properties:", propertyIds);
 
   const [tenantsCount, maintenanceCount] = await Promise.all([
     supabase
@@ -98,12 +83,18 @@ async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
       .in("property_id", propertyIds),
   ]);
 
+  console.log("Landlord metrics calculated:", {
+    properties: properties.length,
+    revenue: monthlyRevenue,
+    tenants: tenantsCount.count,
+    maintenance: maintenanceCount.count,
+  });
+
   return {
     totalProperties: properties.length,
-    monthlyRevenue: totalMonthlyRevenue,
+    monthlyRevenue: monthlyRevenue,
     activeTenants: tenantsCount.count || 0,
     pendingMaintenance: maintenanceCount.count || 0,
-    revenueDetails: revenueDetails
   };
 }
 
