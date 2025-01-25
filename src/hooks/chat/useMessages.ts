@@ -39,7 +39,7 @@ export function useMessages(conversationId: string | null) {
           status,
           profile_id,
           conversation_id,
-          sender:profiles!sender_id(first_name, last_name)
+          sender:profiles(first_name, last_name)
         `)
         .eq('conversation_id', conversationId)
         .order("created_at", { ascending: true });
@@ -57,7 +57,8 @@ export function useMessages(conversationId: string | null) {
       console.log("Initial messages loaded:", data?.length);
       const typedMessages = data?.map(msg => ({
         ...msg,
-        status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read'
+        status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read',
+        sender: msg.sender || { first_name: null, last_name: null }
       })) || [];
       setMessages(typedMessages);
     };
@@ -96,7 +97,7 @@ export function useMessages(conversationId: string | null) {
               status,
               profile_id,
               conversation_id,
-              sender:profiles!sender_id(first_name, last_name)
+              sender:profiles(first_name, last_name)
             `)
             .eq("id", payload.new.id)
             .single();
@@ -110,7 +111,8 @@ export function useMessages(conversationId: string | null) {
 
           const typedMessage = {
             ...newMessage,
-            status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read'
+            status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
+            sender: newMessage.sender || { first_name: null, last_name: null }
           };
 
           setMessages(prev => {
@@ -172,7 +174,7 @@ export function useMessages(conversationId: string | null) {
           status,
           profile_id,
           conversation_id,
-          sender:profiles!sender_id(first_name, last_name)
+          sender:profiles(first_name, last_name)
         `)
         .single();
 
