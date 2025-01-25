@@ -28,40 +28,51 @@ export function useMessages(conversationId: string | null) {
     console.log("Fetching messages for conversation:", conversationId);
 
     const fetchMessages = async () => {
-      const { data, error } = await supabase
-        .from("messages")
-        .select(`
-          id,
-          sender_id,
-          content,
-          created_at,
-          status,
-          read,
-          profile_id,
-          conversation_id,
-          sender:profiles!messages_profile_id_fkey(first_name, last_name)
-        `)
-        .eq('conversation_id', conversationId)
-        .order("created_at", { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from("messages")
+          .select(`
+            id,
+            sender_id,
+            content,
+            created_at,
+            status,
+            read,
+            profile_id,
+            conversation_id,
+            sender:profiles!messages_profile_id_fkey(
+              first_name,
+              last_name
+            )
+          `)
+          .eq('conversation_id', conversationId)
+          .order("created_at", { ascending: true });
 
-      if (error) {
-        console.error("Error fetching messages:", error);
+        if (error) {
+          console.error("Error fetching messages:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load messages",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        console.log("Fetched messages:", data);
+        const typedMessages = data?.map(msg => ({
+          ...msg,
+          status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read',
+          read: msg.read || false
+        })) || [];
+        setMessages(typedMessages);
+      } catch (err) {
+        console.error("Unexpected error fetching messages:", err);
         toast({
           title: "Error",
           description: "Failed to load messages",
           variant: "destructive",
         });
-        return;
       }
-
-      console.log("Fetched messages:", data);
-      // Type cast the status to ensure it matches our Message interface
-      const typedMessages = data?.map(msg => ({
-        ...msg,
-        status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read',
-        read: msg.read || false
-      })) || [];
-      setMessages(typedMessages);
     };
 
     fetchMessages();
@@ -96,7 +107,10 @@ export function useMessages(conversationId: string | null) {
               read,
               profile_id,
               conversation_id,
-              sender:profiles!messages_profile_id_fkey(first_name, last_name)
+              sender:profiles!messages_profile_id_fkey(
+                first_name,
+                last_name
+              )
             `)
             .eq("id", payload.new.id)
             .single();
@@ -148,19 +162,28 @@ export function useMessages(conversationId: string | null) {
       content
     });
 
-    const { error } = await supabase
-      .from("messages")
-      .insert({
-        content: content.trim(),
-        sender_id: currentUserId,
-        profile_id: currentUserId,
-        conversation_id: conversationId,
-        status: 'sent',
-        read: false
-      });
+    try {
+      const { error } = await supabase
+        .from("messages")
+        .insert({
+          content: content.trim(),
+          sender_id: currentUserId,
+          profile_id: currentUserId,
+          conversation_id: conversationId,
+          status: 'sent',
+          read: false
+        });
 
-    if (error) {
-      console.error("Error sending message:", error);
+      if (error) {
+        console.error("Error sending message:", error);
+        toast({
+          title: "Error",
+          description: "Failed to send message",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      console.error("Unexpected error sending message:", err);
       toast({
         title: "Error",
         description: "Failed to send message",
