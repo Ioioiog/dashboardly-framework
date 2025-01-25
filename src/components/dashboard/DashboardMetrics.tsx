@@ -20,7 +20,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
             title="Loading..."
             value="..."
             icon={Home}
-            className="bg-gradient-to-br from-white to-gray-50 shadow-md hover:shadow-lg transition-all duration-300"
+            className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
           />
         ))}
       </div>
@@ -42,7 +42,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
             value={metrics.totalProperties}
             icon={Home}
             route="/properties"
-            className="bg-gradient-to-br from-white to-blue-50 shadow-md hover:shadow-lg transition-all duration-300"
+            className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
             description="Total managed properties"
           />
           <MetricCard
@@ -51,14 +51,14 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
             icon={Wallet}
             onClick={handleRevenueClick}
             description={t('dashboard.revenue.title')}
-            className="bg-gradient-to-br from-white to-green-50 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+            className="bg-white shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
           />
           <MetricCard
             title={t('dashboard.metrics.activeTenants')}
             value={metrics.activeTenants}
             icon={Users}
             route="/tenants"
-            className="bg-gradient-to-br from-white to-purple-50 shadow-md hover:shadow-lg transition-all duration-300"
+            className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
             description="Currently active tenants"
           />
           <MetricCard
@@ -66,7 +66,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
             value={metrics.pendingMaintenance}
             icon={Settings}
             route="/maintenance"
-            className="bg-gradient-to-br from-white to-orange-50 shadow-md hover:shadow-lg transition-all duration-300"
+            className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
             description="Pending maintenance requests"
           />
         </div>
@@ -88,7 +88,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           value={metrics.totalProperties}
           icon={Home}
           route="/properties"
-          className="bg-gradient-to-br from-white to-blue-50 shadow-md hover:shadow-lg transition-all duration-300"
+          className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
           description="Your rented properties"
         />
         <MetricCard
@@ -96,7 +96,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           value={metrics.pendingMaintenance}
           icon={Settings}
           route="/maintenance"
-          className="bg-gradient-to-br from-white to-orange-50 shadow-md hover:shadow-lg transition-all duration-300"
+          className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
           description="Open maintenance requests"
         />
         <MetricCard
@@ -104,7 +104,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           value={metrics.paymentStatus}
           icon={Wallet}
           onClick={handleRevenueClick}
-          className="bg-gradient-to-br from-white to-green-50 shadow-md hover:shadow-lg transition-all duration-300"
+          className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
           description="Click to view monthly payments"
         />
       </div>
