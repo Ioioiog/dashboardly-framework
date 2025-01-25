@@ -8,19 +8,23 @@ export function useUnreadMessages(conversationId: string | null, currentUserId: 
     if (!conversationId || !currentUserId) return;
 
     const fetchUnreadCount = async () => {
-      const { count, error } = await supabase
-        .from('messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('conversation_id', conversationId)
-        .neq('sender_id', currentUserId)
-        .eq('status', 'sent');
+      try {
+        const { count, error } = await supabase
+          .from('messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('conversation_id', conversationId)
+          .neq('sender_id', currentUserId)
+          .eq('status', 'sent');
 
-      if (error) {
-        console.error('Error fetching unread messages:', error);
-        return;
+        if (error) {
+          console.error('Error fetching unread messages:', error);
+          return;
+        }
+
+        setUnreadCount(count || 0);
+      } catch (error) {
+        console.error('Error in useUnreadMessages:', error);
       }
-
-      setUnreadCount(count || 0);
     };
 
     fetchUnreadCount();
