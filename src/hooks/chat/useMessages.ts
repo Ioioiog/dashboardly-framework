@@ -8,6 +8,8 @@ interface Message {
   content: string;
   created_at: string;
   status: 'sent' | 'delivered' | 'read';
+  profile_id: string;
+  conversation_id: string | null;
   sender: {
     first_name: string | null;
     last_name: string | null;
