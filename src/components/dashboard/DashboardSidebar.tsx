@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Home,
@@ -12,6 +12,7 @@ import {
   MessageCircle,
   ChevronLeft,
   ChevronRight,
+  BellDot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -30,12 +31,66 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useQuery } from "@tanstack/react-query";
+
+interface Notification {
+  type: string;
+  count: number;
+}
 
 export const DashboardSidebar = () => {
   const { userRole } = useUserRole();
   const location = useLocation();
   const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(true);
+
+  // Fetch notifications
+  const { data: notifications } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      console.log("Fetching notifications...");
+      
+      const [maintenanceResponse, messagesResponse, paymentsResponse] = await Promise.all([
+        // Get pending maintenance requests
+        supabase
+          .from("maintenance_requests")
+          .select("id")
+          .eq("status", "pending")
+          .eq(userRole === "landlord" ? "assigned_to" : "tenant_id", await supabase.auth.getUser().then(res => res.data.user?.id)),
+        
+        // Get unread messages
+        supabase
+          .from("messages")
+          .select("id")
+          .eq("status", "sent")
+          .eq("receiver_id", await supabase.auth.getUser().then(res => res.data.user?.id)),
+        
+        // Get pending payments
+        supabase
+          .from("payments")
+          .select("id")
+          .eq("status", "pending")
+          .gte("due_date", new Date().toISOString())
+      ]);
+
+      console.log("Notifications fetched:", {
+        maintenance: maintenanceResponse.data?.length,
+        messages: messagesResponse.data?.length,
+        payments: paymentsResponse.data?.length
+      });
+
+      return [
+        { type: "maintenance", count: maintenanceResponse.data?.length || 0 },
+        { type: "messages", count: messagesResponse.data?.length || 0 },
+        { type: "payments", count: paymentsResponse.data?.length || 0 }
+      ] as Notification[];
+    },
+    refetchInterval: 30000 // Refetch every 30 seconds
+  });
+
+  const getNotificationCount = (type: string) => {
+    return notifications?.find(n => n.type === type)?.count || 0;
+  };
 
   const handleSignOut = async () => {
     try {
@@ -87,6 +142,7 @@ export const DashboardSidebar = () => {
       icon: Wrench,
       href: "/maintenance",
       roles: ["landlord", "tenant"],
+      notificationType: "maintenance"
     },
     {
       title: "Documents",
@@ -105,6 +161,7 @@ export const DashboardSidebar = () => {
       icon: CreditCard,
       href: "/payments",
       roles: ["landlord", "tenant"],
+      notificationType: "payments"
     },
     {
       title: "Utilities",
@@ -117,6 +174,7 @@ export const DashboardSidebar = () => {
       icon: MessageCircle,
       href: "/chat",
       roles: ["landlord", "tenant"],
+      notificationType: "messages"
     },
     {
       title: "Settings",
@@ -133,18 +191,26 @@ export const DashboardSidebar = () => {
   const MenuItem = ({ item }: { item: typeof menuItems[0] }) => {
     const active = isActive(item.href);
     const Icon = item.icon;
+    const notificationCount = item.notificationType ? getNotificationCount(item.notificationType) : 0;
     
     const linkContent = (
       <div
         className={cn(
           "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200",
           active
-            ? "bg-primary/10 text-primary font-semibold"
-            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            ? "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
+            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-300",
           !isExpanded && "justify-center px-2"
         )}
       >
-        <Icon className={cn("h-5 w-5", active && "text-primary")} />
+        <div className="relative">
+          <Icon className={cn("h-5 w-5", active && "text-blue-600 dark:text-blue-400")} />
+          {notificationCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white ring-2 ring-white dark:ring-gray-900">
+              {notificationCount}
+            </span>
+          )}
+        </div>
         {isExpanded && <span className="ml-3">{item.title}</span>}
       </div>
     );
@@ -159,8 +225,15 @@ export const DashboardSidebar = () => {
           <TooltipTrigger asChild>
             <Link to={item.href}>{linkContent}</Link>
           </TooltipTrigger>
-          <TooltipContent side="right" align="center">
-            {item.title}
+          <TooltipContent side="right" align="center" className="bg-white dark:bg-gray-900 text-sm">
+            <div className="flex items-center gap-2">
+              {item.title}
+              {notificationCount > 0 && (
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                  {notificationCount}
+                </span>
+              )}
+            </div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
