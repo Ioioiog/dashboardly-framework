@@ -50,8 +50,14 @@ export function MetricCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       {isPropertiesCard && isHovered ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-white transition-all duration-300">
-          <Icon className="h-20 w-20 text-primary animate-fade-in" />
+        <div className="absolute inset-0 flex items-center justify-center bg-white transition-all duration-500">
+          <Icon 
+            className={cn(
+              "h-20 w-20 text-primary transition-all duration-500",
+              "animate-[spin_3s_linear_infinite]",
+              isHovered && "scale-110 animate-[bounce_1s_ease-in-out_infinite]"
+            )}
+          />
         </div>
       ) : (
         <>
