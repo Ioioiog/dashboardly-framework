@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TenantSelect {
   id: string;
@@ -61,11 +62,15 @@ export function TenantSelect({ onTenantSelect, selectedTenantId }: TenantSelectP
   });
 
   if (isLoading) {
-    return <div>Loading tenants...</div>;
+    return <Skeleton className="h-10 w-[300px]" />;
   }
 
   if (!tenants || tenants.length === 0) {
-    return <div>No tenants available</div>;
+    return (
+      <div className="text-sm text-slate-500 dark:text-slate-400">
+        No active tenants available
+      </div>
+    );
   }
 
   return (
@@ -73,17 +78,32 @@ export function TenantSelect({ onTenantSelect, selectedTenantId }: TenantSelectP
       value={selectedTenantId}
       onValueChange={(value) => onTenantSelect(value)}
     >
-      <SelectTrigger className="w-[200px]">
-        <SelectValue placeholder="Select a tenant" />
+      <SelectTrigger className="w-[300px] bg-white dark:bg-slate-900">
+        <SelectValue placeholder="Select a tenant to start chatting" />
       </SelectTrigger>
       <SelectContent>
         {tenants.map((tenancy) => {
           // Additional safety check
           if (!tenancy.tenant) return null;
           
+          const fullName = [tenancy.tenant.first_name, tenancy.tenant.last_name]
+            .filter(Boolean)
+            .join(" ");
+          
           return (
-            <SelectItem key={tenancy.tenant.id} value={tenancy.tenant.id}>
-              {tenancy.tenant.first_name} {tenancy.tenant.last_name}
+            <SelectItem 
+              key={tenancy.tenant.id} 
+              value={tenancy.tenant.id}
+              className="hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <div className="flex flex-col">
+                <span className="font-medium">{fullName}</span>
+                {tenancy.tenant.email && (
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                    {tenancy.tenant.email}
+                  </span>
+                )}
+              </div>
             </SelectItem>
           );
         })}
