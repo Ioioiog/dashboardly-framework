@@ -53,11 +53,7 @@ export const useSidebarNotifications = () => {
               .gte("due_date", new Date().toISOString())
               .in(
                 "tenancy_id",
-                supabase
-                  .from("tenancies")
-                  .select("id")
-                  .eq("tenant_id", currentUserId)
-                  .eq("status", "active")
+                `(SELECT id FROM tenancies WHERE tenant_id = '${currentUserId}' AND status = 'active')`
               )
       ]);
 
