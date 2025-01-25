@@ -34,10 +34,23 @@ export function MessageList({
   const [editedContent, setEditedContent] = useState("");
   const { toast } = useToast();
 
+  // Scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const scrollToBottom = () => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ 
+          behavior: "smooth",
+          block: "end"
+        });
+      }
+    };
+
+    // Add a small delay to ensure DOM has updated
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timeoutId);
   }, [messages, messagesEndRef]);
 
+  // Update message status to read
   useEffect(() => {
     if (!currentUserId) return;
 
@@ -48,6 +61,7 @@ export function MessageList({
         );
 
         if (unreadMessages.length > 0) {
+          console.log("Updating status for messages:", unreadMessages.map(m => m.id));
           const { error } = await supabase
             .from('messages')
             .update({ status: 'read' })
