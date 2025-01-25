@@ -23,17 +23,23 @@ interface Metrics {
 async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
   console.log("Fetching landlord metrics for user:", userId);
   
+  const currentDate = new Date();
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
   // Get properties with active tenancies and their monthly rents
   const { data: properties, error } = await supabase
     .from("properties")
     .select(`
       id,
+      name,
       monthly_rent,
       tenancies (
         id,
         status,
         start_date,
-        end_date
+        end_date,
+        tenant_id
       )
     `)
     .eq("landlord_id", userId);
@@ -50,32 +56,48 @@ async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
       monthlyRevenue: 0,
       activeTenants: 0,
       pendingMaintenance: 0,
+      revenueDetails: []
     };
   }
 
-  // Calculate monthly revenue only from properties with active tenancies
-  const currentDate = new Date().toISOString();
-  const monthlyRevenue = properties.reduce((sum, property) => {
+  // Calculate monthly revenue and collect revenue details
+  const revenueDetails: Array<{ property_name: string; amount: number; due_date: string; status: string }> = [];
+  let totalMonthlyRevenue = 0;
+  let activeTenanciesCount = 0;
+
+  for (const property of properties) {
     const hasActiveTenancy = property.tenancies?.some(tenancy => 
       tenancy.status === 'active' && 
-      tenancy.start_date <= currentDate &&
-      (!tenancy.end_date || tenancy.end_date > currentDate)
+      tenancy.start_date <= currentDate.toISOString() &&
+      (!tenancy.end_date || tenancy.end_date > currentDate.toISOString())
     );
     
-    return hasActiveTenancy ? sum + Number(property.monthly_rent) : sum;
-  }, 0);
+    if (hasActiveTenancy) {
+      totalMonthlyRevenue += Number(property.monthly_rent);
+      activeTenanciesCount++;
 
-  console.log("Monthly revenue from active tenancies:", monthlyRevenue);
+      // Get payment status for this property
+      const { data: payments } = await supabase
+        .from("payments")
+        .select("status")
+        .eq("tenancy_id", property.tenancies[0].id)
+        .gte("due_date", firstDayOfMonth.toISOString())
+        .lte("due_date", lastDayOfMonth.toISOString())
+        .maybeSingle();
+
+      revenueDetails.push({
+        property_name: property.name,
+        amount: Number(property.monthly_rent),
+        due_date: firstDayOfMonth.toISOString(),
+        status: payments?.status || "pending"
+      });
+    }
+  }
+
+  console.log("Revenue details:", revenueDetails);
 
   const propertyIds = properties.map(p => p.id);
-  console.log("Found properties:", propertyIds);
-
-  const [tenantsCount, maintenanceCount] = await Promise.all([
-    supabase
-      .from("tenancies")
-      .select("id", { count: "exact" })
-      .eq("status", "active")
-      .in("property_id", propertyIds),
+  const [maintenanceCount] = await Promise.all([
     supabase
       .from("maintenance_requests")
       .select("id", { count: "exact" })
@@ -83,18 +105,12 @@ async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
       .in("property_id", propertyIds),
   ]);
 
-  console.log("Landlord metrics calculated:", {
-    properties: properties.length,
-    revenue: monthlyRevenue,
-    tenants: tenantsCount.count,
-    maintenance: maintenanceCount.count,
-  });
-
   return {
     totalProperties: properties.length,
-    monthlyRevenue: monthlyRevenue,
-    activeTenants: tenantsCount.count || 0,
+    monthlyRevenue: totalMonthlyRevenue,
+    activeTenants: activeTenanciesCount,
     pendingMaintenance: maintenanceCount.count || 0,
+    revenueDetails: revenueDetails
   };
 }
 
@@ -230,7 +246,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
             icon={Wallet}
             onClick={handleRevenueClick}
             description={t('dashboard.revenue.title')}
-            className="bg-gradient-to-br from-white to-green-50 shadow-md hover:shadow-lg transition-all duration-300"
+            className="bg-gradient-to-br from-white to-green-50 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
           />
           <MetricCard
             title={t('dashboard.metrics.activeTenants')}
@@ -256,34 +272,35 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
               <DialogTitle>Monthly Revenue Details</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              {metrics.revenueDetails?.map((detail, index) => (
-                <div 
-                  key={index}
-                  className="p-4 rounded-lg bg-gradient-to-br from-white to-gray-50 shadow-sm"
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium">{detail.property_name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Due: {new Date(detail.due_date).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">${detail.amount.toLocaleString()}</p>
-                      <span className={`text-sm ${
-                        detail.status === 'paid' 
-                          ? 'text-green-600' 
-                          : detail.status === 'pending' 
-                            ? 'text-orange-600' 
-                            : 'text-red-600'
-                      }`}>
-                        {detail.status.charAt(0).toUpperCase() + detail.status.slice(1)}
-                      </span>
+              {metrics.revenueDetails && metrics.revenueDetails.length > 0 ? (
+                metrics.revenueDetails.map((detail, index) => (
+                  <div 
+                    key={index}
+                    className="p-4 rounded-lg bg-gradient-to-br from-white to-gray-50 shadow-sm"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-medium">{detail.property_name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Due: {new Date(detail.due_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">${detail.amount.toLocaleString()}</p>
+                        <span className={`text-sm ${
+                          detail.status === 'paid' 
+                            ? 'text-green-600' 
+                            : detail.status === 'pending' 
+                              ? 'text-orange-600' 
+                              : 'text-red-600'
+                        }`}>
+                          {detail.status.charAt(0).toUpperCase() + detail.status.slice(1)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-              {(!metrics.revenueDetails || metrics.revenueDetails.length === 0) && (
+                ))
+              ) : (
                 <p className="text-center text-muted-foreground py-4">
                   No revenue details available for this month
                 </p>
