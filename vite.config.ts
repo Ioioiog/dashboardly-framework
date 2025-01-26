@@ -22,14 +22,14 @@ export default defineConfig(({ mode }) => ({
         start_url: '/',
         screenshots: [
           {
-            src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
+            src: '/lovable-uploads/9c23bc1b-4e8c-433e-a961-df606dc6a2c6.png',
             sizes: '1920x1080',
             type: 'image/png',
             form_factor: 'wide',
             label: 'Dashboard Overview'
           },
           {
-            src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
+            src: '/lovable-uploads/a279fbbc-be90-4a4b-afe5-ae98a7d6c04d.png',
             sizes: '1080x1920',
             type: 'image/png',
             form_factor: 'narrow',
@@ -38,19 +38,19 @@ export default defineConfig(({ mode }) => ({
         ],
         icons: [
           {
-            src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
+            src: '/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
+            src: '/lovable-uploads/40d8c354-0818-47dd-81c4-1b8031beedb8.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
+            src: '/lovable-uploads/40d8c354-0818-47dd-81c4-1b8031beedb8.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
