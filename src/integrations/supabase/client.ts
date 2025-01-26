@@ -18,7 +18,12 @@ export const supabase = createClient<Database>(
     },
     global: {
       headers: {
-        'X-Client-Info': 'supabase-js-web'
+        'X-Client-Info': 'supabase-js-web/2.1.0'
+      }
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 10
       }
     }
   }
@@ -44,6 +49,15 @@ const initSession = async () => {
     }
 
     console.log('Valid session found:', session.user.id);
+    
+    // Test realtime connection
+    const { error: realtimeError } = await supabase.channel('system').subscribe((status) => {
+      console.log('Realtime subscription status:', status);
+    });
+
+    if (realtimeError) {
+      console.error('Error establishing realtime connection:', realtimeError);
+    }
 
   } catch (err) {
     console.error('Unexpected error during session initialization:', err);
