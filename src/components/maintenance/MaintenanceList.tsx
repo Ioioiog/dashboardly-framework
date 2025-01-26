@@ -29,7 +29,7 @@ export function MaintenanceList({
   const { userRole } = useUserRole();
   const { toast } = useToast();
 
-  console.log('Current user role:', userRole); // Debug log
+  console.log('Current user role in MaintenanceList:', userRole); // Debug log
 
   const handleMarkAsRead = async (requestId: string) => {
     try {
