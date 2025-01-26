@@ -5,6 +5,7 @@ export interface Message {
   created_at: string;
   status: 'sent' | 'delivered' | 'read';
   read: boolean;
+  conversation_id?: string | null;
   sender: {
     first_name: string | null;
     last_name: string | null;

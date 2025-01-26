@@ -71,7 +71,8 @@ export function useMessageSubscription(
               ...newMessage,
               sender: newMessage.profiles || null,
               status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
-              read: newMessage.read || false
+              read: newMessage.read || false,
+              conversation_id: newMessage.conversation_id
             };
 
             // Cache the message in IndexedDB - prepare data for upsert
@@ -83,7 +84,7 @@ export function useMessageSubscription(
               status: typedMessage.status,
               read: typedMessage.read,
               profile_id: newMessage.profile_id,
-              conversation_id: typedMessage.conversation_id
+              conversation_id: newMessage.conversation_id
             };
 
             try {
