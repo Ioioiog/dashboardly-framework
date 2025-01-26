@@ -10,7 +10,10 @@ import { MaintenanceRequest } from "@/types/maintenance";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, Check } from "lucide-react";
+import { useUserRole } from "@/hooks/use-user-role";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MaintenanceListProps {
   requests: MaintenanceRequest[];
@@ -23,6 +26,33 @@ export function MaintenanceList({
   isLoading,
   onRequestClick,
 }: MaintenanceListProps) {
+  const { userRole } = useUserRole();
+  const { toast } = useToast();
+
+  const handleMarkAsRead = async (requestId: string) => {
+    try {
+      console.log('Marking request as read:', requestId);
+      const { error } = await supabase
+        .from('maintenance_requests')
+        .update({ read_by_landlord: true })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Request marked as read",
+      });
+    } catch (error) {
+      console.error('Error marking request as read:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to mark request as read",
+      });
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -68,6 +98,9 @@ export function MaintenanceList({
           <TableHead>Priority</TableHead>
           <TableHead>Created</TableHead>
           <TableHead>Actions</TableHead>
+          {userRole === 'landlord' && (
+            <TableHead>Mark as Read</TableHead>
+          )}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -105,6 +138,22 @@ export function MaintenanceList({
                 See Request
               </Button>
             </TableCell>
+            {userRole === 'landlord' && (
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleMarkAsRead(request.id)}
+                  disabled={request.read_by_landlord}
+                  className={`flex items-center gap-2 ${
+                    request.read_by_landlord ? 'text-gray-400' : 'text-green-600 hover:text-green-700'
+                  }`}
+                >
+                  <Check className="h-4 w-4" />
+                  {request.read_by_landlord ? 'Read' : 'Mark as Read'}
+                </Button>
+              </TableCell>
+            )}
           </TableRow>
         ))}
       </TableBody>
