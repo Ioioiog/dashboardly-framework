@@ -10,7 +10,7 @@ import { MaintenanceRequest } from "@/types/maintenance";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Check } from "lucide-react";
+import { Eye } from "lucide-react";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -112,9 +112,6 @@ export function MaintenanceList({
           <TableHead>Priority</TableHead>
           <TableHead>Created</TableHead>
           <TableHead>Actions</TableHead>
-          {userRole === 'landlord' && (
-            <TableHead className="text-right w-32">Read Status</TableHead>
-          )}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -147,31 +144,18 @@ export function MaintenanceList({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => onRequestClick(request)}
+                onClick={() => {
+                  onRequestClick(request);
+                  if (userRole === 'landlord' && !request.read_by_landlord) {
+                    handleMarkAsRead(request.id);
+                  }
+                }}
                 className="flex items-center gap-2"
               >
                 <Eye className="h-4 w-4" />
                 See Request
               </Button>
             </TableCell>
-            {userRole === 'landlord' && (
-              <TableCell className="text-right">
-                <Button
-                  variant={request.read_by_landlord ? "ghost" : "outline"}
-                  size="sm"
-                  onClick={() => handleMarkAsRead(request.id)}
-                  disabled={request.read_by_landlord}
-                  className={`w-full justify-center ${
-                    request.read_by_landlord 
-                      ? 'text-gray-400' 
-                      : 'text-blue-600 hover:text-blue-700'
-                  }`}
-                >
-                  <Check className="h-4 w-4 mr-2" />
-                  {request.read_by_landlord ? 'Read' : 'Mark Read'}
-                </Button>
-              </TableCell>
-            )}
           </TableRow>
         ))}
       </TableBody>
