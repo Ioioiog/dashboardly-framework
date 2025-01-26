@@ -67,6 +67,7 @@ export function useMaintenanceRequests() {
       }
     },
     onSuccess: () => {
+      // Invalidate both maintenance requests and sidebar notifications
       queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
       queryClient.invalidateQueries({ queryKey: ['sidebarNotifications'] });
     },

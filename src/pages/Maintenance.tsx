@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MaintenanceDialog } from "@/components/maintenance/MaintenanceDialog";
 import { MaintenanceFilters } from "@/components/maintenance/MaintenanceFilters";
 import { MaintenanceList } from "@/components/maintenance/MaintenanceList";
@@ -25,10 +25,16 @@ export default function Maintenance() {
     return matchesStatus && matchesPriority && matchesProperty;
   });
 
-  const handleRequestClick = (request: MaintenanceRequest) => {
+  const handleRequestClick = async (request: MaintenanceRequest) => {
+    console.log('Handling request click:', request.id);
     setSelectedRequest(request);
-    // Mark as read when viewing the request
-    markAsRead.mutate(request.id);
+    
+    // Only mark as read if the request isn't already read
+    if (userRole === 'landlord' && !request.read_by_landlord) {
+      await markAsRead.mutate(request.id);
+    } else if (userRole === 'tenant' && !request.read_by_tenant) {
+      await markAsRead.mutate(request.id);
+    }
   };
 
   return (
