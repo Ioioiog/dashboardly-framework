@@ -18,7 +18,6 @@ export function useMessageSubscription(
 
     console.log("Setting up message subscription for conversation:", conversationId);
 
-    // Subscribe to real-time updates
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
@@ -75,11 +74,22 @@ export function useMessageSubscription(
               read: newMessage.read || false
             };
 
-            // Cache the message in IndexedDB
+            // Cache the message in IndexedDB - prepare data for upsert
+            const messageForUpsert = {
+              id: typedMessage.id,
+              sender_id: typedMessage.sender_id,
+              content: typedMessage.content,
+              created_at: typedMessage.created_at,
+              status: typedMessage.status,
+              read: typedMessage.read,
+              profile_id: newMessage.profile_id,
+              conversation_id: typedMessage.conversation_id
+            };
+
             try {
               await supabase
                 .from("messages")
-                .upsert([typedMessage], { onConflict: 'id' });
+                .upsert(messageForUpsert, { onConflict: 'id' });
               console.log("Message cached successfully");
             } catch (cacheError) {
               console.error("Error caching message:", cacheError);
