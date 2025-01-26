@@ -101,7 +101,7 @@ export function MaintenanceList({
           <TableHead>Created</TableHead>
           <TableHead>Actions</TableHead>
           {userRole === 'landlord' && (
-            <TableHead className="text-right w-[100px]">Read Status</TableHead>
+            <TableHead className="text-right">Read Status</TableHead>
           )}
         </TableRow>
       </TableHeader>
