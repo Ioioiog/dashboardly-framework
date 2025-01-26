@@ -12,23 +12,42 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
+        id: 'ro.adminchirii.app',
         name: 'AdminChirii.ro',
         short_name: 'AdminChirii',
         description: 'Property management platform',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
+        start_url: '/',
+        screenshots: [
+          {
+            src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
+            sizes: '1920x1080',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'Dashboard Overview'
+          },
+          {
+            src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
+            sizes: '1080x1920',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: 'Mobile Dashboard View'
+          }
+        ],
         icons: [
           {
             src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
           },
           {
             src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any'  
+            purpose: 'any'
           },
           {
             src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
