@@ -2,9 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { useAuthState } from "../useAuthState";
+import { useUserRole } from "../use-user-role";
 
 export function useMaintenanceRequests() {
-  const { currentUserId, userRole } = useAuthState();
+  const { currentUserId } = useAuthState();
+  const { userRole } = useUserRole();
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({

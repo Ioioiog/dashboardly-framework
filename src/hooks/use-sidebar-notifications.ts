@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useAuthState } from "./useAuthState";
+import { useUserRole } from "./use-user-role";
 
 export interface Notification {
   type: string;
@@ -9,7 +10,8 @@ export interface Notification {
 }
 
 export function useSidebarNotifications() {
-  const { currentUserId, userRole } = useAuthState();
+  const { currentUserId } = useAuthState();
+  const { userRole } = useUserRole();
 
   const fetchNotifications = async (): Promise<Notification[]> => {
     if (!currentUserId) return [];
