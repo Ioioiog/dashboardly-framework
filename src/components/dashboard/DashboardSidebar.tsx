@@ -30,7 +30,7 @@ export const DashboardSidebar = () => {
   const { userRole } = useUserRole();
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(true);
-  const { data: notifications } = useSidebarNotifications();
+  const { data: notifications, markAsRead } = useSidebarNotifications();
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -109,6 +109,11 @@ export const DashboardSidebar = () => {
     (item) => !userRole || item.roles.includes(userRole)
   );
 
+  const handleNotificationClick = (type: string) => {
+    console.log(`Marking ${type} notifications as read`);
+    markAsRead(type);
+  };
+
   return (
     <Collapsible
       defaultOpen={true}
@@ -150,6 +155,7 @@ export const DashboardSidebar = () => {
               isActive={isActive(item.href)}
               isExpanded={isExpanded}
               notifications={notifications}
+              onNotificationClick={handleNotificationClick}
             />
           ))}
         </nav>

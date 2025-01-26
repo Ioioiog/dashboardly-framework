@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useAuthState } from "./useAuthState";
@@ -12,6 +12,7 @@ export interface Notification {
 export function useSidebarNotifications() {
   const { currentUserId } = useAuthState();
   const { userRole } = useUserRole();
+  const queryClient = useQueryClient();
 
   const fetchNotifications = async (): Promise<Notification[]> => {
     if (!currentUserId) return [];
@@ -84,6 +85,53 @@ export function useSidebarNotifications() {
     return notifications;
   };
 
+  const markAsRead = async (type: string) => {
+    if (!currentUserId || !userRole) return;
+
+    console.log(`Marking ${type} notifications as read for ${userRole}`);
+
+    try {
+      switch (type) {
+        case 'maintenance':
+          const { error: maintenanceError } = await supabase
+            .from('maintenance_requests')
+            .update({
+              [userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant']: true
+            })
+            .eq('status', 'pending');
+
+          if (maintenanceError) throw maintenanceError;
+          break;
+
+        case 'payments':
+          const { error: paymentsError } = await supabase
+            .from('payments')
+            .update({
+              [userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant']: true
+            })
+            .eq('status', 'pending');
+
+          if (paymentsError) throw paymentsError;
+          break;
+
+        case 'messages':
+          const { error: messagesError } = await supabase
+            .from('messages')
+            .update({ read: true })
+            .eq('receiver_id', currentUserId)
+            .eq('read', false);
+
+          if (messagesError) throw messagesError;
+          break;
+      }
+
+      // Refresh notifications after marking as read
+      queryClient.invalidateQueries({ queryKey: ['sidebarNotifications'] });
+    } catch (error) {
+      console.error(`Error marking ${type} as read:`, error);
+    }
+  };
+
   const { data, refetch } = useQuery({
     queryKey: ['sidebarNotifications', currentUserId],
     queryFn: fetchNotifications,
@@ -140,5 +188,5 @@ export function useSidebarNotifications() {
     };
   }, [currentUserId, refetch]);
 
-  return { data: data || [] };
+  return { data: data || [], markAsRead };
 }

@@ -20,6 +20,7 @@ interface SidebarMenuItemProps {
   isActive: boolean;
   isExpanded: boolean;
   notifications?: Notification[];
+  onNotificationClick?: (type: string) => void;
 }
 
 export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
@@ -27,13 +28,18 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   isActive,
   isExpanded,
   notifications,
+  onNotificationClick,
 }) => {
   const Icon = item.icon;
   const notificationCount = item.notificationType
     ? notifications?.find(n => n.type === item.notificationType)?.count || 0
     : 0;
 
-  console.log(`Notification count for ${item.title}:`, notificationCount); // Debug log
+  const handleClick = () => {
+    if (item.notificationType && notificationCount > 0 && onNotificationClick) {
+      onNotificationClick(item.notificationType);
+    }
+  };
 
   const linkContent = (
     <div
@@ -58,14 +64,14 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   );
 
   if (isExpanded) {
-    return <Link to={item.href}>{linkContent}</Link>;
+    return <Link to={item.href} onClick={handleClick}>{linkContent}</Link>;
   }
 
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Link to={item.href}>{linkContent}</Link>
+          <Link to={item.href} onClick={handleClick}>{linkContent}</Link>
         </TooltipTrigger>
         <TooltipContent side="right" align="center" className="bg-white dark:bg-gray-900 text-sm">
           <div className="flex items-center gap-2">
