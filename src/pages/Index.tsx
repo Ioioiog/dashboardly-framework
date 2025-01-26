@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { DashboardHeader } from "@/components/dashboard/sections/DashboardHeader";
 import { RevenueSection } from "@/components/dashboard/sections/RevenueSection";
 import { UpcomingIncomeSection } from "@/components/dashboard/sections/UpcomingIncomeSection";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -113,6 +114,81 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast, t]);
 
+  const testNotifications = async () => {
+    try {
+      console.log("Testing notifications system...");
+
+      // Test toast notifications
+      toast({
+        title: "Default Toast",
+        description: "This is a default toast notification",
+      });
+
+      setTimeout(() => {
+        toast({
+          title: "Success Toast",
+          description: "This is a success toast notification",
+          variant: "default",
+        });
+      }, 1000);
+
+      setTimeout(() => {
+        toast({
+          title: "Error Toast",
+          description: "This is an error toast notification",
+          variant: "destructive",
+        });
+      }, 2000);
+
+      // Test sidebar notifications by creating test records
+      if (userId) {
+        // Create a test maintenance request
+        const { error: maintenanceError } = await supabase
+          .from('maintenance_requests')
+          .insert({
+            property_id: '00000000-0000-0000-0000-000000000000', // This will fail intentionally
+            tenant_id: userId,
+            title: 'Test Maintenance Request',
+            description: 'This is a test maintenance request',
+            status: 'pending'
+          });
+
+        if (maintenanceError) {
+          console.log("Expected maintenance error (for testing):", maintenanceError);
+          toast({
+            title: "Maintenance Test",
+            description: "Maintenance notification test triggered",
+          });
+        }
+
+        // Create a test message
+        const { error: messageError } = await supabase
+          .from('messages')
+          .insert({
+            sender_id: userId,
+            receiver_id: userId, // Send to self for testing
+            content: 'Test message',
+            profile_id: userId,
+            read: false
+          });
+
+        if (messageError) {
+          console.log("Message creation error:", messageError);
+        } else {
+          console.log("Test message created successfully");
+        }
+      }
+
+    } catch (error) {
+      console.error("Error testing notifications:", error);
+      toast({
+        title: "Error",
+        description: "Failed to test notifications",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-dashboard-background">
       <DashboardSidebar />
@@ -123,6 +199,16 @@ const Index = () => {
           {userId && userRole && (
             <div className="space-y-4">
               <section className="bg-white rounded-lg shadow-sm p-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">Dashboard Overview</h2>
+                  <Button 
+                    onClick={testNotifications}
+                    variant="outline"
+                    className="ml-auto"
+                  >
+                    Test Notifications
+                  </Button>
+                </div>
                 <DashboardMetrics userId={userId} userRole={userRole} />
               </section>
 
