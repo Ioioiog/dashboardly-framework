@@ -6,6 +6,7 @@ import { useAuthState } from "@/hooks/useAuthState";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { InstallPWA } from "@/components/pwa/InstallPWA";
 import "./App.css";
 
 // Create a client
@@ -76,13 +77,14 @@ function App() {
   }, [toast, setIsAuthenticated]);
 
   if (isLoading) {
-    return <div>Loading...</div>; // Add a proper loading component later
+    return <div>Loading...</div>;
   }
 
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AppRoutes isAuthenticated={isAuthenticated} />
+        <InstallPWA />
         <Toaster />
       </BrowserRouter>
     </QueryClientProvider>
