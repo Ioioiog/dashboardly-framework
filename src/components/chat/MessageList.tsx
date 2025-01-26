@@ -44,9 +44,12 @@ export function MessageList({
 
     const updateMessageStatus = async () => {
       try {
+        console.log("Checking for unread messages...");
         const unreadMessages = messages.filter(
           msg => msg.sender_id !== currentUserId && !msg.read
         );
+
+        console.log(`Found ${unreadMessages.length} unread messages`);
 
         if (unreadMessages.length === 0) return;
 
@@ -54,9 +57,15 @@ export function MessageList({
         const batchSize = 10;
         for (let i = 0; i < unreadMessages.length; i += batchSize) {
           const batch = unreadMessages.slice(i, i + batchSize);
+          console.log(`Processing batch of ${batch.length} messages`);
+          
           const { error } = await supabase
             .from('messages')
-            .update({ status: 'read', read: true })
+            .update({ 
+              status: 'read', 
+              read: true,
+              updated_at: new Date().toISOString() // Force update to trigger realtime
+            })
             .in('id', batch.map(msg => msg.id));
 
           if (error) {
@@ -64,6 +73,8 @@ export function MessageList({
             throw error;
           }
         }
+
+        console.log("Successfully marked messages as read");
       } catch (error) {
         console.error('Error updating message status:', error);
         toast({
@@ -74,6 +85,7 @@ export function MessageList({
       }
     };
 
+    // Run immediately when messages change
     updateMessageStatus();
   }, [messages, currentUserId, toast]);
 
@@ -86,7 +98,10 @@ export function MessageList({
     try {
       const { error } = await supabase
         .from('messages')
-        .update({ content: editedContent })
+        .update({ 
+          content: editedContent,
+          updated_at: new Date().toISOString() // Force update to trigger realtime
+        })
         .eq('id', messageId);
 
       if (error) throw error;
