@@ -13,6 +13,8 @@ export interface MaintenanceRequest {
   notes?: string;
   assigned_to?: string;
   service_provider_notes?: string;
+  read_by_landlord?: boolean;
+  read_by_tenant?: boolean;
   property?: {
     id: string;
     name: string;
