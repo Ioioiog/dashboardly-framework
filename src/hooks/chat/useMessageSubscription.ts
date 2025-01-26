@@ -49,7 +49,7 @@ export function useMessageSubscription(
                 read,
                 profile_id,
                 conversation_id,
-                sender:profiles!messages_profile_id_fkey(
+                profiles!messages_profile_id_fkey (
                   first_name,
                   last_name
                 )
@@ -67,21 +67,23 @@ export function useMessageSubscription(
               return;
             }
 
+            // Transform the data to match the Message type
+            const typedMessage: Message = {
+              ...newMessage,
+              sender: newMessage.profiles || null,
+              status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
+              read: newMessage.read || false
+            };
+
             // Cache the message in IndexedDB
             try {
               await supabase
                 .from("messages")
-                .upsert([newMessage], { onConflict: 'id' });
+                .upsert([typedMessage], { onConflict: 'id' });
               console.log("Message cached successfully");
             } catch (cacheError) {
               console.error("Error caching message:", cacheError);
             }
-
-            const typedMessage = {
-              ...newMessage,
-              status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
-              read: newMessage.read || false
-            };
 
             onMessageUpdate(typedMessage);
 
@@ -89,7 +91,7 @@ export function useMessageSubscription(
             const { data: { user } } = await supabase.auth.getUser();
             if (newMessage.sender_id !== user?.id) {
               if ('Notification' in window && Notification.permission === 'granted') {
-                const sender = newMessage.sender?.first_name || 'Someone';
+                const sender = typedMessage.sender?.first_name || 'Someone';
                 new Notification('New Message', {
                   body: `${sender}: ${newMessage.content}`,
                   icon: '/pwa-192x192.png'
