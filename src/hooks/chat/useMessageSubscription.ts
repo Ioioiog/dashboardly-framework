@@ -86,7 +86,8 @@ export function useMessageSubscription(
             onMessageUpdate(typedMessage);
 
             // Show notification if message is from another user
-            if (newMessage.sender_id !== supabase.auth.user()?.id) {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (newMessage.sender_id !== user?.id) {
               if ('Notification' in window && Notification.permission === 'granted') {
                 const sender = newMessage.sender?.first_name || 'Someone';
                 new Notification('New Message', {
