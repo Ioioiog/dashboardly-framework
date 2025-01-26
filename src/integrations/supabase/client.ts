@@ -56,16 +56,11 @@ const initSession = async () => {
     channel
       .subscribe((status) => {
         console.log('Realtime subscription status:', status);
-      })
-      .then((response) => {
-        if (response === 'SUBSCRIBED') {
+        if (status === 'SUBSCRIBED') {
           console.log('Successfully subscribed to realtime updates');
-        } else {
-          console.error('Failed to subscribe to realtime updates:', response);
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          console.error('Failed to subscribe to realtime updates:', status);
         }
-      })
-      .catch((err) => {
-        console.error('Error establishing realtime connection:', err);
       });
 
   } catch (err) {
