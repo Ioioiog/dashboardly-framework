@@ -29,6 +29,8 @@ export function MaintenanceList({
   const { userRole } = useUserRole();
   const { toast } = useToast();
 
+  console.log('Current user role:', userRole); // Debug log
+
   const handleMarkAsRead = async (requestId: string) => {
     try {
       console.log('Marking request as read:', requestId);
@@ -99,7 +101,7 @@ export function MaintenanceList({
           <TableHead>Created</TableHead>
           <TableHead>Actions</TableHead>
           {userRole === 'landlord' && (
-            <TableHead>Mark as Read</TableHead>
+            <TableHead className="text-right">Mark as Read</TableHead>
           )}
         </TableRow>
       </TableHeader>
@@ -139,7 +141,7 @@ export function MaintenanceList({
               </Button>
             </TableCell>
             {userRole === 'landlord' && (
-              <TableCell>
+              <TableCell className="text-right">
                 <Button
                   variant="ghost"
                   size="sm"
