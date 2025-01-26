@@ -20,18 +20,18 @@ export default defineConfig(({ mode }) => ({
         display: 'standalone',
         icons: [
           {
-            src: '/lovable-uploads/40d8c354-0818-47dd-81c4-1b8031beedb8.png',
+            src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/lovable-uploads/40d8c354-0818-47dd-81c4-1b8031beedb8.png',
+            src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any'  
           },
           {
-            src: '/lovable-uploads/40d8c354-0818-47dd-81c4-1b8031beedb8.png',
+            src: '/lovable-uploads/48ac2726-07ee-4c99-8057-254cd9b1b749.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
