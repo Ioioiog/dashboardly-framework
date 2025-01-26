@@ -101,7 +101,7 @@ export function MaintenanceList({
           <TableHead>Created</TableHead>
           <TableHead>Actions</TableHead>
           {userRole === 'landlord' && (
-            <TableHead className="text-right">Mark as Read</TableHead>
+            <TableHead className="text-right w-[100px]">Read Status</TableHead>
           )}
         </TableRow>
       </TableHeader>
@@ -109,7 +109,7 @@ export function MaintenanceList({
         {requests.map((request) => (
           <TableRow
             key={request.id}
-            className="hover:bg-gray-100"
+            className={`hover:bg-gray-100 ${!request.read_by_landlord && userRole === 'landlord' ? 'bg-blue-50' : ''}`}
           >
             <TableCell>{request.property?.name}</TableCell>
             <TableCell>
@@ -143,16 +143,18 @@ export function MaintenanceList({
             {userRole === 'landlord' && (
               <TableCell className="text-right">
                 <Button
-                  variant="ghost"
+                  variant={request.read_by_landlord ? "ghost" : "outline"}
                   size="sm"
                   onClick={() => handleMarkAsRead(request.id)}
                   disabled={request.read_by_landlord}
-                  className={`flex items-center gap-2 ${
-                    request.read_by_landlord ? 'text-gray-400' : 'text-green-600 hover:text-green-700'
+                  className={`w-full justify-center ${
+                    request.read_by_landlord 
+                      ? 'text-gray-400' 
+                      : 'text-blue-600 hover:text-blue-700'
                   }`}
                 >
-                  <Check className="h-4 w-4" />
-                  {request.read_by_landlord ? 'Read' : 'Mark as Read'}
+                  <Check className="h-4 w-4 mr-2" />
+                  {request.read_by_landlord ? 'Read' : 'Mark Read'}
                 </Button>
               </TableCell>
             )}
