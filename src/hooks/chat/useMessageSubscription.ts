@@ -18,6 +18,7 @@ export function useMessageSubscription(
 
     console.log("Setting up message subscription for conversation:", conversationId);
 
+    // Subscribe to real-time updates
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
@@ -66,6 +67,16 @@ export function useMessageSubscription(
               return;
             }
 
+            // Cache the message in IndexedDB
+            try {
+              await supabase
+                .from("messages")
+                .upsert([newMessage], { onConflict: 'id' });
+              console.log("Message cached successfully");
+            } catch (cacheError) {
+              console.error("Error caching message:", cacheError);
+            }
+
             const typedMessage = {
               ...newMessage,
               status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
@@ -73,6 +84,17 @@ export function useMessageSubscription(
             };
 
             onMessageUpdate(typedMessage);
+
+            // Show notification if message is from another user
+            if (newMessage.sender_id !== supabase.auth.user()?.id) {
+              if ('Notification' in window && Notification.permission === 'granted') {
+                const sender = newMessage.sender?.first_name || 'Someone';
+                new Notification('New Message', {
+                  body: `${sender}: ${newMessage.content}`,
+                  icon: '/pwa-192x192.png'
+                });
+              }
+            }
           } catch (err) {
             console.error("Error processing message change:", err);
             toast({
@@ -86,6 +108,11 @@ export function useMessageSubscription(
       .subscribe((status) => {
         console.log("Realtime subscription status:", status);
       });
+
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
 
     return () => {
       console.log("Cleaning up subscription");

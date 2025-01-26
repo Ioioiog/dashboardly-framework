@@ -39,10 +39,10 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Increase to 5MB
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Increased to 5MB
         runtimeCaching: [
           {
+            // Cache Supabase API responses
             urlPattern: /^https:\/\/api\.adminchirii\.ro\/.*/i,
             handler: 'NetworkFirst',
             options: {
@@ -50,10 +50,41 @@ export default defineConfig(({ mode }) => ({
               networkTimeoutSeconds: 10,
               cacheableResponse: {
                 statuses: [0, 200]
+              },
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 24 * 60 * 60 // 24 hours
+              }
+            }
+          },
+          {
+            // Cache static assets
+            urlPattern: /\.(js|css|png|jpg|jpeg|svg|gif)$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'static-resources',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 7 * 24 * 60 * 60 // 7 days
+              }
+            }
+          },
+          {
+            // Cache fonts
+            urlPattern: /^https:\/\/fonts\.googleapis\.com/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
               }
             }
           }
-        ]
+        ],
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true
       }
     })
   ].filter(Boolean),

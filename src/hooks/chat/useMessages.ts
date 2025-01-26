@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageSubscription } from "./useMessageSubscription";
@@ -9,6 +9,43 @@ export function useMessages(conversationId: string | null) {
   const [messages, setMessages] = useState<Message[]>([]);
   const { toast } = useToast();
   const { sendMessage: sendMessageOperation } = useMessageOperations();
+
+  // Load cached messages from IndexedDB if available
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const loadCachedMessages = async () => {
+      try {
+        const { data: cachedMessages } = await supabase
+          .from("messages")
+          .select(`
+            id,
+            sender_id,
+            content,
+            created_at,
+            status,
+            read,
+            profile_id,
+            conversation_id,
+            sender:profiles!messages_profile_id_fkey(
+              first_name,
+              last_name
+            )
+          `)
+          .eq("conversation_id", conversationId)
+          .order("created_at", { ascending: true });
+
+        if (cachedMessages) {
+          console.log("Loaded cached messages:", cachedMessages.length);
+          setMessages(cachedMessages as Message[]);
+        }
+      } catch (error) {
+        console.error("Error loading cached messages:", error);
+      }
+    };
+
+    loadCachedMessages();
+  }, [conversationId]);
 
   const handleMessageUpdate = useCallback((newMessage: Message) => {
     setMessages(prev => {
