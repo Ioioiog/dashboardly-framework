@@ -39,7 +39,6 @@ const Index = () => {
         console.log("Current user ID:", currentUserId);
         setUserId(currentUserId);
 
-        // Fetch profile with explicit filter for current user
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role, first_name, last_name')
@@ -48,7 +47,6 @@ const Index = () => {
 
         if (profileError) {
           console.error("Profile fetch error:", profileError);
-          // If there's an auth error, sign out and redirect
           if (profileError.code === 'PGRST301') {
             await supabase.auth.signOut();
             navigate("/auth");
@@ -75,7 +73,6 @@ const Index = () => {
         console.log("Profile loaded successfully:", profile);
         setUserRole(profile.role as "landlord" | "tenant");
         
-        // Set user name from profile
         const fullName = [profile.first_name, profile.last_name]
           .filter(Boolean)
           .join(" ");
@@ -83,7 +80,6 @@ const Index = () => {
 
       } catch (error: any) {
         console.error("Error in checkUser:", error);
-        // If there's an auth error, redirect to login
         if (error.status === 401 || error.code === 'PGRST301') {
           navigate("/auth");
           return;
@@ -141,12 +137,39 @@ const Index = () => {
       }, 2000);
 
       // Test sidebar notifications by creating test records
-      if (userId) {
-        // Create a test maintenance request
+      if (userId && userRole === 'tenant') {
+        // First, get a valid property ID where the user is a tenant
+        const { data: tenancy, error: tenancyError } = await supabase
+          .from('tenancies')
+          .select('property_id')
+          .eq('tenant_id', userId)
+          .eq('status', 'active')
+          .single();
+
+        if (tenancyError) {
+          console.error("Error fetching tenancy:", tenancyError);
+          toast({
+            title: "Error",
+            description: "Failed to fetch tenant property information",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (!tenancy) {
+          console.log("No active tenancy found for testing");
+          toast({
+            title: "Info",
+            description: "No active tenancy found for creating test maintenance request",
+          });
+          return;
+        }
+
+        // Create a test maintenance request with the valid property ID
         const { error: maintenanceError } = await supabase
           .from('maintenance_requests')
           .insert({
-            property_id: '00000000-0000-0000-0000-000000000000', // This will fail intentionally
+            property_id: tenancy.property_id,
             tenant_id: userId,
             title: 'Test Maintenance Request',
             description: 'This is a test maintenance request',
@@ -154,10 +177,17 @@ const Index = () => {
           });
 
         if (maintenanceError) {
-          console.log("Expected maintenance error (for testing):", maintenanceError);
+          console.error("Maintenance request creation error:", maintenanceError);
           toast({
-            title: "Maintenance Test",
-            description: "Maintenance notification test triggered",
+            title: "Error",
+            description: "Failed to create test maintenance request",
+            variant: "destructive",
+          });
+        } else {
+          console.log("Test maintenance request created successfully");
+          toast({
+            title: "Success",
+            description: "Test maintenance request created",
           });
         }
 
@@ -166,16 +196,25 @@ const Index = () => {
           .from('messages')
           .insert({
             sender_id: userId,
-            receiver_id: userId, // Send to self for testing
+            receiver_id: userId,
             content: 'Test message',
             profile_id: userId,
             read: false
           });
 
         if (messageError) {
-          console.log("Message creation error:", messageError);
+          console.error("Message creation error:", messageError);
+          toast({
+            title: "Error",
+            description: "Failed to create test message",
+            variant: "destructive",
+          });
         } else {
           console.log("Test message created successfully");
+          toast({
+            title: "Success",
+            description: "Test message created",
+          });
         }
       }
 
