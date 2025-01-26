@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MaintenanceDialog } from "@/components/maintenance/MaintenanceDialog";
 import { MaintenanceFilters } from "@/components/maintenance/MaintenanceFilters";
 import { MaintenanceList } from "@/components/maintenance/MaintenanceList";
@@ -16,7 +16,7 @@ export default function Maintenance() {
   const [priorityFilter, setPriorityFilter] = useState<string>("");
   const [propertyFilter, setPropertyFilter] = useState<string>("");
   const { userRole } = useUserRole();
-  const { data: requests, isLoading } = useMaintenanceRequests();
+  const { data: requests, isLoading, markAsRead } = useMaintenanceRequests();
 
   const filteredRequests = requests?.filter((request) => {
     const matchesStatus = !statusFilter || request.status === statusFilter;
@@ -24,6 +24,12 @@ export default function Maintenance() {
     const matchesProperty = !propertyFilter || request.property_id === propertyFilter;
     return matchesStatus && matchesPriority && matchesProperty;
   });
+
+  const handleRequestClick = (request: MaintenanceRequest) => {
+    setSelectedRequest(request);
+    // Mark as read when viewing the request
+    markAsRead.mutate(request.id);
+  };
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
@@ -48,7 +54,7 @@ export default function Maintenance() {
           <MaintenanceList
             requests={filteredRequests || []}
             isLoading={isLoading}
-            onRequestClick={setSelectedRequest}
+            onRequestClick={handleRequestClick}
           />
 
           <MaintenanceDialog

@@ -9,7 +9,7 @@ export interface Notification {
 }
 
 export function useSidebarNotifications() {
-  const { currentUserId } = useAuthState();
+  const { currentUserId, userRole } = useAuthState();
 
   const fetchNotifications = async (): Promise<Notification[]> => {
     if (!currentUserId) return [];
@@ -40,11 +40,12 @@ export function useSidebarNotifications() {
     if (properties) {
       const propertyIds = properties.map(p => p.id);
 
-      // Fetch pending maintenance requests
+      // Fetch pending maintenance requests with read status
       const { count: maintenanceCount, error: maintenanceError } = await supabase
         .from('maintenance_requests')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending')
+        .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false)
         .in('property_id', propertyIds);
 
       if (maintenanceError) {
@@ -62,11 +63,12 @@ export function useSidebarNotifications() {
       if (tenancies) {
         const tenancyIds = tenancies.map(t => t.id);
 
-        // Fetch pending payments
+        // Fetch pending payments with read status
         const { count: paymentsCount, error: paymentsError } = await supabase
           .from('payments')
           .select('*', { count: 'exact', head: true })
           .eq('status', 'pending')
+          .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false)
           .in('tenancy_id', tenancyIds);
 
         if (paymentsError) {
@@ -89,7 +91,7 @@ export function useSidebarNotifications() {
   useEffect(() => {
     if (!currentUserId) return;
 
-    // Subscribe to real-time updates for messages
+    // Subscribe to real-time updates
     const channel = supabase
       .channel('sidebar-notifications')
       .on(
@@ -129,9 +131,7 @@ export function useSidebarNotifications() {
           refetch();
         }
       )
-      .subscribe((status) => {
-        console.log('Realtime subscription status:', status);
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);

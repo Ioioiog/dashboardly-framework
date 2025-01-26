@@ -253,6 +253,8 @@ export type Database = {
           notes: string | null
           priority: string | null
           property_id: string
+          read_by_landlord: boolean | null
+          read_by_tenant: boolean | null
           service_provider_notes: string | null
           status: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id: string
@@ -269,6 +271,8 @@ export type Database = {
           notes?: string | null
           priority?: string | null
           property_id: string
+          read_by_landlord?: boolean | null
+          read_by_tenant?: boolean | null
           service_provider_notes?: string | null
           status?: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id: string
@@ -285,6 +289,8 @@ export type Database = {
           notes?: string | null
           priority?: string | null
           property_id?: string
+          read_by_landlord?: boolean | null
+          read_by_tenant?: boolean | null
           service_provider_notes?: string | null
           status?: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id?: string
@@ -393,6 +399,8 @@ export type Database = {
           due_date: string
           id: string
           paid_date: string | null
+          read_by_landlord: boolean | null
+          read_by_tenant: boolean | null
           status: string
           tenancy_id: string
           updated_at: string
@@ -403,6 +411,8 @@ export type Database = {
           due_date: string
           id?: string
           paid_date?: string | null
+          read_by_landlord?: boolean | null
+          read_by_tenant?: boolean | null
           status?: string
           tenancy_id: string
           updated_at?: string
@@ -413,6 +423,8 @@ export type Database = {
           due_date?: string
           id?: string
           paid_date?: string | null
+          read_by_landlord?: boolean | null
+          read_by_tenant?: boolean | null
           status?: string
           tenancy_id?: string
           updated_at?: string
