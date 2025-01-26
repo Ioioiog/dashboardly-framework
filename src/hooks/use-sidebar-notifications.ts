@@ -44,16 +44,28 @@ export function useSidebarNotifications() {
       const propertyIds = properties.map(p => p.id);
 
       // Fetch pending maintenance requests with read status
-      const { count: maintenanceCount, error: maintenanceError } = await supabase
+      const maintenanceQuery = supabase
         .from('maintenance_requests')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending')
-        .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false)
-        .in('property_id', propertyIds);
+        .eq('status', 'pending');
+
+      // Add role-specific read condition
+      if (userRole === 'landlord') {
+        maintenanceQuery
+          .eq('read_by_landlord', false)
+          .in('property_id', propertyIds);
+      } else {
+        maintenanceQuery
+          .eq('read_by_tenant', false)
+          .eq('tenant_id', currentUserId);
+      }
+
+      const { count: maintenanceCount, error: maintenanceError } = await maintenanceQuery;
 
       if (maintenanceError) {
         console.error('Error fetching maintenance count:', maintenanceError);
       } else {
+        console.log(`Found ${maintenanceCount} unread maintenance requests for ${userRole}`);
         notifications.push({ type: 'maintenance', count: maintenanceCount || 0 });
       }
 
@@ -93,14 +105,37 @@ export function useSidebarNotifications() {
     try {
       switch (type) {
         case 'maintenance':
-          const { error: maintenanceError } = await supabase
-            .from('maintenance_requests')
-            .update({
-              [userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant']: true
-            })
-            .eq('status', 'pending');
+          // For landlords, only mark requests for their properties as read
+          if (userRole === 'landlord') {
+            const { data: properties } = await supabase
+              .from('properties')
+              .select('id')
+              .eq('landlord_id', currentUserId);
 
-          if (maintenanceError) throw maintenanceError;
+            if (properties && properties.length > 0) {
+              const propertyIds = properties.map(p => p.id);
+              const { error: maintenanceError } = await supabase
+                .from('maintenance_requests')
+                .update({
+                  read_by_landlord: true
+                })
+                .eq('status', 'pending')
+                .in('property_id', propertyIds);
+
+              if (maintenanceError) throw maintenanceError;
+            }
+          } else {
+            // For tenants, only mark their requests as read
+            const { error: maintenanceError } = await supabase
+              .from('maintenance_requests')
+              .update({
+                read_by_tenant: true
+              })
+              .eq('status', 'pending')
+              .eq('tenant_id', currentUserId);
+
+            if (maintenanceError) throw maintenanceError;
+          }
           break;
 
         case 'payments':
