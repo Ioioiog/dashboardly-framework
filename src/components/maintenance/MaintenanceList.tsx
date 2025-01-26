@@ -29,14 +29,19 @@ export function MaintenanceList({
   const { userRole } = useUserRole();
   const { toast } = useToast();
 
-  console.log('Current user role in MaintenanceList:', userRole); // Debug log
+  console.log('Current user role:', userRole);
+  console.log('Maintenance requests:', requests);
 
   const handleMarkAsRead = async (requestId: string) => {
     try {
       console.log('Marking request as read:', requestId);
+      const updateData = userRole === 'landlord' 
+        ? { read_by_landlord: true }
+        : { read_by_tenant: true };
+
       const { error } = await supabase
         .from('maintenance_requests')
-        .update({ read_by_landlord: true })
+        .update(updateData)
         .eq('id', requestId);
 
       if (error) throw error;
@@ -45,6 +50,10 @@ export function MaintenanceList({
         title: "Success",
         description: "Request marked as read",
       });
+
+      // Refresh the page to update the notification count
+      window.location.reload();
+      
     } catch (error) {
       console.error('Error marking request as read:', error);
       toast({
@@ -101,7 +110,7 @@ export function MaintenanceList({
           <TableHead>Created</TableHead>
           <TableHead>Actions</TableHead>
           {userRole === 'landlord' && (
-            <TableHead className="text-right">Read Status</TableHead>
+            <TableHead className="text-right w-32">Read Status</TableHead>
           )}
         </TableRow>
       </TableHeader>
