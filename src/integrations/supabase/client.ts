@@ -51,13 +51,22 @@ const initSession = async () => {
     console.log('Valid session found:', session.user.id);
     
     // Test realtime connection
-    const { error: realtimeError } = await supabase.channel('system').subscribe((status) => {
-      console.log('Realtime subscription status:', status);
-    });
-
-    if (realtimeError) {
-      console.error('Error establishing realtime connection:', realtimeError);
-    }
+    const channel = supabase.channel('system');
+    
+    channel
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      })
+      .then((response) => {
+        if (response === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to realtime updates');
+        } else {
+          console.error('Failed to subscribe to realtime updates:', response);
+        }
+      })
+      .catch((err) => {
+        console.error('Error establishing realtime connection:', err);
+      });
 
   } catch (err) {
     console.error('Unexpected error during session initialization:', err);
