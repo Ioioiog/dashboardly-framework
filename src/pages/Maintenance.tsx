@@ -31,8 +31,10 @@ export default function Maintenance() {
     
     // Only mark as read if the request isn't already read
     if (userRole === 'landlord' && !request.read_by_landlord) {
+      console.log('Marking request as read for landlord');
       await markAsRead.mutate(request.id);
     } else if (userRole === 'tenant' && !request.read_by_tenant) {
+      console.log('Marking request as read for tenant');
       await markAsRead.mutate(request.id);
     }
   };

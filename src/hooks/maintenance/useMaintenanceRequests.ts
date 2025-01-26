@@ -51,7 +51,8 @@ export function useMaintenanceRequests() {
 
   const markAsRead = useMutation({
     mutationFn: async (requestId: string) => {
-      console.log('Marking maintenance request as read:', requestId);
+      console.log('Marking maintenance request as read:', requestId, 'for role:', userRole);
+      
       const updateData = userRole === 'landlord' 
         ? { read_by_landlord: true }
         : { read_by_tenant: true };
@@ -65,12 +66,18 @@ export function useMaintenanceRequests() {
         console.error('Error marking request as read:', error);
         throw error;
       }
+
+      console.log('Successfully marked request as read');
     },
     onSuccess: () => {
       // Invalidate both maintenance requests and sidebar notifications
+      console.log('Invalidating queries after marking request as read');
       queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
       queryClient.invalidateQueries({ queryKey: ['sidebarNotifications'] });
     },
+    onError: (error) => {
+      console.error('Error in markAsRead mutation:', error);
+    }
   });
 
   return {
