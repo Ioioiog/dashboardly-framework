@@ -27,8 +27,10 @@ export function useMessages(conversationId: string | null) {
 
     console.log("Fetching messages for conversation:", conversationId);
 
-    const fetchMessages = async () => {
+    const fetchMessages = async (retryCount = 0) => {
       try {
+        console.log(`Attempting to fetch messages (attempt ${retryCount + 1})`);
+        
         const { data, error } = await supabase
           .from("messages")
           .select(`
@@ -50,15 +52,20 @@ export function useMessages(conversationId: string | null) {
 
         if (error) {
           console.error("Error fetching messages:", error);
+          if (retryCount < 2) {
+            console.log("Retrying fetch...");
+            setTimeout(() => fetchMessages(retryCount + 1), 1000 * (retryCount + 1));
+            return;
+          }
           toast({
             title: "Error",
-            description: "Failed to load messages",
+            description: "Failed to load messages. Please try refreshing the page.",
             variant: "destructive",
           });
           return;
         }
 
-        console.log("Fetched messages:", data);
+        console.log("Successfully fetched messages:", data?.length || 0, "messages");
         const typedMessages = data?.map(msg => ({
           ...msg,
           status: (msg.status || 'sent') as 'sent' | 'delivered' | 'read',
@@ -67,9 +74,14 @@ export function useMessages(conversationId: string | null) {
         setMessages(typedMessages);
       } catch (err) {
         console.error("Unexpected error fetching messages:", err);
+        if (retryCount < 2) {
+          console.log("Retrying after unexpected error...");
+          setTimeout(() => fetchMessages(retryCount + 1), 1000 * (retryCount + 1));
+          return;
+        }
         toast({
           title: "Error",
-          description: "Failed to load messages",
+          description: "Failed to load messages. Please try refreshing the page.",
           variant: "destructive",
         });
       }
@@ -77,13 +89,12 @@ export function useMessages(conversationId: string | null) {
 
     fetchMessages();
 
-    // Subscribe to new messages and status updates
     const channel = supabase
       .channel(`messages:${conversationId}`)
       .on(
         "postgres_changes",
         {
-          event: "*", // Listen to all changes (INSERT, UPDATE, DELETE)
+          event: "*",
           schema: "public",
           table: "messages",
           filter: `conversation_id=eq.${conversationId}`,
@@ -96,48 +107,56 @@ export function useMessages(conversationId: string | null) {
             return;
           }
 
-          const { data: newMessage, error } = await supabase
-            .from("messages")
-            .select(`
-              id,
-              sender_id,
-              content,
-              created_at,
-              status,
-              read,
-              profile_id,
-              conversation_id,
-              sender:profiles!messages_profile_id_fkey(
-                first_name,
-                last_name
-              )
-            `)
-            .eq("id", payload.new.id)
-            .single();
+          try {
+            const { data: newMessage, error } = await supabase
+              .from("messages")
+              .select(`
+                id,
+                sender_id,
+                content,
+                created_at,
+                status,
+                read,
+                profile_id,
+                conversation_id,
+                sender:profiles!messages_profile_id_fkey(
+                  first_name,
+                  last_name
+                )
+              `)
+              .eq("id", payload.new.id)
+              .maybeSingle();
 
-          if (error) {
-            console.error("Error fetching updated message:", error);
-            return;
-          }
+            if (error) {
+              console.error("Error fetching updated message:", error);
+              return;
+            }
 
-          // Type cast the new message status and read property
-          const typedMessage = {
-            ...newMessage,
-            status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
-            read: newMessage.read || false
-          };
+            if (!newMessage) {
+              console.log("Message not found or not accessible");
+              return;
+            }
 
-          if (payload.eventType === 'INSERT') {
-            setMessages(prev => [...prev, typedMessage]);
-          } else if (payload.eventType === 'UPDATE') {
-            setMessages(prev => 
-              prev.map(msg => msg.id === typedMessage.id ? typedMessage : msg)
-            );
+            const typedMessage = {
+              ...newMessage,
+              status: (newMessage.status || 'sent') as 'sent' | 'delivered' | 'read',
+              read: newMessage.read || false
+            };
+
+            if (payload.eventType === 'INSERT') {
+              setMessages(prev => [...prev, typedMessage]);
+            } else if (payload.eventType === 'UPDATE') {
+              setMessages(prev => 
+                prev.map(msg => msg.id === typedMessage.id ? typedMessage : msg)
+              );
+            }
+          } catch (err) {
+            console.error("Error processing message change:", err);
           }
         }
       )
       .subscribe((status) => {
-        console.log("Subscription status:", status);
+        console.log("Realtime subscription status:", status);
       });
 
     return () => {
@@ -178,7 +197,7 @@ export function useMessages(conversationId: string | null) {
         console.error("Error sending message:", error);
         toast({
           title: "Error",
-          description: "Failed to send message",
+          description: "Failed to send message. Please try again.",
           variant: "destructive",
         });
       }
@@ -186,9 +205,9 @@ export function useMessages(conversationId: string | null) {
       console.error("Unexpected error sending message:", err);
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: "Failed to send message. Please try again.",
         variant: "destructive",
-      });
+        });
     }
   };
 
