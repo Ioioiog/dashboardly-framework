@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { LucideIcon, BellDot } from "lucide-react";
+import { LucideIcon, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -70,7 +70,7 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
                 {notificationCount}
               </span>
             </div>
-            <BellDot className="absolute -top-1 -right-1 h-3 w-3 text-red-500 animate-pulse" />
+            <Bell className="absolute -top-1 -right-1 h-3 w-3 text-red-500 animate-pulse" />
           </div>
         )}
       </div>
