@@ -29,6 +29,7 @@ export function useChat(selectedTenantId: string | null) {
         }
 
         if (selectedTenantId) {
+          // Subscribe to new messages
           const subscription = supabase
             .channel('messages')
             .on('postgres_changes', {
@@ -36,8 +37,28 @@ export function useChat(selectedTenantId: string | null) {
               schema: 'public',
               table: 'messages',
             }, (payload) => {
+              console.log("New message received:", payload);
               if (mounted) {
-                setMessages(prev => [...prev, payload.new]);
+                // Only add message if it's for the current conversation
+                if (payload.new.conversation_id === selectedTenantId) {
+                  setMessages(prev => [...prev, payload.new]);
+                  
+                  // If the message is not from the current user, mark it as unread
+                  if (payload.new.sender_id !== session.user.id) {
+                    console.log("Marking message as unread");
+                    const { error } = supabase
+                      .from('messages')
+                      .update({ 
+                        read: false,
+                        status: 'delivered'
+                      })
+                      .eq('id', payload.new.id);
+                      
+                    if (error) {
+                      console.error("Error marking message as unread:", error);
+                    }
+                  }
+                }
               }
             })
             .subscribe();
@@ -78,16 +99,20 @@ export function useChat(selectedTenantId: string | null) {
 
       console.log("Sending message with data:", {
         sender_id: currentUserId,
-        profile_id: currentUserId, // Add profile_id field
+        profile_id: currentUserId,
         content: content.trim(),
-        conversation_id: selectedTenantId
+        conversation_id: selectedTenantId,
+        read: false, // Mark as unread initially
+        status: 'sent'
       });
 
       const { error } = await supabase.from('messages').insert({
         sender_id: currentUserId,
-        profile_id: currentUserId, // Add profile_id field
+        profile_id: currentUserId,
         content: content.trim(),
-        conversation_id: selectedTenantId
+        conversation_id: selectedTenantId,
+        read: false, // Mark as unread initially
+        status: 'sent'
       });
 
       if (error) {

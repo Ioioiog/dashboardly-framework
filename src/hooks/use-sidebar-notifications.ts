@@ -1,227 +1,143 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
-import { useAuthState } from "./useAuthState";
-import { useUserRole } from "./use-user-role";
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useUserRole } from '@/hooks/use-user-role';
 
-export interface Notification {
+type NotificationType = {
   type: string;
   count: number;
-}
+};
 
 export function useSidebarNotifications() {
-  const { currentUserId } = useAuthState();
+  const [data, setData] = useState<NotificationType[]>([]);
   const { userRole } = useUserRole();
-  const queryClient = useQueryClient();
 
-  const fetchNotifications = async (): Promise<Notification[]> => {
-    if (!currentUserId) return [];
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    console.log("Fetching notifications for user:", currentUserId);
+      console.log("Fetching notifications for user:", user.id);
 
-    const notifications: Notification[] = [];
-
-    // Fetch unread messages count
-    const { count: messagesCount, error: messagesError } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('receiver_id', currentUserId)
-      .eq('read', false);
-
-    if (messagesError) {
-      console.error('Error fetching messages count:', messagesError);
-    } else {
-      notifications.push({ type: 'messages', count: messagesCount || 0 });
-    }
-
-    // First, get the property IDs
-    const { data: properties } = await supabase
-      .from('properties')
-      .select('id')
-      .eq('landlord_id', currentUserId);
-
-    if (properties) {
-      const propertyIds = properties.map(p => p.id);
-
-      // Fetch pending maintenance requests with read status
-      const maintenanceQuery = supabase
-        .from('maintenance_requests')
+      // Fetch unread messages count
+      const { count: messagesCount, error: messagesError } = await supabase
+        .from('messages')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
+        .eq('read', false)
+        .neq('sender_id', user.id);
 
-      // Add role-specific read condition
-      if (userRole === 'landlord') {
-        maintenanceQuery
-          .eq('read_by_landlord', false)
-          .in('property_id', propertyIds);
+      if (messagesError) {
+        console.error('Error fetching messages count:', messagesError);
       } else {
-        maintenanceQuery
-          .eq('read_by_tenant', false)
-          .eq('tenant_id', currentUserId);
+        console.log('Unread messages count:', messagesCount);
       }
 
-      const { count: maintenanceCount, error: maintenanceError } = await maintenanceQuery;
+      // Fetch maintenance requests count
+      const { count: maintenanceCount, error: maintenanceError } = await supabase
+        .from('maintenance_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false);
 
       if (maintenanceError) {
         console.error('Error fetching maintenance count:', maintenanceError);
-      } else {
-        console.log(`Found ${maintenanceCount} unread maintenance requests for ${userRole}`);
-        notifications.push({ type: 'maintenance', count: maintenanceCount || 0 });
       }
 
-      // Get tenancy IDs for the properties
-      const { data: tenancies } = await supabase
-        .from('tenancies')
-        .select('id')
-        .in('property_id', propertyIds);
+      // Fetch payments count
+      const { count: paymentsCount, error: paymentsError } = await supabase
+        .from('payments')
+        .select('*', { count: 'exact', head: true })
+        .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false);
 
-      if (tenancies) {
-        const tenancyIds = tenancies.map(t => t.id);
-
-        // Fetch pending payments with read status
-        const { count: paymentsCount, error: paymentsError } = await supabase
-          .from('payments')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'pending')
-          .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false)
-          .in('tenancy_id', tenancyIds);
-
-        if (paymentsError) {
-          console.error('Error fetching payments count:', paymentsError);
-        } else {
-          notifications.push({ type: 'payments', count: paymentsCount || 0 });
-        }
+      if (paymentsError) {
+        console.error('Error fetching payments count:', paymentsError);
       }
-    }
 
-    return notifications;
-  };
+      setData([
+        { type: 'messages', count: messagesCount || 0 },
+        { type: 'maintenance', count: maintenanceCount || 0 },
+        { type: 'payments', count: paymentsCount || 0 }
+      ]);
+    };
+
+    fetchNotifications();
+
+    // Subscribe to real-time updates for messages
+    const messagesSubscription = supabase
+      .channel('public:messages')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'messages' },
+        fetchNotifications
+      )
+      .subscribe();
+
+    // Subscribe to maintenance requests updates
+    const maintenanceSubscription = supabase
+      .channel('public:maintenance_requests')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'maintenance_requests' },
+        fetchNotifications
+      )
+      .subscribe();
+
+    // Subscribe to payments updates
+    const paymentsSubscription = supabase
+      .channel('public:payments')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'payments' },
+        fetchNotifications
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(messagesSubscription);
+      supabase.removeChannel(maintenanceSubscription);
+      supabase.removeChannel(paymentsSubscription);
+    };
+  }, [userRole]);
 
   const markAsRead = async (type: string) => {
-    if (!currentUserId || !userRole) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-    console.log(`Marking ${type} notifications as read for ${userRole}`);
+    console.log(`Marking ${type} as read for user:`, user.id);
 
     try {
-      switch (type) {
-        case 'maintenance':
-          // For landlords, only mark requests for their properties as read
-          if (userRole === 'landlord') {
-            const { data: properties } = await supabase
-              .from('properties')
-              .select('id')
-              .eq('landlord_id', currentUserId);
+      if (type === 'messages') {
+        const { error } = await supabase
+          .from('messages')
+          .update({ read: true })
+          .eq('receiver_id', user.id)
+          .eq('read', false);
 
-            if (properties && properties.length > 0) {
-              const propertyIds = properties.map(p => p.id);
-              const { error: maintenanceError } = await supabase
-                .from('maintenance_requests')
-                .update({
-                  read_by_landlord: true
-                })
-                .eq('status', 'pending')
-                .in('property_id', propertyIds);
+        if (error) throw error;
+      } else if (type === 'maintenance') {
+        const { error } = await supabase
+          .from('maintenance_requests')
+          .update({ 
+            [userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant']: true 
+          })
+          .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false);
 
-              if (maintenanceError) throw maintenanceError;
-            }
-          } else {
-            // For tenants, only mark their requests as read
-            const { error: maintenanceError } = await supabase
-              .from('maintenance_requests')
-              .update({
-                read_by_tenant: true
-              })
-              .eq('status', 'pending')
-              .eq('tenant_id', currentUserId);
+        if (error) throw error;
+      } else if (type === 'payments') {
+        const { error } = await supabase
+          .from('payments')
+          .update({ 
+            [userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant']: true 
+          })
+          .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false);
 
-            if (maintenanceError) throw maintenanceError;
-          }
-          break;
-
-        case 'payments':
-          const { error: paymentsError } = await supabase
-            .from('payments')
-            .update({
-              [userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant']: true
-            })
-            .eq('status', 'pending');
-
-          if (paymentsError) throw paymentsError;
-          break;
-
-        case 'messages':
-          const { error: messagesError } = await supabase
-            .from('messages')
-            .update({ read: true })
-            .eq('receiver_id', currentUserId)
-            .eq('read', false);
-
-          if (messagesError) throw messagesError;
-          break;
+        if (error) throw error;
       }
 
       // Refresh notifications after marking as read
-      queryClient.invalidateQueries({ queryKey: ['sidebarNotifications'] });
+      const updatedData = data.map(item => 
+        item.type === type ? { ...item, count: 0 } : item
+      );
+      setData(updatedData);
     } catch (error) {
       console.error(`Error marking ${type} as read:`, error);
     }
   };
 
-  const { data, refetch } = useQuery({
-    queryKey: ['sidebarNotifications', currentUserId],
-    queryFn: fetchNotifications,
-    enabled: !!currentUserId,
-  });
-
-  useEffect(() => {
-    if (!currentUserId) return;
-
-    // Subscribe to real-time updates
-    const channel = supabase
-      .channel('sidebar-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages',
-          filter: `receiver_id=eq.${currentUserId}`,
-        },
-        () => {
-          console.log('Message received, refetching notifications');
-          refetch();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'maintenance_requests',
-        },
-        () => {
-          console.log('Maintenance request updated, refetching notifications');
-          refetch();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'payments',
-        },
-        () => {
-          console.log('Payment updated, refetching notifications');
-          refetch();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [currentUserId, refetch]);
-
-  return { data: data || [], markAsRead };
+  return { data, markAsRead };
 }
