@@ -43,11 +43,14 @@ export function useSidebarNotifications() {
 
       console.log('Unread payments count:', paymentsCount);
 
-      setData([
+      const notifications = [
         { type: 'messages', count: messagesCount || 0 },
         { type: 'maintenance', count: maintenanceCount || 0 },
         { type: 'payments', count: paymentsCount || 0 }
-      ]);
+      ];
+
+      console.log('Setting notifications:', notifications);
+      setData(notifications);
     };
 
     fetchNotifications();
