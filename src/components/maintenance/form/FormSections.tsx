@@ -4,6 +4,7 @@ import { Property } from "@/utils/propertyUtils";
 import { UseFormReturn } from "react-hook-form";
 import { MaintenanceFormFields } from "./MaintenanceFormFields";
 import { ImageUploadField } from "./ImageUploadField";
+import { useTranslation } from "react-i18next";
 
 interface FormSectionsProps {
   form: UseFormReturn<any>;
@@ -26,11 +27,13 @@ export function FormSections({
   isSubmitting,
   isEditing,
 }: FormSectionsProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-4 space-y-4">
-          <h3 className="text-lg font-medium">Request Details</h3>
+          <h3 className="text-lg font-medium">{t('maintenance.form.requestDetails')}</h3>
           <MaintenanceFormFields
             form={form}
             properties={properties}
@@ -39,7 +42,7 @@ export function FormSections({
         </Card>
         
         <Card className="p-4">
-          <h3 className="text-lg font-medium mb-4">Request Images</h3>
+          <h3 className="text-lg font-medium mb-4">{t('maintenance.form.requestImages')}</h3>
           <ImageUploadField
             onImageChange={onImageChange}
             selectedImages={selectedImages}
@@ -48,17 +51,17 @@ export function FormSections({
         </Card>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end mt-6">
         <Button 
           type="submit" 
           disabled={isSubmitting}
           className="min-w-[150px]"
         >
           {isSubmitting
-            ? "Saving..."
+            ? t('common.saving')
             : isEditing
-            ? "Update Request"
-            : "Create Request"}
+            ? t('maintenance.form.updateRequest')
+            : t('maintenance.form.createRequest')}
         </Button>
       </div>
     </>
