@@ -43,9 +43,6 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
     if (item.notificationType && notificationCount > 0 && onNotificationClick) {
       e.preventDefault();
       onNotificationClick(item.notificationType);
-      setTimeout(() => {
-        window.location.href = item.href;
-      }, 100);
     }
   };
 
