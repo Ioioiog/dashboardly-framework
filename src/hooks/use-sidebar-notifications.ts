@@ -12,6 +12,8 @@ export function useSidebarNotifications() {
   const { userRole } = useUserRole();
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchNotifications = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -59,14 +61,10 @@ export function useSidebarNotifications() {
           { type: 'payments', count: paymentsCount || 0 }
         ];
 
-        console.log('Setting notifications:', newNotifications);
-        setData(prevData => {
-          // Only update if counts have changed
-          const hasChanges = newNotifications.some((newNotif, index) => 
-            !prevData[index] || prevData[index].count !== newNotif.count
-          );
-          return hasChanges ? newNotifications : prevData;
-        });
+        if (mounted) {
+          console.log('Setting new notifications:', newNotifications);
+          setData(newNotifications);
+        }
       } catch (error) {
         console.error('Error fetching notifications:', error);
       }
@@ -107,6 +105,7 @@ export function useSidebarNotifications() {
       .subscribe();
 
     return () => {
+      mounted = false;
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(maintenanceChannel);
       supabase.removeChannel(paymentsChannel);

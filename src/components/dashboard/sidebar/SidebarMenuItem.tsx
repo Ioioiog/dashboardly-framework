@@ -32,16 +32,12 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
 }) => {
   const Icon = item.icon;
   
-  // Add debug logging
-  console.log(`Rendering menu item: ${item.title}`);
-  console.log('Item notification type:', item.notificationType);
-  console.log('Current notifications:', notifications);
-  
-  const notificationCount = item.notificationType 
-    ? notifications.find(n => n.type === item.notificationType)?.count || 0
-    : 0;
-
-  console.log(`Notification count for ${item.title}:`, notificationCount);
+  const notificationCount = React.useMemo(() => {
+    if (!item.notificationType || !notifications.length) return 0;
+    const notification = notifications.find(n => n.type === item.notificationType);
+    console.log(`Notification for ${item.title}:`, notification);
+    return notification?.count || 0;
+  }, [item.notificationType, notifications, item.title]);
 
   const handleClick = (e: React.MouseEvent) => {
     if (item.notificationType && notificationCount > 0 && onNotificationClick) {
