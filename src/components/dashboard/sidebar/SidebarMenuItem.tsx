@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, BellDot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -31,16 +31,21 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   onNotificationClick,
 }) => {
   const Icon = item.icon;
+  
+  // Add debug logging
+  console.log(`Rendering menu item: ${item.title}`);
+  console.log('Item notification type:', item.notificationType);
+  console.log('Current notifications:', notifications);
+  
   const notificationCount = item.notificationType 
     ? notifications.find(n => n.type === item.notificationType)?.count || 0
     : 0;
 
   console.log(`Notification count for ${item.title}:`, notificationCount);
-  console.log('Item notification type:', item.notificationType);
-  console.log('All notifications:', notifications);
 
   const handleClick = (e: React.MouseEvent) => {
     if (item.notificationType && notificationCount > 0 && onNotificationClick) {
+      console.log(`Handling click for ${item.title} with ${notificationCount} notifications`);
       e.preventDefault();
       onNotificationClick(item.notificationType);
     }
@@ -59,9 +64,14 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
       <div className="relative">
         <Icon className={cn("h-5 w-5", isActive && "text-blue-600 dark:text-blue-400")} />
         {notificationCount > 0 && (
-          <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-medium text-white">
-            {notificationCount}
-          </span>
+          <div className="absolute -top-2 -right-2">
+            <div className="flex items-center justify-center h-5 w-5 rounded-full bg-red-500">
+              <span className="text-[11px] font-medium text-white">
+                {notificationCount}
+              </span>
+            </div>
+            <BellDot className="absolute -top-1 -right-1 h-3 w-3 text-red-500 animate-pulse" />
+          </div>
         )}
       </div>
       {isExpanded && <span className="ml-3">{item.title}</span>}
@@ -82,9 +92,11 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
           <div className="flex items-center gap-2">
             {item.title}
             {notificationCount > 0 && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-medium text-white">
-                {notificationCount}
-              </span>
+              <div className="flex items-center justify-center h-5 w-5 rounded-full bg-red-500">
+                <span className="text-[11px] font-medium text-white">
+                  {notificationCount}
+                </span>
+              </div>
             )}
           </div>
         </TooltipContent>
