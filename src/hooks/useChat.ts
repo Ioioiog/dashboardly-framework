@@ -30,6 +30,18 @@ export function useChat(selectedTenantId: string | null) {
         }
 
         if (selectedTenantId) {
+          // First, check if conversation exists
+          const { data: existingConversation, error: conversationError } = await supabase
+            .from('conversations')
+            .select('*')
+            .eq('tenant_id', selectedTenantId)
+            .single();
+
+          if (conversationError) {
+            console.error("Error checking conversation:", conversationError);
+            return;
+          }
+
           // Subscribe to new messages
           const subscription = supabase
             .channel('messages')
@@ -47,17 +59,18 @@ export function useChat(selectedTenantId: string | null) {
                   // If the message is not from the current user, mark it as unread
                   if (payload.new.sender_id !== session.user.id) {
                     console.log("Marking message as unread");
-                    const { error } = supabase
+                    supabase
                       .from('messages')
                       .update({ 
                         read: false,
                         status: 'delivered'
                       })
-                      .eq('id', payload.new.id);
-                      
-                    if (error) {
-                      console.error("Error marking message as unread:", error);
-                    }
+                      .eq('id', payload.new.id)
+                      .then(({ error }) => {
+                        if (error) {
+                          console.error("Error marking message as unread:", error);
+                        }
+                      });
                   }
                 }
               }
