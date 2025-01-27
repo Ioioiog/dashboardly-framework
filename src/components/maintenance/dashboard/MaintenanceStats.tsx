@@ -16,7 +16,7 @@ export function MaintenanceStats({ requests }: MaintenanceStatsProps) {
     completed: requests?.filter((r) => r.status === "completed").length || 0,
   };
 
-  const highPriorityCount = requests?.filter((r) => r.priority === "High" && r.status !== "completed").length || 0;
+  const highPriorityCount = requests?.filter((r) => r.priority === "high" && r.status !== "completed").length || 0;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
