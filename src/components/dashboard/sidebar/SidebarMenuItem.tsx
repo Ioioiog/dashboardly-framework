@@ -35,7 +35,8 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
     ? notifications.find(n => n.type === item.notificationType)?.count || 0
     : 0;
 
-  console.log(`Notification count for ${item.notificationType}:`, notificationCount);
+  console.log(`Notification count for ${item.title}:`, notificationCount);
+  console.log('Item notification type:', item.notificationType);
   console.log('All notifications:', notifications);
 
   const handleClick = (e: React.MouseEvent) => {

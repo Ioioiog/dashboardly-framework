@@ -32,6 +32,8 @@ export const DashboardSidebar = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const { data: notifications, markAsRead } = useSidebarNotifications();
 
+  console.log("Current notifications:", notifications);
+
   const isActive = (href: string) => {
     if (href === "/dashboard") {
       return location.pathname === href;
