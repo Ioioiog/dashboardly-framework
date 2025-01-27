@@ -3,13 +3,10 @@
     "title": "Maintenance Requests",
     "newRequest": "New Request",
     "noRequests": "No maintenance requests found",
-    "details": {
-      "viewImages": "View Images",
-      "viewHistory": "View History",
-      "edit": "Edit",
-      "delete": "Delete",
-      "imageAlt": "Maintenance request image {{number}}"
-    },
+    "createRequestPrompt": "Click the \"New Request\" button above to create a maintenance request",
+    "ticket": "Ticket ID",
+    "property": "Property",
+    "title": "Title",
     "status": {
       "pending": "Pending",
       "in_progress": "In Progress",
@@ -21,63 +18,13 @@
       "medium": "Medium Priority",
       "high": "High Priority"
     },
-    "filters": {
-      "search": "Search requests...",
-      "status": {
-        "label": "Filter by status",
-        "all": "All statuses"
-      },
-      "priority": {
-        "label": "Filter by priority",
-        "all": "All priorities"
-      },
-      "issueType": {
-        "label": "Filter by issue type",
-        "all": "All types"
-      }
-    },
-    "form": {
-      "title": {
-        "label": "Title",
-        "placeholder": "Brief description of the issue"
-      },
-      "description": {
-        "label": "Description",
-        "placeholder": "Detailed description of the maintenance issue"
-      },
-      "notes": {
-        "label": "Additional Notes",
-        "placeholder": "Any additional information or special instructions"
-      },
-      "issueType": {
-        "label": "Issue Type",
-        "placeholder": "Select an issue type"
-      },
-      "priority": {
-        "label": "Priority",
-        "placeholder": "Select priority level"
-      },
-      "property": {
-        "label": "Property",
-        "placeholder": "Select a property"
-      },
-      "images": {
-        "label": "Images",
-        "placeholder": "Upload images"
-      }
-    },
-    "toast": {
-      "success": {
-        "created": "Maintenance request created successfully",
-        "updated": "Maintenance request updated successfully",
-        "deleted": "Maintenance request deleted successfully"
-      },
-      "error": {
-        "create": "Failed to create maintenance request",
-        "update": "Failed to update maintenance request",
-        "delete": "Failed to delete maintenance request"
-      }
-    }
+    "assignee": "Assignee",
+    "unassigned": "Unassigned",
+    "dates": "Dates",
+    "created": "Created",
+    "updated": "Last Updated",
+    "actions": "Actions",
+    "viewDetails": "View Details"
   },
   "dashboard": {
     "title": "Dashboard",

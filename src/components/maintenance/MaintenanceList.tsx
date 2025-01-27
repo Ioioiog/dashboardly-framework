@@ -10,11 +10,12 @@ import { MaintenanceRequest } from "@/types/maintenance";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, Paperclip } from "lucide-react";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 interface MaintenanceListProps {
   requests: MaintenanceRequest[];
@@ -30,6 +31,7 @@ export function MaintenanceList({
   const { userRole } = useUserRole();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   console.log('Current user role:', userRole);
   console.log('Maintenance requests:', requests);
@@ -80,10 +82,10 @@ export function MaintenanceList({
   if (!requests.length) {
     return (
       <div className="text-center py-8 bg-gray-50 rounded-lg">
-        <p className="text-gray-600">No maintenance requests found.</p>
+        <p className="text-gray-600">{t('maintenance.noRequests')}</p>
         {userRole === 'tenant' && (
           <p className="text-sm text-gray-500 mt-2">
-            Click the "New Request" button above to create a maintenance request.
+            {t('maintenance.createRequestPrompt')}
           </p>
         )}
       </div>
@@ -104,12 +106,12 @@ export function MaintenanceList({
   };
 
   const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "High":
+    switch (priority?.toLowerCase()) {
+      case "high":
         return "bg-red-500";
-      case "Medium":
+      case "medium":
         return "bg-orange-500";
-      case "Low":
+      case "low":
         return "bg-blue-500";
       default:
         return "bg-gray-500";
@@ -123,17 +125,22 @@ export function MaintenanceList({
     return !request.read_by_tenant;
   };
 
+  const generateTicketId = (id: string) => {
+    return `MR-${id.slice(0, 6)}`.toUpperCase();
+  };
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Property</TableHead>
-          <TableHead>Tenant</TableHead>
-          <TableHead>Title</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Priority</TableHead>
-          <TableHead>Created</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead>{t('maintenance.ticket')}</TableHead>
+          <TableHead>{t('maintenance.property')}</TableHead>
+          <TableHead>{t('maintenance.title')}</TableHead>
+          <TableHead>{t('maintenance.status')}</TableHead>
+          <TableHead>{t('maintenance.priority')}</TableHead>
+          <TableHead>{t('maintenance.assignee')}</TableHead>
+          <TableHead>{t('maintenance.dates')}</TableHead>
+          <TableHead>{t('maintenance.actions')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -142,23 +149,36 @@ export function MaintenanceList({
             key={request.id}
             className={isUnread(request) ? 'bg-red-50' : ''}
           >
+            <TableCell className="font-mono">{generateTicketId(request.id)}</TableCell>
             <TableCell>{request.property?.name}</TableCell>
             <TableCell>
-              {request.tenant?.first_name} {request.tenant?.last_name}
+              <div className="flex items-center gap-2">
+                {request.title}
+                {request.images && request.images.length > 0 && (
+                  <Paperclip className="h-4 w-4 text-gray-400" />
+                )}
+              </div>
             </TableCell>
-            <TableCell>{request.title}</TableCell>
             <TableCell>
               <Badge className={getStatusColor(request.status)}>
-                {request.status}
+                {t(`maintenance.status.${request.status}`)}
               </Badge>
             </TableCell>
             <TableCell>
               <Badge className={getPriorityColor(request.priority || "")}>
-                {request.priority}
+                {t(`maintenance.priority.${request.priority?.toLowerCase()}`)}
               </Badge>
             </TableCell>
             <TableCell>
-              {format(new Date(request.created_at), "PPP")}
+              {request.assignee ? 
+                `${request.assignee.first_name} ${request.assignee.last_name}` : 
+                t('maintenance.unassigned')}
+            </TableCell>
+            <TableCell>
+              <div className="text-sm">
+                <div>{t('maintenance.created')}: {format(new Date(request.created_at), "PP")}</div>
+                <div className="text-gray-500">{t('maintenance.updated')}: {format(new Date(request.updated_at), "PP")}</div>
+              </div>
             </TableCell>
             <TableCell>
               <Button
@@ -173,7 +193,7 @@ export function MaintenanceList({
                 className="flex items-center gap-2"
               >
                 <Eye className="h-4 w-4" />
-                See Request
+                {t('maintenance.viewDetails')}
               </Button>
             </TableCell>
           </TableRow>
