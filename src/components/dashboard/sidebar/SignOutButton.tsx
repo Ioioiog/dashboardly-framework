@@ -19,6 +19,9 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({ isExpanded }) => {
 
   const handleSignOut = async () => {
     try {
+      // Clear any stored tokens first
+      localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
+      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       

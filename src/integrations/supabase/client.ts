@@ -48,21 +48,16 @@ const initSession = async () => {
       return;
     }
 
+    // Verify the session is still valid
+    const { error: userError } = await supabase.auth.getUser();
+    if (userError) {
+      console.error('User verification failed:', userError);
+      await supabase.auth.signOut();
+      return;
+    }
+
     console.log('Valid session found:', session.user.id);
     
-    // Test realtime connection
-    const channel = supabase.channel('system');
-    
-    channel
-      .subscribe((status) => {
-        console.log('Realtime subscription status:', status);
-        if (status === 'SUBSCRIBED') {
-          console.log('Successfully subscribed to realtime updates');
-        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-          console.error('Failed to subscribe to realtime updates:', status);
-        }
-      });
-
   } catch (err) {
     console.error('Unexpected error during session initialization:', err);
     await supabase.auth.signOut();

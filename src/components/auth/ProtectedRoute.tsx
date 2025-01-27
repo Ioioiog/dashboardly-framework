@@ -43,6 +43,19 @@ export function ProtectedRoute({
           return;
         }
 
+        // Additional verification of the user
+        const { error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error("User verification error:", userError);
+          toast({
+            title: "Authentication Error",
+            description: "Your session has expired. Please sign in again.",
+            variant: "destructive",
+          });
+          await supabase.auth.signOut();
+          return;
+        }
+
         console.log("Session verified successfully for user:", session.user.id);
       } catch (error) {
         console.error("Session verification error:", error);
