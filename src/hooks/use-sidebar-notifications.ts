@@ -7,10 +7,8 @@ export type Notification = {
   count: number;
 };
 
-type NotificationType = Notification;
-
 export function useSidebarNotifications() {
-  const [data, setData] = useState<NotificationType[]>([]);
+  const [data, setData] = useState<Notification[]>([]);
   const { userRole } = useUserRole();
 
   useEffect(() => {
@@ -25,7 +23,7 @@ export function useSidebarNotifications() {
         .from('messages')
         .select('*', { count: 'exact', head: true })
         .eq('read', false)
-        .neq('sender_id', user.id);
+        .eq('receiver_id', user.id);
 
       console.log('Unread messages count:', messagesCount);
 
@@ -35,11 +33,15 @@ export function useSidebarNotifications() {
         .select('*', { count: 'exact', head: true })
         .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false);
 
+      console.log('Unread maintenance requests count:', maintenanceCount);
+
       // Fetch payments count
       const { count: paymentsCount } = await supabase
         .from('payments')
         .select('*', { count: 'exact', head: true })
         .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false);
+
+      console.log('Unread payments count:', paymentsCount);
 
       setData([
         { type: 'messages', count: messagesCount || 0 },
@@ -52,28 +54,37 @@ export function useSidebarNotifications() {
 
     // Subscribe to real-time updates for messages
     const messagesSubscription = supabase
-      .channel('public:messages')
+      .channel('messages_changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'messages' },
-        fetchNotifications
+        (payload) => {
+          console.log('Messages change detected:', payload);
+          fetchNotifications();
+        }
       )
       .subscribe();
 
     // Subscribe to maintenance requests updates
     const maintenanceSubscription = supabase
-      .channel('public:maintenance_requests')
+      .channel('maintenance_changes')
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'maintenance_requests' },
-        fetchNotifications
+        (payload) => {
+          console.log('Maintenance change detected:', payload);
+          fetchNotifications();
+        }
       )
       .subscribe();
 
     // Subscribe to payments updates
     const paymentsSubscription = supabase
-      .channel('public:payments')
+      .channel('payments_changes')
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'payments' },
-        fetchNotifications
+        (payload) => {
+          console.log('Payments change detected:', payload);
+          fetchNotifications();
+        }
       )
       .subscribe();
 

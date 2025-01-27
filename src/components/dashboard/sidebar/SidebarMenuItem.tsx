@@ -31,15 +31,14 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   onNotificationClick,
 }) => {
   const Icon = item.icon;
-  const notificationCount = item.notificationType
-    ? notifications?.find(n => n.type === item.notificationType)?.count || 0
+  const notificationCount = item.notificationType && notifications
+    ? notifications.find(n => n.type === item.notificationType)?.count || 0
     : 0;
 
   const handleClick = (e: React.MouseEvent) => {
     if (item.notificationType && notificationCount > 0 && onNotificationClick) {
-      e.preventDefault(); // Prevent navigation until notification is cleared
+      e.preventDefault();
       onNotificationClick(item.notificationType);
-      // Navigate after a short delay to ensure the notification is cleared
       setTimeout(() => {
         window.location.href = item.href;
       }, 100);
