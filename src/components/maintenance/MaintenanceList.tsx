@@ -68,11 +68,27 @@ export function MaintenanceList({
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-4">
+        <div className="h-8 bg-gray-100 animate-pulse rounded" />
+        <div className="h-12 bg-gray-100 animate-pulse rounded" />
+        <div className="h-12 bg-gray-100 animate-pulse rounded" />
+        <div className="h-12 bg-gray-100 animate-pulse rounded" />
+      </div>
+    );
   }
 
   if (!requests.length) {
-    return <div>No maintenance requests found.</div>;
+    return (
+      <div className="text-center py-8 bg-gray-50 rounded-lg">
+        <p className="text-gray-600">No maintenance requests found.</p>
+        {userRole === 'tenant' && (
+          <p className="text-sm text-gray-500 mt-2">
+            Click the "New Request" button above to create a maintenance request.
+          </p>
+        )}
+      </div>
+    );
   }
 
   const getStatusColor = (status: string) => {
