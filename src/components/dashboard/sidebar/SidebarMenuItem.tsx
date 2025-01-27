@@ -27,11 +27,11 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   item,
   isActive,
   isExpanded,
-  notifications,
+  notifications = [],
   onNotificationClick,
 }) => {
   const Icon = item.icon;
-  const notificationCount = item.notificationType && notifications
+  const notificationCount = item.notificationType 
     ? notifications.find(n => n.type === item.notificationType)?.count || 0
     : 0;
 

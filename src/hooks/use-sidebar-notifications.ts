@@ -19,28 +19,37 @@ export function useSidebarNotifications() {
       console.log("Fetching notifications for user:", user.id);
 
       // Fetch unread messages count
-      const { count: messagesCount } = await supabase
+      const { count: messagesCount, error: messagesError } = await supabase
         .from('messages')
         .select('*', { count: 'exact', head: true })
-        .eq('read', false)
-        .eq('receiver_id', user.id);
+        .eq('receiver_id', user.id)
+        .eq('read', false);
 
+      if (messagesError) {
+        console.error('Error fetching messages:', messagesError);
+      }
       console.log('Unread messages count:', messagesCount);
 
       // Fetch maintenance requests count
-      const { count: maintenanceCount } = await supabase
+      const { count: maintenanceCount, error: maintenanceError } = await supabase
         .from('maintenance_requests')
         .select('*', { count: 'exact', head: true })
         .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false);
 
+      if (maintenanceError) {
+        console.error('Error fetching maintenance requests:', maintenanceError);
+      }
       console.log('Unread maintenance requests count:', maintenanceCount);
 
       // Fetch payments count
-      const { count: paymentsCount } = await supabase
+      const { count: paymentsCount, error: paymentsError } = await supabase
         .from('payments')
         .select('*', { count: 'exact', head: true })
         .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false);
 
+      if (paymentsError) {
+        console.error('Error fetching payments:', paymentsError);
+      }
       console.log('Unread payments count:', paymentsCount);
 
       const notifications = [
@@ -133,11 +142,12 @@ export function useSidebarNotifications() {
         if (error) throw error;
       }
 
-      // Refresh notifications after marking as read
-      const updatedData = data.map(item => 
-        item.type === type ? { ...item, count: 0 } : item
+      // Update local state
+      setData(prevData => 
+        prevData.map(item => 
+          item.type === type ? { ...item, count: 0 } : item
+        )
       );
-      setData(updatedData);
     } catch (error) {
       console.error(`Error marking ${type} as read:`, error);
     }
