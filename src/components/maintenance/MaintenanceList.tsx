@@ -140,9 +140,7 @@ export function MaintenanceList({
         {requests.map((request) => (
           <TableRow
             key={request.id}
-            className={`hover:bg-gray-100 ${
-              isUnread(request) ? 'bg-red-50' : ''
-            }`}
+            className={isUnread(request) ? 'bg-red-50' : ''}
           >
             <TableCell>{request.property?.name}</TableCell>
             <TableCell>
@@ -168,7 +166,7 @@ export function MaintenanceList({
                 size="sm"
                 onClick={() => {
                   onRequestClick(request);
-                  if (userRole === 'landlord' && !request.read_by_landlord) {
+                  if (isUnread(request)) {
                     handleMarkAsRead(request.id);
                   }
                 }}
