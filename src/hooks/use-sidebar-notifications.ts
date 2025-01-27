@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRole } from '@/hooks/use-user-role';
 
-type NotificationType = {
+export type Notification = {
   type: string;
   count: number;
 };
+
+type NotificationType = Notification;
 
 export function useSidebarNotifications() {
   const [data, setData] = useState<NotificationType[]>([]);
@@ -19,37 +21,25 @@ export function useSidebarNotifications() {
       console.log("Fetching notifications for user:", user.id);
 
       // Fetch unread messages count
-      const { count: messagesCount, error: messagesError } = await supabase
+      const { count: messagesCount } = await supabase
         .from('messages')
         .select('*', { count: 'exact', head: true })
         .eq('read', false)
         .neq('sender_id', user.id);
 
-      if (messagesError) {
-        console.error('Error fetching messages count:', messagesError);
-      } else {
-        console.log('Unread messages count:', messagesCount);
-      }
+      console.log('Unread messages count:', messagesCount);
 
       // Fetch maintenance requests count
-      const { count: maintenanceCount, error: maintenanceError } = await supabase
+      const { count: maintenanceCount } = await supabase
         .from('maintenance_requests')
         .select('*', { count: 'exact', head: true })
         .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false);
 
-      if (maintenanceError) {
-        console.error('Error fetching maintenance count:', maintenanceError);
-      }
-
       // Fetch payments count
-      const { count: paymentsCount, error: paymentsError } = await supabase
+      const { count: paymentsCount } = await supabase
         .from('payments')
         .select('*', { count: 'exact', head: true })
         .eq(userRole === 'landlord' ? 'read_by_landlord' : 'read_by_tenant', false);
-
-      if (paymentsError) {
-        console.error('Error fetching payments count:', paymentsError);
-      }
 
       setData([
         { type: 'messages', count: messagesCount || 0 },

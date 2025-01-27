@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { PostgrestError } from "@supabase/supabase-js";
 
 export function useChat(selectedTenantId: string | null) {
   const [messages, setMessages] = useState<any[]>([]);
@@ -102,7 +103,7 @@ export function useChat(selectedTenantId: string | null) {
         profile_id: currentUserId,
         content: content.trim(),
         conversation_id: selectedTenantId,
-        read: false, // Mark as unread initially
+        read: false,
         status: 'sent'
       });
 
@@ -111,7 +112,7 @@ export function useChat(selectedTenantId: string | null) {
         profile_id: currentUserId,
         content: content.trim(),
         conversation_id: selectedTenantId,
-        read: false, // Mark as unread initially
+        read: false,
         status: 'sent'
       });
 
