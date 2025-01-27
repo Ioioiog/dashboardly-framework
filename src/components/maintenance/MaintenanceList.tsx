@@ -53,7 +53,6 @@ export function MaintenanceList({
         description: "Request marked as read",
       });
 
-      // Invalidate both maintenance requests and sidebar notifications queries
       await queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
       await queryClient.invalidateQueries({ queryKey: ['sidebarNotifications'] });
       
@@ -117,6 +116,13 @@ export function MaintenanceList({
     }
   };
 
+  const isUnread = (request: MaintenanceRequest) => {
+    if (userRole === 'landlord') {
+      return !request.read_by_landlord;
+    }
+    return !request.read_by_tenant;
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -135,7 +141,7 @@ export function MaintenanceList({
           <TableRow
             key={request.id}
             className={`hover:bg-gray-100 ${
-              userRole === 'landlord' && !request.read_by_landlord ? 'bg-blue-50' : ''
+              isUnread(request) ? 'bg-red-50' : ''
             }`}
           >
             <TableCell>{request.property?.name}</TableCell>
