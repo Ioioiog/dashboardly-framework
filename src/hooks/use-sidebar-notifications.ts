@@ -60,7 +60,13 @@ export function useSidebarNotifications() {
         ];
 
         console.log('Setting notifications:', newNotifications);
-        setData(newNotifications);
+        setData(prevData => {
+          // Only update if counts have changed
+          const hasChanges = newNotifications.some((newNotif, index) => 
+            !prevData[index] || prevData[index].count !== newNotif.count
+          );
+          return hasChanges ? newNotifications : prevData;
+        });
       } catch (error) {
         console.error('Error fetching notifications:', error);
       }
@@ -73,8 +79,8 @@ export function useSidebarNotifications() {
     const messagesChannel = supabase.channel('messages_changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'messages' },
-        () => {
-          console.log('Messages change detected, refreshing notifications');
+        (payload) => {
+          console.log('Messages change detected:', payload);
           fetchNotifications();
         }
       )
@@ -83,8 +89,8 @@ export function useSidebarNotifications() {
     const maintenanceChannel = supabase.channel('maintenance_changes')
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'maintenance_requests' },
-        () => {
-          console.log('Maintenance change detected, refreshing notifications');
+        (payload) => {
+          console.log('Maintenance change detected:', payload);
           fetchNotifications();
         }
       )
@@ -93,8 +99,8 @@ export function useSidebarNotifications() {
     const paymentsChannel = supabase.channel('payments_changes')
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'payments' },
-        () => {
-          console.log('Payments change detected, refreshing notifications');
+        (payload) => {
+          console.log('Payments change detected:', payload);
           fetchNotifications();
         }
       )
