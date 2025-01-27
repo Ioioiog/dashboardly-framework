@@ -35,9 +35,14 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
     ? notifications?.find(n => n.type === item.notificationType)?.count || 0
     : 0;
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
     if (item.notificationType && notificationCount > 0 && onNotificationClick) {
+      e.preventDefault(); // Prevent navigation until notification is cleared
       onNotificationClick(item.notificationType);
+      // Navigate after a short delay to ensure the notification is cleared
+      setTimeout(() => {
+        window.location.href = item.href;
+      }, 100);
     }
   };
 
