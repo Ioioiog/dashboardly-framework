@@ -48,7 +48,9 @@ export function MaintenanceTableRow({
             }
           >
             <SelectTrigger className="w-[130px]">
-              <SelectValue />
+              <SelectValue>
+                {t(`maintenance.status.${request.status}`)}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="pending">{t('maintenance.status.pending')}</SelectItem>
@@ -67,7 +69,9 @@ export function MaintenanceTableRow({
             onValueChange={(value) => onPriorityChange(request.id, value)}
           >
             <SelectTrigger className="w-[100px]">
-              <SelectValue />
+              <SelectValue>
+                {t(`maintenance.priority.${request.priority?.toLowerCase()}`)}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="low">{t('maintenance.priority.low')}</SelectItem>

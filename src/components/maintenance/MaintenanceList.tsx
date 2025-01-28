@@ -54,8 +54,8 @@ export function MaintenanceList({
 
       console.log('[MaintenanceList] Successfully marked as read');
       toast({
-        title: "Success",
-        description: "Request marked as read",
+        title: t('common.success'),
+        description: t('maintenance.markedAsRead'),
       });
 
       await queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
@@ -65,8 +65,8 @@ export function MaintenanceList({
       console.error('[MaintenanceList] Error in handleMarkAsRead:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to mark request as read",
+        title: t('common.error'),
+        description: t('maintenance.errorMarkingAsRead'),
       });
     }
   };
@@ -86,8 +86,8 @@ export function MaintenanceList({
 
       console.log('[MaintenanceList] Priority updated successfully');
       toast({
-        title: "Success",
-        description: "Priority updated successfully",
+        title: t('common.success'),
+        description: t('maintenance.priorityUpdated'),
       });
 
       await queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
@@ -95,8 +95,8 @@ export function MaintenanceList({
       console.error('[MaintenanceList] Error in handlePriorityChange:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to update priority",
+        title: t('common.error'),
+        description: t('maintenance.errorUpdatingPriority'),
       });
     }
   };
@@ -119,8 +119,8 @@ export function MaintenanceList({
 
       console.log('[MaintenanceList] Status updated successfully');
       toast({
-        title: "Success",
-        description: "Status updated successfully",
+        title: t('common.success'),
+        description: t('maintenance.statusUpdated'),
       });
 
       await queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
@@ -128,8 +128,8 @@ export function MaintenanceList({
       console.error('[MaintenanceList] Error in handleStatusChange:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to update status",
+        title: t('common.error'),
+        description: t('maintenance.errorUpdatingStatus'),
       });
     }
   };
