@@ -95,7 +95,10 @@ export function MaintenanceList({
     }
   };
 
-  const handleStatusChange = async (requestId: string, newStatus: string) => {
+  const handleStatusChange = async (
+    requestId: string, 
+    newStatus: 'pending' | 'in_progress' | 'completed'
+  ) => {
     try {
       console.log('Updating status:', requestId, newStatus);
       const { error } = await supabase
@@ -216,7 +219,9 @@ export function MaintenanceList({
               {userRole === 'landlord' ? (
                 <Select
                   defaultValue={request.status}
-                  onValueChange={(value) => handleStatusChange(request.id, value)}
+                  onValueChange={(value: 'pending' | 'in_progress' | 'completed') => 
+                    handleStatusChange(request.id, value)
+                  }
                 >
                   <SelectTrigger className="w-[130px]">
                     <SelectValue />
