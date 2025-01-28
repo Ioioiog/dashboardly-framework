@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Paperclip, Clock, User } from "lucide-react";
+import { MaintenanceHistory } from "./MaintenanceHistory";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -52,7 +53,7 @@ export function MaintenanceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-6">
+      <DialogContent className="max-w-7xl p-6">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold flex items-center gap-4">
             {request ? (
@@ -73,38 +74,57 @@ export function MaintenanceDialog({
           </DialogTitle>
         </DialogHeader>
 
-        {request && (
-          <Card className="p-4 mb-4 space-y-2">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Clock className="h-4 w-4" />
-              <span>
-                {t('maintenance.created')}: {format(new Date(request.created_at), "PP")}
-              </span>
-              <span className="mx-2">•</span>
-              <span>
-                {t('maintenance.updated')}: {format(new Date(request.updated_at), "PP")}
-              </span>
-            </div>
-            
-            {request.assignee && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <User className="h-4 w-4" />
-                <span>
-                  {t('maintenance.assignee')}: {request.assignee.first_name} {request.assignee.last_name}
-                </span>
-              </div>
-            )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left side - Tenant's request form */}
+          <div className="space-y-4">
+            <Card className="p-4">
+              <h3 className="text-lg font-medium mb-4">{t('maintenance.form.submitRequest')}</h3>
+              <MaintenanceForm request={request} onSuccess={() => onOpenChange(false)} />
+            </Card>
+          </div>
 
-            {request.images && request.images.length > 0 && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Paperclip className="h-4 w-4" />
-                <span>{request.images.length} {t('maintenance.attachments')}</span>
-              </div>
-            )}
-          </Card>
-        )}
+          {/* Right side - Request details and history */}
+          <div className="space-y-4">
+            {request && (
+              <>
+                <Card className="p-4 space-y-2">
+                  <h3 className="text-lg font-medium mb-2">{t('maintenance.requestDetails')}</h3>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock className="h-4 w-4" />
+                    <span>
+                      {t('maintenance.created')}: {format(new Date(request.created_at), "PP")}
+                    </span>
+                    <span className="mx-2">•</span>
+                    <span>
+                      {t('maintenance.updated')}: {format(new Date(request.updated_at), "PP")}
+                    </span>
+                  </div>
+                  
+                  {request.assignee && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <User className="h-4 w-4" />
+                      <span>
+                        {t('maintenance.assignee')}: {request.assignee.first_name} {request.assignee.last_name}
+                      </span>
+                    </div>
+                  )}
 
-        <MaintenanceForm request={request} onSuccess={() => onOpenChange(false)} />
+                  {request.images && request.images.length > 0 && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Paperclip className="h-4 w-4" />
+                      <span>{request.images.length} {t('maintenance.attachments')}</span>
+                    </div>
+                  )}
+                </Card>
+
+                <Card className="p-4">
+                  <h3 className="text-lg font-medium mb-4">{t('maintenance.requestHistory')}</h3>
+                  <MaintenanceHistory requestId={request.id} />
+                </Card>
+              </>
+            )}
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
