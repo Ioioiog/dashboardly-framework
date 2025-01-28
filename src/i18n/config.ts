@@ -30,9 +30,10 @@ i18n
     interpolation: {
       escapeValue: false,
     },
+    returnObjects: true, // Add this line to enable returning objects
     debug: process.env.NODE_ENV === 'development',
     react: {
-      useSuspense: false // This is important for initial render
+      useSuspense: false
     },
   })
   .then(() => {
