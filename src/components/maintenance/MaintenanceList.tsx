@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface MaintenanceListProps {
   requests: MaintenanceRequest[];
@@ -64,6 +65,32 @@ export function MaintenanceList({
         variant: "destructive",
         title: "Error",
         description: "Failed to mark request as read",
+      });
+    }
+  };
+
+  const handlePriorityChange = async (requestId: string, newPriority: string) => {
+    try {
+      console.log('Updating priority:', requestId, newPriority);
+      const { error } = await supabase
+        .from('maintenance_requests')
+        .update({ priority: newPriority })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Priority updated successfully",
+      });
+
+      await queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
+    } catch (error) {
+      console.error('Error updating priority:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update priority",
       });
     }
   };
@@ -165,9 +192,25 @@ export function MaintenanceList({
               </Badge>
             </TableCell>
             <TableCell>
-              <Badge className={getPriorityColor(request.priority || "")}>
-                {t(`maintenance.priority.${request.priority?.toLowerCase()}`)}
-              </Badge>
+              {userRole === 'landlord' ? (
+                <Select
+                  defaultValue={request.priority?.toLowerCase()}
+                  onValueChange={(value) => handlePriorityChange(request.id, value)}
+                >
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">{t('maintenance.priority.low')}</SelectItem>
+                    <SelectItem value="medium">{t('maintenance.priority.medium')}</SelectItem>
+                    <SelectItem value="high">{t('maintenance.priority.high')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge className={getPriorityColor(request.priority || "")}>
+                  {t(`maintenance.priority.${request.priority?.toLowerCase()}`)}
+                </Badge>
+              )}
             </TableCell>
             <TableCell>
               {request.assignee ? 
