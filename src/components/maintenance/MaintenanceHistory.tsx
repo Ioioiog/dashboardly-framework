@@ -31,11 +31,12 @@ export function MaintenanceHistory({ requestId }: MaintenanceHistoryProps) {
     queryFn: async () => {
       console.log('Fetching maintenance history for request:', requestId);
       
-      const { data, error } = await supabase
+      // First get the history entries
+      const { data: historyData, error: historyError } = await supabase
         .from('maintenance_request_history')
         .select(`
           *,
-          editor:profiles!maintenance_request_history_edited_by_fkey(
+          editor:edited_by(
             first_name,
             last_name
           )
@@ -43,13 +44,29 @@ export function MaintenanceHistory({ requestId }: MaintenanceHistoryProps) {
         .eq('maintenance_request_id', requestId)
         .order('edited_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching maintenance history:', error);
-        throw error;
+      if (historyError) {
+        console.error('Error fetching maintenance history:', historyError);
+        throw historyError;
       }
+
+      // For each history entry, get the editor's profile
+      const historyWithProfiles = await Promise.all(
+        (historyData || []).map(async (entry) => {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', entry.edited_by)
+            .single();
+
+          return {
+            ...entry,
+            editor: profileData
+          };
+        })
+      );
       
-      console.log('Fetched maintenance history:', data);
-      return data as unknown as HistoryEntry[];
+      console.log('Fetched maintenance history:', historyWithProfiles);
+      return historyWithProfiles as unknown as HistoryEntry[];
     },
   });
 
