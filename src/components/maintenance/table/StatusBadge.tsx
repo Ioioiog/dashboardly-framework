@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 
 interface StatusBadgeProps {
-  status: 'pending' | 'in_progress' | 'completed';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
@@ -16,6 +16,8 @@ export function StatusBadge({ status }: StatusBadgeProps) {
         return "bg-blue-500";
       case "completed":
         return "bg-green-500";
+      case "cancelled":
+        return "bg-red-500";
       default:
         return "bg-gray-500";
     }

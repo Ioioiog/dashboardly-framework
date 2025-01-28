@@ -1,11 +1,12 @@
 import { MaintenanceRequest } from "@/types/maintenance";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
+import { StatusBadge } from "./StatusBadge";
+import { PriorityBadge } from "./PriorityBadge";
 
 interface MaintenanceTableRowProps {
   request: MaintenanceRequest;
