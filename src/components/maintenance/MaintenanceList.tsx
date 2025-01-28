@@ -1,22 +1,17 @@
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { MaintenanceRequest } from "@/types/maintenance";
-import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Eye, Paperclip } from "lucide-react";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MaintenanceTableRow } from "./table/MaintenanceTableRow";
 
 interface MaintenanceListProps {
   requests: MaintenanceRequest[];
@@ -148,32 +143,6 @@ export function MaintenanceList({
     );
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-500";
-      case "in_progress":
-        return "bg-blue-500";
-      case "completed":
-        return "bg-green-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority?.toLowerCase()) {
-      case "high":
-        return "bg-red-500";
-      case "medium":
-        return "bg-orange-500";
-      case "low":
-        return "bg-blue-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
-
   const isUnread = (request: MaintenanceRequest) => {
     if (userRole === 'landlord') {
       return !request.read_by_landlord;
@@ -181,8 +150,11 @@ export function MaintenanceList({
     return !request.read_by_tenant;
   };
 
-  const generateTicketId = (id: string) => {
-    return `MR-${id.slice(0, 6)}`.toUpperCase();
+  const handleRequestClick = (request: MaintenanceRequest) => {
+    onRequestClick(request);
+    if (isUnread(request)) {
+      handleMarkAsRead(request.id);
+    }
   };
 
   return (
@@ -201,92 +173,15 @@ export function MaintenanceList({
       </TableHeader>
       <TableBody>
         {requests.map((request) => (
-          <TableRow
+          <MaintenanceTableRow
             key={request.id}
-            className={isUnread(request) ? 'bg-red-50' : ''}
-          >
-            <TableCell className="font-mono">{generateTicketId(request.id)}</TableCell>
-            <TableCell>{request.property?.name}</TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                {request.title}
-                {request.images && request.images.length > 0 && (
-                  <Paperclip className="h-4 w-4 text-gray-400" />
-                )}
-              </div>
-            </TableCell>
-            <TableCell>
-              {userRole === 'landlord' ? (
-                <Select
-                  defaultValue={request.status}
-                  onValueChange={(value: 'pending' | 'in_progress' | 'completed') => 
-                    handleStatusChange(request.id, value)
-                  }
-                >
-                  <SelectTrigger className="w-[130px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">{t('maintenance.status.pending')}</SelectItem>
-                    <SelectItem value="in_progress">{t('maintenance.status.in_progress')}</SelectItem>
-                    <SelectItem value="completed">{t('maintenance.status.completed')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Badge className={getStatusColor(request.status)}>
-                  {t(`maintenance.status.${request.status}`)}
-                </Badge>
-              )}
-            </TableCell>
-            <TableCell>
-              {userRole === 'landlord' ? (
-                <Select
-                  defaultValue={request.priority?.toLowerCase()}
-                  onValueChange={(value) => handlePriorityChange(request.id, value)}
-                >
-                  <SelectTrigger className="w-[100px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">{t('maintenance.priority.low')}</SelectItem>
-                    <SelectItem value="medium">{t('maintenance.priority.medium')}</SelectItem>
-                    <SelectItem value="high">{t('maintenance.priority.high')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Badge className={getPriorityColor(request.priority || "")}>
-                  {t(`maintenance.priority.${request.priority?.toLowerCase()}`)}
-                </Badge>
-              )}
-            </TableCell>
-            <TableCell>
-              {request.assignee ? 
-                `${request.assignee.first_name} ${request.assignee.last_name}` : 
-                t('maintenance.unassigned')}
-            </TableCell>
-            <TableCell>
-              <div className="text-sm">
-                <div>{t('maintenance.created')}: {format(new Date(request.created_at), "PP")}</div>
-                <div className="text-gray-500">{t('maintenance.updated')}: {format(new Date(request.updated_at), "PP")}</div>
-              </div>
-            </TableCell>
-            <TableCell>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  onRequestClick(request);
-                  if (isUnread(request)) {
-                    handleMarkAsRead(request.id);
-                  }
-                }}
-                className="flex items-center gap-2"
-              >
-                <Eye className="h-4 w-4" />
-                {t('maintenance.viewDetails')}
-              </Button>
-            </TableCell>
-          </TableRow>
+            request={request}
+            userRole={userRole}
+            isUnread={isUnread(request)}
+            onRequestClick={handleRequestClick}
+            onStatusChange={handleStatusChange}
+            onPriorityChange={handlePriorityChange}
+          />
         ))}
       </TableBody>
     </Table>
