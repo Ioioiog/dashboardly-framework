@@ -2,7 +2,6 @@ import { Route, Routes } from "react-router-dom";
 import AuthPage from "@/pages/Auth";
 import Properties from "@/pages/Properties";
 import Tenants from "@/pages/Tenants";
-import Maintenance from "@/pages/Maintenance";
 import Documents from "@/pages/Documents";
 import Settings from "@/pages/Settings";
 import Payments from "@/pages/Payments";
@@ -51,14 +50,6 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <Tenants />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/maintenance"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <Maintenance />
           </ProtectedRoute>
         }
       />
