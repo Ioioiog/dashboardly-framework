@@ -27,6 +27,15 @@ export function MaintenanceTableRow({
 }: MaintenanceTableRowProps) {
   const { t } = useTranslation();
 
+  // Helper functions to get translated values
+  const getStatusText = (status: string | undefined) => {
+    return status ? t(`maintenance.status.${status}`) : t('maintenance.status.pending');
+  };
+
+  const getPriorityText = (priority: string | undefined) => {
+    return priority ? t(`maintenance.priority.${priority.toLowerCase()}`) : t('maintenance.priority.low');
+  };
+
   return (
     <TableRow className={isUnread ? 'bg-red-50' : ''}>
       <TableCell className="font-mono">{`MR-${request.id.slice(0, 6)}`.toUpperCase()}</TableCell>
@@ -49,7 +58,7 @@ export function MaintenanceTableRow({
           >
             <SelectTrigger className="w-[130px]">
               <SelectValue>
-                {request.status ? t(`maintenance.status.${request.status}`) : t('maintenance.status.pending')}
+                {getStatusText(request.status)}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -59,7 +68,7 @@ export function MaintenanceTableRow({
             </SelectContent>
           </Select>
         ) : (
-          <StatusBadge status={request.status} />
+          <StatusBadge status={request.status || 'pending'} />
         )}
       </TableCell>
       <TableCell>
@@ -70,7 +79,7 @@ export function MaintenanceTableRow({
           >
             <SelectTrigger className="w-[100px]">
               <SelectValue>
-                {request.priority ? t(`maintenance.priority.${request.priority.toLowerCase()}`) : t('maintenance.priority.low')}
+                {getPriorityText(request.priority)}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
