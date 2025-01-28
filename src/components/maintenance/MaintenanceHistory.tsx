@@ -34,13 +34,7 @@ export function MaintenanceHistory({ requestId }: MaintenanceHistoryProps) {
       // First get the history entries
       const { data: historyData, error: historyError } = await supabase
         .from('maintenance_request_history')
-        .select(`
-          *,
-          editor:edited_by(
-            first_name,
-            last_name
-          )
-        `)
+        .select('*')
         .eq('maintenance_request_id', requestId)
         .order('edited_at', { ascending: false });
 
@@ -52,21 +46,25 @@ export function MaintenanceHistory({ requestId }: MaintenanceHistoryProps) {
       // For each history entry, get the editor's profile
       const historyWithProfiles = await Promise.all(
         (historyData || []).map(async (entry) => {
-          const { data: profileData } = await supabase
+          const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('first_name, last_name')
             .eq('id', entry.edited_by)
-            .single();
+            .maybeSingle();
+
+          if (profileError) {
+            console.error('Error fetching profile:', profileError);
+          }
 
           return {
             ...entry,
-            editor: profileData
+            editor: profileData || null
           };
         })
       );
       
       console.log('Fetched maintenance history:', historyWithProfiles);
-      return historyWithProfiles as unknown as HistoryEntry[];
+      return historyWithProfiles as HistoryEntry[];
     },
   });
 
