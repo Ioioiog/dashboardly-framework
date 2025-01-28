@@ -108,7 +108,10 @@ export function MaintenanceDialog({
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Paperclip className="h-4 w-4" />
                     <span>{request.images.length} {t('maintenance.attachments')}</span>
-                  </priority === 'high' && (
+                  </div>
+                )}
+
+                {request.priority === 'high' && (
                   <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-2 rounded">
                     <AlertCircle className="h-4 w-4" />
                     <span>{t('maintenance.highPriorityWarning')}</span>
