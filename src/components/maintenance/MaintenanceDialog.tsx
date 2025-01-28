@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
-import { Paperclip, Clock, User } from "lucide-react";
+import { Paperclip, Clock, User, AlertCircle } from "lucide-react";
 import { MaintenanceHistory } from "./MaintenanceHistory";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -20,6 +21,7 @@ export function MaintenanceDialog({
   request,
 }: MaintenanceDialogProps) {
   const { t } = useTranslation();
+  const { userRole } = useUserRole();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -29,6 +31,8 @@ export function MaintenanceDialog({
         return "bg-blue-500";
       case "completed":
         return "bg-green-500";
+      case "rejected":
+        return "bg-red-500";
       default:
         return "bg-gray-500";
     }
@@ -55,7 +59,7 @@ export function MaintenanceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-7xl p-6">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold flex items-center gap-4">
+          <DialogTitle className="text-2xl font-semibold flex items-center gap-4 mb-4">
             {request ? (
               <>
                 <span className="font-mono">{generateTicketId(request.id)}</span>
@@ -74,32 +78,32 @@ export function MaintenanceDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left side - Tenant's request form */}
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left side - Request Details */}
+          <div className="lg:col-span-2 space-y-4">
             <Card className="p-4">
-              <h3 className="text-lg font-medium mb-4">{t('maintenance.form.submitRequest')}</h3>
+              <h3 className="text-lg font-medium mb-4">
+                {request ? t('maintenance.requestDetails') : t('maintenance.form.submitRequest')}
+              </h3>
               <MaintenanceForm request={request} onSuccess={() => onOpenChange(false)} />
             </Card>
           </div>
 
-          {/* Right side - Request details and history */}
+          {/* Right side - Request Information and History */}
           <div className="space-y-4">
             {request && (
               <>
-                <Card className="p-4 space-y-2">
-                  <h3 className="text-lg font-medium mb-2">{t('maintenance.requestDetails')}</h3>
+                <Card className="p-4 space-y-3">
+                  <h3 className="text-lg font-medium">{t('maintenance.requestInfo')}</h3>
+                  
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Clock className="h-4 w-4" />
-                    <span>
-                      {t('maintenance.created')}: {format(new Date(request.created_at), "PP")}
-                    </span>
-                    <span className="mx-2">•</span>
-                    <span>
-                      {t('maintenance.updated')}: {format(new Date(request.updated_at), "PP")}
-                    </span>
+                    <div className="flex flex-col">
+                      <span>{t('maintenance.created')}: {format(new Date(request.created_at), "PPp")}</span>
+                      <span>{t('maintenance.updated')}: {format(new Date(request.updated_at), "PPp")}</span>
+                    </div>
                   </div>
-                  
+
                   {request.assignee && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <User className="h-4 w-4" />
@@ -113,6 +117,13 @@ export function MaintenanceDialog({
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Paperclip className="h-4 w-4" />
                       <span>{request.images.length} {t('maintenance.attachments')}</span>
+                    </div>
+                  )}
+
+                  {request.priority === 'high' && (
+                    <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-2 rounded">
+                      <AlertCircle className="h-4 w-4" />
+                      <span>{t('maintenance.highPriorityWarning')}</span>
                     </div>
                   )}
                 </Card>
