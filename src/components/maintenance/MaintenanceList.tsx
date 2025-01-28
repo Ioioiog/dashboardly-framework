@@ -95,6 +95,32 @@ export function MaintenanceList({
     }
   };
 
+  const handleStatusChange = async (requestId: string, newStatus: string) => {
+    try {
+      console.log('Updating status:', requestId, newStatus);
+      const { error } = await supabase
+        .from('maintenance_requests')
+        .update({ status: newStatus })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Status updated successfully",
+      });
+
+      await queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update status",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -187,9 +213,25 @@ export function MaintenanceList({
               </div>
             </TableCell>
             <TableCell>
-              <Badge className={getStatusColor(request.status)}>
-                {t(`maintenance.status.${request.status}`)}
-              </Badge>
+              {userRole === 'landlord' ? (
+                <Select
+                  defaultValue={request.status}
+                  onValueChange={(value) => handleStatusChange(request.id, value)}
+                >
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">{t('maintenance.status.pending')}</SelectItem>
+                    <SelectItem value="in_progress">{t('maintenance.status.in_progress')}</SelectItem>
+                    <SelectItem value="completed">{t('maintenance.status.completed')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge className={getStatusColor(request.status)}>
+                  {t(`maintenance.status.${request.status}`)}
+                </Badge>
+              )}
             </TableCell>
             <TableCell>
               {userRole === 'landlord' ? (
