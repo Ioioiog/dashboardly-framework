@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 import { Property } from "@/utils/propertyUtils";
+import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 interface MaintenanceFormFieldsProps {
   form: UseFormReturn<any>;
@@ -24,6 +26,8 @@ interface MaintenanceFormFieldsProps {
 }
 
 export function MaintenanceFormFields({ form, properties, userRole }: MaintenanceFormFieldsProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       <FormField
@@ -31,14 +35,14 @@ export function MaintenanceFormFields({ form, properties, userRole }: Maintenanc
         name="property_id"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Property</FormLabel>
+            <FormLabel>{t('maintenance.property')}</FormLabel>
             <Select
               onValueChange={field.onChange}
               defaultValue={field.value}
             >
               <FormControl>
                 <SelectTrigger className="bg-white">
-                  <SelectValue placeholder="Select property" />
+                  <SelectValue placeholder={t('maintenance.selectProperty')} />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
@@ -59,9 +63,9 @@ export function MaintenanceFormFields({ form, properties, userRole }: Maintenanc
         name="title"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Title</FormLabel>
+            <FormLabel>{t('maintenance.title')}</FormLabel>
             <FormControl>
-              <Input placeholder="Enter title" {...field} className="bg-white" />
+              <Input placeholder={t('maintenance.enterTitle')} {...field} className="bg-white" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -73,10 +77,10 @@ export function MaintenanceFormFields({ form, properties, userRole }: Maintenanc
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description</FormLabel>
+            <FormLabel>{t('maintenance.description')}</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Enter description"
+                placeholder={t('maintenance.enterDescription')}
                 className="min-h-[100px] bg-white"
                 {...field}
               />
@@ -86,80 +90,90 @@ export function MaintenanceFormFields({ form, properties, userRole }: Maintenanc
         )}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <FormField
           control={form.control}
           name="priority"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Priority</FormLabel>
+              <FormLabel>{t('maintenance.priority')}</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
               >
                 <FormControl>
                   <SelectTrigger className="bg-white">
-                    <SelectValue placeholder="Select priority" />
+                    <SelectValue placeholder={t('maintenance.selectPriority')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Low">Low</SelectItem>
-                  <SelectItem value="Medium">Medium</SelectItem>
-                  <SelectItem value="High">High</SelectItem>
+                  <SelectItem value="Low">{t('maintenance.priority.low')}</SelectItem>
+                  <SelectItem value="Medium">{t('maintenance.priority.medium')}</SelectItem>
+                  <SelectItem value="High">{t('maintenance.priority.high')}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
           )}
         />
+      </div>
 
-        {userRole !== "tenant" && (
+      {userRole === "landlord" && (
+        <div className="space-y-4 border-t pt-4 mt-4">
+          <h3 className="font-medium text-lg">{t('maintenance.landlordSection')}</h3>
+          
           <FormField
             control={form.control}
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Status</FormLabel>
+                <FormLabel>{t('maintenance.status')}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger className="bg-white">
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder={t('maintenance.selectStatus')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="pending">{t('maintenance.status.pending')}</SelectItem>
+                    <SelectItem value="in_progress">{t('maintenance.status.in_progress')}</SelectItem>
+                    <SelectItem value="completed">{t('maintenance.status.completed')}</SelectItem>
+                    <SelectItem value="cancelled">{t('maintenance.status.cancelled')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-        )}
-      </div>
 
-      <FormField
-        control={form.control}
-        name="notes"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Notes</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="Add notes"
-                className="min-h-[100px] bg-white"
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('maintenance.landlordNotes')}</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder={t('maintenance.enterNotes')}
+                    className="min-h-[100px] bg-white"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.getValues("updated_at") && (
+            <div className="text-sm text-gray-500">
+              {t('maintenance.lastUpdated')}: {format(new Date(form.getValues("updated_at")), "PPpp")}
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
