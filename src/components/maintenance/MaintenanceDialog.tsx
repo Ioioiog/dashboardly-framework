@@ -78,61 +78,78 @@ export function MaintenanceDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left side - Request Details */}
-          <div className="lg:col-span-2 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left side - Tenant's Form */}
+          <div className="space-y-4">
             <Card className="p-4">
               <h3 className="text-lg font-medium mb-4">
-                {request ? t('maintenance.requestDetails') : t('maintenance.form.submitRequest')}
+                {t('maintenance.tenantSection')}
               </h3>
-              <MaintenanceForm request={request} onSuccess={() => onOpenChange(false)} />
+              <MaintenanceForm 
+                request={request} 
+                onSuccess={() => onOpenChange(false)}
+                section="tenant"
+              />
             </Card>
+            
+            {request && (
+              <Card className="p-4 space-y-3">
+                <h3 className="text-lg font-medium">{t('maintenance.requestInfo')}</h3>
+                
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Clock className="h-4 w-4" />
+                  <div className="flex flex-col">
+                    <span>{t('maintenance.created')}: {format(new Date(request.created_at), "PPp")}</span>
+                    <span>{t('maintenance.updated')}: {format(new Date(request.updated_at), "PPp")}</span>
+                  </div>
+                </div>
+
+                {request.images && request.images.length > 0 && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Paperclip className="h-4 w-4" />
+                    <span>{request.images.length} {t('maintenance.attachments')}</span>
+                  </priority === 'high' && (
+                  <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-2 rounded">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{t('maintenance.highPriorityWarning')}</span>
+                  </div>
+                )}
+              </Card>
+            )}
           </div>
 
-          {/* Right side - Request Information and History */}
+          {/* Right side - Landlord's Form and History */}
           <div className="space-y-4">
+            {userRole === 'landlord' && (
+              <Card className="p-4">
+                <h3 className="text-lg font-medium mb-4">
+                  {t('maintenance.landlordSection')}
+                </h3>
+                <MaintenanceForm 
+                  request={request} 
+                  onSuccess={() => onOpenChange(false)}
+                  section="landlord"
+                />
+              </Card>
+            )}
+
+            {request?.assignee && (
+              <Card className="p-4">
+                <h3 className="text-lg font-medium mb-4">{t('maintenance.assignedTo')}</h3>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <User className="h-4 w-4" />
+                  <span>
+                    {request.assignee.first_name} {request.assignee.last_name}
+                  </span>
+                </div>
+              </Card>
+            )}
+
             {request && (
-              <>
-                <Card className="p-4 space-y-3">
-                  <h3 className="text-lg font-medium">{t('maintenance.requestInfo')}</h3>
-                  
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Clock className="h-4 w-4" />
-                    <div className="flex flex-col">
-                      <span>{t('maintenance.created')}: {format(new Date(request.created_at), "PPp")}</span>
-                      <span>{t('maintenance.updated')}: {format(new Date(request.updated_at), "PPp")}</span>
-                    </div>
-                  </div>
-
-                  {request.assignee && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <User className="h-4 w-4" />
-                      <span>
-                        {t('maintenance.assignee')}: {request.assignee.first_name} {request.assignee.last_name}
-                      </span>
-                    </div>
-                  )}
-
-                  {request.images && request.images.length > 0 && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Paperclip className="h-4 w-4" />
-                      <span>{request.images.length} {t('maintenance.attachments')}</span>
-                    </div>
-                  )}
-
-                  {request.priority === 'high' && (
-                    <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-2 rounded">
-                      <AlertCircle className="h-4 w-4" />
-                      <span>{t('maintenance.highPriorityWarning')}</span>
-                    </div>
-                  )}
-                </Card>
-
-                <Card className="p-4">
-                  <h3 className="text-lg font-medium mb-4">{t('maintenance.requestHistory')}</h3>
-                  <MaintenanceHistory requestId={request.id} />
-                </Card>
-              </>
+              <Card className="p-4">
+                <h3 className="text-lg font-medium mb-4">{t('maintenance.requestHistory')}</h3>
+                <MaintenanceHistory requestId={request.id} />
+              </Card>
             )}
           </div>
         </div>

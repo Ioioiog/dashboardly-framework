@@ -15,6 +15,7 @@ interface FormSectionsProps {
   onImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   isSubmitting: boolean;
   isEditing: boolean;
+  section: "tenant" | "landlord";
 }
 
 export function FormSections({
@@ -26,29 +27,37 @@ export function FormSections({
   onImageChange,
   isSubmitting,
   isEditing,
+  section,
 }: FormSectionsProps) {
   const { t } = useTranslation();
 
+  const showTenantFields = section === "tenant";
+  const showLandlordFields = section === "landlord" && userRole === "landlord";
+
+  if (!showTenantFields && !showLandlordFields) {
+    return null;
+  }
+
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="p-4 space-y-4">
-          <h3 className="text-lg font-medium">{t('maintenance.form.requestDetails')}</h3>
-          <MaintenanceFormFields
-            form={form}
-            properties={properties}
-            userRole={userRole}
-          />
-        </Card>
+      <div className="space-y-6">
+        <MaintenanceFormFields
+          form={form}
+          properties={properties}
+          userRole={userRole}
+          section={section}
+        />
         
-        <Card className="p-4">
-          <h3 className="text-lg font-medium mb-4">{t('maintenance.form.requestImages')}</h3>
-          <ImageUploadField
-            onImageChange={onImageChange}
-            selectedImages={selectedImages}
-            existingImages={existingImages}
-          />
-        </Card>
+        {showTenantFields && (
+          <Card className="p-4">
+            <h3 className="text-lg font-medium mb-4">{t('maintenance.form.requestImages')}</h3>
+            <ImageUploadField
+              onImageChange={onImageChange}
+              selectedImages={selectedImages}
+              existingImages={existingImages}
+            />
+          </Card>
+        )}
       </div>
 
       <div className="flex justify-end mt-6">

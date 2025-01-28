@@ -9,9 +9,10 @@ import { FormSections } from "./form/FormSections";
 interface MaintenanceFormProps {
   request?: MaintenanceRequest | null;
   onSuccess: () => void;
+  section: "tenant" | "landlord";
 }
 
-export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
+export function MaintenanceForm({ request, onSuccess, section }: MaintenanceFormProps) {
   const { userRole } = useUserRole();
   const { properties } = useProperties({ userRole });
   
@@ -51,6 +52,7 @@ export function MaintenanceForm({ request, onSuccess }: MaintenanceFormProps) {
           onImageChange={handleImageChange}
           isSubmitting={isSubmitting}
           isEditing={!!request}
+          section={section}
         />
       </form>
     </Form>
