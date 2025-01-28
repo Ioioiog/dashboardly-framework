@@ -1,17 +1,12 @@
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { MaintenanceRequest } from "@/types/maintenance";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
-import { MaintenanceTableRow } from "./table/MaintenanceTableRow";
+import { MaintenanceTable } from "./table/MaintenanceTable";
+import { LoadingState } from "./LoadingState";
+import { EmptyState } from "./EmptyState";
 
 interface MaintenanceListProps {
   requests: MaintenanceRequest[];
@@ -136,28 +131,12 @@ export function MaintenanceList({
 
   if (isLoading) {
     console.log('[MaintenanceList] Showing loading state');
-    return (
-      <div className="space-y-4">
-        <div className="h-8 bg-gray-100 animate-pulse rounded" />
-        <div className="h-12 bg-gray-100 animate-pulse rounded" />
-        <div className="h-12 bg-gray-100 animate-pulse rounded" />
-        <div className="h-12 bg-gray-100 animate-pulse rounded" />
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (!requests?.length) {
     console.log('[MaintenanceList] No requests found');
-    return (
-      <div className="text-center py-8 bg-gray-50 rounded-lg">
-        <p className="text-gray-600">{t('maintenance.noRequests')}</p>
-        {userRole === 'tenant' && (
-          <p className="text-sm text-gray-500 mt-2">
-            {t('maintenance.createRequestPrompt')}
-          </p>
-        )}
-      </div>
-    );
+    return <EmptyState userRole={userRole} />;
   }
 
   const isUnread = (request: MaintenanceRequest) => {
@@ -179,32 +158,13 @@ export function MaintenanceList({
   console.log('[MaintenanceList] Rendering table with requests:', requests.length);
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t('maintenance.ticket')}</TableHead>
-          <TableHead>{t('maintenance.property')}</TableHead>
-          <TableHead>{t('maintenance.title')}</TableHead>
-          <TableHead>{t('maintenance.status')}</TableHead>
-          <TableHead>{t('maintenance.priority')}</TableHead>
-          <TableHead>{t('maintenance.assignee')}</TableHead>
-          <TableHead>{t('maintenance.dates')}</TableHead>
-          <TableHead>{t('maintenance.actions')}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {requests.map((request) => (
-          <MaintenanceTableRow
-            key={request.id}
-            request={request}
-            userRole={userRole}
-            isUnread={isUnread(request)}
-            onRequestClick={handleRequestClick}
-            onStatusChange={handleStatusChange}
-            onPriorityChange={handlePriorityChange}
-          />
-        ))}
-      </TableBody>
-    </Table>
+    <MaintenanceTable
+      requests={requests}
+      userRole={userRole}
+      onRequestClick={handleRequestClick}
+      onStatusChange={handleStatusChange}
+      onPriorityChange={handlePriorityChange}
+      isUnread={isUnread}
+    />
   );
 }
