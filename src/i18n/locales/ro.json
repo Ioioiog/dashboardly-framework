@@ -3,213 +3,24 @@
     "title": "Cereri de Mentenanță",
     "newRequest": "Cerere Nouă",
     "noRequests": "Nu s-au găsit cereri de mentenanță",
-    "details": {
-      "viewImages": "Vezi Imagini",
-      "viewHistory": "Vezi Istoric",
-      "edit": "Editează",
-      "delete": "Șterge",
-      "imageAlt": "Imagine cerere de mentenanță {{number}}"
-    },
-    "status": {
-      "pending": "În Așteptare",
-      "in_progress": "În Lucru",
-      "completed": "Finalizat",
-      "cancelled": "Anulat"
-    },
-    "priority": {
-      "low": "Prioritate Scăzută",
-      "medium": "Prioritate Medie",
-      "high": "Prioritate Ridicată"
-    },
+    "createRequestPrompt": "Apăsați butonul \"Cerere Nouă\" pentru a crea o cerere de mentenanță",
     "filters": {
-      "search": "Caută cereri...",
-      "status": {
-        "label": "Filtrează după status",
-        "all": "Toate statusurile"
-      },
-      "priority": {
-        "label": "Filtrează după prioritate",
-        "all": "Toate prioritățile"
-      },
-      "issueType": {
-        "label": "Filtrează după tip",
-        "all": "Toate tipurile"
-      }
+      "status": "Stare",
+      "priority": "Prioritate",
+      "property": "Proprietate",
+      "allStatuses": "Toate Stările",
+      "allPriorities": "Toate Prioritățile",
+      "allProperties": "Toate Proprietățile"
     },
-    "form": {
-      "title": {
-        "label": "Titlu",
-        "placeholder": "Scurtă descriere a problemei"
-      },
-      "description": {
-        "label": "Descriere",
-        "placeholder": "Descriere detaliată a problemei de mentenanță"
-      },
-      "notes": {
-        "label": "Note Adiționale",
-        "placeholder": "Orice informații suplimentare sau instrucțiuni speciale"
-      },
-      "issueType": {
-        "label": "Tip Problemă",
-        "placeholder": "Selectează un tip de problemă"
-      },
-      "priority": {
-        "label": "Prioritate",
-        "placeholder": "Selectează nivelul de prioritate"
-      },
-      "property": {
-        "label": "Proprietate",
-        "placeholder": "Selectează o proprietate"
-      },
-      "images": {
-        "label": "Imagini",
-        "placeholder": "Încarcă imagini"
-      }
-    },
-    "toast": {
-      "success": {
-        "created": "Cererea de mentenanță a fost creată cu succes",
-        "updated": "Cererea de mentenanță a fost actualizată cu succes",
-        "deleted": "Cererea de mentenanță a fost ștearsă cu succes"
-      },
-      "error": {
-        "create": "Eroare la crearea cererii de mentenanță",
-        "update": "Eroare la actualizarea cererii de mentenanță",
-        "delete": "Eroare la ștergerea cererii de mentenanță"
-      }
-    }
-  },
-  "dashboard": {
-    "title": "Panou de Control",
-    "welcome": "Bun venit",
-    "overview": "Iată o prezentare generală a proprietăților și finanțelor tale",
-    "metrics": {
-      "totalProperties": "Total Proprietăți",
-      "monthlyRevenue": "Venit Lunar",
-      "activeTenants": "Chiriași Activi",
-      "pendingMaintenance": "Mentenanță în Așteptare",
-      "paymentStatus": "Stare Plată",
-      "noData": "Nu există date disponibile"
-    },
-    "revenue": {
-      "title": "Prezentare Venituri",
-      "noData": "Nu există date despre venituri",
-      "prediction": {
-        "title": "Predicții Venituri",
-        "description": "Bazat pe date istorice și tendințe",
-        "noData": "Nu există date disponibile pentru predicții"
-      },
-      "history": {
-        "title": "Istoric Venituri",
-        "description": "Vizualizare istorică a performanței veniturilor lunare"
-      }
-    },
-    "performance": {
-      "title": "Performanță",
-      "total": "Total",
-      "monthlyAverage": "Media Lunară",
-      "vsLastMonth": "vs luna trecută"
-    }
-  },
-  "properties": {
-    "title": {
-      "landlord": "Proprietățile Mele",
-      "tenant": "Închirierile Mele"
-    },
-    "description": {
-      "landlord": "Gestionează portofoliul tău imobiliar",
-      "tenant": "Vezi închirierile tale curente"
-    },
-    "addProperty": "Adaugă Proprietate",
-    "rent": {
-      "period": "lună"
-    },
-    "type": "Tip Proprietate",
-    "empty": {
-      "landlord": "Nu ai adăugat încă nicio proprietate",
-      "tenant": "Nu ai nicio închiriere activă",
-      "tenant.contact": "Te rugăm să contactezi proprietarul pentru mai multe informații"
-    },
-    "error": {
-      "fetch": "Eroare la încărcarea proprietăților"
-    },
-    "filters": {
-      "search": "Caută proprietăți...",
-      "type": {
-        "label": "Tip Proprietate",
-        "all": "Toate Tipurile",
-        "apartment": "Apartament",
-        "house": "Casă",
-        "condo": "Condominium",
-        "commercial": "Comercial"
-      }
-    },
-    "viewMode": {
-      "grid": "Vizualizare Grid",
-      "list": "Vizualizare Listă"
-    },
-    "form": {
-      "name": "Nume Proprietate",
-      "address": "Adresă",
-      "monthlyRent": "Chirie Lunară",
-      "type": "Tip Proprietate",
-      "description": "Descriere",
-      "availableFrom": "Disponibil Din",
-      "contractEndDate": "Data Încheierii Contractului",
-      "contractEndDateNote": "Această dată este setată automat la data de încheiere a contractului chiriașului"
-    },
-    "toast": {
-      "success": {
-        "created": "Proprietate creată cu succes",
-        "updated": "Proprietate actualizată cu succes",
-        "deleted": "Proprietate ștearsă cu succes"
-      },
-      "error": {
-        "create": "Eroare la crearea proprietății",
-        "update": "Eroare la actualizarea proprietății",
-        "delete": "Eroare la ștergerea proprietății"
-      }
-    }
-  },
-  "tenants": {
-    "title": {
-      "landlord": "Chiriașii Mei",
-      "tenant": "Profilul Meu"
-    },
-    "description": {
-      "landlord": "Gestionează chiriașii tăi",
-      "tenant": "Vezi și actualizează informațiile tale de chiriaș"
-    },
-    "dashboard": {
-      "property": "Proprietatea Curentă",
-      "leasePeriod": "Perioada de Închiriere",
-      "monthlyRent": "Chirie Lunară",
-      "endDate": "Data de sfârșit: {{date}}",
-      "noEndDate": "Fără dată de sfârșit"
-    }
-  },
-  "common": {
-    "actions": {
-      "edit": "Editează",
-      "delete": "Șterge",
-      "save": "Salvează",
-      "cancel": "Anulează",
-      "confirm": "Confirmă",
-      "back": "Înapoi"
-    },
-    "status": {
-      "active": "Activ",
-      "inactive": "Inactiv",
-      "pending": "În Așteptare",
-      "completed": "Finalizat"
-    },
-    "timeRanges": {
-      "1M": "Ultima Lună",
-      "6M": "Ultimele 6 Luni",
-      "1Y": "Ultimul An",
-      "nextMonth": "Luna Următoare",
-      "next6Months": "Următoarele 6 Luni",
-      "nextYear": "Anul Următor"
+    "tenantSection": "Detaliile Cererii Chiriașului",
+    "landlordSection": "Răspunsul Proprietarului",
+    "requestInfo": "Informații Cerere",
+    "attachments": "atașamente",
+    "highPriorityWarning": "Această cerere necesită atenție imediată",
+    "assignedTo": "Atribuit către",
+    "requestHistory": "Istoricul Cererii",
+    "tabs": {
+      "all": "Toate Cererile"
     }
   }
 }

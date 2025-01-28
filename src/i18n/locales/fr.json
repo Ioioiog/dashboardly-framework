@@ -3,213 +3,24 @@
     "title": "Demandes de Maintenance",
     "newRequest": "Nouvelle Demande",
     "noRequests": "Aucune demande de maintenance trouvée",
-    "details": {
-      "viewImages": "Voir les Images",
-      "viewHistory": "Voir l'Historique",
-      "edit": "Modifier",
-      "delete": "Supprimer",
-      "imageAlt": "Image de demande de maintenance {{number}}"
-    },
-    "status": {
-      "pending": "En Attente",
-      "in_progress": "En Cours",
-      "completed": "Terminé",
-      "cancelled": "Annulé"
-    },
-    "priority": {
-      "low": "Priorité Basse",
-      "medium": "Priorité Moyenne",
-      "high": "Priorité Haute"
-    },
+    "createRequestPrompt": "Cliquez sur le bouton \"Nouvelle Demande\" pour créer une demande de maintenance",
     "filters": {
-      "search": "Rechercher des demandes...",
-      "status": {
-        "label": "Filtrer par statut",
-        "all": "Tous les statuts"
-      },
-      "priority": {
-        "label": "Filtrer par priorité",
-        "all": "Toutes les priorités"
-      },
-      "issueType": {
-        "label": "Filtrer par type de problème",
-        "all": "Tous les types"
-      }
+      "status": "Statut",
+      "priority": "Priorité",
+      "property": "Propriété",
+      "allStatuses": "Tous les Statuts",
+      "allPriorities": "Toutes les Priorités",
+      "allProperties": "Toutes les Propriétés"
     },
-    "form": {
-      "title": {
-        "label": "Titre",
-        "placeholder": "Brève description du problème"
-      },
-      "description": {
-        "label": "Description",
-        "placeholder": "Description détaillée du problème de maintenance"
-      },
-      "notes": {
-        "label": "Notes Supplémentaires",
-        "placeholder": "Toute information supplémentaire ou instructions spéciales"
-      },
-      "issueType": {
-        "label": "Type de Problème",
-        "placeholder": "Sélectionnez un type de problème"
-      },
-      "priority": {
-        "label": "Priorité",
-        "placeholder": "Sélectionnez le niveau de priorité"
-      },
-      "property": {
-        "label": "Propriété",
-        "placeholder": "Sélectionnez une propriété"
-      },
-      "images": {
-        "label": "Images",
-        "placeholder": "Télécharger des images"
-      }
-    },
-    "toast": {
-      "success": {
-        "created": "Demande de maintenance créée avec succès",
-        "updated": "Demande de maintenance mise à jour avec succès",
-        "deleted": "Demande de maintenance supprimée avec succès"
-      },
-      "error": {
-        "create": "Échec de la création de la demande de maintenance",
-        "update": "Échec de la mise à jour de la demande de maintenance",
-        "delete": "Échec de la suppression de la demande de maintenance"
-      }
-    }
-  },
-  "dashboard": {
-    "title": "Tableau de Bord",
-    "welcome": "Bienvenue",
-    "overview": "Voici un aperçu de vos propriétés et finances",
-    "metrics": {
-      "totalProperties": "Total des Propriétés",
-      "monthlyRevenue": "Revenus Mensuels",
-      "activeTenants": "Locataires Actifs",
-      "pendingMaintenance": "Maintenance en Attente",
-      "paymentStatus": "État des Paiements",
-      "noData": "Aucune donnée disponible"
-    },
-    "revenue": {
-      "title": "Aperçu des Revenus",
-      "noData": "Aucune donnée de revenus disponible",
-      "prediction": {
-        "title": "Prévisions des Revenus",
-        "description": "Basé sur les données historiques et les tendances",
-        "noData": "Aucune donnée disponible pour les prévisions"
-      },
-      "history": {
-        "title": "Historique des Revenus",
-        "description": "Vue historique de la performance des revenus mensuels"
-      }
-    },
-    "performance": {
-      "title": "Performance",
-      "total": "Total",
-      "monthlyAverage": "Moyenne Mensuelle",
-      "vsLastMonth": "vs mois précédent"
-    }
-  },
-  "properties": {
-    "title": {
-      "landlord": "Mes Propriétés",
-      "tenant": "Mes Locations"
-    },
-    "description": {
-      "landlord": "Gérez votre portefeuille immobilier",
-      "tenant": "Consultez vos locations actuelles"
-    },
-    "addProperty": "Ajouter une Propriété",
-    "rent": {
-      "period": "mois"
-    },
-    "type": "Type de Propriété",
-    "empty": {
-      "landlord": "Vous n'avez pas encore ajouté de propriétés",
-      "tenant": "Vous n'avez pas de locations actives",
-      "tenant.contact": "Veuillez contacter votre propriétaire pour plus d'informations"
-    },
-    "error": {
-      "fetch": "Échec de la récupération des propriétés"
-    },
-    "filters": {
-      "search": "Rechercher des propriétés...",
-      "type": {
-        "label": "Type de Propriété",
-        "all": "Tous les Types",
-        "apartment": "Appartement",
-        "house": "Maison",
-        "condo": "Copropriété",
-        "commercial": "Commercial"
-      }
-    },
-    "viewMode": {
-      "grid": "Vue en Grille",
-      "list": "Vue en Liste"
-    },
-    "form": {
-      "name": "Nom de la Propriété",
-      "address": "Adresse",
-      "monthlyRent": "Loyer Mensuel",
-      "type": "Type de Propriété",
-      "description": "Description",
-      "availableFrom": "Disponible à partir de",
-      "contractEndDate": "Date de Fin du Contrat",
-      "contractEndDateNote": "Cette date est automatiquement définie à la date de fin du contrat du locataire"
-    },
-    "toast": {
-      "success": {
-        "created": "Propriété créée avec succès",
-        "updated": "Propriété mise à jour avec succès",
-        "deleted": "Propriété supprimée avec succès"
-      },
-      "error": {
-        "create": "Échec de la création de la propriété",
-        "update": "Échec de la mise à jour de la propriété",
-        "delete": "Échec de la suppression de la propriété"
-      }
-    }
-  },
-  "tenants": {
-    "title": {
-      "landlord": "Mes Locataires",
-      "tenant": "Mon Profil"
-    },
-    "description": {
-      "landlord": "Gérez vos locataires",
-      "tenant": "Voir et mettre à jour vos informations de locataire"
-    },
-    "dashboard": {
-      "property": "Propriété Actuelle",
-      "leasePeriod": "Période de Location",
-      "monthlyRent": "Loyer Mensuel",
-      "endDate": "Date de fin: {{date}}",
-      "noEndDate": "Pas de date de fin"
-    }
-  },
-  "common": {
-    "actions": {
-      "edit": "Modifier",
-      "delete": "Supprimer",
-      "save": "Enregistrer",
-      "cancel": "Annuler",
-      "confirm": "Confirmer",
-      "back": "Retour"
-    },
-    "status": {
-      "active": "Actif",
-      "inactive": "Inactif",
-      "pending": "En Attente",
-      "completed": "Terminé"
-    },
-    "timeRanges": {
-      "1M": "Dernier Mois",
-      "6M": "6 Derniers Mois",
-      "1Y": "Dernière Année",
-      "nextMonth": "Mois Prochain",
-      "next6Months": "6 Prochains Mois",
-      "nextYear": "Année Prochaine"
+    "tenantSection": "Détails de la Demande du Locataire",
+    "landlordSection": "Réponse du Propriétaire",
+    "requestInfo": "Informations sur la Demande",
+    "attachments": "pièces jointes",
+    "highPriorityWarning": "Cette demande nécessite une attention immédiate",
+    "assignedTo": "Assigné à",
+    "requestHistory": "Historique de la Demande",
+    "tabs": {
+      "all": "Toutes les Demandes"
     }
   }
 }

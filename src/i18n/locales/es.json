@@ -3,179 +3,24 @@
     "title": "Solicitudes de Mantenimiento",
     "newRequest": "Nueva Solicitud",
     "noRequests": "No se encontraron solicitudes de mantenimiento",
-    "details": {
-      "viewImages": "Ver Imágenes",
-      "viewHistory": "Ver Historial",
-      "edit": "Editar",
-      "delete": "Eliminar",
-      "imageAlt": "Imagen de solicitud de mantenimiento {{number}}"
-    },
-    "status": {
-      "pending": "Pendiente",
-      "in_progress": "En Progreso",
-      "completed": "Completado",
-      "cancelled": "Cancelado"
-    },
-    "priority": {
-      "low": "Prioridad Baja",
-      "medium": "Prioridad Media",
-      "high": "Prioridad Alta"
-    },
+    "createRequestPrompt": "Haga clic en el botón \"Nueva Solicitud\" para crear una solicitud de mantenimiento",
     "filters": {
-      "search": "Buscar solicitudes...",
-      "status": {
-        "label": "Filtrar por estado",
-        "all": "Todos los estados"
-      },
-      "priority": {
-        "label": "Filtrar por prioridad",
-        "all": "Todas las prioridades"
-      },
-      "issueType": {
-        "label": "Filtrar por tipo de problema",
-        "all": "Todos los tipos"
-      }
+      "status": "Estado",
+      "priority": "Prioridad",
+      "property": "Propiedad",
+      "allStatuses": "Todos los Estados",
+      "allPriorities": "Todas las Prioridades",
+      "allProperties": "Todas las Propiedades"
     },
-    "form": {
-      "title": {
-        "label": "Título",
-        "placeholder": "Breve descripción del problema"
-      },
-      "description": {
-        "label": "Descripción",
-        "placeholder": "Descripción detallada del problema de mantenimiento"
-      },
-      "notes": {
-        "label": "Notas Adicionales",
-        "placeholder": "Cualquier información adicional o instrucciones especiales"
-      },
-      "issueType": {
-        "label": "Tipo de Problema",
-        "placeholder": "Seleccione un tipo de problema"
-      },
-      "priority": {
-        "label": "Prioridad",
-        "placeholder": "Seleccione el nivel de prioridad"
-      },
-      "property": {
-        "label": "Propiedad",
-        "placeholder": "Seleccione una propiedad"
-      },
-      "images": {
-        "label": "Imágenes",
-        "placeholder": "Subir imágenes"
-      }
-    },
-    "toast": {
-      "success": {
-        "created": "Solicitud de mantenimiento creada exitosamente",
-        "updated": "Solicitud de mantenimiento actualizada exitosamente",
-        "deleted": "Solicitud de mantenimiento eliminada exitosamente"
-      },
-      "error": {
-        "create": "Error al crear la solicitud de mantenimiento",
-        "update": "Error al actualizar la solicitud de mantenimiento",
-        "delete": "Error al eliminar la solicitud de mantenimiento"
-      }
-    }
-  },
-  "dashboard": {
-    "title": "Panel de Control",
-    "welcome": "Bienvenido",
-    "overview": "Aquí tienes una visión general de tus propiedades y finanzas",
-    "metrics": {
-      "totalProperties": "Total de Propiedades",
-      "monthlyRevenue": "Ingresos Mensuales",
-      "activeTenants": "Inquilinos Activos",
-      "pendingMaintenance": "Mantenimiento Pendiente",
-      "paymentStatus": "Estado de Pago",
-      "noData": "No hay datos disponibles"
-    },
-    "revenue": {
-      "title": "Resumen de Ingresos",
-      "noData": "No hay datos de ingresos disponibles",
-      "prediction": {
-        "title": "Predicciones de Ingresos",
-        "description": "Basado en datos históricos y tendencias",
-        "noData": "No hay datos disponibles para predicciones"
-      },
-      "history": {
-        "title": "Historial de Ingresos",
-        "description": "Vista histórica del rendimiento de ingresos mensuales"
-      }
-    },
-    "performance": {
-      "title": "Rendimiento",
-      "total": "Total",
-      "monthlyAverage": "Promedio Mensual",
-      "vsLastMonth": "vs mes anterior"
-    }
-  },
-  "properties": {
-    "title": {
-      "landlord": "Mis Propiedades",
-      "tenant": "Mis Alquileres"
-    },
-    "description": {
-      "landlord": "Gestiona tu cartera de propiedades",
-      "tenant": "Ver tus alquileres actuales"
-    },
-    "filters": {
-      "search": "Buscar propiedades...",
-      "type": {
-        "label": "Tipo de Propiedad",
-        "all": "Todos los Tipos",
-        "apartment": "Apartamento",
-        "house": "Casa",
-        "condo": "Condominio",
-        "commercial": "Comercial"
-      }
-    },
-    "noProperties": "No se encontraron propiedades",
-    "viewMode": {
-      "grid": "Vista en Cuadrícula",
-      "list": "Vista en Lista"
-    }
-  },
-  "tenants": {
-    "title": {
-      "landlord": "Mis Inquilinos",
-      "tenant": "Mi Perfil"
-    },
-    "description": {
-      "landlord": "Gestiona tus inquilinos",
-      "tenant": "Ver y actualizar tu información de inquilino"
-    },
-    "dashboard": {
-      "property": "Propiedad Actual",
-      "leasePeriod": "Período de Arrendamiento",
-      "monthlyRent": "Alquiler Mensual",
-      "endDate": "Fecha de finalización: {{date}}",
-      "noEndDate": "Sin fecha de finalización"
-    }
-  },
-  "common": {
-    "actions": {
-      "edit": "Editar",
-      "delete": "Eliminar",
-      "save": "Guardar",
-      "cancel": "Cancelar",
-      "confirm": "Confirmar",
-      "back": "Atrás"
-    },
-    "status": {
-      "active": "Activo",
-      "inactive": "Inactivo",
-      "pending": "Pendiente",
-      "completed": "Completado"
-    },
-    "timeRanges": {
-      "1M": "Último Mes",
-      "6M": "Últimos 6 Meses",
-      "1Y": "Último Año",
-      "nextMonth": "Próximo Mes",
-      "next6Months": "Próximos 6 Meses",
-      "nextYear": "Próximo Año"
+    "tenantSection": "Detalles de la Solicitud del Inquilino",
+    "landlordSection": "Respuesta del Propietario",
+    "requestInfo": "Información de la Solicitud",
+    "attachments": "archivos adjuntos",
+    "highPriorityWarning": "Esta solicitud requiere atención inmediata",
+    "assignedTo": "Asignado a",
+    "requestHistory": "Historial de la Solicitud",
+    "tabs": {
+      "all": "Todas las Solicitudes"
     }
   }
 }

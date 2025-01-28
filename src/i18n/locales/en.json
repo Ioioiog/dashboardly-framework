@@ -18,147 +18,34 @@
       "medium": "Medium Priority",
       "high": "High Priority"
     },
+    "filters": {
+      "status": "Status",
+      "priority": "Priority",
+      "property": "Property",
+      "allStatuses": "All Statuses",
+      "allPriorities": "All Priorities",
+      "allProperties": "All Properties"
+    },
     "assignee": "Assignee",
     "unassigned": "Unassigned",
     "dates": "Dates",
     "created": "Created",
     "updated": "Last Updated",
     "actions": "Actions",
-    "viewDetails": "View Details"
-  },
-  "dashboard": {
-    "title": "Dashboard",
-    "welcome": "Welcome",
-    "overview": "Here's an overview of your properties and finances",
-    "metrics": {
-      "totalProperties": "Total Properties",
-      "monthlyRevenue": "Monthly Revenue",
-      "activeTenants": "Active Tenants",
-      "pendingMaintenance": "Pending Maintenance",
-      "paymentStatus": "Payment Status",
-      "noData": "No data available"
-    },
-    "revenue": {
-      "title": "Revenue Overview",
-      "noData": "No revenue data available",
-      "prediction": {
-        "title": "Revenue Predictions",
-        "description": "Based on historical data and trends",
-        "noData": "No revenue data available for predictions"
-      },
-      "history": {
-        "title": "Revenue History",
-        "description": "Historical view of your monthly revenue performance"
-      },
-      "upcomingPayments": "Upcoming Payments",
-      "noUpcomingPayments": "No upcoming payments"
-    },
-    "performance": {
-      "title": "Performance",
-      "total": "Total",
-      "monthlyAverage": "Monthly Average",
-      "vsLastMonth": "vs last month"
-    }
-  },
-  "properties": {
-    "title": {
-      "landlord": "My Properties",
-      "tenant": "My Rentals"
-    },
-    "description": {
-      "landlord": "Manage your property portfolio",
-      "tenant": "View your current rentals"
-    },
-    "addProperty": "Add Property",
-    "rent": {
-      "period": "month"
-    },
-    "type": "Property Type",
-    "empty": {
-      "landlord": "You haven't added any properties yet",
-      "tenant": "You don't have any active rentals",
-      "tenant.contact": "Please contact your landlord for more information"
-    },
-    "error": {
-      "fetch": "Failed to fetch properties"
-    },
-    "filters": {
-      "search": "Search properties...",
-      "type": {
-        "label": "Property Type",
-        "all": "All Types",
-        "apartment": "Apartment",
-        "house": "House",
-        "condo": "Condo",
-        "commercial": "Commercial"
-      }
-    },
-    "viewMode": {
-      "grid": "Grid View",
-      "list": "List View"
-    },
+    "viewDetails": "View Details",
     "form": {
-      "name": "Property Name",
-      "address": "Address",
-      "monthlyRent": "Monthly Rent",
-      "type": "Property Type",
-      "description": "Description",
-      "availableFrom": "Available From",
-      "contractEndDate": "Contract End Date",
-      "contractEndDateNote": "This date is automatically set to the tenant's contract end date"
+      "createRequest": "Create Request",
+      "updateRequest": "Update Request"
     },
-    "toast": {
-      "success": {
-        "created": "Property created successfully",
-        "updated": "Property updated successfully",
-        "deleted": "Property deleted successfully"
-      },
-      "error": {
-        "create": "Failed to create property",
-        "update": "Failed to update property",
-        "delete": "Failed to delete property"
-      }
-    }
-  },
-  "tenants": {
-    "title": {
-      "landlord": "My Tenants",
-      "tenant": "My Profile"
-    },
-    "description": {
-      "landlord": "Manage your tenants",
-      "tenant": "View and update your tenant information"
-    },
-    "dashboard": {
-      "property": "Current Property",
-      "leasePeriod": "Lease Period",
-      "monthlyRent": "Monthly Rent",
-      "endDate": "End Date: {{date}}",
-      "noEndDate": "No end date set"
-    }
-  },
-  "common": {
-    "actions": {
-      "edit": "Edit",
-      "delete": "Delete",
-      "save": "Save",
-      "cancel": "Cancel",
-      "confirm": "Confirm",
-      "back": "Back"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "pending": "Pending",
-      "completed": "Completed"
-    },
-    "timeRanges": {
-      "1M": "Last Month",
-      "6M": "Last 6 Months",
-      "1Y": "Last Year",
-      "nextMonth": "Next Month",
-      "next6Months": "Next 6 Months",
-      "nextYear": "Next Year"
+    "tenantSection": "Tenant's Request Details",
+    "landlordSection": "Landlord's Response",
+    "requestInfo": "Request Information",
+    "attachments": "attachments",
+    "highPriorityWarning": "This request requires immediate attention",
+    "assignedTo": "Assigned To",
+    "requestHistory": "Request History",
+    "tabs": {
+      "all": "All Requests"
     }
   }
 }
