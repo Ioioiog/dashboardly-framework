@@ -16,6 +16,7 @@ interface UtilityProvider {
   utility_type?: 'electricity' | 'water' | 'gas';
   start_day?: number;
   end_day?: number;
+  location_name?: string;
 }
 
 interface ProviderFormProps {
@@ -32,6 +33,7 @@ export function ProviderForm({ onClose, onSuccess, provider }: ProviderFormProps
     provider_name: provider?.provider_name || "",
     username: provider?.username || "",
     password: "",
+    location_name: provider?.location_name || "",
     property_id: provider?.property_id || "",
     utility_type: provider?.utility_type || "electricity",
     start_day: provider?.start_day?.toString() || "1",
@@ -69,6 +71,7 @@ export function ProviderForm({ onClose, onSuccess, provider }: ProviderFormProps
             provider_name: formData.provider_name,
             username: formData.username,
             encrypted_password: formData.password || undefined,
+            location_name: formData.location_name,
             property_id: formData.property_id || null,
             utility_type: formData.utility_type,
             start_day: startDayNum,
@@ -81,6 +84,7 @@ export function ProviderForm({ onClose, onSuccess, provider }: ProviderFormProps
             provider_name: formData.provider_name,
             username: formData.username,
             encrypted_password: formData.password,
+            location_name: formData.location_name,
             property_id: formData.property_id || null,
             landlord_id: user.id,
             utility_type: formData.utility_type,
@@ -141,6 +145,15 @@ export function ProviderForm({ onClose, onSuccess, provider }: ProviderFormProps
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           placeholder="Enter password"
           required={!provider}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="location_name">Location Name</Label>
+        <Input
+          id="location_name"
+          value={formData.location_name}
+          onChange={(e) => setFormData({ ...formData, location_name: e.target.value })}
+          placeholder="Enter location name (e.g. Main Building, Apartment 3B)"
         />
       </div>
       <div className="space-y-2">
