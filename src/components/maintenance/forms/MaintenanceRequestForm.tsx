@@ -41,7 +41,7 @@ export interface MaintenanceFormValues {
   notes: string;
   assigned_to: string;
   service_provider_notes: string;
-  images: (string | File)[];  // Updated type to allow both string and File
+  images: (string | File)[];
   tenant_id: string;
 }
 
@@ -69,9 +69,12 @@ export function MaintenanceRequestForm({
   // Create object URLs when images change
   useEffect(() => {
     const images = form.getValues("images") || [];
-    const urls = images.map(image => 
-      typeof image === 'string' ? image : URL.createObjectURL(image)
-    );
+    const urls = images.map(image => {
+      if (typeof image === 'string') {
+        return image;
+      }
+      return URL.createObjectURL(image);
+    });
     setImageUrls(urls);
 
     // Cleanup
@@ -82,7 +85,7 @@ export function MaintenanceRequestForm({
         }
       });
     };
-  }, [form.getValues("images")]);
+  }, [form.watch("images")]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: (string | File)[]) => void) => {
     const files = Array.from(e.target.files || []);
@@ -237,7 +240,7 @@ export function MaintenanceRequestForm({
                           {...field}
                         />
                         {/* Display existing images */}
-                        {value && value.length > 0 && (
+                        {imageUrls.length > 0 && (
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                             {imageUrls.map((imageUrl, index) => (
                               <div 
