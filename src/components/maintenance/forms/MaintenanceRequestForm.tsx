@@ -72,9 +72,14 @@ export function MaintenanceRequestForm({
   useEffect(() => {
     console.log("Images changed:", images);
     
-    // Filter out any invalid images and create URLs
+    // Filter out invalid images and create URLs
     const urls = images
-      .filter(image => image !== null && image !== undefined && image !== "{}")
+      .filter(image => {
+        if (!image) return false;
+        if (image === "{}") return false;
+        if (typeof image === "string" && !image.startsWith("http")) return false;
+        return true;
+      })
       .map(image => {
         if (typeof image === 'string') {
           return image;
@@ -112,7 +117,10 @@ export function MaintenanceRequestForm({
     console.log("Current images:", currentImages);
     console.log("New files:", files);
 
-    form.setValue("images", [...currentImages, ...files]);
+    // Filter out any invalid images from current images
+    const validCurrentImages = currentImages.filter(img => img && img !== "{}" && (typeof img === "string" ? img.startsWith("http") : true));
+    
+    form.setValue("images", [...validCurrentImages, ...files]);
   };
 
   const handleDeleteImage = (index: number) => {
