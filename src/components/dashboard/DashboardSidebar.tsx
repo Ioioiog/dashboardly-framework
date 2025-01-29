@@ -11,6 +11,7 @@ import {
   MessageCircle,
   ChevronLeft,
   ChevronRight,
+  Clipboard,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -90,6 +91,12 @@ export const DashboardSidebar = () => {
       title: "Utilities",
       icon: Droplets,
       href: "/utilities",
+      roles: ["landlord", "tenant"],
+    },
+    {
+      title: "Meter Readings",
+      icon: Clipboard,
+      href: "/meter-readings",
       roles: ["landlord", "tenant"],
     },
     {
