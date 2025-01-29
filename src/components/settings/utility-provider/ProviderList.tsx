@@ -3,11 +3,16 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ScrapingStatus } from "./ScrapingStatus";
+import { Edit2, Trash2 } from "lucide-react";
 
 interface UtilityProvider {
   id: string;
   provider_name: string;
   username: string;
+  property_id?: string;
+  utility_type?: 'electricity' | 'water' | 'gas';
+  start_day?: number;
+  end_day?: number;
 }
 
 interface ScrapingJob {
@@ -19,10 +24,11 @@ interface ScrapingJob {
 interface ProviderListProps {
   providers: UtilityProvider[];
   onDelete: (id: string) => void;
+  onEdit: (provider: UtilityProvider) => void;
   isLoading: boolean;
 }
 
-export function ProviderList({ providers, onDelete, isLoading }: ProviderListProps) {
+export function ProviderList({ providers, onDelete, onEdit, isLoading }: ProviderListProps) {
   const [scrapingStates, setScrapingStates] = useState<Record<string, boolean>>({});
   const [scrapingJobs, setScrapingJobs] = useState<Record<string, ScrapingJob>>({});
   const { toast } = useToast();
@@ -127,15 +133,35 @@ export function ProviderList({ providers, onDelete, isLoading }: ProviderListPro
               <p className="text-sm text-muted-foreground">
                 Username: {provider.username}
               </p>
+              {provider.utility_type && (
+                <p className="text-sm text-muted-foreground capitalize">
+                  Type: {provider.utility_type}
+                </p>
+              )}
+              {provider.start_day && provider.end_day && (
+                <p className="text-sm text-muted-foreground">
+                  Reading Period: Day {provider.start_day} - {provider.end_day}
+                </p>
+              )}
             </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => onDelete(provider.id)}
-              disabled={isLoading || scrapingStates[provider.id]}
-            >
-              Remove
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(provider)}
+                disabled={isLoading || scrapingStates[provider.id]}
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => onDelete(provider.id)}
+                disabled={isLoading || scrapingStates[provider.id]}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           
           <ScrapingStatus

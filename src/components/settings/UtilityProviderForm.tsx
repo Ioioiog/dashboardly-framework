@@ -23,7 +23,9 @@ interface UtilityProvider {
 export function UtilityProviderForm() {
   const [providers, setProviders] = useState<UtilityProvider[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [newProvider, setNewProvider] = useState({
+    id: "",
     provider_name: "",
     username: "",
     password: "",
@@ -85,31 +87,54 @@ export function UtilityProviderForm() {
     }
 
     try {
-      console.log('Adding new utility provider');
+      console.log(isEditing ? 'Updating utility provider' : 'Adding new utility provider');
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("No user found");
 
-      const { error } = await supabase
-        .from("utility_provider_credentials")
-        .insert({
-          provider_name: newProvider.provider_name,
-          username: newProvider.username,
-          encrypted_password: newProvider.password,
-          property_id: newProvider.property_id || null,
-          utility_type: newProvider.utility_type,
-          start_day: startDayNum,
-          end_day: endDayNum,
-          landlord_id: userData.user.id
+      if (isEditing) {
+        const { error } = await supabase
+          .from("utility_provider_credentials")
+          .update({
+            provider_name: newProvider.provider_name,
+            username: newProvider.username,
+            ...(newProvider.password && { encrypted_password: newProvider.password }),
+            property_id: newProvider.property_id || null,
+            utility_type: newProvider.utility_type,
+            start_day: startDayNum,
+            end_day: endDayNum,
+          })
+          .eq('id', newProvider.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Utility provider updated successfully",
         });
+      } else {
+        const { error } = await supabase
+          .from("utility_provider_credentials")
+          .insert({
+            provider_name: newProvider.provider_name,
+            username: newProvider.username,
+            encrypted_password: newProvider.password,
+            property_id: newProvider.property_id || null,
+            utility_type: newProvider.utility_type,
+            start_day: startDayNum,
+            end_day: endDayNum,
+            landlord_id: userData.user.id
+          });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Utility provider credentials added successfully",
-      });
+        toast({
+          title: "Success",
+          description: "Utility provider credentials added successfully",
+        });
+      }
 
       setNewProvider({
+        id: "",
         provider_name: "",
         username: "",
         password: "",
@@ -118,18 +143,32 @@ export function UtilityProviderForm() {
         start_day: "",
         end_day: "",
       });
-
+      setIsEditing(false);
       fetchProviders();
     } catch (error) {
-      console.error("Error adding provider:", error);
+      console.error("Error saving provider:", error);
       toast({
         title: "Error",
-        description: "Failed to add utility provider",
+        description: `Failed to ${isEditing ? 'update' : 'add'} utility provider`,
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEdit = (provider: UtilityProvider) => {
+    setIsEditing(true);
+    setNewProvider({
+      id: provider.id,
+      provider_name: provider.provider_name,
+      username: provider.username,
+      password: "",
+      property_id: provider.property_id || "",
+      utility_type: provider.utility_type || "electricity",
+      start_day: provider.start_day?.toString() || "",
+      end_day: provider.end_day?.toString() || "",
+    });
   };
 
   const handleDelete = async (id: string) => {
@@ -187,6 +226,7 @@ export function UtilityProviderForm() {
             <ProviderList 
               providers={providers}
               onDelete={handleDelete}
+              onEdit={handleEdit}
               isLoading={isLoading}
             />
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -218,7 +258,7 @@ export function UtilityProviderForm() {
                     value={newProvider.password}
                     onChange={(e) => setNewProvider({ ...newProvider, password: e.target.value })}
                     placeholder="Enter password"
-                    required
+                    required={!isEditing}
                   />
                 </div>
 
@@ -287,8 +327,30 @@ export function UtilityProviderForm() {
               </div>
 
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Adding..." : "Add Provider"}
+                {isLoading ? (isEditing ? "Updating..." : "Adding...") : (isEditing ? "Update Provider" : "Add Provider")}
               </Button>
+              {isEditing && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="ml-2"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setNewProvider({
+                      id: "",
+                      provider_name: "",
+                      username: "",
+                      password: "",
+                      property_id: "",
+                      utility_type: "electricity",
+                      start_day: "",
+                      end_day: "",
+                    });
+                  }}
+                >
+                  Cancel Edit
+                </Button>
+              )}
             </form>
           </div>
         </CardContent>
