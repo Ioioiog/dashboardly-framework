@@ -40,7 +40,7 @@ export interface MaintenanceFormValues {
   notes: string;
   assigned_to: string;
   service_provider_notes: string;
-  images: File[] | string[];
+  images: (string | File)[];  // Updated type to allow both string and File
   tenant_id: string;
 }
 
@@ -64,7 +64,7 @@ export function MaintenanceRequestForm({
   const isExistingRequest = defaultValues.title !== "";
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: File[] | string[]) => void) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: (string | File)[]) => void) => {
     const files = Array.from(e.target.files || []);
     const currentImages = form.getValues("images") || [];
     const totalImages = currentImages.length + files.length;
@@ -218,7 +218,7 @@ export function MaintenanceRequestForm({
                         {/* Display existing images */}
                         {value && value.length > 0 && (
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                            {(value as (File | string)[]).map((image, index) => (
+                            {value.map((image, index) => (
                               <div 
                                 key={index} 
                                 className="relative aspect-square group"
@@ -257,7 +257,6 @@ export function MaintenanceRequestForm({
 
             {/* Right Column - Landlord Actions */}
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg">{t("maintenance.form.landlordActions")}</h3>
             <FormField
               control={form.control}
               name="status"
