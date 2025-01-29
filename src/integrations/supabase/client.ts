@@ -34,6 +34,13 @@ const initSession = async () => {
   try {
     console.log('Initializing Supabase session...');
     
+    // Try to recover the session from storage first
+    const storedSession = localStorage.getItem('sb-wecmvyohaxizmnhuvjly-auth-token');
+    if (!storedSession) {
+      console.log('No stored session found');
+      return;
+    }
+
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError) {

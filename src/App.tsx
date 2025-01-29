@@ -47,6 +47,20 @@ function App() {
           return;
         }
 
+        // Additional verification of the user
+        const { error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error("User verification error:", userError);
+          setIsAuthenticated(false);
+          toast({
+            title: "Session Error",
+            description: "Your session has expired. Please sign in again.",
+            variant: "destructive",
+          });
+          await supabase.auth.signOut();
+          return;
+        }
+
         console.log("Valid session found:", session.user.id);
         setIsAuthenticated(true);
       } catch (error) {
