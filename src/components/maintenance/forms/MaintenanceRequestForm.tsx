@@ -66,18 +66,24 @@ export function MaintenanceRequestForm({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
-  // Create object URLs when images change
+  // Watch for changes in the images field
+  const images = form.watch("images") || [];
+
   useEffect(() => {
-    const images = form.getValues("images") || [];
+    console.log("Images changed:", images);
+    
+    // Create URLs for all images (both Files and strings)
     const urls = images.map(image => {
       if (typeof image === 'string') {
         return image;
       }
-      return URL.createObjectURL(image);
+      return URL.createObjectURL(image as File);
     });
+    
+    console.log("Generated URLs:", urls);
     setImageUrls(urls);
 
-    // Cleanup
+    // Cleanup function to revoke object URLs
     return () => {
       urls.forEach(url => {
         if (url.startsWith('blob:')) {
@@ -85,9 +91,9 @@ export function MaintenanceRequestForm({
         }
       });
     };
-  }, [form.watch("images")]);
+  }, [images]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: (string | File)[]) => void) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const currentImages = form.getValues("images") || [];
     const totalImages = currentImages.length + files.length;
@@ -101,7 +107,10 @@ export function MaintenanceRequestForm({
       return;
     }
 
-    onChange([...currentImages, ...files]);
+    console.log("Current images:", currentImages);
+    console.log("New files:", files);
+
+    form.setValue("images", [...currentImages, ...files]);
   };
 
   const handleDeleteImage = (index: number) => {
@@ -129,7 +138,7 @@ export function MaintenanceRequestForm({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Column - Tenant Details */}
+            {/* Left Column - Request Details */}
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">{t("maintenance.form.requestDetails")}</h3>
               
@@ -235,8 +244,8 @@ export function MaintenanceRequestForm({
                           type="file"
                           accept="image/*"
                           multiple
-                          disabled={userRole === "landlord" || (value && value.length >= 3)}
-                          onChange={(e) => handleImageUpload(e, onChange)}
+                          disabled={userRole === "landlord" || imageUrls.length >= 3}
+                          onChange={handleImageUpload}
                           {...field}
                         />
                         {/* Display existing images */}
