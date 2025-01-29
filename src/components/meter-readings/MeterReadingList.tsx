@@ -34,13 +34,17 @@ import { useToast } from "@/hooks/use-toast";
 interface MeterReading {
   id: string;
   property_id: string;
-  reading_type: string;
+  reading_type: 'electricity' | 'water' | 'gas';
   reading_value: number;
   reading_date: string;
   notes: string | null;
   property: {
     name: string;
     address: string;
+    type: 'Apartment' | 'House' | 'Condo' | 'Commercial';
+    monthly_rent: number;
+    created_at: string;
+    updated_at: string;
   };
 }
 
@@ -168,14 +172,29 @@ export function MeterReadingList({
           </DialogHeader>
           {selectedReading && (
             <MeterReadingForm
-              properties={[{ id: selectedReading.property_id, name: selectedReading.property.name }]}
+              properties={[{
+                id: selectedReading.property_id,
+                name: selectedReading.property.name,
+                address: selectedReading.property.address,
+                type: selectedReading.property.type,
+                monthly_rent: selectedReading.property.monthly_rent,
+                created_at: selectedReading.property.created_at,
+                updated_at: selectedReading.property.updated_at
+              }]}
               onSuccess={() => {
                 setEditDialogOpen(false);
                 onUpdate();
               }}
               userRole={userRole}
               userId={null}
-              initialData={selectedReading}
+              initialData={{
+                id: selectedReading.id,
+                property_id: selectedReading.property_id,
+                reading_type: selectedReading.reading_type,
+                reading_value: selectedReading.reading_value,
+                reading_date: selectedReading.reading_date,
+                notes: selectedReading.notes || undefined
+              }}
             />
           )}
         </DialogContent>
