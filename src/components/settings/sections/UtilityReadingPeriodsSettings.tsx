@@ -26,12 +26,18 @@ export function UtilityReadingPeriodsSettings() {
   const [periods, setPeriods] = useState<ReadingPeriod[]>([]);
   const { toast } = useToast();
   const { userRole } = useUserRole();
-  const { properties } = useProperties();
+  const { properties } = useProperties({ userRole: userRole || 'tenant' });
 
   const fetchPeriods = async () => {
     try {
       console.log('Fetching reading periods');
       setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("No authenticated user");
+      }
+
       const { data, error } = await supabase
         .from('utility_reading_periods')
         .select('*');
@@ -80,6 +86,12 @@ export function UtilityReadingPeriodsSettings() {
       setIsLoading(true);
       console.log('Adding new reading period');
 
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("No authenticated user");
+      }
+
       const { error } = await supabase
         .from('utility_reading_periods')
         .upsert({
@@ -87,6 +99,7 @@ export function UtilityReadingPeriodsSettings() {
           utility_type: utilityType,
           start_day: startDayNum,
           end_day: endDayNum,
+          landlord_id: user.id
         });
 
       if (error) throw error;
