@@ -80,16 +80,13 @@ export function MaintenanceRequestForm({
     return null;
   };
 
-  const processImages = (images: (string | File)[]) => {
+  const processImages = (images: (string | File)[]): string[] => {
     if (!images) return [];
     
     return images
       .filter((image): image is string | File => {
         if (!image) return false;
-        if (image === "{}") return false;
-        if (typeof image === "string") {
-          return image.startsWith("http");
-        }
+        if (typeof image === "string" && image === "{}") return false;
         return true;
       })
       .map(image => {
@@ -120,7 +117,16 @@ export function MaintenanceRequestForm({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const currentImages = form.getValues("images") || [];
-    const totalImages = currentImages.length + files.length;
+    
+    // Filter out invalid entries from current images
+    const validCurrentImages = currentImages.filter(img => 
+      img && 
+      typeof img === "string" && 
+      img !== "{}" && 
+      img.startsWith("http")
+    );
+
+    const totalImages = validCurrentImages.length + files.length;
 
     if (totalImages > MAX_IMAGES) {
       toast({
@@ -145,13 +151,6 @@ export function MaintenanceRequestForm({
       return true;
     });
 
-    // Filter out invalid images from current images
-    const validCurrentImages = currentImages.filter(img => 
-      img && 
-      img !== "{}" && 
-      (typeof img === "string" ? img.startsWith("http") : true)
-    );
-    
     form.setValue("images", [...validCurrentImages, ...validFiles]);
   };
 
