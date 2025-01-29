@@ -392,6 +392,77 @@ export type Database = {
           },
         ]
       }
+      meter_readings: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          property_id: string
+          reading_date: string
+          reading_type: Database["public"]["Enums"]["meter_type"]
+          reading_value: number
+          tenant_id: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          notes?: string | null
+          property_id: string
+          reading_date?: string
+          reading_type: Database["public"]["Enums"]["meter_type"]
+          reading_value: number
+          tenant_id: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          property_id?: string
+          reading_date?: string
+          reading_type?: Database["public"]["Enums"]["meter_type"]
+          reading_value?: number
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meter_readings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meter_readings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meter_readings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meter_readings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -982,6 +1053,7 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+      meter_type: "electricity" | "water" | "gas"
       property_type: "Apartment" | "House" | "Condo" | "Commercial"
       scraping_status: "pending" | "in_progress" | "completed" | "failed"
       tenant_action_type:

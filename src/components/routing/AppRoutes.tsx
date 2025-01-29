@@ -9,6 +9,7 @@ import Utilities from "@/pages/Utilities";
 import Chat from "@/pages/Chat";
 import Invoices from "@/pages/Invoices";
 import Maintenance from "@/pages/Maintenance";
+import MeterReadings from "@/pages/MeterReadings";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import TenantRegistration from "@/pages/TenantRegistration";
 import { ResetPassword } from "@/components/auth/ResetPassword";
@@ -83,6 +84,14 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <Utilities />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/meter-readings"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <MeterReadings />
           </ProtectedRoute>
         }
       />
