@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useProperties } from "@/hooks/useProperties";
+import { Label } from "@/components/ui/label";
 
 interface UtilityProvider {
   id: string;
@@ -270,104 +271,113 @@ export function UtilityProviderForm() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Utility Provider Credentials</CardTitle>
+          <CardTitle>Utility Provider Settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <ProviderList 
-            providers={providers}
-            onDelete={handleDelete}
-            isLoading={isLoading}
-          />
-          <ProviderForm
-            data={newProvider}
-            onChange={setNewProvider}
-            onSubmit={handleProviderSubmit}
-            isLoading={isLoading}
-          />
-        </CardContent>
-      </Card>
+          <div className="space-y-6">
+            <h3 className="text-lg font-medium">Provider Credentials</h3>
+            <ProviderList 
+              providers={providers}
+              onDelete={handleDelete}
+              isLoading={isLoading}
+            />
+            <ProviderForm
+              data={newProvider}
+              onChange={setNewProvider}
+              onSubmit={handleProviderSubmit}
+              isLoading={isLoading}
+            />
+          </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Utility Reading Periods
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <form onSubmit={handlePeriodSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Select
-                value={selectedProperty}
-                onValueChange={setSelectedProperty}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select property" />
-                </SelectTrigger>
-                <SelectContent>
-                  {properties?.map((property) => (
-                    <SelectItem key={property.id} value={property.id}>
-                      {property.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Reading Periods
+            </h3>
+            <form onSubmit={handlePeriodSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Property</Label>
+                  <Select
+                    value={selectedProperty}
+                    onValueChange={setSelectedProperty}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select property" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {properties?.map((property) => (
+                        <SelectItem key={property.id} value={property.id}>
+                          {property.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <Select
-                value={utilityType}
-                onValueChange={(value: 'electricity' | 'water' | 'gas') => setUtilityType(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select utility type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="electricity">Electricity</SelectItem>
-                  <SelectItem value="water">Water</SelectItem>
-                  <SelectItem value="gas">Gas</SelectItem>
-                </SelectContent>
-              </Select>
+                <div className="space-y-2">
+                  <Label>Utility Type</Label>
+                  <Select
+                    value={utilityType}
+                    onValueChange={(value: 'electricity' | 'water' | 'gas') => setUtilityType(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select utility type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="electricity">Electricity</SelectItem>
+                      <SelectItem value="water">Water</SelectItem>
+                      <SelectItem value="gas">Gas</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <Input
-                type="number"
-                placeholder="Start Day (1-31)"
-                min="1"
-                max="31"
-                value={startDay}
-                onChange={(e) => setStartDay(e.target.value)}
-              />
+                <div className="space-y-2">
+                  <Label>Start Day</Label>
+                  <Input
+                    type="number"
+                    placeholder="Start Day (1-31)"
+                    min="1"
+                    max="31"
+                    value={startDay}
+                    onChange={(e) => setStartDay(e.target.value)}
+                  />
+                </div>
 
-              <Input
-                type="number"
-                placeholder="End Day (1-31)"
-                min="1"
-                max="31"
-                value={endDay}
-                onChange={(e) => setEndDay(e.target.value)}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label>End Day</Label>
+                  <Input
+                    type="number"
+                    placeholder="End Day (1-31)"
+                    min="1"
+                    max="31"
+                    value={endDay}
+                    onChange={(e) => setEndDay(e.target.value)}
+                  />
+                </div>
+              </div>
 
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save Reading Period"}
-            </Button>
-          </form>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save Reading Period"}
+              </Button>
+            </form>
 
-          <div className="mt-6">
-            <h3 className="text-lg font-medium mb-4">Current Reading Periods</h3>
-            {periods.map((period) => (
-              <div
-                key={period.id}
-                className="bg-gray-50 p-4 rounded-lg mb-2 flex justify-between items-center"
-              >
-                <div>
+            <div className="mt-6">
+              <h4 className="text-sm font-medium text-muted-foreground mb-4">Current Reading Periods</h4>
+              {periods.map((period) => (
+                <div
+                  key={period.id}
+                  className="bg-secondary/50 p-4 rounded-lg mb-2"
+                >
                   <p className="font-medium">
                     {properties?.find(p => p.id === period.property_id)?.name} - {period.utility_type}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Days {period.start_day} - {period.end_day} of each month
                   </p>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
