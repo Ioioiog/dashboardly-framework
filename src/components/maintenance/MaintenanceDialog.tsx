@@ -23,6 +23,8 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/use-user-role";
+import { Separator } from "@/components/ui/separator";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -36,12 +38,18 @@ export default function MaintenanceDialog({
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { userRole } = useUserRole();
+  
   const form = useForm({
     defaultValues: {
       title: "",
       description: "",
       property_id: "",
       priority: "low",
+      status: "pending",
+      notes: "",
+      assigned_to: "",
+      service_provider_notes: "",
     },
   });
 
@@ -56,16 +64,24 @@ export default function MaintenanceDialog({
     },
   });
 
+  const { data: serviceProviders } = useQuery({
+    queryKey: ["service-providers"],
+    enabled: userRole === "landlord",
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name")
+        .eq("role", "service_provider");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const createMutation = useMutation({
     mutationFn: async (values: any) => {
       const { data, error } = await supabase
         .from("maintenance_requests")
-        .insert([
-          {
-            ...values,
-            status: "pending",
-          },
-        ])
+        .insert([values])
         .select();
       if (error) throw error;
       return data;
@@ -95,103 +111,218 @@ export default function MaintenanceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[900px]">
         <DialogHeader>
           <DialogTitle>{t("maintenance.form.createRequest")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="property_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("maintenance.property")}</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a property" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {properties?.map((property) => (
-                        <SelectItem key={property.id} value={property.id}>
-                          {property.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column - Tenant Details */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">{t("maintenance.form.requestDetails")}</h3>
+                <FormField
+                  control={form.control}
+                  name="property_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("maintenance.property")}</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={userRole === "landlord"}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a property" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {properties?.map((property) => (
+                            <SelectItem key={property.id} value={property.id}>
+                              {property.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={userRole === "landlord"} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} disabled={userRole === "landlord"} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="priority"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Priority</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="low">
-                        {t("maintenance.priority.low")}
-                      </SelectItem>
-                      <SelectItem value="medium">
-                        {t("maintenance.priority.medium")}
-                      </SelectItem>
-                      <SelectItem value="high">
-                        {t("maintenance.priority.high")}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priority</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={userRole === "landlord"}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="low">
+                            {t("maintenance.priority.low")}
+                          </SelectItem>
+                          <SelectItem value="medium">
+                            {t("maintenance.priority.medium")}
+                          </SelectItem>
+                          <SelectItem value="high">
+                            {t("maintenance.priority.high")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            <Button type="submit" className="w-full">
-              Create Request
-            </Button>
+              {/* Right Column - Landlord Actions */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">{t("maintenance.form.landlordActions")}</h3>
+                
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={userRole !== "landlord"}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="in_progress">In Progress</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="assigned_to"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Assign To</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={userRole !== "landlord"}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select service provider" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {serviceProviders?.map((provider) => (
+                            <SelectItem key={provider.id} value={provider.id}>
+                              {`${provider.first_name} ${provider.last_name}`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Internal Notes</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          disabled={userRole !== "landlord"}
+                          placeholder="Add internal notes about this request"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="service_provider_notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Service Provider Instructions</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          disabled={userRole !== "landlord"}
+                          placeholder="Add instructions for the service provider"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                {userRole === "landlord" ? "Update Request" : "Create Request"}
+              </Button>
+            </div>
           </form>
         </Form>
       </DialogContent>
