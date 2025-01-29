@@ -3,8 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ProviderList } from "./utility-provider/ProviderList";
-import { ProviderForm } from "./utility-provider/ProviderForm";
-import { Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,14 +15,9 @@ interface UtilityProvider {
   provider_name: string;
   username: string;
   property_id?: string;
-}
-
-interface ReadingPeriod {
-  id: string;
-  property_id: string;
-  utility_type: 'electricity' | 'water' | 'gas';
-  start_day: number;
-  end_day: number;
+  utility_type?: 'electricity' | 'water' | 'gas';
+  start_day?: number;
+  end_day?: number;
 }
 
 export function UtilityProviderForm() {
@@ -35,14 +28,10 @@ export function UtilityProviderForm() {
     username: "",
     password: "",
     property_id: "",
+    utility_type: "electricity" as 'electricity' | 'water' | 'gas',
+    start_day: "",
+    end_day: "",
   });
-
-  // Reading periods state
-  const [selectedProperty, setSelectedProperty] = useState<string>("");
-  const [utilityType, setUtilityType] = useState<'electricity' | 'water' | 'gas'>('electricity');
-  const [startDay, setStartDay] = useState("");
-  const [endDay, setEndDay] = useState("");
-  const [periods, setPeriods] = useState<ReadingPeriod[]>([]);
 
   const { toast } = useToast();
   const { userRole } = useUserRole();
@@ -57,7 +46,7 @@ export function UtilityProviderForm() {
 
       const { data, error } = await supabase
         .from("utility_provider_credentials")
-        .select("id, provider_name, username, property_id");
+        .select("id, provider_name, username, property_id, utility_type, start_day, end_day");
 
       if (error) throw error;
       console.log('Fetched providers:', data);
@@ -74,44 +63,26 @@ export function UtilityProviderForm() {
     }
   };
 
-  const fetchPeriods = async () => {
-    try {
-      console.log('Fetching reading periods');
-      setIsLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error("No authenticated user");
-      }
-
-      const { data, error } = await supabase
-        .from('utility_reading_periods')
-        .select('*');
-
-      if (error) throw error;
-
-      console.log('Fetched periods:', data);
-      setPeriods(data || []);
-    } catch (error) {
-      console.error('Error fetching reading periods:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load reading periods",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchProviders();
-    fetchPeriods();
   }, []);
 
-  const handleProviderSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    const startDayNum = parseInt(newProvider.start_day);
+    const endDayNum = parseInt(newProvider.end_day);
+
+    if (startDayNum < 1 || startDayNum > 31 || endDayNum < 1 || endDayNum > 31) {
+      toast({
+        title: "Error",
+        description: "Days must be between 1 and 31",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
 
     try {
       console.log('Adding new utility provider');
@@ -125,6 +96,9 @@ export function UtilityProviderForm() {
           username: newProvider.username,
           encrypted_password: newProvider.password,
           property_id: newProvider.property_id || null,
+          utility_type: newProvider.utility_type,
+          start_day: startDayNum,
+          end_day: endDayNum,
           landlord_id: userData.user.id
         });
 
@@ -140,6 +114,9 @@ export function UtilityProviderForm() {
         username: "",
         password: "",
         property_id: "",
+        utility_type: "electricity",
+        start_day: "",
+        end_day: "",
       });
 
       fetchProviders();
@@ -160,7 +137,6 @@ export function UtilityProviderForm() {
       console.log('Deleting utility provider:', id);
       setIsLoading(true);
 
-      // First, delete all associated scraping jobs
       const { error: scrapingJobsError } = await supabase
         .from("scraping_jobs")
         .delete()
@@ -171,7 +147,6 @@ export function UtilityProviderForm() {
         throw scrapingJobsError;
       }
 
-      // Then delete the utility provider
       const { error } = await supabase
         .from("utility_provider_credentials")
         .delete()
@@ -197,72 +172,6 @@ export function UtilityProviderForm() {
     }
   };
 
-  const handlePeriodSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedProperty || !startDay || !endDay) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const startDayNum = parseInt(startDay);
-    const endDayNum = parseInt(endDay);
-
-    if (startDayNum < 1 || startDayNum > 31 || endDayNum < 1 || endDayNum > 31) {
-      toast({
-        title: "Error",
-        description: "Days must be between 1 and 31",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      console.log('Adding new reading period');
-
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error("No authenticated user");
-      }
-
-      const { error } = await supabase
-        .from('utility_reading_periods')
-        .upsert({
-          property_id: selectedProperty,
-          utility_type: utilityType,
-          start_day: startDayNum,
-          end_day: endDayNum,
-          landlord_id: user.id
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Reading period saved successfully",
-      });
-
-      setStartDay("");
-      setEndDay("");
-      fetchPeriods();
-    } catch (error) {
-      console.error('Error saving reading period:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save reading period",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   if (userRole !== 'landlord') {
     return null;
   }
@@ -275,32 +184,49 @@ export function UtilityProviderForm() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-6">
-            <h3 className="text-lg font-medium">Provider Credentials</h3>
             <ProviderList 
               providers={providers}
               onDelete={handleDelete}
               isLoading={isLoading}
             />
-            <ProviderForm
-              data={newProvider}
-              onChange={setNewProvider}
-              onSubmit={handleProviderSubmit}
-              isLoading={isLoading}
-            />
-          </div>
-
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Reading Periods
-            </h3>
-            <form onSubmit={handlePeriodSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Provider Name</Label>
+                  <Input
+                    value={newProvider.provider_name}
+                    onChange={(e) => setNewProvider({ ...newProvider, provider_name: e.target.value })}
+                    placeholder="Enter provider name"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Username</Label>
+                  <Input
+                    value={newProvider.username}
+                    onChange={(e) => setNewProvider({ ...newProvider, username: e.target.value })}
+                    placeholder="Enter username"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Password</Label>
+                  <Input
+                    type="password"
+                    value={newProvider.password}
+                    onChange={(e) => setNewProvider({ ...newProvider, password: e.target.value })}
+                    placeholder="Enter password"
+                    required
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <Label>Property</Label>
                   <Select
-                    value={selectedProperty}
-                    onValueChange={setSelectedProperty}
+                    value={newProvider.property_id}
+                    onValueChange={(value) => setNewProvider({ ...newProvider, property_id: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select property" />
@@ -318,8 +244,9 @@ export function UtilityProviderForm() {
                 <div className="space-y-2">
                   <Label>Utility Type</Label>
                   <Select
-                    value={utilityType}
-                    onValueChange={(value: 'electricity' | 'water' | 'gas') => setUtilityType(value)}
+                    value={newProvider.utility_type}
+                    onValueChange={(value: 'electricity' | 'water' | 'gas') => 
+                      setNewProvider({ ...newProvider, utility_type: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select utility type" />
@@ -339,8 +266,9 @@ export function UtilityProviderForm() {
                     placeholder="Start Day (1-31)"
                     min="1"
                     max="31"
-                    value={startDay}
-                    onChange={(e) => setStartDay(e.target.value)}
+                    value={newProvider.start_day}
+                    onChange={(e) => setNewProvider({ ...newProvider, start_day: e.target.value })}
+                    required
                   />
                 </div>
 
@@ -351,33 +279,17 @@ export function UtilityProviderForm() {
                     placeholder="End Day (1-31)"
                     min="1"
                     max="31"
-                    value={endDay}
-                    onChange={(e) => setEndDay(e.target.value)}
+                    value={newProvider.end_day}
+                    onChange={(e) => setNewProvider({ ...newProvider, end_day: e.target.value })}
+                    required
                   />
                 </div>
               </div>
 
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Reading Period"}
+                {isLoading ? "Adding..." : "Add Provider"}
               </Button>
             </form>
-
-            <div className="mt-6">
-              <h4 className="text-sm font-medium text-muted-foreground mb-4">Current Reading Periods</h4>
-              {periods.map((period) => (
-                <div
-                  key={period.id}
-                  className="bg-secondary/50 p-4 rounded-lg mb-2"
-                >
-                  <p className="font-medium">
-                    {properties?.find(p => p.id === period.property_id)?.name} - {period.utility_type}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Days {period.start_day} - {period.end_day} of each month
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
         </CardContent>
       </Card>
