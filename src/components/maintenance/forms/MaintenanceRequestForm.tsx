@@ -55,6 +55,7 @@ export function MaintenanceRequestForm({
 }: MaintenanceRequestFormProps) {
   const { t } = useTranslation();
   const form = useForm<MaintenanceFormValues>({ defaultValues });
+  const isExistingRequest = defaultValues.title !== "";
 
   return (
     <Form {...form}>
@@ -72,7 +73,7 @@ export function MaintenanceRequestForm({
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled={userRole === "landlord"}
+                    disabled={userRole === "landlord" || isExistingRequest}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -279,7 +280,7 @@ export function MaintenanceRequestForm({
 
         <div className="flex justify-end space-x-2 pt-4">
           <Button type="submit">
-            {userRole === "landlord" ? "Update Request" : "Create Request"}
+            {isExistingRequest ? "Update Request" : "Create Request"}
           </Button>
         </div>
       </form>
