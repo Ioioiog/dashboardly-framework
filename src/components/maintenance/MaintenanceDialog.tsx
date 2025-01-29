@@ -108,27 +108,37 @@ export default function MaintenanceDialog({
     }
   }, [existingRequest, form]);
 
+  // Updated query to fetch only assigned properties for tenants
   const { data: properties } = useQuery({
-    queryKey: ["properties"],
+    queryKey: ["properties", userRole, currentUserId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("properties")
-        .select("id, name");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: serviceProviders } = useQuery({
-    queryKey: ["service-providers"],
-    enabled: userRole === "landlord",
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name")
-        .eq("role", "service_provider");
-      if (error) throw error;
-      return data;
+      if (userRole === "landlord") {
+        const { data, error } = await supabase
+          .from("properties")
+          .select("id, name");
+        if (error) throw error;
+        return data;
+      } else {
+        // For tenants, fetch only properties they are assigned to via active tenancies
+        const { data, error } = await supabase
+          .from("tenancies")
+          .select(`
+            property:properties (
+              id,
+              name
+            )
+          `)
+          .eq("tenant_id", currentUserId)
+          .eq("status", "active");
+        
+        if (error) throw error;
+        
+        // Transform the data to match the expected format
+        return data?.map(item => ({
+          id: item.property.id,
+          name: item.property.name
+        })) || [];
+      }
     },
   });
 
