@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -63,6 +64,25 @@ export function MaintenanceRequestForm({
   const form = useForm<MaintenanceFormValues>({ defaultValues });
   const isExistingRequest = defaultValues.title !== "";
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+
+  // Create object URLs when images change
+  useEffect(() => {
+    const images = form.getValues("images") || [];
+    const urls = images.map(image => 
+      typeof image === 'string' ? image : URL.createObjectURL(image)
+    );
+    setImageUrls(urls);
+
+    // Cleanup
+    return () => {
+      urls.forEach(url => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [form.getValues("images")]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: (string | File)[]) => void) => {
     const files = Array.from(e.target.files || []);
@@ -92,6 +112,7 @@ export function MaintenanceRequestForm({
     <>
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-3xl">
+          <DialogTitle>Image Preview</DialogTitle>
           {selectedImage && (
             <img
               src={selectedImage}
@@ -138,66 +159,66 @@ export function MaintenanceRequestForm({
                 )}
               />
 
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input {...field} disabled={userRole === "landlord"} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} disabled={userRole === "landlord"} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="priority"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Priority</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={userRole === "landlord"}
-                  >
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
+                      <Input {...field} disabled={userRole === "landlord"} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="low">
-                        {t("maintenance.priority.low")}
-                      </SelectItem>
-                      <SelectItem value="medium">
-                        {t("maintenance.priority.medium")}
-                      </SelectItem>
-                      <SelectItem value="high">
-                        {t("maintenance.priority.high")}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} disabled={userRole === "landlord"} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Priority</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={userRole === "landlord"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="low">
+                          {t("maintenance.priority.low")}
+                        </SelectItem>
+                        <SelectItem value="medium">
+                          {t("maintenance.priority.medium")}
+                        </SelectItem>
+                        <SelectItem value="high">
+                          {t("maintenance.priority.high")}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -218,21 +239,16 @@ export function MaintenanceRequestForm({
                         {/* Display existing images */}
                         {value && value.length > 0 && (
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                            {value.map((image, index) => (
+                            {imageUrls.map((imageUrl, index) => (
                               <div 
                                 key={index} 
                                 className="relative aspect-square group"
                               >
                                 <img
-                                  src={typeof image === 'string' ? image : URL.createObjectURL(image)}
+                                  src={imageUrl}
                                   alt={`Uploaded image ${index + 1}`}
                                   className="rounded-lg object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
-                                  onClick={() => {
-                                    const imageUrl = typeof image === 'string' 
-                                      ? image 
-                                      : URL.createObjectURL(image);
-                                    setSelectedImage(imageUrl);
-                                  }}
+                                  onClick={() => setSelectedImage(imageUrl)}
                                 />
                                 {userRole !== "landlord" && (
                                   <button
@@ -257,98 +273,98 @@ export function MaintenanceRequestForm({
 
             {/* Right Column - Landlord Actions */}
             <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={userRole !== "landlord"}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="assigned_to"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Assign To</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={userRole !== "landlord"}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select service provider" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {serviceProviders?.map((provider) => (
-                        <SelectItem key={provider.id} value={provider.id}>
-                          {`${provider.first_name} ${provider.last_name}`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Internal Notes</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      {...field} 
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
                       disabled={userRole !== "landlord"}
-                      placeholder="Add internal notes about this request"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="service_provider_notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Service Provider Instructions</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      {...field} 
+              <FormField
+                control={form.control}
+                name="assigned_to"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assign To</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
                       disabled={userRole !== "landlord"}
-                      placeholder="Add instructions for the service provider"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select service provider" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {serviceProviders?.map((provider) => (
+                          <SelectItem key={provider.id} value={provider.id}>
+                            {`${provider.first_name} ${provider.last_name}`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Internal Notes</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        disabled={userRole !== "landlord"}
+                        placeholder="Add internal notes about this request"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="service_provider_notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Service Provider Instructions</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        disabled={userRole !== "landlord"}
+                        placeholder="Add instructions for the service provider"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
 
