@@ -24,9 +24,14 @@ interface MaintenanceRequest {
 interface MaintenanceListProps {
   requests: MaintenanceRequest[];
   isLoading: boolean;
+  onRequestClick?: (requestId: string) => void;
 }
 
-export default function MaintenanceList({ requests, isLoading }: MaintenanceListProps) {
+export default function MaintenanceList({ 
+  requests, 
+  isLoading,
+  onRequestClick 
+}: MaintenanceListProps) {
   const { t } = useTranslation();
 
   if (isLoading) {
@@ -75,7 +80,11 @@ export default function MaintenanceList({ requests, isLoading }: MaintenanceList
       </TableHeader>
       <TableBody>
         {requests.map((request) => (
-          <TableRow key={request.id}>
+          <TableRow 
+            key={request.id}
+            className={onRequestClick ? "cursor-pointer hover:bg-gray-50" : ""}
+            onClick={() => onRequestClick?.(request.id)}
+          >
             <TableCell className="font-medium">#{request.id.slice(0, 8)}</TableCell>
             <TableCell>{request.property.name}</TableCell>
             <TableCell>{request.title}</TableCell>

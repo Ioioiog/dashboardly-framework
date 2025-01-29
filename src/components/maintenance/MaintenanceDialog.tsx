@@ -30,7 +30,20 @@ import { Separator } from "@/components/ui/separator";
 interface MaintenanceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  requestId?: string; // Optional - if provided, we're editing an existing request
+  requestId?: string;
+}
+
+interface FormValues {
+  title: string;
+  description: string;
+  property_id: string;
+  priority: string;
+  status: string;
+  notes: string;
+  assigned_to: string;
+  service_provider_notes: string;
+  images: File[] | string[];
+  tenant_id: string;
 }
 
 export default function MaintenanceDialog({
@@ -44,7 +57,7 @@ export default function MaintenanceDialog({
   const { userRole } = useUserRole();
   const { currentUserId } = useAuthState();
   
-  const form = useForm({
+  const form = useForm<FormValues>({
     defaultValues: {
       title: "",
       description: "",
@@ -54,8 +67,8 @@ export default function MaintenanceDialog({
       notes: "",
       assigned_to: "",
       service_provider_notes: "",
-      images: [] as File[],
-      tenant_id: currentUserId, // Auto-fill tenant_id for new requests
+      images: [],
+      tenant_id: currentUserId || "", // Auto-fill tenant_id for new requests
     },
   });
 
@@ -133,10 +146,10 @@ export default function MaintenanceDialog({
 
   // Create new request
   const createMutation = useMutation({
-    mutationFn: async (values: any) => {
+    mutationFn: async (values: FormValues) => {
       let imageUrls: string[] = [];
-      if (values.images?.length > 0) {
-        imageUrls = await handleImageUpload(values.images);
+      if (values.images?.length > 0 && values.images[0] instanceof File) {
+        imageUrls = await handleImageUpload(values.images as File[]);
       }
 
       const { data, error } = await supabase
@@ -167,10 +180,15 @@ export default function MaintenanceDialog({
 
   // Update existing request
   const updateMutation = useMutation({
-    mutationFn: async (values: any) => {
+    mutationFn: async (values: FormValues) => {
+      let imageUrls = values.images;
+      if (values.images?.length > 0 && values.images[0] instanceof File) {
+        imageUrls = await handleImageUpload(values.images as File[]);
+      }
+
       const { data, error } = await supabase
         .from("maintenance_requests")
-        .update(values)
+        .update({ ...values, images: imageUrls })
         .eq("id", requestId)
         .select();
       if (error) throw error;
@@ -193,7 +211,7 @@ export default function MaintenanceDialog({
     },
   });
 
-  const onSubmit = (values: any) => {
+  const onSubmit = (values: FormValues) => {
     if (requestId) {
       updateMutation.mutate(values);
     } else {
