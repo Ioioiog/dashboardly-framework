@@ -53,6 +53,10 @@ interface MaintenanceRequestFormProps {
   serviceProviders?: Array<{ id: string; first_name: string; last_name: string; }>;
 }
 
+const MAX_IMAGES = 3;
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 export function MaintenanceRequestForm({
   defaultValues,
   onSubmit,
@@ -66,31 +70,44 @@ export function MaintenanceRequestForm({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
-  // Watch for changes in the images field
-  const images = form.watch("images") || [];
+  const validateImage = (file: File): string | null => {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return "Invalid file type. Please upload an image (JPEG, PNG, GIF, or WebP)";
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      return "File is too large. Maximum size is 5MB";
+    }
+    return null;
+  };
 
-  useEffect(() => {
-    console.log("Images changed:", images);
+  const processImages = (images: (string | File)[]) => {
+    if (!images) return [];
     
-    // Filter out invalid images and create URLs
-    const urls = images
-      .filter(image => {
+    return images
+      .filter((image): image is string | File => {
         if (!image) return false;
         if (image === "{}") return false;
-        if (typeof image === "string" && !image.startsWith("http")) return false;
+        if (typeof image === "string") {
+          return image.startsWith("http");
+        }
         return true;
       })
       .map(image => {
-        if (typeof image === 'string') {
-          return image;
+        if (image instanceof File) {
+          return URL.createObjectURL(image);
         }
-        return URL.createObjectURL(image as File);
+        return image as string;
       });
+  };
+
+  useEffect(() => {
+    const images = form.watch("images") || [];
+    console.log("Processing images:", images);
     
+    const urls = processImages(images);
     console.log("Generated URLs:", urls);
     setImageUrls(urls);
 
-    // Cleanup function to revoke object URLs
     return () => {
       urls.forEach(url => {
         if (url.startsWith('blob:')) {
@@ -98,29 +115,44 @@ export function MaintenanceRequestForm({
         }
       });
     };
-  }, [images]);
+  }, [form.watch("images")]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const currentImages = form.getValues("images") || [];
     const totalImages = currentImages.length + files.length;
 
-    if (totalImages > 3) {
+    if (totalImages > MAX_IMAGES) {
       toast({
         title: "Error",
-        description: "You can only upload up to 3 images",
+        description: `You can only upload up to ${MAX_IMAGES} images`,
         variant: "destructive",
       });
       return;
     }
 
-    console.log("Current images:", currentImages);
-    console.log("New files:", files);
+    // Validate each file
+    const validFiles = files.filter(file => {
+      const error = validateImage(file);
+      if (error) {
+        toast({
+          title: "Error",
+          description: error,
+          variant: "destructive",
+        });
+        return false;
+      }
+      return true;
+    });
 
-    // Filter out any invalid images from current images
-    const validCurrentImages = currentImages.filter(img => img && img !== "{}" && (typeof img === "string" ? img.startsWith("http") : true));
+    // Filter out invalid images from current images
+    const validCurrentImages = currentImages.filter(img => 
+      img && 
+      img !== "{}" && 
+      (typeof img === "string" ? img.startsWith("http") : true)
+    );
     
-    form.setValue("images", [...validCurrentImages, ...files]);
+    form.setValue("images", [...validCurrentImages, ...validFiles]);
   };
 
   const handleDeleteImage = (index: number) => {
@@ -129,6 +161,8 @@ export function MaintenanceRequestForm({
     newImages.splice(index, 1);
     form.setValue("images", newImages);
   };
+
+  // ... keep existing code (form JSX structure)
 
   return (
     <>
@@ -247,18 +281,17 @@ export function MaintenanceRequestForm({
                 name="images"
                 render={({ field: { onChange, value, ...field } }) => (
                   <FormItem>
-                    <FormLabel>Images (Max 3)</FormLabel>
+                    <FormLabel>Images (Max {MAX_IMAGES})</FormLabel>
                     <FormControl>
                       <div className="space-y-4">
                         <Input
                           type="file"
-                          accept="image/*"
+                          accept={ALLOWED_IMAGE_TYPES.join(',')}
                           multiple
-                          disabled={userRole === "landlord" || imageUrls.length >= 3}
+                          disabled={userRole === "landlord" || imageUrls.length >= MAX_IMAGES}
                           onChange={handleImageUpload}
                           {...field}
                         />
-                        {/* Display existing images */}
                         {imageUrls.length > 0 && (
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                             {imageUrls.map((imageUrl, index) => (
@@ -293,7 +326,6 @@ export function MaintenanceRequestForm({
               />
             </div>
 
-            {/* Right Column - Landlord Actions */}
             <div className="space-y-4">
               <FormField
                 control={form.control}
