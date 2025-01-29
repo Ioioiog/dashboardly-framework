@@ -1,6 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Form, FormField } from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "./ImageUpload";
 import { RequestDetails } from "./RequestDetails";
@@ -46,7 +46,6 @@ export function MaintenanceRequestForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column - Request Details */}
           <div className="space-y-4">
             <RequestDetails
               form={form}
@@ -55,20 +54,13 @@ export function MaintenanceRequestForm({
               isExistingRequest={isExistingRequest}
             />
 
-            <FormField
-              control={form.control}
-              name="images"
-              render={({ field }) => (
-                <ImageUpload
-                  images={field.value}
-                  onChange={field.onChange}
-                  disabled={userRole === "landlord"}
-                />
-              )}
+            <ImageUpload
+              images={form.watch("images")}
+              onChange={(images) => form.setValue("images", images)}
+              disabled={userRole === "landlord"}
             />
           </div>
 
-          {/* Right Column - Landlord Fields */}
           <div className="space-y-4">
             <LandlordFields
               form={form}
