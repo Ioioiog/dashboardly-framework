@@ -5,10 +5,11 @@ import { AccountSettings } from "@/components/settings/sections/AccountSettings"
 import { FinancialSettings } from "@/components/settings/sections/FinancialSettings";
 import { PropertyProvidersSettings } from "@/components/settings/sections/PropertyProvidersSettings";
 import { PreferencesSettings } from "@/components/settings/sections/PreferencesSettings";
-import { Settings2, Wallet, Building2, Languages } from "lucide-react";
+import { UtilityReadingPeriodsSettings } from "@/components/settings/sections/UtilityReadingPeriodsSettings";
+import { Settings2, Wallet, Building2, Languages, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type SettingsSection = 'account' | 'financial' | 'providers' | 'preferences';
+type SettingsSection = 'account' | 'financial' | 'providers' | 'reading-periods' | 'preferences';
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState<SettingsSection>('account');
@@ -30,6 +31,11 @@ const Settings = () => {
       icon: Building2,
     },
     {
+      id: 'reading-periods' as SettingsSection,
+      label: 'Reading Periods',
+      icon: Calendar,
+    },
+    {
       id: 'preferences' as SettingsSection,
       label: 'Preferences',
       icon: Languages,
@@ -44,6 +50,8 @@ const Settings = () => {
         return <FinancialSettings />;
       case 'providers':
         return <PropertyProvidersSettings />;
+      case 'reading-periods':
+        return <UtilityReadingPeriodsSettings />;
       case 'preferences':
         return <PreferencesSettings />;
       default:
@@ -56,7 +64,6 @@ const Settings = () => {
       <DashboardSidebar />
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Settings Navigation - Now a horizontal row */}
           <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto">
             {navigationItems.map((item) => (
               <Button
@@ -74,7 +81,6 @@ const Settings = () => {
             ))}
           </div>
 
-          {/* Settings Content */}
           <div className="bg-card p-6 rounded-lg shadow-sm">
             {renderSection()}
           </div>

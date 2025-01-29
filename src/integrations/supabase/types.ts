@@ -1017,6 +1017,54 @@ export type Database = {
           },
         ]
       }
+      utility_reading_periods: {
+        Row: {
+          created_at: string
+          end_day: number
+          id: string
+          landlord_id: string
+          property_id: string
+          start_day: number
+          updated_at: string
+          utility_type: Database["public"]["Enums"]["utility_reading_type"]
+        }
+        Insert: {
+          created_at?: string
+          end_day: number
+          id?: string
+          landlord_id: string
+          property_id: string
+          start_day: number
+          updated_at?: string
+          utility_type: Database["public"]["Enums"]["utility_reading_type"]
+        }
+        Update: {
+          created_at?: string
+          end_day?: number
+          id?: string
+          landlord_id?: string
+          property_id?: string
+          start_day?: number
+          updated_at?: string
+          utility_type?: Database["public"]["Enums"]["utility_reading_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "utility_reading_periods_landlord_id_fkey"
+            columns: ["landlord_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "utility_reading_periods_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1062,6 +1110,7 @@ export type Database = {
         | "invitation_accepted"
         | "tenant_assigned"
         | "tenancy_ended"
+      utility_reading_type: "electricity" | "water" | "gas"
     }
     CompositeTypes: {
       [_ in never]: never
