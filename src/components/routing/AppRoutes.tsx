@@ -8,6 +8,7 @@ import Payments from "@/pages/Payments";
 import Utilities from "@/pages/Utilities";
 import Chat from "@/pages/Chat";
 import Invoices from "@/pages/Invoices";
+import Maintenance from "@/pages/Maintenance";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import TenantRegistration from "@/pages/TenantRegistration";
 import { ResetPassword } from "@/components/auth/ResetPassword";
@@ -98,6 +99,14 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <Invoices />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/maintenance"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Maintenance />
           </ProtectedRoute>
         }
       />
