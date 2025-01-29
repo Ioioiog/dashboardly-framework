@@ -28,6 +28,14 @@ interface MeterReadingFormProps {
   onSuccess: () => void;
   userRole: "landlord" | "tenant";
   userId: string | null;
+  initialData?: {
+    id: string;
+    property_id: string;
+    reading_type: 'electricity' | 'water' | 'gas';
+    reading_value: number;
+    reading_date: string;
+    notes?: string;
+  };
 }
 
 interface FormData {
@@ -42,13 +50,14 @@ export function MeterReadingForm({
   properties,
   onSuccess,
   userRole,
-  userId
+  userId,
+  initialData
 }: MeterReadingFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormData>({
-    defaultValues: {
+    defaultValues: initialData || {
       reading_date: format(new Date(), 'yyyy-MM-dd'),
     },
   });
@@ -75,21 +84,41 @@ export function MeterReadingForm({
         tenant_id = tenancy.tenant_id;
       }
 
-      const { error: insertError } = await supabase
-        .from('meter_readings')
-        .insert({
-          ...data,
-          tenant_id,
-          created_by: userId,
-          updated_by: userId
+      if (initialData) {
+        // Update existing reading
+        const { error: updateError } = await supabase
+          .from('meter_readings')
+          .update({
+            ...data,
+            tenant_id,
+            updated_by: userId
+          })
+          .eq('id', initialData.id);
+
+        if (updateError) throw updateError;
+
+        toast({
+          title: "Success",
+          description: "Meter reading has been updated",
         });
+      } else {
+        // Insert new reading
+        const { error: insertError } = await supabase
+          .from('meter_readings')
+          .insert({
+            ...data,
+            tenant_id,
+            created_by: userId,
+            updated_by: userId
+          });
 
-      if (insertError) throw insertError;
+        if (insertError) throw insertError;
 
-      toast({
-        title: "Success",
-        description: "Meter reading has been recorded",
-      });
+        toast({
+          title: "Success",
+          description: "Meter reading has been recorded",
+        });
+      }
 
       onSuccess();
     } catch (error: any) {
@@ -198,7 +227,7 @@ export function MeterReadingForm({
         />
 
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save Reading"}
+          {isSubmitting ? "Saving..." : (initialData ? "Update Reading" : "Save Reading")}
         </Button>
       </form>
     </Form>

@@ -21,6 +21,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { MeterReadingForm } from "./MeterReadingForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -50,6 +57,7 @@ export function MeterReadingList({
 }: MeterReadingListProps) {
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedReading, setSelectedReading] = useState<MeterReading | null>(null);
 
   const handleDelete = async () => {
@@ -114,11 +122,8 @@ export function MeterReadingList({
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        // TODO: Implement edit functionality
-                        toast({
-                          title: "Coming Soon",
-                          description: "Edit functionality will be available soon",
-                        });
+                        setSelectedReading(reading);
+                        setEditDialogOpen(true);
                       }}
                     >
                       <Pencil className="h-4 w-4" />
@@ -155,6 +160,26 @@ export function MeterReadingList({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Meter Reading</DialogTitle>
+          </DialogHeader>
+          {selectedReading && (
+            <MeterReadingForm
+              properties={[{ id: selectedReading.property_id, name: selectedReading.property.name }]}
+              onSuccess={() => {
+                setEditDialogOpen(false);
+                onUpdate();
+              }}
+              userRole={userRole}
+              userId={null}
+              initialData={selectedReading}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
