@@ -37,6 +37,8 @@ export function ProviderList({ providers, onDelete, onEdit, isLoading }: Provide
   const [scrapingJobs, setScrapingJobs] = useState<Record<string, ScrapingJob>>({});
   const { toast } = useToast();
 
+  console.log('Providers with property details:', providers); // Debug log
+
   const handleScrape = async (providerId: string) => {
     try {
       console.log('Starting scrape for provider:', providerId);
