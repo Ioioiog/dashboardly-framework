@@ -208,7 +208,7 @@ export default function MaintenanceDialog({
   // Update existing request
   const updateMutation = useMutation({
     mutationFn: async (values: FormValues) => {
-      let imageUrls = values.images;
+      let imageUrls: string[] = values.images as string[];
       if (values.images?.length > 0 && values.images[0] instanceof File) {
         imageUrls = await handleImageUpload(values.images as File[]);
       }
@@ -222,7 +222,7 @@ export default function MaintenanceDialog({
         notes: values.notes,
         assigned_to: values.assigned_to,
         service_provider_notes: values.service_provider_notes,
-        images: Array.isArray(imageUrls) ? imageUrls : [],
+        images: imageUrls,
         tenant_id: values.tenant_id,
       };
 
