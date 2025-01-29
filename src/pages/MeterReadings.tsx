@@ -20,6 +20,10 @@ interface MeterReading {
   property: {
     name: string;
     address: string;
+    type: 'Apartment' | 'House' | 'Condo' | 'Commercial';
+    monthly_rent: number;
+    created_at: string;
+    updated_at: string;
   };
 }
 
@@ -43,7 +47,11 @@ const MeterReadings = () => {
           *,
           property:properties (
             name,
-            address
+            address,
+            type,
+            monthly_rent,
+            created_at,
+            updated_at
           )
         `)
         .order('reading_date', { ascending: false });
