@@ -12,7 +12,7 @@ interface MaintenanceRequest {
   priority: string;
   status: MaintenanceStatus;
   notes: string;
-  assigned_to: string;
+  assigned_to: string | null;
   service_provider_notes: string;
   images: string[];
   tenant_id: string;
@@ -64,6 +64,11 @@ export function useMaintenanceRequest(requestId?: string) {
 
   const createMutation = useMutation({
     mutationFn: async (values: any) => {
+      // Validate required UUIDs
+      if (!values.property_id || !values.tenant_id) {
+        throw new Error("Property and tenant IDs are required");
+      }
+
       let imageUrls: string[] = [];
       if (values.images?.length > 0 && values.images[0] instanceof File) {
         imageUrls = await handleImageUpload(values.images as File[]);
@@ -75,12 +80,14 @@ export function useMaintenanceRequest(requestId?: string) {
         property_id: values.property_id,
         priority: values.priority,
         status: values.status,
-        notes: values.notes,
-        assigned_to: values.assigned_to,
-        service_provider_notes: values.service_provider_notes,
+        notes: values.notes || "",
+        assigned_to: values.assigned_to || null,
+        service_provider_notes: values.service_provider_notes || "",
         images: imageUrls,
         tenant_id: values.tenant_id,
       };
+
+      console.log("Creating maintenance request with data:", newRequest);
 
       const { data, error } = await supabase
         .from("maintenance_requests")
@@ -100,7 +107,7 @@ export function useMaintenanceRequest(requestId?: string) {
       console.error("Error creating maintenance request:", error);
       toast({
         title: "Error",
-        description: "Failed to create maintenance request",
+        description: error instanceof Error ? error.message : "Failed to create maintenance request",
         variant: "destructive",
       });
     },
@@ -108,6 +115,10 @@ export function useMaintenanceRequest(requestId?: string) {
 
   const updateMutation = useMutation({
     mutationFn: async (values: any) => {
+      if (!requestId) {
+        throw new Error("Request ID is required for updates");
+      }
+
       let imageUrls: string[] = values.images as string[];
       if (values.images?.length > 0 && values.images[0] instanceof File) {
         imageUrls = await handleImageUpload(values.images as File[]);
@@ -119,12 +130,14 @@ export function useMaintenanceRequest(requestId?: string) {
         property_id: values.property_id,
         priority: values.priority,
         status: values.status,
-        notes: values.notes,
-        assigned_to: values.assigned_to,
-        service_provider_notes: values.service_provider_notes,
+        notes: values.notes || "",
+        assigned_to: values.assigned_to || null,
+        service_provider_notes: values.service_provider_notes || "",
         images: imageUrls,
         tenant_id: values.tenant_id,
       };
+
+      console.log("Updating maintenance request with data:", updatedRequest);
 
       const { data, error } = await supabase
         .from("maintenance_requests")
@@ -145,7 +158,7 @@ export function useMaintenanceRequest(requestId?: string) {
       console.error("Error updating maintenance request:", error);
       toast({
         title: "Error",
-        description: "Failed to update maintenance request",
+        description: error instanceof Error ? error.message : "Failed to update maintenance request",
         variant: "destructive",
       });
     },
