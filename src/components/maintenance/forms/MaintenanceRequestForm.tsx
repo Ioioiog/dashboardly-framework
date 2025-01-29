@@ -83,26 +83,33 @@ export function MaintenanceRequestForm({
   const processImages = (images: (string | File)[]): string[] => {
     if (!images) return [];
     
-    return images
-      .filter((image): image is string | File => {
-        if (!image) return false;
-        if (typeof image === "string" && image === "{}") return false;
-        return true;
-      })
-      .map(image => {
-        if (image instanceof File) {
-          return URL.createObjectURL(image);
-        }
-        return image as string;
-      });
+    console.log("Processing images:", images);
+    
+    const validImages = images.filter((image): image is string | File => {
+      if (!image) return false;
+      if (typeof image === "string") {
+        // Only accept valid URLs and reject empty objects
+        return image !== "{}" && image.startsWith("http");
+      }
+      return true;
+    });
+    
+    console.log("Valid images after filtering:", validImages);
+    
+    return validImages.map(image => {
+      if (image instanceof File) {
+        return URL.createObjectURL(image);
+      }
+      return image as string;
+    });
   };
 
   useEffect(() => {
     const images = form.watch("images") || [];
-    console.log("Processing images:", images);
+    console.log("Images in form:", images);
     
     const urls = processImages(images);
-    console.log("Generated URLs:", urls);
+    console.log("Generated image URLs:", urls);
     setImageUrls(urls);
 
     return () => {
@@ -118,6 +125,8 @@ export function MaintenanceRequestForm({
     const files = Array.from(e.target.files || []);
     const currentImages = form.getValues("images") || [];
     
+    console.log("Current images before upload:", currentImages);
+    
     // Filter out invalid entries from current images
     const validCurrentImages = currentImages.filter(img => 
       img && 
@@ -125,8 +134,11 @@ export function MaintenanceRequestForm({
       img !== "{}" && 
       img.startsWith("http")
     );
+    
+    console.log("Valid current images:", validCurrentImages);
 
     const totalImages = validCurrentImages.length + files.length;
+    console.log("Total images count:", totalImages);
 
     if (totalImages > MAX_IMAGES) {
       toast({
@@ -151,13 +163,23 @@ export function MaintenanceRequestForm({
       return true;
     });
 
-    form.setValue("images", [...validCurrentImages, ...validFiles]);
+    console.log("Valid files to upload:", validFiles);
+    
+    const newImages = [...validCurrentImages, ...validFiles];
+    console.log("Setting new images:", newImages);
+    
+    form.setValue("images", newImages);
   };
 
   const handleDeleteImage = (index: number) => {
     const currentImages = form.getValues("images");
+    console.log("Deleting image at index:", index);
+    console.log("Current images before deletion:", currentImages);
+    
     const newImages = [...currentImages];
     newImages.splice(index, 1);
+    
+    console.log("Images after deletion:", newImages);
     form.setValue("images", newImages);
   };
 
