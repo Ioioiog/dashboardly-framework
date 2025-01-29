@@ -6,6 +6,7 @@ import { PropertySelect } from "@/components/documents/PropertySelect";
 import { useProperties } from "@/hooks/useProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface UtilityProvider {
   id: string;
@@ -33,13 +34,26 @@ export function ProviderForm({ onClose, onSuccess, provider }: ProviderFormProps
     password: "",
     property_id: provider?.property_id || "",
     utility_type: provider?.utility_type || "electricity",
-    start_day: provider?.start_day || 1,
-    end_day: provider?.end_day || 28
+    start_day: provider?.start_day?.toString() || "1",
+    end_day: provider?.end_day?.toString() || "28"
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    const startDayNum = parseInt(formData.start_day);
+    const endDayNum = parseInt(formData.end_day);
+
+    if (startDayNum < 1 || startDayNum > 31 || endDayNum < 1 || endDayNum > 31) {
+      toast({
+        title: "Error",
+        description: "Days must be between 1 and 31",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -54,11 +68,11 @@ export function ProviderForm({ onClose, onSuccess, provider }: ProviderFormProps
           .update({
             provider_name: formData.provider_name,
             username: formData.username,
-            encrypted_password: formData.password,
+            encrypted_password: formData.password || undefined,
             property_id: formData.property_id || null,
             utility_type: formData.utility_type,
-            start_day: formData.start_day,
-            end_day: formData.end_day
+            start_day: startDayNum,
+            end_day: endDayNum
           })
           .eq('id', provider.id) :
         supabase
@@ -70,8 +84,8 @@ export function ProviderForm({ onClose, onSuccess, provider }: ProviderFormProps
             property_id: formData.property_id || null,
             landlord_id: user.id,
             utility_type: formData.utility_type,
-            start_day: formData.start_day,
-            end_day: formData.end_day
+            start_day: startDayNum,
+            end_day: endDayNum
           });
 
       const { error } = await operation;
@@ -135,6 +149,51 @@ export function ProviderForm({ onClose, onSuccess, provider }: ProviderFormProps
           selectedPropertyId={formData.property_id}
           onPropertyChange={(value) => setFormData({ ...formData, property_id: value })}
         />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="utility_type">Utility Type</Label>
+        <Select
+          value={formData.utility_type}
+          onValueChange={(value: 'electricity' | 'water' | 'gas') => 
+            setFormData({ ...formData, utility_type: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select utility type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="electricity">Electricity</SelectItem>
+            <SelectItem value="water">Water</SelectItem>
+            <SelectItem value="gas">Gas</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="start_day">Reading Period Start Day</Label>
+          <Input
+            id="start_day"
+            type="number"
+            min="1"
+            max="31"
+            value={formData.start_day}
+            onChange={(e) => setFormData({ ...formData, start_day: e.target.value })}
+            placeholder="Enter start day (1-31)"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="end_day">Reading Period End Day</Label>
+          <Input
+            id="end_day"
+            type="number"
+            min="1"
+            max="31"
+            value={formData.end_day}
+            onChange={(e) => setFormData({ ...formData, end_day: e.target.value })}
+            placeholder="Enter end day (1-31)"
+            required
+          />
+        </div>
       </div>
       <div className="flex gap-4">
         <Button 
