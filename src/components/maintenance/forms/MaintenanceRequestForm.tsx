@@ -23,6 +23,8 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
+import { X } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface Property {
   id: string;
@@ -62,6 +64,30 @@ export function MaintenanceRequestForm({
   const isExistingRequest = defaultValues.title !== "";
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: File[] | string[]) => void) => {
+    const files = Array.from(e.target.files || []);
+    const currentImages = form.getValues("images") || [];
+    const totalImages = currentImages.length + files.length;
+
+    if (totalImages > 3) {
+      toast({
+        title: "Error",
+        description: "You can only upload up to 3 images",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    onChange([...currentImages, ...files]);
+  };
+
+  const handleDeleteImage = (index: number) => {
+    const currentImages = form.getValues("images");
+    const newImages = [...currentImages];
+    newImages.splice(index, 1);
+    form.setValue("images", newImages);
+  };
+
   return (
     <>
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
@@ -83,34 +109,34 @@ export function MaintenanceRequestForm({
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">{t("maintenance.form.requestDetails")}</h3>
               
-            <FormField
-              control={form.control}
-              name="property_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("maintenance.property")}</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={userRole === "landlord" || isExistingRequest}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a property" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {properties?.map((property) => (
-                        <SelectItem key={property.id} value={property.id}>
-                          {property.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="property_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("maintenance.property")}</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={userRole === "landlord" || isExistingRequest}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a property" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {properties?.map((property) => (
+                          <SelectItem key={property.id} value={property.id}>
+                            {property.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
             <FormField
               control={form.control}
@@ -178,18 +204,15 @@ export function MaintenanceRequestForm({
                 name="images"
                 render={({ field: { onChange, value, ...field } }) => (
                   <FormItem>
-                    <FormLabel>Images</FormLabel>
+                    <FormLabel>Images (Max 3)</FormLabel>
                     <FormControl>
                       <div className="space-y-4">
                         <Input
                           type="file"
                           accept="image/*"
                           multiple
-                          disabled={userRole === "landlord"}
-                          onChange={(e) => {
-                            const files = Array.from(e.target.files || []);
-                            onChange(files);
-                          }}
+                          disabled={userRole === "landlord" || (value && value.length >= 3)}
+                          onChange={(e) => handleImageUpload(e, onChange)}
                           {...field}
                         />
                         {/* Display existing images */}
@@ -198,19 +221,28 @@ export function MaintenanceRequestForm({
                             {(value as (File | string)[]).map((image, index) => (
                               <div 
                                 key={index} 
-                                className="relative aspect-square cursor-pointer hover:opacity-90 transition-opacity"
-                                onClick={() => {
-                                  const imageUrl = typeof image === 'string' 
-                                    ? image 
-                                    : URL.createObjectURL(image);
-                                  setSelectedImage(imageUrl);
-                                }}
+                                className="relative aspect-square group"
                               >
                                 <img
                                   src={typeof image === 'string' ? image : URL.createObjectURL(image)}
                                   alt={`Uploaded image ${index + 1}`}
-                                  className="rounded-lg object-cover w-full h-full"
+                                  className="rounded-lg object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => {
+                                    const imageUrl = typeof image === 'string' 
+                                      ? image 
+                                      : URL.createObjectURL(image);
+                                    setSelectedImage(imageUrl);
+                                  }}
                                 />
+                                {userRole !== "landlord" && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteImage(index)}
+                                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </button>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -226,7 +258,6 @@ export function MaintenanceRequestForm({
             {/* Right Column - Landlord Actions */}
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">{t("maintenance.form.landlordActions")}</h3>
-              
             <FormField
               control={form.control}
               name="status"
