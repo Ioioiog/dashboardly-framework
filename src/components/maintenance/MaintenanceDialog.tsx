@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
@@ -24,21 +24,25 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useAuthState } from "@/hooks/useAuthState";
 import { Separator } from "@/components/ui/separator";
 
 interface MaintenanceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  requestId?: string; // Optional - if provided, we're editing an existing request
 }
 
 export default function MaintenanceDialog({
   open,
   onOpenChange,
+  requestId,
 }: MaintenanceDialogProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { userRole } = useUserRole();
+  const { currentUserId } = useAuthState();
   
   const form = useForm({
     defaultValues: {
@@ -51,8 +55,31 @@ export default function MaintenanceDialog({
       assigned_to: "",
       service_provider_notes: "",
       images: [] as File[],
+      tenant_id: currentUserId, // Auto-fill tenant_id for new requests
     },
   });
+
+  // Fetch existing request data if requestId is provided
+  const { data: existingRequest } = useQuery({
+    queryKey: ["maintenance-request", requestId],
+    enabled: !!requestId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("maintenance_requests")
+        .select("*")
+        .eq("id", requestId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Load existing request data into form
+  useEffect(() => {
+    if (existingRequest) {
+      form.reset(existingRequest);
+    }
+  }, [existingRequest, form]);
 
   const { data: properties } = useQuery({
     queryKey: ["properties"],
@@ -104,9 +131,9 @@ export default function MaintenanceDialog({
     return uploadedUrls;
   }, []);
 
+  // Create new request
   const createMutation = useMutation({
     mutationFn: async (values: any) => {
-      // Handle image uploads first if there are any
       let imageUrls: string[] = [];
       if (values.images?.length > 0) {
         imageUrls = await handleImageUpload(values.images);
@@ -138,8 +165,40 @@ export default function MaintenanceDialog({
     },
   });
 
+  // Update existing request
+  const updateMutation = useMutation({
+    mutationFn: async (values: any) => {
+      const { data, error } = await supabase
+        .from("maintenance_requests")
+        .update(values)
+        .eq("id", requestId)
+        .select();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maintenance-requests"] });
+      toast({
+        title: "Success",
+        description: "Maintenance request updated successfully",
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating maintenance request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update maintenance request",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (values: any) => {
-    createMutation.mutate(values);
+    if (requestId) {
+      updateMutation.mutate(values);
+    } else {
+      createMutation.mutate(values);
+    }
   };
 
   return (

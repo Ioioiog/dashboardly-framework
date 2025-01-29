@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import MaintenanceList from "@/components/maintenance/MaintenanceList";
 import MaintenanceDialog from "@/components/maintenance/MaintenanceDialog";
 import MaintenanceFilters from "@/components/maintenance/MaintenanceFilters";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { useQueryClient } from "@tanstack/react-query";
 
 type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
 
@@ -21,12 +22,37 @@ interface Filters {
 export default function Maintenance() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
   const [filters, setFilters] = React.useState<Filters>({
     status: "all",
     priority: "all",
     propertyId: "all",
   });
+
+  // Set up real-time subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('maintenance-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'maintenance_requests'
+        },
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const { data: maintenanceRequests, isLoading } = useQuery({
     queryKey: ["maintenance-requests", filters],
@@ -62,6 +88,16 @@ export default function Maintenance() {
     },
   });
 
+  const handleRequestClick = (requestId: string) => {
+    setSelectedRequestId(requestId);
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setSelectedRequestId(undefined);
+    setIsDialogOpen(false);
+  };
+
   return (
     <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
@@ -91,12 +127,14 @@ export default function Maintenance() {
             <MaintenanceList
               requests={maintenanceRequests || []}
               isLoading={isLoading}
+              onRequestClick={handleRequestClick}
             />
           )}
 
           <MaintenanceDialog
             open={isDialogOpen}
-            onOpenChange={setIsDialogOpen}
+            onOpenChange={handleDialogClose}
+            requestId={selectedRequestId}
           />
         </div>
       </div>
