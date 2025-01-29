@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
@@ -19,6 +19,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 
 interface Property {
   id: string;
@@ -56,14 +60,29 @@ export function MaintenanceRequestForm({
   const { t } = useTranslation();
   const form = useForm<MaintenanceFormValues>({ defaultValues });
   const isExistingRequest = defaultValues.title !== "";
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column - Tenant Details */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">{t("maintenance.form.requestDetails")}</h3>
+    <>
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-3xl">
+          {selectedImage && (
+            <img
+              src={selectedImage}
+              alt="Maintenance request"
+              className="w-full h-auto rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left Column - Tenant Details */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">{t("maintenance.form.requestDetails")}</h3>
+              
             <FormField
               control={form.control}
               name="property_id"
@@ -154,51 +173,60 @@ export function MaintenanceRequestForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="images"
-              render={({ field: { onChange, value, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Images</FormLabel>
-                  <FormControl>
-                    <div className="space-y-4">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        disabled={userRole === "landlord"}
-                        onChange={(e) => {
-                          const files = Array.from(e.target.files || []);
-                          onChange(files);
-                        }}
-                        {...field}
-                      />
-                      {/* Display existing images */}
-                      {value && value.length > 0 && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                          {(value as (File | string)[]).map((image, index) => (
-                            <div key={index} className="relative aspect-square">
-                              <img
-                                src={typeof image === 'string' ? image : URL.createObjectURL(image)}
-                                alt={`Uploaded image ${index + 1}`}
-                                className="rounded-lg object-cover w-full h-full"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+              <FormField
+                control={form.control}
+                name="images"
+                render={({ field: { onChange, value, ...field } }) => (
+                  <FormItem>
+                    <FormLabel>Images</FormLabel>
+                    <FormControl>
+                      <div className="space-y-4">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          disabled={userRole === "landlord"}
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            onChange(files);
+                          }}
+                          {...field}
+                        />
+                        {/* Display existing images */}
+                        {value && value.length > 0 && (
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                            {(value as (File | string)[]).map((image, index) => (
+                              <div 
+                                key={index} 
+                                className="relative aspect-square cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => {
+                                  const imageUrl = typeof image === 'string' 
+                                    ? image 
+                                    : URL.createObjectURL(image);
+                                  setSelectedImage(imageUrl);
+                                }}
+                              >
+                                <img
+                                  src={typeof image === 'string' ? image : URL.createObjectURL(image)}
+                                  alt={`Uploaded image ${index + 1}`}
+                                  className="rounded-lg object-cover w-full h-full"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-          {/* Right Column - Landlord Actions */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">{t("maintenance.form.landlordActions")}</h3>
-            
+            {/* Right Column - Landlord Actions */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">{t("maintenance.form.landlordActions")}</h3>
+              
             <FormField
               control={form.control}
               name="status"
@@ -291,15 +319,16 @@ export function MaintenanceRequestForm({
                 </FormItem>
               )}
             />
+            </div>
           </div>
-        </div>
 
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="submit">
-            {isExistingRequest ? "Update Request" : "Create Request"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="submit">
+              {isExistingRequest ? "Update Request" : "Create Request"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 }
