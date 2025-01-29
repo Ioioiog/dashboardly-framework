@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
@@ -50,6 +50,7 @@ export default function MaintenanceDialog({
       notes: "",
       assigned_to: "",
       service_provider_notes: "",
+      images: [] as File[],
     },
   });
 
@@ -77,11 +78,43 @@ export default function MaintenanceDialog({
     },
   });
 
+  const handleImageUpload = useCallback(async (files: File[]) => {
+    const uploadedUrls: string[] = [];
+    
+    for (const file of files) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('maintenance-images')
+        .upload(fileName, file);
+        
+      if (uploadError) {
+        console.error('Error uploading file:', uploadError);
+        continue;
+      }
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('maintenance-images')
+        .getPublicUrl(fileName);
+        
+      uploadedUrls.push(publicUrl);
+    }
+    
+    return uploadedUrls;
+  }, []);
+
   const createMutation = useMutation({
     mutationFn: async (values: any) => {
+      // Handle image uploads first if there are any
+      let imageUrls: string[] = [];
+      if (values.images?.length > 0) {
+        imageUrls = await handleImageUpload(values.images);
+      }
+
       const { data, error } = await supabase
         .from("maintenance_requests")
-        .insert([values])
+        .insert([{ ...values, images: imageUrls }])
         .select();
       if (error) throw error;
       return data;
@@ -210,6 +243,30 @@ export default function MaintenanceDialog({
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="images"
+                  render={({ field: { onChange, value, ...field } }) => (
+                    <FormItem>
+                      <FormLabel>Images</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          disabled={userRole === "landlord"}
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            onChange(files);
+                          }}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               {/* Right Column - Landlord Actions */}
@@ -309,6 +366,7 @@ export default function MaintenanceDialog({
                   )}
                 />
               </div>
+
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">
