@@ -980,32 +980,47 @@ export type Database = {
         Row: {
           created_at: string
           encrypted_password: string
+          end_day: number | null
           id: string
           landlord_id: string
           property_id: string | null
           provider_name: string
+          start_day: number | null
           updated_at: string
           username: string
+          utility_type:
+            | Database["public"]["Enums"]["utility_reading_type"]
+            | null
         }
         Insert: {
           created_at?: string
           encrypted_password: string
+          end_day?: number | null
           id?: string
           landlord_id: string
           property_id?: string | null
           provider_name: string
+          start_day?: number | null
           updated_at?: string
           username: string
+          utility_type?:
+            | Database["public"]["Enums"]["utility_reading_type"]
+            | null
         }
         Update: {
           created_at?: string
           encrypted_password?: string
+          end_day?: number | null
           id?: string
           landlord_id?: string
           property_id?: string | null
           provider_name?: string
+          start_day?: number | null
           updated_at?: string
           username?: string
+          utility_type?:
+            | Database["public"]["Enums"]["utility_reading_type"]
+            | null
         }
         Relationships: [
           {
