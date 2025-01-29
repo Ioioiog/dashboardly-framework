@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import MaintenanceList from "@/components/maintenance/MaintenanceList";
 import MaintenanceDialog from "@/components/maintenance/MaintenanceDialog";
 import MaintenanceFilters from "@/components/maintenance/MaintenanceFilters";
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 
 type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
 
@@ -62,38 +63,43 @@ export default function Maintenance() {
   });
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{t("maintenance.title")}</h1>
-        <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          {t("maintenance.newRequest")}
-        </Button>
-      </div>
+    <div className="flex h-screen bg-dashboard-background">
+      <DashboardSidebar />
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto p-6 space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">{t("maintenance.title")}</h1>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t("maintenance.newRequest")}
+            </Button>
+          </div>
 
-      <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
+          <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
 
-      {maintenanceRequests?.length === 0 && !isLoading ? (
-        <div className="text-center py-12">
-          <AlertTriangle className="mx-auto h-12 w-12 text-yellow-500" />
-          <h3 className="mt-4 text-lg font-semibold">
-            {t("maintenance.noRequests")}
-          </h3>
-          <p className="mt-2 text-gray-500">
-            {t("maintenance.createRequestPrompt")}
-          </p>
+          {maintenanceRequests?.length === 0 && !isLoading ? (
+            <div className="text-center py-12">
+              <AlertTriangle className="mx-auto h-12 w-12 text-yellow-500" />
+              <h3 className="mt-4 text-lg font-semibold">
+                {t("maintenance.noRequests")}
+              </h3>
+              <p className="mt-2 text-gray-500">
+                {t("maintenance.createRequestPrompt")}
+              </p>
+            </div>
+          ) : (
+            <MaintenanceList
+              requests={maintenanceRequests || []}
+              isLoading={isLoading}
+            />
+          )}
+
+          <MaintenanceDialog
+            open={isDialogOpen}
+            onOpenChange={setIsDialogOpen}
+          />
         </div>
-      ) : (
-        <MaintenanceList
-          requests={maintenanceRequests || []}
-          isLoading={isLoading}
-        />
-      )}
-
-      <MaintenanceDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-      />
+      </div>
     </div>
   );
 }
