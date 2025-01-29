@@ -1,31 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { X } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { ImageUpload } from "./ImageUpload";
+import { RequestDetails } from "./RequestDetails";
+import { LandlordFields } from "./LandlordFields";
 
 interface Property {
   id: string;
@@ -53,10 +32,6 @@ interface MaintenanceRequestFormProps {
   serviceProviders?: Array<{ id: string; first_name: string; last_name: string; }>;
 }
 
-const MAX_IMAGES = 3;
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
 export function MaintenanceRequestForm({
   defaultValues,
   onSubmit,
@@ -64,394 +39,51 @@ export function MaintenanceRequestForm({
   userRole,
   serviceProviders,
 }: MaintenanceRequestFormProps) {
-  const { t } = useTranslation();
   const form = useForm<MaintenanceFormValues>({ defaultValues });
   const isExistingRequest = defaultValues.title !== "";
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-
-  const validateImage = (file: File): string | null => {
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      return "Invalid file type. Please upload an image (JPEG, PNG, GIF, or WebP)";
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      return "File is too large. Maximum size is 5MB";
-    }
-    return null;
-  };
-
-  const processImages = (images: (string | File)[]): string[] => {
-    if (!images) return [];
-    
-    console.log("Processing images:", images);
-    
-    // Filter out null, undefined, and empty objects
-    const validImages = images.filter((image): image is string | File => {
-      if (!image) return false;
-      if (typeof image === "string") {
-        return image !== "{}" && image.startsWith("http");
-      }
-      return image instanceof File;
-    });
-    
-    console.log("Valid images after filtering:", validImages);
-    
-    return validImages.map(image => {
-      if (image instanceof File) {
-        return URL.createObjectURL(image);
-      }
-      return image as string;
-    });
-  };
-
-  useEffect(() => {
-    const images = form.watch("images") || [];
-    console.log("Images in form:", images);
-    
-    const urls = processImages(images);
-    console.log("Generated image URLs:", urls);
-    setImageUrls(urls);
-
-    return () => {
-      // Cleanup object URLs on unmount
-      urls.forEach(url => {
-        if (url.startsWith('blob:')) {
-          URL.revokeObjectURL(url);
-        }
-      });
-    };
-  }, [form.watch("images")]);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const currentImages = form.getValues("images") || [];
-    
-    console.log("Current images before upload:", currentImages);
-    
-    // Filter out invalid entries and empty objects
-    const validCurrentImages = currentImages.filter(img => 
-      img && 
-      typeof img === "string" && 
-      img !== "{}" && 
-      img.startsWith("http")
-    );
-    
-    console.log("Valid current images:", validCurrentImages);
-
-    const totalImages = validCurrentImages.length + files.length;
-    console.log("Total images count:", totalImages);
-
-    if (totalImages > MAX_IMAGES) {
-      toast({
-        title: "Error",
-        description: `You can only upload up to ${MAX_IMAGES} images`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate each file
-    const validFiles = files.filter(file => {
-      const error = validateImage(file);
-      if (error) {
-        toast({
-          title: "Error",
-          description: error,
-          variant: "destructive",
-        });
-        return false;
-      }
-      return true;
-    });
-
-    console.log("Valid files to upload:", validFiles);
-    
-    // Create a new array with both existing valid images and new files
-    const newImages = [...validCurrentImages, ...validFiles];
-    console.log("Setting new images:", newImages);
-    
-    form.setValue("images", newImages);
-  };
-
-  const handleDeleteImage = (index: number) => {
-    const currentImages = form.getValues("images");
-    console.log("Deleting image at index:", index);
-    console.log("Current images before deletion:", currentImages);
-    
-    const newImages = [...currentImages];
-    newImages.splice(index, 1);
-    
-    console.log("Images after deletion:", newImages);
-    form.setValue("images", newImages);
-  };
-
-  // ... keep existing code (form JSX structure)
 
   return (
-    <>
-      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogTitle>Image Preview</DialogTitle>
-          {selectedImage && (
-            <img
-              src={selectedImage}
-              alt="Maintenance request"
-              className="w-full h-auto rounded-lg"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left Column - Request Details */}
+          <div className="space-y-4">
+            <RequestDetails
+              form={form}
+              properties={properties}
+              userRole={userRole}
+              isExistingRequest={isExistingRequest}
             />
-          )}
-        </DialogContent>
-      </Dialog>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Column - Request Details */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg">{t("maintenance.form.requestDetails")}</h3>
-              
-              <FormField
-                control={form.control}
-                name="property_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("maintenance.property")}</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={userRole === "landlord" || isExistingRequest}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a property" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {properties?.map((property) => (
-                          <SelectItem key={property.id} value={property.id}>
-                            {property.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled={userRole === "landlord"} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} disabled={userRole === "landlord"} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Priority</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={userRole === "landlord"}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="low">
-                          {t("maintenance.priority.low")}
-                        </SelectItem>
-                        <SelectItem value="medium">
-                          {t("maintenance.priority.medium")}
-                        </SelectItem>
-                        <SelectItem value="high">
-                          {t("maintenance.priority.high")}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="images"
-                render={({ field: { onChange, value, ...field } }) => (
-                  <FormItem>
-                    <FormLabel>Images (Max {MAX_IMAGES})</FormLabel>
-                    <FormControl>
-                      <div className="space-y-4">
-                        <Input
-                          type="file"
-                          accept={ALLOWED_IMAGE_TYPES.join(',')}
-                          multiple
-                          disabled={userRole === "landlord" || imageUrls.length >= MAX_IMAGES}
-                          onChange={handleImageUpload}
-                          {...field}
-                        />
-                        {imageUrls.length > 0 && (
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                            {imageUrls.map((imageUrl, index) => (
-                              <div 
-                                key={index} 
-                                className="relative aspect-square group"
-                              >
-                                <img
-                                  src={imageUrl}
-                                  alt={`Uploaded image ${index + 1}`}
-                                  className="rounded-lg object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
-                                  onClick={() => setSelectedImage(imageUrl)}
-                                />
-                                {userRole !== "landlord" && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteImage(index)}
-                                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </button>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={userRole !== "landlord"}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="in_progress">In Progress</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="assigned_to"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Assign To</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={userRole !== "landlord"}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select service provider" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {serviceProviders?.map((provider) => (
-                          <SelectItem key={provider.id} value={provider.id}>
-                            {`${provider.first_name} ${provider.last_name}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Internal Notes</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        {...field} 
-                        disabled={userRole !== "landlord"}
-                        placeholder="Add internal notes about this request"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="service_provider_notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Service Provider Instructions</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        {...field} 
-                        disabled={userRole !== "landlord"}
-                        placeholder="Add instructions for the service provider"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="images"
+              render={({ field }) => (
+                <ImageUpload
+                  images={field.value}
+                  onChange={field.onChange}
+                  disabled={userRole === "landlord"}
+                />
+              )}
+            />
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="submit">
-              {isExistingRequest ? "Update Request" : "Create Request"}
-            </Button>
+          {/* Right Column - Landlord Fields */}
+          <div className="space-y-4">
+            <LandlordFields
+              form={form}
+              serviceProviders={serviceProviders}
+              userRole={userRole}
+            />
           </div>
-        </form>
-      </Form>
-    </>
+        </div>
+
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button type="submit">
+            {isExistingRequest ? "Update Request" : "Create Request"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
