@@ -85,13 +85,13 @@ export function MaintenanceRequestForm({
     
     console.log("Processing images:", images);
     
+    // Filter out null, undefined, and empty objects
     const validImages = images.filter((image): image is string | File => {
       if (!image) return false;
       if (typeof image === "string") {
-        // Only accept valid URLs and reject empty objects
         return image !== "{}" && image.startsWith("http");
       }
-      return true;
+      return image instanceof File;
     });
     
     console.log("Valid images after filtering:", validImages);
@@ -113,6 +113,7 @@ export function MaintenanceRequestForm({
     setImageUrls(urls);
 
     return () => {
+      // Cleanup object URLs on unmount
       urls.forEach(url => {
         if (url.startsWith('blob:')) {
           URL.revokeObjectURL(url);
@@ -127,7 +128,7 @@ export function MaintenanceRequestForm({
     
     console.log("Current images before upload:", currentImages);
     
-    // Filter out invalid entries from current images
+    // Filter out invalid entries and empty objects
     const validCurrentImages = currentImages.filter(img => 
       img && 
       typeof img === "string" && 
@@ -165,6 +166,7 @@ export function MaintenanceRequestForm({
 
     console.log("Valid files to upload:", validFiles);
     
+    // Create a new array with both existing valid images and new files
     const newImages = [...validCurrentImages, ...validFiles];
     console.log("Setting new images:", newImages);
     
