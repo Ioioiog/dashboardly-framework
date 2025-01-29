@@ -5,11 +5,10 @@ import { AccountSettings } from "@/components/settings/sections/AccountSettings"
 import { FinancialSettings } from "@/components/settings/sections/FinancialSettings";
 import { PropertyProvidersSettings } from "@/components/settings/sections/PropertyProvidersSettings";
 import { PreferencesSettings } from "@/components/settings/sections/PreferencesSettings";
-import { UtilityReadingPeriodsSettings } from "@/components/settings/sections/UtilityReadingPeriodsSettings";
-import { Settings2, Wallet, Building2, Languages, Calendar } from "lucide-react";
+import { Settings2, Wallet, Building2, Languages } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type SettingsSection = 'account' | 'financial' | 'providers' | 'reading-periods' | 'preferences';
+type SettingsSection = 'account' | 'financial' | 'providers' | 'preferences';
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState<SettingsSection>('account');
@@ -31,11 +30,6 @@ const Settings = () => {
       icon: Building2,
     },
     {
-      id: 'reading-periods' as SettingsSection,
-      label: 'Reading Periods',
-      icon: Calendar,
-    },
-    {
       id: 'preferences' as SettingsSection,
       label: 'Preferences',
       icon: Languages,
@@ -50,8 +44,6 @@ const Settings = () => {
         return <FinancialSettings />;
       case 'providers':
         return <PropertyProvidersSettings />;
-      case 'reading-periods':
-        return <UtilityReadingPeriodsSettings />;
       case 'preferences':
         return <PreferencesSettings />;
       default:
