@@ -161,17 +161,33 @@ export function MaintenanceRequestForm({
                 <FormItem>
                   <FormLabel>Images</FormLabel>
                   <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      disabled={userRole === "landlord"}
-                      onChange={(e) => {
-                        const files = Array.from(e.target.files || []);
-                        onChange(files);
-                      }}
-                      {...field}
-                    />
+                    <div className="space-y-4">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        disabled={userRole === "landlord"}
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          onChange(files);
+                        }}
+                        {...field}
+                      />
+                      {/* Display existing images */}
+                      {value && value.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                          {(value as (File | string)[]).map((image, index) => (
+                            <div key={index} className="relative aspect-square">
+                              <img
+                                src={typeof image === 'string' ? image : URL.createObjectURL(image)}
+                                alt={`Uploaded image ${index + 1}`}
+                                className="rounded-lg object-cover w-full h-full"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
