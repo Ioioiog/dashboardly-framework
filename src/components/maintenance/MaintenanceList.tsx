@@ -14,7 +14,7 @@ import { format } from "date-fns";
 interface MaintenanceRequest {
   id: string;
   title: string;
-  status: string;
+  status: "pending" | "in_progress" | "completed" | "cancelled";
   priority: string;
   created_at: string;
   property: { name: string };
@@ -32,6 +32,34 @@ export default function MaintenanceList({ requests, isLoading }: MaintenanceList
   if (isLoading) {
     return <div>Loading...</div>;
   }
+
+  const getStatusVariant = (status: MaintenanceRequest['status']) => {
+    switch (status) {
+      case 'completed':
+        return 'default';
+      case 'pending':
+        return 'secondary';
+      case 'in_progress':
+        return 'outline';
+      case 'cancelled':
+        return 'destructive';
+      default:
+        return 'secondary';
+    }
+  };
+
+  const getPriorityVariant = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'destructive';
+      case 'medium':
+        return 'secondary';
+      case 'low':
+        return 'outline';
+      default:
+        return 'secondary';
+    }
+  };
 
   return (
     <Table>
@@ -52,15 +80,12 @@ export default function MaintenanceList({ requests, isLoading }: MaintenanceList
             <TableCell>{request.property.name}</TableCell>
             <TableCell>{request.title}</TableCell>
             <TableCell>
-              <Badge variant={request.status === "pending" ? "default" : "success"}>
+              <Badge variant={getStatusVariant(request.status)}>
                 {t(`maintenance.status.${request.status}`)}
               </Badge>
             </TableCell>
             <TableCell>
-              <Badge variant={
-                request.priority === "high" ? "destructive" : 
-                request.priority === "medium" ? "warning" : "default"
-              }>
+              <Badge variant={getPriorityVariant(request.priority)}>
                 {t(`maintenance.priority.${request.priority}`)}
               </Badge>
             </TableCell>

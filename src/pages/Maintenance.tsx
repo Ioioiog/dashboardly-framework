@@ -9,11 +9,19 @@ import MaintenanceList from "@/components/maintenance/MaintenanceList";
 import MaintenanceDialog from "@/components/maintenance/MaintenanceDialog";
 import MaintenanceFilters from "@/components/maintenance/MaintenanceFilters";
 
+type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
+
+interface Filters {
+  status: MaintenanceStatus | "all";
+  priority: string;
+  propertyId: string;
+}
+
 export default function Maintenance() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [filters, setFilters] = React.useState({
+  const [filters, setFilters] = React.useState<Filters>({
     status: "all",
     priority: "all",
     propertyId: "all",
