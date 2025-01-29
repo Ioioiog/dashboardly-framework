@@ -25,7 +25,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useAuthState } from "@/hooks/useAuthState";
-import { Separator } from "@/components/ui/separator";
+
+type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -38,11 +39,24 @@ interface FormValues {
   description: string;
   property_id: string;
   priority: string;
-  status: string;
+  status: MaintenanceStatus;
   notes: string;
   assigned_to: string;
   service_provider_notes: string;
   images: File[] | string[];
+  tenant_id: string;
+}
+
+interface MaintenanceRequest {
+  title: string;
+  description: string;
+  property_id: string;
+  priority: string;
+  status: MaintenanceStatus;
+  notes: string;
+  assigned_to: string;
+  service_provider_notes: string;
+  images: string[];
   tenant_id: string;
 }
 
@@ -68,7 +82,7 @@ export default function MaintenanceDialog({
       assigned_to: "",
       service_provider_notes: "",
       images: [],
-      tenant_id: currentUserId || "", // Auto-fill tenant_id for new requests
+      tenant_id: currentUserId || "",
     },
   });
 
@@ -152,9 +166,22 @@ export default function MaintenanceDialog({
         imageUrls = await handleImageUpload(values.images as File[]);
       }
 
+      const newRequest: MaintenanceRequest = {
+        title: values.title,
+        description: values.description,
+        property_id: values.property_id,
+        priority: values.priority,
+        status: values.status,
+        notes: values.notes,
+        assigned_to: values.assigned_to,
+        service_provider_notes: values.service_provider_notes,
+        images: imageUrls,
+        tenant_id: values.tenant_id,
+      };
+
       const { data, error } = await supabase
         .from("maintenance_requests")
-        .insert([{ ...values, images: imageUrls }])
+        .insert(newRequest)
         .select();
       if (error) throw error;
       return data;
@@ -186,9 +213,22 @@ export default function MaintenanceDialog({
         imageUrls = await handleImageUpload(values.images as File[]);
       }
 
+      const updatedRequest: MaintenanceRequest = {
+        title: values.title,
+        description: values.description,
+        property_id: values.property_id,
+        priority: values.priority,
+        status: values.status,
+        notes: values.notes,
+        assigned_to: values.assigned_to,
+        service_provider_notes: values.service_provider_notes,
+        images: Array.isArray(imageUrls) ? imageUrls : [],
+        tenant_id: values.tenant_id,
+      };
+
       const { data, error } = await supabase
         .from("maintenance_requests")
-        .update({ ...values, images: imageUrls })
+        .update(updatedRequest)
         .eq("id", requestId)
         .select();
       if (error) throw error;
