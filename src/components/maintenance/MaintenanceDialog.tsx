@@ -142,6 +142,20 @@ export default function MaintenanceDialog({
     },
   });
 
+  // Add back the service providers query
+  const { data: serviceProviders } = useQuery({
+    queryKey: ["service-providers"],
+    enabled: userRole === "landlord",
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name")
+        .eq("role", "service_provider");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const handleImageUpload = useCallback(async (files: File[]) => {
     const uploadedUrls: string[] = [];
     
