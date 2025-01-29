@@ -72,13 +72,15 @@ export function MaintenanceRequestForm({
   useEffect(() => {
     console.log("Images changed:", images);
     
-    // Create URLs for all images (both Files and strings)
-    const urls = images.map(image => {
-      if (typeof image === 'string') {
-        return image;
-      }
-      return URL.createObjectURL(image as File);
-    });
+    // Filter out any invalid images and create URLs
+    const urls = images
+      .filter(image => image !== null && image !== undefined && image !== "{}")
+      .map(image => {
+        if (typeof image === 'string') {
+          return image;
+        }
+        return URL.createObjectURL(image as File);
+      });
     
     console.log("Generated URLs:", urls);
     setImageUrls(urls);
