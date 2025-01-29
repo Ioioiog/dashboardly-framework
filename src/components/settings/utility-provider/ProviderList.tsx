@@ -10,6 +10,10 @@ interface UtilityProvider {
   provider_name: string;
   username: string;
   property_id?: string;
+  property?: {
+    name: string;
+    address: string;
+  };
   utility_type?: 'electricity' | 'water' | 'gas';
   start_day?: number;
   end_day?: number;
@@ -136,6 +140,11 @@ export function ProviderList({ providers, onDelete, onEdit, isLoading }: Provide
               {provider.utility_type && (
                 <p className="text-sm text-muted-foreground capitalize">
                   Type: {provider.utility_type}
+                </p>
+              )}
+              {provider.property && (
+                <p className="text-sm text-muted-foreground">
+                  Property: {provider.property.name} ({provider.property.address})
                 </p>
               )}
               {provider.start_day && provider.end_day && (
