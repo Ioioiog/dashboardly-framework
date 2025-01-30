@@ -16,20 +16,20 @@ interface ExchangeRates {
 const convertCurrency = (amount: number, fromCurrency: string, toCurrency: string, rates: ExchangeRates['rates']): number => {
   if (fromCurrency === toCurrency) return amount;
 
-  // All rates are in RON from CursBNR, so we need to:
+  // All rates are in RON from BNR, so we need to:
   // 1. Convert the amount to RON first (if not already in RON)
   // 2. Then convert from RON to target currency
   
   let amountInRON = amount;
   if (fromCurrency !== 'RON') {
-    amountInRON = amount * rates[fromCurrency];
+    amountInRON = amount * rates[fromCurrency as keyof typeof rates];
   }
 
   if (toCurrency === 'RON') {
     return amountInRON;
   }
 
-  return amountInRON / rates[toCurrency];
+  return amountInRON / rates[toCurrency as keyof typeof rates];
 };
 
 export function useCurrency() {
@@ -75,8 +75,8 @@ export function useCurrency() {
     },
     // Cache for 24 hours since rates don't change frequently
     staleTime: 24 * 60 * 60 * 1000,
-    // Keep cached data for 24 hours
-    cacheTime: 24 * 60 * 60 * 1000,
+    // Keep cached data for 24 hours (renamed from cacheTime)
+    gcTime: 24 * 60 * 60 * 1000,
     // Retry up to 3 times
     retry: 3,
   });
