@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useSettingsSync } from "@/hooks/useSettingsSync";
+import { useQueryClient } from "@tanstack/react-query";
 
 const currencies = [
   { value: 'USD', label: '🇺🇸 USD - US Dollar (USD)' },
@@ -14,6 +15,7 @@ const currencies = [
 export function CurrencySelector() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   useSettingsSync(); // Add real-time sync
 
   const handleCurrencyChange = async (value: string) => {
@@ -38,8 +40,12 @@ export function CurrencySelector() {
 
       if (error) throw error;
 
+      // Update localStorage first
       localStorage.setItem('currency', value);
       
+      // Invalidate the currency preference query
+      queryClient.invalidateQueries({ queryKey: ['currency-preference'] });
+
       toast({
         title: "Success",
         description: "Currency preference updated successfully. Reloading page...",

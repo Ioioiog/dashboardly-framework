@@ -44,10 +44,11 @@ const convertCurrency = (amount: number, fromCurrency: string, toCurrency: strin
 };
 
 export function useCurrency() {
-  // Fetch user's currency preference
+  // Fetch user's currency preference with no caching
   const { data: preference } = useQuery({
     queryKey: ["currency-preference"],
     queryFn: async () => {
+      console.log('Fetching currency preference...');
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
@@ -58,8 +59,19 @@ export function useCurrency() {
         .single();
 
       if (error) throw error;
+
+      // Get the most up-to-date preference from localStorage if it exists
+      const localCurrency = localStorage.getItem('currency');
+      if (localCurrency) {
+        console.log('Using currency from localStorage:', localCurrency);
+        return { currency_preference: localCurrency };
+      }
+
+      console.log('Using currency from database:', data.currency_preference);
       return data as CurrencyPreference;
     },
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache
   });
 
   // Fetch exchange rates with 24-hour caching
@@ -86,9 +98,7 @@ export function useCurrency() {
     },
     // Cache for 24 hours since rates don't change frequently
     staleTime: 24 * 60 * 60 * 1000,
-    // Keep cached data for 24 hours (renamed from cacheTime)
     gcTime: 24 * 60 * 60 * 1000,
-    // Retry up to 3 times
     retry: 3,
   });
 
