@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { InstallPWA } from "@/components/pwa/InstallPWA";
+import { FloatingSettingsBox } from "@/components/settings/FloatingSettingsBox";
 import "./App.css";
 
 // Create a client
@@ -99,6 +100,7 @@ function App() {
       <BrowserRouter>
         <AppRoutes isAuthenticated={isAuthenticated} />
         <InstallPWA />
+        {isAuthenticated && <FloatingSettingsBox />}
         <Toaster />
       </BrowserRouter>
     </QueryClientProvider>
