@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Settings, Users, Wallet } from "lucide-react";
+import { Home, Tools, Users, Wallet } from "lucide-react";
 import { MetricCard } from "./MetricCard";
 import { useMetrics } from "@/hooks/useMetrics";
 import { useTranslation } from "react-i18next";
@@ -64,7 +64,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           <MetricCard
             title={t('dashboard.metrics.pendingMaintenance')}
             value={metrics.pendingMaintenance}
-            icon={Settings}
+            icon={Tools}
             route="/maintenance"
             className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
             description="Pending maintenance requests"
@@ -94,7 +94,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
         <MetricCard
           title={t('dashboard.metrics.pendingMaintenance')}
           value={metrics.pendingMaintenance}
-          icon={Settings}
+          icon={Tools}
           route="/maintenance"
           className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
           description="Open maintenance requests"
