@@ -22,6 +22,20 @@ const MeterReadings = () => {
 
   const fetchReadings = async () => {
     try {
+      console.log("Fetching readings for user:", userId, "with role:", userRole);
+      
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        throw sessionError;
+      }
+
+      if (!session) {
+        console.log("No active session, redirecting to auth");
+        navigate("/auth");
+        return;
+      }
+
       let query = supabase
         .from('meter_readings')
         .select(`
@@ -57,8 +71,8 @@ const MeterReadings = () => {
       console.error("Error in meter readings page:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message || "An unexpected error occurred",
+        title: "Error fetching readings",
+        description: error.message || "An unexpected error occurred. Please try refreshing the page.",
       });
       setIsLoading(false);
     }
@@ -93,7 +107,10 @@ const MeterReadings = () => {
           throw profileError;
         }
 
+        console.log("Setting user role to:", profile.role);
         setUserRole(profile.role as "landlord" | "tenant");
+        
+        // Only fetch readings after we have the user role
         await fetchReadings();
 
       } catch (error: any) {
@@ -101,7 +118,7 @@ const MeterReadings = () => {
         toast({
           variant: "destructive",
           title: "Error",
-          description: error.message || "An unexpected error occurred",
+          description: error.message || "An unexpected error occurred. Please try logging in again.",
         });
         setIsLoading(false);
       }
