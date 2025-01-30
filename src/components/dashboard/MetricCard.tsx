@@ -57,7 +57,7 @@ export function MetricCard({
         <div className="absolute inset-0 flex items-center justify-center bg-white transition-all duration-500">
           <Icon 
             className={cn(
-              "h-20 w-20 text-primary transition-all duration-500",
+              "h-20 w-20 text-white p-4 rounded-full transition-all duration-500 bg-blue-600",
               isHovered && "scale-110"
             )}
           />
