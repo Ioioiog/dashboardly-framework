@@ -1,12 +1,130 @@
 {
+  "common": {
+    "error": "Error",
+    "success": "Success",
+    "unexpectedError": "An unexpected error occurred",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "close": "Close",
+    "confirm": "Confirm",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No",
+    "actions": "Actions",
+    "details": "Details",
+    "status": "Status",
+    "date": "Date",
+    "amount": "Amount",
+    "description": "Description",
+    "noData": "No data available"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "newPassword": "New Password",
+    "rememberMe": "Remember Me",
+    "orContinueWith": "Or continue with"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "metrics": {
+      "totalProperties": "Total Properties",
+      "monthlyRevenue": "Monthly Revenue",
+      "activeTenants": "Active Tenants",
+      "pendingMaintenance": "Pending Maintenance",
+      "paymentStatus": "Payment Status"
+    },
+    "revenue": {
+      "title": "Revenue Overview",
+      "monthly": "Monthly Revenue",
+      "yearly": "Yearly Revenue",
+      "details": "Revenue Details"
+    }
+  },
+  "properties": {
+    "title": "Properties",
+    "addProperty": "Add Property",
+    "editProperty": "Edit Property",
+    "deleteProperty": "Delete Property",
+    "propertyDetails": "Property Details",
+    "name": "Property Name",
+    "address": "Address",
+    "type": "Property Type",
+    "monthlyRent": "Monthly Rent",
+    "status": "Status",
+    "availableFrom": "Available From",
+    "description": "Description",
+    "noProperties": "No properties found",
+    "types": {
+      "apartment": "Apartment",
+      "house": "House",
+      "commercial": "Commercial",
+      "other": "Other"
+    },
+    "filters": {
+      "searchPlaceholder": "Search properties...",
+      "type": "Filter by type",
+      "status": "Filter by status",
+      "all": "All Properties"
+    }
+  },
+  "tenants": {
+    "title": {
+      "landlord": "Manage Tenants",
+      "tenant": "Your Tenancy"
+    },
+    "description": {
+      "landlord": "Manage your tenants and view their information",
+      "tenant": "View your tenancy details and related information"
+    },
+    "addTenant": "Add Tenant",
+    "inviteTenant": "Invite Tenant",
+    "editTenant": "Edit Tenant",
+    "deleteTenant": "Delete Tenant",
+    "tenantDetails": "Tenant Details",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "noTenants": "No tenants found",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending"
+    },
+    "dashboard": {
+      "property": "Property",
+      "leasePeriod": "Lease Period",
+      "monthlyRent": "Monthly Rent",
+      "endDate": "End Date: {{date}}",
+      "noEndDate": "No end date set"
+    },
+    "noTenancy": {
+      "message": "You currently have no active tenancy"
+    }
+  },
   "maintenance": {
     "title": "Maintenance Requests",
     "newRequest": "New Request",
     "noRequests": "No maintenance requests found",
-    "createRequestPrompt": "Click the \"New Request\" button above to create a maintenance request",
+    "createRequestPrompt": "Click the \"New Request\" button to create a maintenance request",
     "ticket": "Ticket ID",
     "property": "Property",
-    "title": "Title",
     "status": {
       "pending": "Pending",
       "in_progress": "In Progress",
@@ -32,20 +150,77 @@
     "created": "Created",
     "updated": "Last Updated",
     "actions": "Actions",
-    "viewDetails": "View Details",
-    "form": {
-      "createRequest": "Create Request",
-      "updateRequest": "Update Request"
+    "viewDetails": "View Details"
+  },
+  "payments": {
+    "title": "Payments",
+    "makePayment": "Make Payment",
+    "paymentHistory": "Payment History",
+    "upcomingPayments": "Upcoming Payments",
+    "dueDate": "Due Date",
+    "paidDate": "Paid Date",
+    "status": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "overdue": "Overdue"
     },
-    "tenantSection": "Tenant's Request Details",
-    "landlordSection": "Landlord's Response",
-    "requestInfo": "Request Information",
-    "attachments": "attachments",
-    "highPriorityWarning": "This request requires immediate attention",
-    "assignedTo": "Assigned To",
-    "requestHistory": "Request History",
-    "tabs": {
-      "all": "All Requests"
+    "noPayments": "No payments found"
+  },
+  "utilities": {
+    "title": "Utilities",
+    "addUtility": "Add Utility",
+    "type": "Utility Type",
+    "amount": "Amount",
+    "dueDate": "Due Date",
+    "status": "Status",
+    "noUtilities": "No utilities found",
+    "types": {
+      "electricity": "Electricity",
+      "water": "Water",
+      "gas": "Gas",
+      "internet": "Internet",
+      "other": "Other"
+    },
+    "status": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "overdue": "Overdue"
     }
+  },
+  "documents": {
+    "title": "Documents",
+    "uploadDocument": "Upload Document",
+    "noDocuments": "No documents found",
+    "type": "Document Type",
+    "uploadedBy": "Uploaded By",
+    "uploadDate": "Upload Date",
+    "types": {
+      "lease": "Lease Agreement",
+      "invoice": "Invoice",
+      "maintenance": "Maintenance",
+      "other": "Other"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile Settings",
+    "notifications": "Notifications",
+    "security": "Security",
+    "preferences": "Preferences",
+    "language": "Language",
+    "currency": "Currency",
+    "theme": "Theme",
+    "account": "Account Settings",
+    "subscription": "Subscription",
+    "billing": "Billing",
+    "invoiceInfo": "Invoice Information"
+  },
+  "chat": {
+    "title": "Messages",
+    "newMessage": "New Message",
+    "noMessages": "No messages found",
+    "selectTenant": "Select a tenant to start chatting",
+    "typeMessage": "Type your message...",
+    "send": "Send"
   }
 }
