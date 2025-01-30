@@ -222,13 +222,13 @@ export function TenantList({ tenants }: TenantListProps) {
             <TableBody>
               {showInactive && pendingInvitations.map((invitation) => (
                 <PendingInvitationRow
-                  key={`invitation-${invitation.id}`}
+                  key={`inv-${invitation.id}`}
                   invitation={invitation}
                 />
               ))}
               {filteredTenants.map((tenant) => (
                 <TenantRow
-                  key={`tenant-${tenant.id}`}
+                  key={`ten-${tenant.id}`}
                   tenant={tenant}
                   onDelete={handleDeleteTenant}
                   onUpdate={handleTenantUpdate}
