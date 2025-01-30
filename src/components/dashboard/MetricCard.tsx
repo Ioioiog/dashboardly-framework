@@ -36,6 +36,8 @@ export function MetricCard({
     }
   };
 
+  console.log("Rendering MetricCard with icon:", Icon.name); // Debug log
+
   const shouldAnimate = title === 'dashboard.metrics.totalProperties' || 
                        title === 'dashboard.metrics.activeTenants' || 
                        title === 'dashboard.metrics.pendingMaintenance';
@@ -56,8 +58,7 @@ export function MetricCard({
           <Icon 
             className={cn(
               "h-20 w-20 text-primary transition-all duration-500",
-              "animate-[spin_3s_linear_infinite]",
-              isHovered && "scale-110 animate-[bounce_1s_ease-in-out_infinite]"
+              isHovered && "scale-110"
             )}
           />
         </div>
@@ -67,7 +68,7 @@ export function MetricCard({
             <CardTitle className="text-sm font-medium">
               {t(title)}
             </CardTitle>
-            <Icon className="h-4 w-4 text-muted-foreground" />
+            <Icon className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{value}</div>
