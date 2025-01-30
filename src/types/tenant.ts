@@ -13,6 +13,7 @@ export interface Tenant {
     address: string;
   };
   tenancy: {
+    id: string;
     start_date: string;
     end_date: string | null;
     status: string;
