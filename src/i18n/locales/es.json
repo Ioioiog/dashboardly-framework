@@ -1,4 +1,99 @@
 {
+  "properties": {
+    "title": {
+      "landlord": "Gestionar Propiedades",
+      "tenant": "Sus Propiedades"
+    },
+    "description": {
+      "landlord": "Gestione y supervise su cartera de propiedades",
+      "tenant": "Ver sus propiedades alquiladas e información relacionada"
+    },
+    "addProperty": "Añadir Propiedad",
+    "editProperty": "Editar Propiedad",
+    "deleteProperty": "Eliminar Propiedad",
+    "propertyDetails": "Detalles de la Propiedad",
+    "name": "Nombre de la Propiedad",
+    "address": "Dirección",
+    "type": "Tipo de Propiedad",
+    "monthlyRent": "Alquiler Mensual",
+    "status": "Estado",
+    "availableFrom": "Disponible Desde",
+    "description": "Descripción",
+    "noProperties": "No se encontraron propiedades",
+    "empty": {
+      "landlord": "Aún no ha añadido ninguna propiedad. Haga clic en el botón de arriba para añadir su primera propiedad.",
+      "tenant": "Aún no tiene propiedades asignadas.",
+      "tenant.contact": "Póngase en contacto con su propietario si cree que esto es un error."
+    },
+    "types": {
+      "apartment": "Apartamento",
+      "house": "Casa",
+      "condo": "Condominio",
+      "commercial": "Comercial"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar propiedades...",
+      "type": "Filtrar por tipo",
+      "status": "Filtrar por estado",
+      "all": "Todas las Propiedades",
+      "occupied": "Mostrar solo propiedades ocupadas"
+    },
+    "sort": {
+      "nameAsc": "Nombre (A-Z)",
+      "nameDesc": "Nombre (Z-A)",
+      "rentAsc": "Alquiler (Menor a Mayor)",
+      "rentDesc": "Alquiler (Mayor a Menor)",
+      "dateAsc": "Fecha Añadida (Más Antigua)",
+      "dateDesc": "Fecha Añadida (Más Reciente)"
+    },
+    "view": {
+      "grid": "Vista en Cuadrícula",
+      "list": "Vista en Lista"
+    },
+    "tenant": {
+      "assign": "Asignar Inquilino",
+      "remove": "Eliminar Inquilino",
+      "none": "Sin inquilino asignado",
+      "current": "Inquilino Actual",
+      "dates": {
+        "start": "Fecha de Inicio",
+        "end": "Fecha de Finalización",
+        "edit": "Editar Fechas",
+        "save": "Guardar Cambios"
+      }
+    },
+    "utilities": {
+      "analyze": "Analizar Historial de Facturas",
+      "stats": {
+        "title": "Estadísticas de Servicios",
+        "average": "Costo Mensual Promedio",
+        "total": "Total de Servicios",
+        "highest": "Factura Más Alta",
+        "lowest": "Factura Más Baja"
+      }
+    },
+    "rent": {
+      "period": "mes"
+    },
+    "toast": {
+      "success": {
+        "added": "Propiedad añadida exitosamente",
+        "updated": "Propiedad actualizada exitosamente",
+        "deleted": "Propiedad eliminada exitosamente",
+        "tenantAssigned": "Inquilino asignado exitosamente",
+        "tenantRemoved": "Inquilino eliminado exitosamente",
+        "datesUpdated": "Fechas de arrendamiento actualizadas exitosamente"
+      },
+      "error": {
+        "add": "Error al añadir propiedad",
+        "update": "Error al actualizar propiedad",
+        "delete": "Error al eliminar propiedad",
+        "assignTenant": "Error al asignar inquilino",
+        "removeTenant": "Error al eliminar inquilino",
+        "updateDates": "Error al actualizar fechas de arrendamiento"
+      }
+    }
+  },
   "maintenance": {
     "title": "Solicitudes de Mantenimiento",
     "newRequest": "Nueva Solicitud",

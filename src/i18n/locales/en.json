@@ -128,113 +128,6 @@
       }
     }
   },
-  "tenants": {
-    "title": "Manage Tenants",
-    "description": "View and manage your tenants",
-    "addTenant": "Add Tenant",
-    "editTenant": "Edit Tenant",
-    "deleteTenant": "Delete Tenant",
-    "tenantDetails": "Tenant Details",
-    "noTenants": "No tenants found",
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "pending": "Pending"
-    },
-    "filters": {
-      "searchPlaceholder": "Search tenants...",
-      "status": "Filter by status",
-      "all": "All Tenants"
-    }
-  },
-  "maintenance": {
-    "title": "Maintenance Requests",
-    "description": "View and manage maintenance requests",
-    "addRequest": "New Request",
-    "editRequest": "Edit Request",
-    "deleteRequest": "Delete Request",
-    "requestDetails": "Request Details",
-    "noRequests": "No maintenance requests found",
-    "status": {
-      "pending": "Pending",
-      "inProgress": "In Progress",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
-    },
-    "priority": {
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High",
-      "urgent": "Urgent"
-    }
-  },
-  "payments": {
-    "title": "Payments",
-    "description": "View and manage payments",
-    "addPayment": "Add Payment",
-    "editPayment": "Edit Payment",
-    "deletePayment": "Delete Payment",
-    "paymentDetails": "Payment Details",
-    "noPayments": "No payments found",
-    "status": {
-      "pending": "Pending",
-      "paid": "Paid",
-      "overdue": "Overdue",
-      "cancelled": "Cancelled"
-    }
-  },
-  "documents": {
-    "title": "Documents",
-    "description": "View and manage documents",
-    "addDocument": "Add Document",
-    "editDocument": "Edit Document",
-    "deleteDocument": "Delete Document",
-    "documentDetails": "Document Details",
-    "noDocuments": "No documents found",
-    "types": {
-      "contract": "Contract",
-      "invoice": "Invoice",
-      "receipt": "Receipt",
-      "other": "Other"
-    }
-  },
-  "utilities": {
-    "title": "Utilities",
-    "description": "View and manage utility bills",
-    "addUtility": "Add Utility",
-    "editUtility": "Edit Utility",
-    "deleteUtility": "Delete Utility",
-    "utilityDetails": "Utility Details",
-    "noUtilities": "No utilities found",
-    "types": {
-      "electricity": "Electricity",
-      "water": "Water",
-      "gas": "Gas",
-      "internet": "Internet",
-      "other": "Other"
-    }
-  },
-  "settings": {
-    "title": "Settings",
-    "description": "Manage your account settings",
-    "sections": {
-      "profile": "Profile",
-      "notifications": "Notifications",
-      "preferences": "Preferences",
-      "security": "Security",
-      "billing": "Billing"
-    }
-  },
-  "auth": {
-    "signIn": "Sign In",
-    "signUp": "Sign Up",
-    "signOut": "Sign Out",
-    "forgotPassword": "Forgot Password",
-    "resetPassword": "Reset Password",
-    "email": "Email",
-    "password": "Password",
-    "confirmPassword": "Confirm Password"
-  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome",
@@ -254,5 +147,15 @@
       "rentedPropertiesDesc": "Your rented properties",
       "openMaintenanceDesc": "Open maintenance requests"
     }
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Reset Password",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password"
   }
 }
