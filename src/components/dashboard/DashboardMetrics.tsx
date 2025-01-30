@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Wrench, Users, Wallet } from "lucide-react";
+import { DollarSign, Home, Wrench, Users } from "lucide-react";
 import { MetricCard } from "./MetricCard";
 import { useMetrics } from "@/hooks/useMetrics";
 import { useTranslation } from "react-i18next";
@@ -48,7 +48,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           <MetricCard
             title={t('dashboard.metrics.monthlyRevenue')}
             value={`$${metrics.monthlyRevenue?.toLocaleString()}`}
-            icon={Wallet}
+            icon={DollarSign}
             onClick={handleRevenueClick}
             description={t('dashboard.revenue.title')}
             className="bg-white shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
@@ -102,7 +102,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
         <MetricCard
           title={t('dashboard.metrics.paymentStatus')}
           value={metrics.paymentStatus}
-          icon={Wallet}
+          icon={DollarSign}
           onClick={handleRevenueClick}
           className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
           description="Click to view monthly payments"
