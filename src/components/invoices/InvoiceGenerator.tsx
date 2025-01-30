@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatDate } from '@/lib/utils';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface InvoiceItem {
   description: string;
@@ -14,6 +15,7 @@ interface InvoiceGeneratorProps {
     due_date: string;
     created_at: string;
     vat_rate?: number;
+    currency: string;
     property?: {
       name: string;
       address: string;
@@ -33,6 +35,8 @@ interface InvoiceGeneratorProps {
 }
 
 export function InvoiceGenerator({ invoice, invoiceItems, companyInfo }: InvoiceGeneratorProps) {
+  const { formatAmount } = useCurrency();
+
   if (!invoice || !invoiceItems || !companyInfo) {
     console.error('Missing required props:', { invoice, invoiceItems, companyInfo });
     return <div>Unable to generate invoice. Missing required information.</div>;
@@ -107,10 +111,12 @@ export function InvoiceGenerator({ invoice, invoiceItems, companyInfo }: Invoice
             {displayItems.map((item, index) => (
               <tr key={index} className="border-b">
                 <td className="py-2 text-foreground">{item.description}</td>
-                <td className="py-2 text-foreground">${item.unitPrice.toFixed(2)}</td>
+                <td className="py-2 text-foreground">
+                  {formatAmount(item.unitPrice, invoice.currency)}
+                </td>
                 <td className="py-2 text-foreground">{item.quantity}</td>
                 <td className="py-2 text-foreground text-right">
-                  ${(item.unitPrice * item.quantity).toFixed(2)}
+                  {formatAmount(item.unitPrice * item.quantity, invoice.currency)}
                 </td>
               </tr>
             ))}
@@ -122,17 +128,21 @@ export function InvoiceGenerator({ invoice, invoiceItems, companyInfo }: Invoice
         <div className="w-64">
           <div className="flex justify-between mb-2">
             <span className="text-muted-foreground">SUBTOTAL</span>
-            <span className="text-foreground">${calculateSubtotal().toFixed(2)}</span>
+            <span className="text-foreground">
+              {formatAmount(calculateSubtotal(), invoice.currency)}
+            </span>
           </div>
           {invoice.vat_rate && (
             <div className="flex justify-between mb-2">
               <span className="text-muted-foreground">VAT ({invoice.vat_rate}%) on Rent</span>
-              <span className="text-foreground">${calculateRentVAT().toFixed(2)}</span>
+              <span className="text-foreground">
+                {formatAmount(calculateRentVAT(), invoice.currency)}
+              </span>
             </div>
           )}
           <div className="flex justify-between font-bold border-t pt-2">
             <span>TOTAL</span>
-            <span>${calculateTotal().toFixed(2)}</span>
+            <span>{formatAmount(calculateTotal(), invoice.currency)}</span>
           </div>
         </div>
       </div>
