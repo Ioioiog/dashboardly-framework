@@ -99,8 +99,12 @@ export function PropertyProvidersSettings() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Utility Providers</h3>
-        <Button onClick={() => setShowForm(true)} disabled={showForm}>
-          <Plus className="h-4 w-4 mr-2" />
+        <Button 
+          onClick={() => setShowForm(true)} 
+          disabled={showForm}
+          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
           Add Provider
         </Button>
       </div>
