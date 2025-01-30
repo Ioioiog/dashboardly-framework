@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Receipt } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { InvoiceList } from "@/components/invoices/InvoiceList";
 import { InvoiceDialog } from "@/components/invoices/InvoiceDialog";
-import { Invoice } from "@/types/invoice";
 import { InvoiceFilters } from "@/components/invoices/InvoiceFilters";
 import { DateRange } from "react-day-picker";
 import { isWithinInterval, parseISO } from "date-fns";
@@ -15,7 +15,7 @@ import { isWithinInterval, parseISO } from "date-fns";
 const Invoices = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoices, setInvoices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
   
@@ -54,7 +54,7 @@ const Invoices = () => {
       if (invoicesError) throw invoicesError;
 
       console.log("Fetched invoices:", invoicesData);
-      setInvoices(invoicesData as Invoice[]);
+      setInvoices(invoicesData);
     } catch (error) {
       console.error("Error fetching invoices:", error);
       toast({
@@ -160,10 +160,22 @@ const Invoices = () => {
       <div className="flex-1 p-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Invoices</CardTitle>
-            {userRole === "landlord" && (
-              <InvoiceDialog onInvoiceCreated={fetchInvoices} />
-            )}
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-600 rounded-xl">
+                  <Receipt className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-2xl">Invoices</CardTitle>
+              </div>
+              <p className="text-gray-500 max-w-2xl">
+                Manage and track all your property-related invoices.
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              {userRole === "landlord" && (
+                <InvoiceDialog onInvoiceCreated={fetchInvoices} />
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <InvoiceFilters

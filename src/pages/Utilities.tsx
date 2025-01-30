@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Plug, Loader2 } from "lucide-react";
 import { UtilityDialog } from "@/components/utilities/UtilityDialog";
 import { UtilityList } from "@/components/utilities/UtilityList";
 import { UtilityFilters } from "@/components/utilities/UtilityFilters";
 import { useProperties } from "@/hooks/useProperties";
-import { Loader2 } from "lucide-react";
 
 interface Utility {
   id: string;
@@ -154,14 +154,18 @@ const Utilities = () => {
       <div className="flex-1 p-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Utilities</CardTitle>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-600 rounded-xl">
+                  <Plug className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-2xl">Utilities</CardTitle>
+              </div>
+              <p className="text-gray-500 max-w-2xl">
+                Manage and track utility services for your properties.
+              </p>
+            </div>
             <div className="flex items-center gap-4">
-              <UtilityFilters
-                status={statusFilter}
-                onStatusChange={setStatusFilter}
-                type={typeFilter}
-                onTypeChange={setTypeFilter}
-              />
               {userRole === "landlord" && properties && (
                 <UtilityDialog
                   properties={properties}

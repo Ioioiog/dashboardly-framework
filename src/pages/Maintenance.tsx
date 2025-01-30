@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, AlertTriangle } from "lucide-react";
+import { Plus, Wrench, AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import MaintenanceList from "@/components/maintenance/MaintenanceList";
@@ -104,12 +104,24 @@ export default function Maintenance() {
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-8 space-y-8">
           <div className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm">
-            <h1 className="text-2xl font-semibold text-gray-900">{t("maintenance.title")}</h1>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-600 rounded-xl">
+                  <Wrench className="h-6 w-6 text-white" />
+                </div>
+                <h1 className="text-2xl font-semibold text-gray-900">
+                  {t("maintenance.title")}
+                </h1>
+              </div>
+              <p className="text-gray-500 max-w-2xl">
+                {t("maintenance.description")}
+              </p>
+            </div>
             <Button 
               onClick={() => setIsDialogOpen(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="h-4 w-4" />
               {t("maintenance.newRequest")}
             </Button>
           </div>

@@ -12,6 +12,7 @@ import { TenantDashboard } from "@/components/tenants/TenantDashboard";
 import { NoTenancy } from "@/components/tenants/NoTenancy";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Users } from "lucide-react";
 
 const Tenants = () => {
   const navigate = useNavigate();
@@ -157,7 +158,42 @@ const Tenants = () => {
       <DashboardSidebar />
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto space-y-8">
-          <TenantsHeader userRole={userRole} properties={properties} />
+          <div className="bg-white p-8 rounded-lg shadow-sm mb-6 animate-fade-in">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-blue-600 rounded-xl">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
+                  <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                    {t('tenants.title.landlord')}
+                  </h1>
+                </div>
+                <p className="text-gray-500 max-w-2xl">
+                  {t('tenants.description.landlord')}
+                </p>
+              </div>
+              {userRole === "landlord" && (
+                <div className="flex flex-wrap gap-3 sm:flex-nowrap">
+                  <Button
+                    onClick={() => setShowAssignDialog(true)}
+                    variant="outline"
+                    className="w-full sm:w-auto flex items-center gap-2 hover:bg-gray-50 transition-colors"
+                  >
+                    <UserPlus className="h-4 w-4 text-gray-600" />
+                    <span>Assign Existing Tenant</span>
+                  </Button>
+                  <Button
+                    onClick={() => setShowInviteDialog(true)}
+                    className="w-full sm:w-auto flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-colors"
+                  >
+                    <Mail className="h-4 w-4" />
+                    <span>Invite New Tenant</span>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
           
           <div className="space-y-6">
             {isLoading ? (

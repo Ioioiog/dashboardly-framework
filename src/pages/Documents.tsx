@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Grid, List, Plus } from "lucide-react";
+import { Grid, List, Plus, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { Button } from "@/components/ui/button";
@@ -78,13 +78,18 @@ const Documents = () => {
   return (
     <div className="flex bg-dashboard-background min-h-screen">
       <DashboardSidebar />
-      <main className="flex-1 p-8 animate-fade-in">
+      <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <header className="flex justify-between items-center">
-              <div>
-                <h1 className="text-3xl font-semibold text-gray-900">Documents</h1>
-                <p className="mt-2 text-dashboard-text">
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-blue-600 rounded-xl">
+                    <FileText className="h-6 w-6 text-white" />
+                  </div>
+                  <h1 className="text-3xl font-semibold text-gray-900">Documents</h1>
+                </div>
+                <p className="text-gray-500 max-w-2xl">
                   Manage and view your property-related documents.
                 </p>
               </div>

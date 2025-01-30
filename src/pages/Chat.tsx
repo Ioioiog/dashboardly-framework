@@ -6,7 +6,7 @@ import { MessageInput } from "@/components/chat/MessageInput";
 import { useConversation } from "@/hooks/chat/useConversation";
 import { useMessages } from "@/hooks/chat/useMessages";
 import { useAuthState } from "@/hooks/useAuthState";
-import { Loader2 } from "lucide-react";
+import { Loader2, MessageSquare } from "lucide-react";
 import { useUserRole } from "@/hooks/use-user-role";
 import { ConversationContainer } from "@/components/chat/ConversationContainer";
 
@@ -85,10 +85,21 @@ const Chat = () => {
     <div className="flex bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 min-h-screen">
       <DashboardSidebar />
       <ConversationContainer>
-        <ChatHeader
-          onTenantSelect={setSelectedTenantId}
-          selectedTenantId={selectedTenantId}
-        />
+        <div className="p-4 border-b bg-white dark:bg-slate-900 rounded-t-xl backdrop-blur-sm">
+          <div className="flex items-center gap-4 mb-2 animate-fade-in">
+            <div className="p-3 bg-blue-600 rounded-xl">
+              <MessageSquare className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
+              {userRole === "landlord" ? "Chat with Tenants" : "Chat with Landlord"}
+            </h1>
+          </div>
+          {userRole === "landlord" && (
+            <div className="mt-3 flex items-center gap-2 animate-fade-in delay-100">
+              {/* Tenant select component can be added here */}
+            </div>
+          )}
+        </div>
         {renderContent()}
       </ConversationContainer>
     </div>

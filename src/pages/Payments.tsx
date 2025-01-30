@@ -1,14 +1,13 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { DollarSign, Loader2 } from "lucide-react";
 import { PaymentList } from "@/components/payments/PaymentList";
 import { PaymentDialog } from "@/components/payments/PaymentDialog";
 import { PaymentFilters } from "@/components/payments/PaymentFilters";
-import { PaymentWithRelations } from "@/integrations/supabase/types/payment";
-import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { subDays, startOfYear } from "date-fns";
 
 const Payments = () => {
@@ -194,7 +193,17 @@ const Payments = () => {
       <div className="flex-1 p-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Payments</CardTitle>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-600 rounded-xl">
+                  <DollarSign className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-2xl">Payments</CardTitle>
+              </div>
+              <p className="text-gray-500 max-w-2xl">
+                Track and manage all property-related payments.
+              </p>
+            </div>
             <div className="flex items-center gap-4">
               {userRole === "landlord" && (
                 <PaymentDialog
