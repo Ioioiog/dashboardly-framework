@@ -169,6 +169,9 @@ export function TenantList({ tenants }: TenantListProps) {
       propertyName.includes(searchString) ||
       propertyAddress.includes(searchString);
 
+    // Log tenant status for debugging
+    console.log(`Tenant ${tenant.email} status:`, tenant.tenancy?.status);
+    
     const matchesStatus = showInactive ? true : tenant.tenancy?.status === 'active';
 
     return matchesSearch && matchesStatus;
@@ -189,13 +192,13 @@ export function TenantList({ tenants }: TenantListProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
           {showInactive && pendingInvitations.map((invitation) => (
             <PendingInvitationCard
-              key={`invitation-${invitation.id}`}
+              key={`inv-${invitation.id}`}
               invitation={invitation}
             />
           ))}
           {filteredTenants.map((tenant) => (
             <TenantCard
-              key={`tenant-${tenant.id}`}
+              key={`ten-${tenant.id}`}
               tenant={tenant}
               onDelete={handleDeleteTenant}
               onUpdate={handleTenantUpdate}

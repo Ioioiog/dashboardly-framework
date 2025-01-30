@@ -780,48 +780,6 @@ export type Database = {
           },
         ]
       }
-      tenant_interactions: {
-        Row: {
-          created_at: string
-          description: string
-          id: string
-          interaction_type: string
-          landlord_id: string
-          tenant_id: string
-        }
-        Insert: {
-          created_at?: string
-          description: string
-          id?: string
-          interaction_type: string
-          landlord_id: string
-          tenant_id: string
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          id?: string
-          interaction_type?: string
-          landlord_id?: string
-          tenant_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tenant_interactions_landlord_id_fkey"
-            columns: ["landlord_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tenant_interactions_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       tenant_invitation_properties: {
         Row: {
           invitation_id: string
@@ -1079,54 +1037,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "utility_provider_credentials_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      utility_reading_periods: {
-        Row: {
-          created_at: string
-          end_day: number
-          id: string
-          landlord_id: string
-          property_id: string
-          start_day: number
-          updated_at: string
-          utility_type: Database["public"]["Enums"]["utility_reading_type"]
-        }
-        Insert: {
-          created_at?: string
-          end_day: number
-          id?: string
-          landlord_id: string
-          property_id: string
-          start_day: number
-          updated_at?: string
-          utility_type: Database["public"]["Enums"]["utility_reading_type"]
-        }
-        Update: {
-          created_at?: string
-          end_day?: number
-          id?: string
-          landlord_id?: string
-          property_id?: string
-          start_day?: number
-          updated_at?: string
-          utility_type?: Database["public"]["Enums"]["utility_reading_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "utility_reading_periods_landlord_id_fkey"
-            columns: ["landlord_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "utility_reading_periods_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
