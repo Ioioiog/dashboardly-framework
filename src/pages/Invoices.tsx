@@ -11,6 +11,7 @@ import { InvoiceDialog } from "@/components/invoices/InvoiceDialog";
 import { InvoiceFilters } from "@/components/invoices/InvoiceFilters";
 import { DateRange } from "react-day-picker";
 import { isWithinInterval, parseISO } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Invoices = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<"landlord" | "tenant" | null>(null);
+  const isMobile = useIsMobile();
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -155,29 +157,29 @@ const Invoices = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex min-h-screen flex-col md:flex-row bg-gray-100">
       <DashboardSidebar />
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-4 md:p-8 w-full">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div className="space-y-4">
+          <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0">
+            <div className="space-y-2 md:space-y-4">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-blue-600 rounded-xl">
-                  <Receipt className="h-6 w-6 text-white" />
+                  <Receipt className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
-                <CardTitle className="text-2xl">Invoices</CardTitle>
+                <CardTitle className="text-xl md:text-2xl">Invoices</CardTitle>
               </div>
-              <p className="text-gray-500 max-w-2xl">
+              <p className="text-sm md:text-base text-gray-500 max-w-2xl">
                 Manage and track all your property-related invoices.
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full md:w-auto">
               {userRole === "landlord" && (
                 <InvoiceDialog onInvoiceCreated={fetchInvoices} />
               )}
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             <InvoiceFilters
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
