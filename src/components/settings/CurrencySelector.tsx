@@ -95,15 +95,16 @@ export function CurrencySelector() {
           <CardTitle>Current Exchange Rates</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full flex justify-center">
+          <div className="w-full flex flex-col items-center space-y-2">
             <iframe 
               className="rounded-lg shadow-sm"
-              style={{ width: "200px", height: "95px" }} 
+              style={{ width: "300px", height: "95px" }} 
               frameBorder="0" 
               scrolling="no" 
-              src="https://www.cursbnr.ro/insert/cursvalutar.php?w=200&b=f7f7f7&bl=dcdcdc&ttc=0a6eab&tc=000000&diff=1&ron=1&cb=1&pics=1"
+              src="https://www.cursbnr.ro/insert/cursvalutar.php?w=300&b=f7f7f7&bl=dcdcdc&ttc=0a6eab&tc=000000&diff=1&ron=1&cb=1&pics=1"
               title="BNR Exchange Rates"
             />
+            <p className="text-sm text-muted-foreground">oferit de CursBNR.ro</p>
           </div>
         </CardContent>
       </Card>
