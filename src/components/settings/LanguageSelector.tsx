@@ -41,9 +41,9 @@ export function LanguageSelector() {
         description: "Language updated successfully. Reloading page...",
       });
 
-      // Reload the page after a short delay to show the toast
+      // Force a hard reload after a short delay
       setTimeout(() => {
-        window.location.reload();
+        window.location.href = window.location.href;
       }, 1500);
 
     } catch (error) {
