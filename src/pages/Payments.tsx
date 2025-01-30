@@ -9,6 +9,7 @@ import { PaymentList } from "@/components/payments/PaymentList";
 import { PaymentDialog } from "@/components/payments/PaymentDialog";
 import { PaymentFilters } from "@/components/payments/PaymentFilters";
 import { subDays, startOfYear } from "date-fns";
+import { PaymentWithRelations } from "@/integrations/supabase/types/payment";
 
 const Payments = () => {
   const navigate = useNavigate();

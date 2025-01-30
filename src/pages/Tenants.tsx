@@ -12,7 +12,10 @@ import { TenantDashboard } from "@/components/tenants/TenantDashboard";
 import { NoTenancy } from "@/components/tenants/NoTenancy";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users } from "lucide-react";
+import { Users, UserPlus, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TenantInviteDialog } from "@/components/tenants/TenantInviteDialog";
+import { TenantAssignDialog } from "@/components/tenants/TenantAssignDialog";
 
 const Tenants = () => {
   const navigate = useNavigate();
@@ -23,6 +26,8 @@ const Tenants = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const { data: tenants = [], isLoading, error: tenantsError } = useTenants();
   const [isCheckingProfile, setIsCheckingProfile] = useState(true);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -193,6 +198,18 @@ const Tenants = () => {
                 </div>
               )}
             </div>
+
+            <TenantInviteDialog
+              properties={properties}
+              open={showInviteDialog}
+              onOpenChange={setShowInviteDialog}
+            />
+            
+            <TenantAssignDialog
+              properties={properties}
+              open={showAssignDialog}
+              onOpenChange={setShowAssignDialog}
+            />
           </div>
           
           <div className="space-y-6">
