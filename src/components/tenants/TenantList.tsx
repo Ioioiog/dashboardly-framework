@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -29,75 +29,26 @@ export function TenantList({ tenants }: TenantListProps) {
   const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchPendingInvitations = async () => {
-      if (showInactive) {
-        try {
-          const { data: invitations, error } = await supabase
-            .from('tenant_invitations')
-            .select(`
-              *,
-              tenant_invitation_properties (
-                property_id,
-                properties:property_id (
-                  id,
-                  name,
-                  address
-                )
-              )
-            `)
-            .eq('status', 'pending')
-            .eq('used', false);
-
-          if (error) throw error;
-          console.log("Pending invitations:", invitations);
-          setPendingInvitations(invitations || []);
-        } catch (error) {
-          console.error("Error fetching pending invitations:", error);
-          toast({
-            title: "Error",
-            description: "Failed to fetch pending invitations",
-            variant: "destructive",
-          });
-        }
-      }
-    };
-
-    fetchPendingInvitations();
-  }, [showInactive, toast]);
-
   const handleTenantUpdate = () => {
-    console.log("Invalidating tenants query");
     queryClient.invalidateQueries({ queryKey: ["tenants"] });
   };
 
   const handleDeleteTenant = async (tenantId: string) => {
     try {
-      console.log("Starting deletion process for tenant:", tenantId);
-      
-      // Delete tenant observations
       const { error: observationsError } = await supabase
         .from('tenant_observations')
         .delete()
         .eq('tenant_id', tenantId);
 
-      if (observationsError) {
-        console.error("Error deleting observations:", observationsError);
-        throw observationsError;
-      }
+      if (observationsError) throw observationsError;
 
-      // Get all tenancies for the tenant
       const { data: tenancies, error: tenanciesFetchError } = await supabase
         .from('tenancies')
         .select('id, status')
         .eq('tenant_id', tenantId);
 
-      if (tenanciesFetchError) {
-        console.error("Error fetching tenancies:", tenanciesFetchError);
-        throw tenanciesFetchError;
-      }
+      if (tenanciesFetchError) throw tenanciesFetchError;
 
-      // Update status to inactive for any active tenancies
       for (const tenancy of tenancies || []) {
         if (tenancy.status !== 'inactive') {
           const { error: tenancyError } = await supabase
@@ -105,21 +56,15 @@ export function TenantList({ tenants }: TenantListProps) {
             .update({ status: 'inactive' })
             .eq('id', tenancy.id);
 
-          if (tenancyError) {
-            console.error("Error updating tenancy:", tenancyError);
-            throw tenancyError;
-          }
+          if (tenancyError) throw tenancyError;
         }
       }
-
-      console.log("Successfully deleted tenant data");
 
       toast({
         title: "Tenant deleted",
         description: "The tenant has been successfully removed.",
       });
 
-      // Force a refresh of the tenants data
       await queryClient.invalidateQueries({ queryKey: ["tenants"] });
     } catch (error) {
       console.error("Error in deletion process:", error);
@@ -139,11 +84,7 @@ export function TenantList({ tenants }: TenantListProps) {
     return `${tenant.first_name || ''} ${tenant.last_name || ''}`.trim();
   };
 
-  const getStatusBadgeColor = (status: string) => {
-    return status === 'active' ? 'bg-green-500' : 'bg-gray-500';
-  };
-
-  const filteredTenants = (tenants || []).filter((tenant) => {
+  const filteredTenants = tenants.filter((tenant) => {
     if (!tenant) return false;
     
     const searchString = searchTerm.toLowerCase();
@@ -157,14 +98,6 @@ export function TenantList({ tenants }: TenantListProps) {
       tenantEmail.includes(searchString) ||
       propertyName.includes(searchString) ||
       propertyAddress.includes(searchString);
-
-    // Enhanced logging for tenant status filtering
-    console.log(`Tenant ${tenant.email} details:`, {
-      tenancyStatus: tenant.tenancy?.status,
-      showInactive,
-      matchesSearch,
-      willBeIncluded: matchesSearch && (showInactive ? true : tenant.tenancy?.status === 'active')
-    });
     
     const matchesStatus = showInactive ? true : tenant.tenancy?.status === 'active';
 
@@ -183,26 +116,19 @@ export function TenantList({ tenants }: TenantListProps) {
       />
 
       {viewMode === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-          {showInactive && pendingInvitations.map((invitation) => (
-            <PendingInvitationCard
-              key={`inv-${invitation.id}`}
-              invitation={invitation}
-            />
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTenants.map((tenant) => (
             <TenantCard
-              key={`ten-${tenant.id}`}
+              key={tenant.id}
               tenant={tenant}
               onDelete={handleDeleteTenant}
               onUpdate={handleTenantUpdate}
               getTenantDisplayName={getTenantDisplayName}
-              getStatusBadgeColor={getStatusBadgeColor}
             />
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden animate-fade-in">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50 hover:bg-gray-50">
@@ -217,20 +143,13 @@ export function TenantList({ tenants }: TenantListProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {showInactive && pendingInvitations.map((invitation) => (
-                <PendingInvitationRow
-                  key={`inv-${invitation.id}`}
-                  invitation={invitation}
-                />
-              ))}
               {filteredTenants.map((tenant) => (
                 <TenantRow
-                  key={`ten-${tenant.id}`}
+                  key={tenant.id}
                   tenant={tenant}
                   onDelete={handleDeleteTenant}
                   onUpdate={handleTenantUpdate}
                   getTenantDisplayName={getTenantDisplayName}
-                  getStatusBadgeColor={getStatusBadgeColor}
                 />
               ))}
             </TableBody>
