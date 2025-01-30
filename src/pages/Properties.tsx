@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Building2, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { DashboardProperties } from "@/components/dashboard/DashboardProperties";
@@ -9,6 +9,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import { cn } from "@/lib/utils";
 
 export default function Properties() {
   const { t } = useTranslation();
@@ -153,11 +154,16 @@ export default function Properties() {
           <div className="space-y-6">
             <header className="bg-white rounded-xl shadow-lg p-8 transition-all duration-300 hover:shadow-xl animate-fade-in">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
-                    {t(`properties.title.${userRole}`)}
-                  </h1>
-                  <p className="mt-2 text-gray-500 leading-relaxed max-w-2xl">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-blue-600 rounded-xl">
+                      <Building2 className="h-6 w-6 text-white" />
+                    </div>
+                    <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+                      {t(`properties.title.${userRole}`)}
+                    </h1>
+                  </div>
+                  <p className="text-gray-500 leading-relaxed max-w-2xl">
                     {t(`properties.description.${userRole}`)}
                   </p>
                 </div>
@@ -170,7 +176,7 @@ export default function Properties() {
                     }}
                     className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
                   >
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="h-4 w-4" />
                     {t("properties.addProperty")}
                   </Button>
                 )}
