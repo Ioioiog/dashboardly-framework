@@ -171,11 +171,11 @@ const Tenants = () => {
                     <Users className="h-6 w-6 text-white" />
                   </div>
                   <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                    {t('tenants.title.landlord')}
+                    {t('tenants.title')}
                   </h1>
                 </div>
                 <p className="text-gray-500 max-w-2xl">
-                  {t('tenants.description.landlord')}
+                  {t('tenants.description')}
                 </p>
               </div>
               {userRole === "landlord" && (
@@ -186,14 +186,14 @@ const Tenants = () => {
                     className="w-full sm:w-auto flex items-center gap-2 hover:bg-gray-50 transition-colors"
                   >
                     <UserPlus className="h-4 w-4 text-gray-600" />
-                    <span>Assign Existing Tenant</span>
+                    <span>{t('tenants.addTenant')}</span>
                   </Button>
                   <Button
                     onClick={() => setShowInviteDialog(true)}
                     className="w-full sm:w-auto flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-colors"
                   >
                     <Mail className="h-4 w-4" />
-                    <span>Invite New Tenant</span>
+                    <span>{t('tenants.inviteTenant')}</span>
                   </Button>
                 </div>
               )}
