@@ -529,6 +529,9 @@ export type Database = {
           role: string
           settings: Json | null
           stripe_account_id: string | null
+          subscription_end_date: string | null
+          subscription_plan: Database["public"]["Enums"]["subscription_plan"]
+          subscription_start_date: string | null
           updated_at: string
         }
         Insert: {
@@ -543,6 +546,9 @@ export type Database = {
           role?: string
           settings?: Json | null
           stripe_account_id?: string | null
+          subscription_end_date?: string | null
+          subscription_plan?: Database["public"]["Enums"]["subscription_plan"]
+          subscription_start_date?: string | null
           updated_at?: string
         }
         Update: {
@@ -557,6 +563,9 @@ export type Database = {
           role?: string
           settings?: Json | null
           stripe_account_id?: string | null
+          subscription_end_date?: string | null
+          subscription_plan?: Database["public"]["Enums"]["subscription_plan"]
+          subscription_start_date?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -637,6 +646,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          id: string
+          name: Database["public"]["Enums"]["subscription_plan"]
+          price: number
+          tenant_limit: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: Database["public"]["Enums"]["subscription_plan"]
+          price: number
+          tenant_limit: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: Database["public"]["Enums"]["subscription_plan"]
+          price?: number
+          tenant_limit?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       tenancies: {
         Row: {
@@ -1137,6 +1173,7 @@ export type Database = {
       meter_type: "electricity" | "water" | "gas"
       property_type: "Apartment" | "House" | "Condo" | "Commercial"
       scraping_status: "pending" | "in_progress" | "completed" | "failed"
+      subscription_plan: "free" | "basic" | "premium" | "gold"
       tenant_action_type:
         | "invitation_sent"
         | "invitation_resent"

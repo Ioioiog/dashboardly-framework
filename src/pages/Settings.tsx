@@ -5,13 +5,16 @@ import { AccountSettings } from "@/components/settings/sections/AccountSettings"
 import { FinancialSettings } from "@/components/settings/sections/FinancialSettings";
 import { PropertyProvidersSettings } from "@/components/settings/sections/PropertyProvidersSettings";
 import { PreferencesSettings } from "@/components/settings/sections/PreferencesSettings";
-import { Settings2, Wallet, Building2, Languages } from "lucide-react";
+import { SubscriptionSettings } from "@/components/settings/sections/SubscriptionSettings";
+import { Settings2, Wallet, Building2, Languages, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUserRole } from "@/hooks/use-user-role";
 
-type SettingsSection = 'account' | 'financial' | 'providers' | 'preferences';
+type SettingsSection = 'account' | 'financial' | 'providers' | 'preferences' | 'subscription';
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState<SettingsSection>('account');
+  const { userRole } = useUserRole();
 
   const navigationItems = [
     {
@@ -34,6 +37,11 @@ const Settings = () => {
       label: 'Preferences',
       icon: Languages,
     },
+    ...(userRole === 'landlord' ? [{
+      id: 'subscription' as SettingsSection,
+      label: 'Subscription',
+      icon: Crown,
+    }] : []),
   ];
 
   const renderSection = () => {
@@ -46,6 +54,8 @@ const Settings = () => {
         return <PropertyProvidersSettings />;
       case 'preferences':
         return <PreferencesSettings />;
+      case 'subscription':
+        return <SubscriptionSettings />;
       default:
         return <AccountSettings />;
     }
