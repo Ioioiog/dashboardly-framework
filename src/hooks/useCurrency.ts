@@ -13,9 +13,20 @@ interface ExchangeRates {
   };
 }
 
+interface Currency {
+  code: string;
+  name: string;
+}
+
+const availableCurrencies: Currency[] = [
+  { code: 'USD', name: 'US Dollar' },
+  { code: 'EUR', name: 'Euro' },
+  { code: 'RON', name: 'Romanian Leu' }
+];
+
 const convertCurrency = (amount: number, fromCurrency: string, toCurrency: string, rates: ExchangeRates['rates']): number => {
   if (fromCurrency === toCurrency) return amount;
-
+  
   // All rates are in RON from BNR, so we need to:
   // 1. Convert the amount to RON first (if not already in RON)
   // 2. Then convert from RON to target currency
@@ -103,6 +114,7 @@ export function useCurrency() {
   return {
     formatAmount,
     currency: preference?.currency_preference || 'USD',
-    isLoading: !exchangeRates
+    isLoading: !exchangeRates,
+    availableCurrencies
   };
 }

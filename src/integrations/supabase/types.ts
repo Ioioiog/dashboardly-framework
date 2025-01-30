@@ -138,6 +138,7 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          currency: string
           due_date: string
           id: string
           landlord_id: string
@@ -150,6 +151,7 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          currency?: string
           due_date: string
           id?: string
           landlord_id: string
@@ -162,6 +164,7 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          currency?: string
           due_date?: string
           id?: string
           landlord_id?: string
@@ -467,6 +470,7 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          currency: string
           due_date: string
           id: string
           paid_date: string | null
@@ -479,6 +483,7 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          currency?: string
           due_date: string
           id?: string
           paid_date?: string | null
@@ -491,6 +496,7 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          currency?: string
           due_date?: string
           id?: string
           paid_date?: string | null
@@ -898,6 +904,7 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          currency: string
           due_date: string
           id: string
           property_id: string
@@ -908,6 +915,7 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          currency?: string
           due_date: string
           id?: string
           property_id: string
@@ -918,6 +926,7 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          currency?: string
           due_date?: string
           id?: string
           property_id?: string
