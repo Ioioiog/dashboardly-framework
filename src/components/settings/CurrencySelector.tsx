@@ -5,6 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useSettingsSync } from "@/hooks/useSettingsSync";
 import { useQueryClient } from "@tanstack/react-query";
+import { Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const currencies = [
   { value: 'USD', label: '🇺🇸 USD - US Dollar (USD)' },
@@ -71,8 +80,31 @@ export function CurrencySelector() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Currency Settings</CardTitle>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Info className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Current Exchange Rates</DialogTitle>
+              </DialogHeader>
+              <div className="w-full flex flex-col items-center space-y-2">
+                <iframe 
+                  style={{ width: "200px", height: "95px" }} 
+                  frameBorder="0" 
+                  marginWidth="0" 
+                  marginHeight="0" 
+                  scrolling="no" 
+                  src="https://www.cursbnr.ro/insert/cursvalutar.php?w=200&b=f7f7f7&bl=dcdcdc&ttc=0a6eab&tc=000000&diff=1&ron=1&cb=1&pics=1"
+                  title="BNR Exchange Rates"
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
         </CardHeader>
         <CardContent>
           <Select onValueChange={handleCurrencyChange} disabled={isLoading}>
@@ -87,24 +119,6 @@ export function CurrencySelector() {
               ))}
             </SelectContent>
           </Select>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Current Exchange Rates</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full flex flex-col items-center space-y-2">
-            <iframe 
-              className="rounded-lg shadow-sm"
-              style={{ width: "300px", height: "95px" }} 
-              frameBorder="0" 
-              scrolling="no" 
-              src="https://www.cursbnr.ro/insert/cursvalutar.php?w=300&b=f7f7f7&bl=dcdcdc&ttc=0a6eab&tc=000000&diff=1&ron=1&cb=1&pics=1"
-              title="BNR Exchange Rates"
-            />
-          </div>
         </CardContent>
       </Card>
     </div>
