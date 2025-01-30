@@ -168,7 +168,7 @@ export default function Properties() {
                       setSelectedProperty(null);
                       setShowDialog(true);
                     }}
-                    className="w-full sm:w-auto bg-gradient-to-r from-primary/90 to-primary hover:from-primary hover:to-primary/90 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     {t("properties.addProperty")}
