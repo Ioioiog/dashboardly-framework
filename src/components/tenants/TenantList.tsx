@@ -97,28 +97,29 @@ export function TenantList({ tenants }: TenantListProps) {
         throw interactionsError;
       }
 
-      // Get current tenancy status
-      const { data: tenancyData, error: tenancyFetchError } = await supabase
+      // Get all tenancies for the tenant
+      const { data: tenancies, error: tenanciesFetchError } = await supabase
         .from('tenancies')
-        .select('status')
-        .eq('tenant_id', tenantId)
-        .single();
+        .select('id, status')
+        .eq('tenant_id', tenantId);
 
-      if (tenancyFetchError) {
-        console.error("Error fetching tenancy:", tenancyFetchError);
-        throw tenancyFetchError;
+      if (tenanciesFetchError) {
+        console.error("Error fetching tenancies:", tenanciesFetchError);
+        throw tenanciesFetchError;
       }
 
-      // Only update tenancy if it's not already inactive
-      if (tenancyData && tenancyData.status !== 'inactive') {
-        const { error: tenancyError } = await supabase
-          .from('tenancies')
-          .update({ status: 'inactive' })
-          .eq('tenant_id', tenantId);
+      // Update status to inactive for any active tenancies
+      for (const tenancy of tenancies || []) {
+        if (tenancy.status !== 'inactive') {
+          const { error: tenancyError } = await supabase
+            .from('tenancies')
+            .update({ status: 'inactive' })
+            .eq('id', tenancy.id);
 
-        if (tenancyError) {
-          console.error("Error updating tenancy:", tenancyError);
-          throw tenancyError;
+          if (tenancyError) {
+            console.error("Error updating tenancy:", tenancyError);
+            throw tenancyError;
+          }
         }
       }
 
