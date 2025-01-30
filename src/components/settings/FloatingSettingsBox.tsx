@@ -54,7 +54,7 @@ export function FloatingSettingsBox() {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="fixed top-16 right-4 z-40">
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon" className="h-10 w-10 bg-white">
