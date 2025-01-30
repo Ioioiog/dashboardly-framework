@@ -234,5 +234,25 @@
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "overview": "Here's an overview of your activities",
+    "metrics": {
+      "loading": "Loading...",
+      "totalProperties": "Total Properties",
+      "totalPropertiesDesc": "Total managed properties",
+      "monthlyRevenue": "Monthly Revenue",
+      "monthlyRevenueDesc": "Current month's revenue",
+      "activeTenants": "Active Tenants",
+      "activeTenantsDesc": "Currently active tenants",
+      "pendingMaintenance": "Pending Maintenance",
+      "pendingMaintenanceDesc": "Pending maintenance requests",
+      "paymentStatus": "Payment Status",
+      "paymentStatusDesc": "Click to view monthly payments",
+      "rentedPropertiesDesc": "Your rented properties",
+      "openMaintenanceDesc": "Open maintenance requests"
+    }
   }
 }
