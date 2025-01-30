@@ -107,7 +107,7 @@ export default function Maintenance() {
             <h1 className="text-2xl font-semibold text-gray-900">{t("maintenance.title")}</h1>
             <Button 
               onClick={() => setIsDialogOpen(true)}
-              className="bg-primary hover:bg-primary/90 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
             >
               <Plus className="mr-2 h-4 w-4" />
               {t("maintenance.newRequest")}
