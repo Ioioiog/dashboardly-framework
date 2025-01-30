@@ -1,0 +1,27 @@
+{
+  "error": "Error",
+  "success": "Éxito",
+  "loading": "Cargando...",
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "delete": "Eliminar",
+  "edit": "Editar",
+  "view": "Ver",
+  "close": "Cerrar",
+  "confirm": "Confirmar",
+  "back": "Volver",
+  "next": "Siguiente",
+  "submit": "Enviar",
+  "currency": {
+    "usd": "$",
+    "eur": "€",
+    "gbp": "£"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente",
+    "completed": "Completado",
+    "cancelled": "Cancelado"
+  }
+}

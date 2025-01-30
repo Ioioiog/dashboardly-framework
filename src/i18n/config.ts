@@ -8,27 +8,35 @@ import enDashboard from './locales/en/dashboard.json';
 import enAuth from './locales/en/auth.json';
 
 // Spanish translations
-import esTranslations from './locales/es.json';
+import esCommon from './locales/es/common.json';
+import esProperties from './locales/es/properties.json';
+
 // French translations
-import frTranslations from './locales/fr.json';
+import frCommon from './locales/fr/common.json';
+import frProperties from './locales/fr/properties.json';
+
 // Romanian translations
-import roTranslations from './locales/ro.json';
+import roCommon from './locales/ro/common.json';
+import roProperties from './locales/ro/properties.json';
 
 const resources = {
   en: {
     common: enCommon,
     properties: enProperties,
     dashboard: enDashboard,
-    auth: enAuth
+    auth: enAuth,
   },
   es: {
-    translation: esTranslations,
+    common: esCommon,
+    properties: esProperties,
   },
   fr: {
-    translation: frTranslations,
+    common: frCommon,
+    properties: frProperties,
   },
   ro: {
-    translation: roTranslations,
+    common: roCommon,
+    properties: roProperties,
   },
 };
 
@@ -36,25 +44,13 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem('language') || 'en',
+    lng: 'en',
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,
     },
-    returnObjects: true,
-    debug: process.env.NODE_ENV === 'development',
-    react: {
-      useSuspense: false
-    },
-    // Add namespaces configuration
+    defaultNS: 'common',
     ns: ['common', 'properties', 'dashboard', 'auth'],
-    defaultNS: 'common'
-  })
-  .then(() => {
-    console.log('i18n initialized successfully');
-  })
-  .catch((error) => {
-    console.error('Error initializing i18n:', error);
   });
 
 export default i18n;

@@ -1,0 +1,27 @@
+{
+  "error": "Eroare",
+  "success": "Succes",
+  "loading": "Se încarcă...",
+  "save": "Salvează",
+  "cancel": "Anulează",
+  "delete": "Șterge",
+  "edit": "Editează",
+  "view": "Vizualizează",
+  "close": "Închide",
+  "confirm": "Confirmă",
+  "back": "Înapoi",
+  "next": "Următorul",
+  "submit": "Trimite",
+  "currency": {
+    "usd": "$",
+    "eur": "€",
+    "gbp": "£"
+  },
+  "status": {
+    "active": "Activ",
+    "inactive": "Inactiv",
+    "pending": "În așteptare",
+    "completed": "Finalizat",
+    "cancelled": "Anulat"
+  }
+}

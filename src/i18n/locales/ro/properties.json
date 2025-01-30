@@ -1,0 +1,77 @@
+{
+  "title": {
+    "landlord": "Gestionează Proprietățile",
+    "tenant": "Proprietățile Tale"
+  },
+  "description": {
+    "landlord": "Gestionează și monitorizează portofoliul tău imobiliar",
+    "tenant": "Vizualizează proprietățile închiriate și informațiile aferente"
+  },
+  "addProperty": "Adaugă Proprietate",
+  "editProperty": "Editează Proprietatea",
+  "deleteProperty": "Șterge Proprietatea",
+  "propertyDetails": "Detalii Proprietate",
+  "name": "Numele Proprietății",
+  "address": "Adresă",
+  "type": "Tipul Proprietății",
+  "monthlyRent": "Chirie Lunară",
+  "status": "Stare",
+  "availableFrom": "Disponibil Din",
+  "description": "Descriere",
+  "noProperties": "Nu s-au găsit proprietăți",
+  "empty": {
+    "landlord": "Nu ai adăugat încă nicio proprietate. Click pe butonul de mai sus pentru a adăuga prima ta proprietate.",
+    "tenant": "Nu ai nicio proprietate atribuită încă.",
+    "tenant.contact": "Te rugăm să contactezi proprietarul dacă crezi că este o eroare."
+  },
+  "types": {
+    "apartment": "Apartament",
+    "house": "Casă",
+    "condo": "Condominium",
+    "commercial": "Comercial"
+  },
+  "filters": {
+    "searchPlaceholder": "Caută proprietăți...",
+    "type": "Filtrează după tip",
+    "status": "Filtrează după stare",
+    "all": "Toate Proprietățile",
+    "occupied": "Arată doar proprietățile ocupate"
+  },
+  "sort": {
+    "nameAsc": "Nume (A-Z)",
+    "nameDesc": "Nume (Z-A)",
+    "rentAsc": "Chirie (Crescător)",
+    "rentDesc": "Chirie (Descrescător)",
+    "dateAsc": "Data Adăugării (Cel mai vechi)",
+    "dateDesc": "Data Adăugării (Cel mai recent)"
+  },
+  "view": {
+    "grid": "Vizualizare Grid",
+    "list": "Vizualizare Listă"
+  },
+  "tenant": {
+    "assign": "Atribuie Chiriaș",
+    "remove": "Elimină Chiriașul",
+    "none": "Niciun chiriaș atribuit",
+    "current": "Chiriașul Actual",
+    "dates": {
+      "start": "Data de Început",
+      "end": "Data de Sfârșit",
+      "edit": "Editează Datele",
+      "save": "Salvează Modificările"
+    }
+  },
+  "utilities": {
+    "analyze": "Analizează Istoricul Facturilor",
+    "stats": {
+      "title": "Statistici Utilități",
+      "average": "Cost Lunar Mediu",
+      "total": "Total Utilități",
+      "highest": "Cea Mai Mare Factură",
+      "lowest": "Cea Mai Mică Factură"
+    }
+  },
+  "rent": {
+    "period": "lună"
+  }
+}

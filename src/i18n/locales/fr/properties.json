@@ -1,0 +1,77 @@
+{
+  "title": {
+    "landlord": "Gérer les Propriétés",
+    "tenant": "Vos Propriétés"
+  },
+  "description": {
+    "landlord": "Gérez et surveillez votre portefeuille immobilier",
+    "tenant": "Consultez vos propriétés louées et les informations associées"
+  },
+  "addProperty": "Ajouter une Propriété",
+  "editProperty": "Modifier la Propriété",
+  "deleteProperty": "Supprimer la Propriété",
+  "propertyDetails": "Détails de la Propriété",
+  "name": "Nom de la Propriété",
+  "address": "Adresse",
+  "type": "Type de Propriété",
+  "monthlyRent": "Loyer Mensuel",
+  "status": "Statut",
+  "availableFrom": "Disponible à partir de",
+  "description": "Description",
+  "noProperties": "Aucune propriété trouvée",
+  "empty": {
+    "landlord": "Vous n'avez pas encore ajouté de propriété. Cliquez sur le bouton ci-dessus pour ajouter votre première propriété.",
+    "tenant": "Vous n'avez pas encore de propriété assignée.",
+    "tenant.contact": "Veuillez contacter votre propriétaire si vous pensez qu'il s'agit d'une erreur."
+  },
+  "types": {
+    "apartment": "Appartement",
+    "house": "Maison",
+    "condo": "Copropriété",
+    "commercial": "Commercial"
+  },
+  "filters": {
+    "searchPlaceholder": "Rechercher des propriétés...",
+    "type": "Filtrer par type",
+    "status": "Filtrer par statut",
+    "all": "Toutes les Propriétés",
+    "occupied": "Afficher uniquement les propriétés occupées"
+  },
+  "sort": {
+    "nameAsc": "Nom (A-Z)",
+    "nameDesc": "Nom (Z-A)",
+    "rentAsc": "Loyer (Croissant)",
+    "rentDesc": "Loyer (Décroissant)",
+    "dateAsc": "Date d'ajout (Plus ancien)",
+    "dateDesc": "Date d'ajout (Plus récent)"
+  },
+  "view": {
+    "grid": "Vue en Grille",
+    "list": "Vue en Liste"
+  },
+  "tenant": {
+    "assign": "Assigner un Locataire",
+    "remove": "Retirer le Locataire",
+    "none": "Aucun locataire assigné",
+    "current": "Locataire Actuel",
+    "dates": {
+      "start": "Date de Début",
+      "end": "Date de Fin",
+      "edit": "Modifier les Dates",
+      "save": "Enregistrer les Modifications"
+    }
+  },
+  "utilities": {
+    "analyze": "Analyser l'Historique des Factures",
+    "stats": {
+      "title": "Statistiques des Services",
+      "average": "Coût Mensuel Moyen",
+      "total": "Total des Services",
+      "highest": "Facture la Plus Élevée",
+      "lowest": "Facture la Plus Basse"
+    }
+  },
+  "rent": {
+    "period": "mois"
+  }
+}
