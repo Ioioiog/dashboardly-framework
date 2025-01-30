@@ -38,8 +38,14 @@ export function LanguageSelector() {
 
       toast({
         title: "Success",
-        description: "Language updated successfully",
+        description: "Language updated successfully. Reloading page...",
       });
+
+      // Reload the page after a short delay to show the toast
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+
     } catch (error) {
       console.error('Error updating language:', error);
       toast({

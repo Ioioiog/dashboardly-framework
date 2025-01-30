@@ -40,8 +40,14 @@ export function CurrencySelector() {
 
       toast({
         title: "Success",
-        description: "Currency preference updated successfully",
+        description: "Currency preference updated successfully. Reloading page...",
       });
+
+      // Reload the page after a short delay to show the toast
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+      
     } catch (error) {
       console.error('Error updating currency:', error);
       toast({
