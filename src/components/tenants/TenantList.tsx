@@ -86,17 +86,6 @@ export function TenantList({ tenants }: TenantListProps) {
         throw observationsError;
       }
 
-      // Delete tenant interactions
-      const { error: interactionsError } = await supabase
-        .from('tenant_interactions')
-        .delete()
-        .eq('tenant_id', tenantId);
-
-      if (interactionsError) {
-        console.error("Error deleting interactions:", interactionsError);
-        throw interactionsError;
-      }
-
       // Get all tenancies for the tenant
       const { data: tenancies, error: tenanciesFetchError } = await supabase
         .from('tenancies')
