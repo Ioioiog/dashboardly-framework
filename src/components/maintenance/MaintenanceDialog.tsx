@@ -9,6 +9,7 @@ import { MaintenanceRequestForm } from "./forms/MaintenanceRequestForm";
 import { useMaintenanceRequest } from "./hooks/useMaintenanceRequest";
 import { useMaintenanceProperties } from "./hooks/useMaintenanceProperties";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -22,6 +23,7 @@ export default function MaintenanceDialog({
   requestId,
 }: MaintenanceDialogProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { userRole } = useUserRole();
   const { currentUserId } = useAuthState();
 
@@ -57,6 +59,36 @@ export default function MaintenanceDialog({
   };
 
   const handleSubmit = (values: any) => {
+    // Validate required fields
+    if (!values.property_id) {
+      toast({
+        title: "Error",
+        description: "Please select a property",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!values.title) {
+      toast({
+        title: "Error",
+        description: "Please enter a title",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!values.description) {
+      toast({
+        title: "Error",
+        description: "Please enter a description",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log("Submitting maintenance request with values:", values);
+
     if (requestId) {
       updateMutation.mutate(values);
     } else {
@@ -68,7 +100,7 @@ export default function MaintenanceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[900px]">
         <DialogHeader>
-          <DialogTitle>{t("maintenance.form.createRequest")}</DialogTitle>
+          <DialogTitle>{requestId ? t("maintenance.form.updateRequest") : t("maintenance.form.createRequest")}</DialogTitle>
         </DialogHeader>
         <MaintenanceRequestForm
           defaultValues={defaultValues}

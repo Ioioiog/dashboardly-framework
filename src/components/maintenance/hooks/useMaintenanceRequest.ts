@@ -52,11 +52,14 @@ export function useMaintenanceRequest(requestId?: string) {
     queryKey: ["maintenance-request", requestId],
     enabled: !!requestId,
     queryFn: async () => {
+      if (!requestId) return null;
+      
       const { data, error } = await supabase
         .from("maintenance_requests")
         .select("*")
         .eq("id", requestId)
-        .single();
+        .maybeSingle();
+        
       if (error) throw error;
       return data;
     },
@@ -64,9 +67,9 @@ export function useMaintenanceRequest(requestId?: string) {
 
   const createMutation = useMutation({
     mutationFn: async (values: any) => {
-      // Validate required UUIDs
-      if (!values.property_id || !values.tenant_id) {
-        throw new Error("Property and tenant IDs are required");
+      // Validate required fields
+      if (!values.property_id || !values.tenant_id || !values.title || !values.description) {
+        throw new Error("Required fields are missing");
       }
 
       let imageUrls: string[] = [];
@@ -117,6 +120,11 @@ export function useMaintenanceRequest(requestId?: string) {
     mutationFn: async (values: any) => {
       if (!requestId) {
         throw new Error("Request ID is required for updates");
+      }
+
+      // Validate required fields
+      if (!values.property_id || !values.tenant_id || !values.title || !values.description) {
+        throw new Error("Required fields are missing");
       }
 
       let imageUrls: string[] = values.images as string[];
