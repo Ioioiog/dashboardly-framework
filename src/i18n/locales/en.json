@@ -22,40 +22,26 @@
     "date": "Date",
     "amount": "Amount",
     "description": "Description",
-    "noData": "No data available"
-  },
-  "auth": {
-    "signIn": "Sign In",
-    "signUp": "Sign Up",
-    "signOut": "Sign Out",
-    "forgotPassword": "Forgot Password?",
-    "resetPassword": "Reset Password",
-    "email": "Email",
-    "password": "Password",
-    "confirmPassword": "Confirm Password",
-    "newPassword": "New Password",
-    "rememberMe": "Remember Me",
-    "orContinueWith": "Or continue with"
-  },
-  "dashboard": {
-    "title": "Dashboard",
-    "welcome": "Welcome back",
-    "metrics": {
-      "totalProperties": "Total Properties",
-      "monthlyRevenue": "Monthly Revenue",
-      "activeTenants": "Active Tenants",
-      "pendingMaintenance": "Pending Maintenance",
-      "paymentStatus": "Payment Status"
-    },
-    "revenue": {
-      "title": "Revenue Overview",
-      "monthly": "Monthly Revenue",
-      "yearly": "Yearly Revenue",
-      "details": "Revenue Details"
+    "noData": "No data available",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "currency": {
+      "usd": "USD",
+      "eur": "EUR",
+      "gbp": "GBP",
+      "ron": "RON"
     }
   },
   "properties": {
-    "title": "Properties",
+    "title": {
+      "landlord": "Manage Properties",
+      "tenant": "Your Properties"
+    },
+    "description": {
+      "landlord": "Manage and monitor your property portfolio",
+      "tenant": "View your rented properties and related information"
+    },
     "addProperty": "Add Property",
     "editProperty": "Edit Property",
     "deleteProperty": "Delete Property",
@@ -68,159 +54,75 @@
     "availableFrom": "Available From",
     "description": "Description",
     "noProperties": "No properties found",
+    "empty": {
+      "landlord": "You haven't added any properties yet. Click the button above to add your first property.",
+      "tenant": "You don't have any properties assigned to you yet.",
+      "tenant.contact": "Please contact your landlord if you believe this is an error."
+    },
     "types": {
       "apartment": "Apartment",
       "house": "House",
-      "commercial": "Commercial",
-      "other": "Other"
+      "condo": "Condo",
+      "commercial": "Commercial"
     },
     "filters": {
       "searchPlaceholder": "Search properties...",
       "type": "Filter by type",
       "status": "Filter by status",
-      "all": "All Properties"
+      "all": "All Properties",
+      "occupied": "Show only occupied properties"
+    },
+    "sort": {
+      "nameAsc": "Name (A-Z)",
+      "nameDesc": "Name (Z-A)",
+      "rentAsc": "Rent (Low to High)",
+      "rentDesc": "Rent (High to Low)",
+      "dateAsc": "Date Added (Oldest)",
+      "dateDesc": "Date Added (Newest)"
+    },
+    "view": {
+      "grid": "Grid View",
+      "list": "List View"
+    },
+    "tenant": {
+      "assign": "Assign Tenant",
+      "remove": "Remove Tenant",
+      "none": "No tenant assigned",
+      "current": "Current Tenant",
+      "dates": {
+        "start": "Start Date",
+        "end": "End Date",
+        "edit": "Edit Dates",
+        "save": "Save Changes"
+      }
+    },
+    "utilities": {
+      "analyze": "Analyze Invoice History",
+      "stats": {
+        "title": "Utility Statistics",
+        "average": "Average Monthly Cost",
+        "total": "Total Utilities",
+        "highest": "Highest Bill",
+        "lowest": "Lowest Bill"
+      }
+    },
+    "toast": {
+      "success": {
+        "added": "Property added successfully",
+        "updated": "Property updated successfully",
+        "deleted": "Property deleted successfully",
+        "tenantAssigned": "Tenant assigned successfully",
+        "tenantRemoved": "Tenant removed successfully",
+        "datesUpdated": "Tenancy dates updated successfully"
+      },
+      "error": {
+        "add": "Failed to add property",
+        "update": "Failed to update property",
+        "delete": "Failed to delete property",
+        "assignTenant": "Failed to assign tenant",
+        "removeTenant": "Failed to remove tenant",
+        "updateDates": "Failed to update tenancy dates"
+      }
     }
-  },
-  "tenants": {
-    "title": {
-      "landlord": "Manage Tenants",
-      "tenant": "Your Tenancy"
-    },
-    "description": {
-      "landlord": "Manage your tenants and view their information",
-      "tenant": "View your tenancy details and related information"
-    },
-    "addTenant": "Add Tenant",
-    "inviteTenant": "Invite Tenant",
-    "editTenant": "Edit Tenant",
-    "deleteTenant": "Delete Tenant",
-    "tenantDetails": "Tenant Details",
-    "firstName": "First Name",
-    "lastName": "Last Name",
-    "email": "Email",
-    "phone": "Phone",
-    "startDate": "Start Date",
-    "endDate": "End Date",
-    "noTenants": "No tenants found",
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "pending": "Pending"
-    },
-    "dashboard": {
-      "property": "Property",
-      "leasePeriod": "Lease Period",
-      "monthlyRent": "Monthly Rent",
-      "endDate": "End Date: {{date}}",
-      "noEndDate": "No end date set"
-    },
-    "noTenancy": {
-      "message": "You currently have no active tenancy"
-    }
-  },
-  "maintenance": {
-    "title": "Maintenance Requests",
-    "newRequest": "New Request",
-    "noRequests": "No maintenance requests found",
-    "createRequestPrompt": "Click the \"New Request\" button to create a maintenance request",
-    "ticket": "Ticket ID",
-    "property": "Property",
-    "status": {
-      "pending": "Pending",
-      "in_progress": "In Progress",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
-    },
-    "priority": {
-      "low": "Low Priority",
-      "medium": "Medium Priority",
-      "high": "High Priority"
-    },
-    "filters": {
-      "status": "Status",
-      "priority": "Priority",
-      "property": "Property",
-      "allStatuses": "All Statuses",
-      "allPriorities": "All Priorities",
-      "allProperties": "All Properties"
-    },
-    "assignee": "Assignee",
-    "unassigned": "Unassigned",
-    "dates": "Dates",
-    "created": "Created",
-    "updated": "Last Updated",
-    "actions": "Actions",
-    "viewDetails": "View Details"
-  },
-  "payments": {
-    "title": "Payments",
-    "makePayment": "Make Payment",
-    "paymentHistory": "Payment History",
-    "upcomingPayments": "Upcoming Payments",
-    "dueDate": "Due Date",
-    "paidDate": "Paid Date",
-    "status": {
-      "paid": "Paid",
-      "pending": "Pending",
-      "overdue": "Overdue"
-    },
-    "noPayments": "No payments found"
-  },
-  "utilities": {
-    "title": "Utilities",
-    "addUtility": "Add Utility",
-    "type": "Utility Type",
-    "amount": "Amount",
-    "dueDate": "Due Date",
-    "status": "Status",
-    "noUtilities": "No utilities found",
-    "types": {
-      "electricity": "Electricity",
-      "water": "Water",
-      "gas": "Gas",
-      "internet": "Internet",
-      "other": "Other"
-    },
-    "status": {
-      "paid": "Paid",
-      "pending": "Pending",
-      "overdue": "Overdue"
-    }
-  },
-  "documents": {
-    "title": "Documents",
-    "uploadDocument": "Upload Document",
-    "noDocuments": "No documents found",
-    "type": "Document Type",
-    "uploadedBy": "Uploaded By",
-    "uploadDate": "Upload Date",
-    "types": {
-      "lease": "Lease Agreement",
-      "invoice": "Invoice",
-      "maintenance": "Maintenance",
-      "other": "Other"
-    }
-  },
-  "settings": {
-    "title": "Settings",
-    "profile": "Profile Settings",
-    "notifications": "Notifications",
-    "security": "Security",
-    "preferences": "Preferences",
-    "language": "Language",
-    "currency": "Currency",
-    "theme": "Theme",
-    "account": "Account Settings",
-    "subscription": "Subscription",
-    "billing": "Billing",
-    "invoiceInfo": "Invoice Information"
-  },
-  "chat": {
-    "title": "Messages",
-    "newMessage": "New Message",
-    "noMessages": "No messages found",
-    "selectTenant": "Select a tenant to start chatting",
-    "typeMessage": "Type your message...",
-    "send": "Send"
   }
 }
