@@ -13,22 +13,24 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Tenant } from "@/types/tenant";
 
 interface TenantActionsProps {
   tenantId: string;
   tenantName: string;
+  tenant: Tenant;
   onDelete: (tenantId: string) => Promise<void>;
   onUpdate: () => void;
 }
 
-export function TenantActions({ tenantId, tenantName, onDelete, onUpdate }: TenantActionsProps) {
+export function TenantActions({ tenantId, tenantName, tenant, onDelete, onUpdate }: TenantActionsProps) {
   return (
     <div className="flex justify-end space-x-2">
       <TenantObservationDialog
         tenantId={tenantId}
         tenantName={tenantName}
       />
-      <EditTenantDialog tenant={{ id: tenantId }} onUpdate={onUpdate} />
+      <EditTenantDialog tenant={tenant} onUpdate={onUpdate} />
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button variant="destructive" size="icon">

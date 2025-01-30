@@ -33,6 +33,7 @@ export function TenantCard({
         <TenantActions
           tenantId={tenant.id}
           tenantName={getTenantDisplayName(tenant)}
+          tenant={tenant}
           onDelete={onDelete}
           onUpdate={onUpdate}
         />
