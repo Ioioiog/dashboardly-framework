@@ -36,7 +36,9 @@ export function MetricCard({
     }
   };
 
-  const isPropertiesCard = title === 'dashboard.metrics.totalProperties';
+  const shouldAnimate = title === 'dashboard.metrics.totalProperties' || 
+                       title === 'dashboard.metrics.activeTenants' || 
+                       title === 'dashboard.metrics.pendingMaintenance';
 
   return (
     <Card 
@@ -49,7 +51,7 @@ export function MetricCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {isPropertiesCard && isHovered ? (
+      {shouldAnimate && isHovered ? (
         <div className="absolute inset-0 flex items-center justify-center bg-white transition-all duration-500">
           <Icon 
             className={cn(

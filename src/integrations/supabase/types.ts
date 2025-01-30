@@ -983,6 +983,7 @@ export type Database = {
           end_day: number | null
           id: string
           landlord_id: string
+          location_name: string | null
           property_id: string | null
           provider_name: string
           start_day: number | null
@@ -998,6 +999,7 @@ export type Database = {
           end_day?: number | null
           id?: string
           landlord_id: string
+          location_name?: string | null
           property_id?: string | null
           provider_name: string
           start_day?: number | null
@@ -1013,6 +1015,7 @@ export type Database = {
           end_day?: number | null
           id?: string
           landlord_id?: string
+          location_name?: string | null
           property_id?: string | null
           provider_name?: string
           start_day?: number | null
