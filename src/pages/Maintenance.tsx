@@ -102,21 +102,26 @@ export default function Maintenance() {
     <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
       <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">{t("maintenance.title")}</h1>
-            <Button onClick={() => setIsDialogOpen(true)}>
+        <div className="container mx-auto p-8 space-y-8">
+          <div className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm">
+            <h1 className="text-2xl font-semibold text-gray-900">{t("maintenance.title")}</h1>
+            <Button 
+              onClick={() => setIsDialogOpen(true)}
+              className="bg-primary hover:bg-primary/90 text-white"
+            >
               <Plus className="mr-2 h-4 w-4" />
               {t("maintenance.newRequest")}
             </Button>
           </div>
 
-          <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
+          </div>
 
           {maintenanceRequests?.length === 0 && !isLoading ? (
-            <div className="text-center py-12">
+            <div className="text-center py-16 bg-white rounded-lg shadow-sm">
               <AlertTriangle className="mx-auto h-12 w-12 text-yellow-500" />
-              <h3 className="mt-4 text-lg font-semibold">
+              <h3 className="mt-4 text-lg font-semibold text-gray-900">
                 {t("maintenance.noRequests")}
               </h3>
               <p className="mt-2 text-gray-500">
@@ -124,11 +129,13 @@ export default function Maintenance() {
               </p>
             </div>
           ) : (
-            <MaintenanceList
-              requests={maintenanceRequests || []}
-              isLoading={isLoading}
-              onRequestClick={handleRequestClick}
-            />
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <MaintenanceList
+                requests={maintenanceRequests || []}
+                isLoading={isLoading}
+                onRequestClick={handleRequestClick}
+              />
+            </div>
           )}
 
           <MaintenanceDialog
