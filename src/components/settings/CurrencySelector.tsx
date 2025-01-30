@@ -69,24 +69,44 @@ export function CurrencySelector() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Currency Settings</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Select onValueChange={handleCurrencyChange} disabled={isLoading}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select Currency" />
-          </SelectTrigger>
-          <SelectContent>
-            {currencies.map((currency) => (
-              <SelectItem key={currency.value} value={currency.value}>
-                {currency.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Currency Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select onValueChange={handleCurrencyChange} disabled={isLoading}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {currencies.map((currency) => (
+                <SelectItem key={currency.value} value={currency.value}>
+                  {currency.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Exchange Rates</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full flex justify-center">
+            <iframe 
+              className="rounded-lg shadow-sm"
+              style={{ width: "200px", height: "95px" }} 
+              frameBorder="0" 
+              scrolling="no" 
+              src="https://www.cursbnr.ro/insert/cursvalutar.php?w=200&b=f7f7f7&bl=dcdcdc&ttc=0a6eab&tc=000000&diff=1&ron=1&cb=1&pics=1"
+              title="BNR Exchange Rates"
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
