@@ -22,5 +22,25 @@
     "tabs": {
       "all": "Toate Cererile"
     }
+  },
+  "dashboard": {
+    "title": "Panou de control",
+    "welcome": "Bun venit",
+    "overview": "Iată o prezentare generală a activităților dvs",
+    "metrics": {
+      "loading": "Se încarcă...",
+      "totalProperties": "Total proprietăți",
+      "totalPropertiesDesc": "Total proprietăți administrate",
+      "monthlyRevenue": "Venit lunar",
+      "monthlyRevenueDesc": "Veniturile lunii curente",
+      "activeTenants": "Chiriași activi",
+      "activeTenantsDesc": "Chiriași activi în prezent",
+      "pendingMaintenance": "Mentenanță în așteptare",
+      "pendingMaintenanceDesc": "Cereri de mentenanță în așteptare",
+      "paymentStatus": "Stare plăți",
+      "paymentStatusDesc": "Click pentru a vedea plățile lunare",
+      "rentedPropertiesDesc": "Proprietățile dvs închiriate",
+      "openMaintenanceDesc": "Cereri de mentenanță deschise"
+    }
   }
 }

@@ -22,5 +22,25 @@
     "tabs": {
       "all": "Todas las Solicitudes"
     }
+  },
+  "dashboard": {
+    "title": "Panel de control",
+    "welcome": "Bienvenido",
+    "overview": "Aquí tiene una visión general de sus actividades",
+    "metrics": {
+      "loading": "Cargando...",
+      "totalProperties": "Total propiedades",
+      "totalPropertiesDesc": "Total de propiedades gestionadas",
+      "monthlyRevenue": "Ingresos mensuales",
+      "monthlyRevenueDesc": "Ingresos del mes actual",
+      "activeTenants": "Inquilinos activos",
+      "activeTenantsDesc": "Inquilinos actualmente activos",
+      "pendingMaintenance": "Mantenimiento pendiente",
+      "pendingMaintenanceDesc": "Solicitudes de mantenimiento pendientes",
+      "paymentStatus": "Estado de pagos",
+      "paymentStatusDesc": "Haga clic para ver los pagos mensuales",
+      "rentedPropertiesDesc": "Sus propiedades alquiladas",
+      "openMaintenanceDesc": "Solicitudes de mantenimiento abiertas"
+    }
   }
 }

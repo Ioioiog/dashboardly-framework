@@ -22,5 +22,25 @@
     "tabs": {
       "all": "Toutes les Demandes"
     }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bienvenue",
+    "overview": "Voici un aperçu de vos activités",
+    "metrics": {
+      "loading": "Chargement...",
+      "totalProperties": "Propriétés totales",
+      "totalPropertiesDesc": "Total des propriétés gérées",
+      "monthlyRevenue": "Revenu mensuel",
+      "monthlyRevenueDesc": "Revenus du mois en cours",
+      "activeTenants": "Locataires actifs",
+      "activeTenantsDesc": "Locataires actuellement actifs",
+      "pendingMaintenance": "Maintenance en attente",
+      "pendingMaintenanceDesc": "Demandes de maintenance en attente",
+      "paymentStatus": "État des paiements",
+      "paymentStatusDesc": "Cliquez pour voir les paiements mensuels",
+      "rentedPropertiesDesc": "Vos propriétés louées",
+      "openMaintenanceDesc": "Demandes de maintenance ouvertes"
+    }
   }
 }
