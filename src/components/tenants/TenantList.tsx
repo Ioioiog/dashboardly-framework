@@ -67,23 +67,37 @@ export function TenantList({ tenants }: TenantListProps) {
   }, [showInactive, toast]);
 
   const handleTenantUpdate = () => {
+    console.log("Invalidating tenants query");
     queryClient.invalidateQueries({ queryKey: ["tenants"] });
   };
 
   const handleDeleteTenant = async (tenantId: string) => {
     try {
-      console.log("Deleting tenant:", tenantId);
+      console.log("Starting deletion process for tenant:", tenantId);
       
-      await supabase
+      // Delete tenant observations
+      const { error: observationsError } = await supabase
         .from('tenant_observations')
         .delete()
         .eq('tenant_id', tenantId);
 
-      await supabase
+      if (observationsError) {
+        console.error("Error deleting observations:", observationsError);
+        throw observationsError;
+      }
+
+      // Delete tenant interactions
+      const { error: interactionsError } = await supabase
         .from('tenant_interactions')
         .delete()
         .eq('tenant_id', tenantId);
 
+      if (interactionsError) {
+        console.error("Error deleting interactions:", interactionsError);
+        throw interactionsError;
+      }
+
+      // Update tenancy status
       const { error: tenancyError } = await supabase
         .from('tenancies')
         .update({ status: 'inactive' })
@@ -94,14 +108,18 @@ export function TenantList({ tenants }: TenantListProps) {
         throw tenancyError;
       }
 
+      console.log("Successfully deleted tenant data");
+
       toast({
         title: "Tenant deleted",
         description: "The tenant has been successfully removed.",
       });
 
+      // Force a refresh of the tenants data
+      await queryClient.invalidateQueries({ queryKey: ["tenants"] });
       handleTenantUpdate();
     } catch (error) {
-      console.error("Error deleting tenant:", error);
+      console.error("Error in deletion process:", error);
       toast({
         title: "Error",
         description: "Failed to delete tenant. Please try again.",
@@ -142,6 +160,9 @@ export function TenantList({ tenants }: TenantListProps) {
     return matchesSearch && matchesStatus;
   });
 
+  // Ensure unique keys by combining tenant ID with a timestamp
+  const getUniqueKey = (id: string) => `${id}-${Date.now()}`;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <TenantListHeader
@@ -157,13 +178,13 @@ export function TenantList({ tenants }: TenantListProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
           {showInactive && pendingInvitations.map((invitation) => (
             <PendingInvitationCard
-              key={invitation.id}
+              key={getUniqueKey(invitation.id)}
               invitation={invitation}
             />
           ))}
           {filteredTenants.map((tenant) => (
             <TenantCard
-              key={tenant.id}
+              key={getUniqueKey(tenant.id)}
               tenant={tenant}
               onDelete={handleDeleteTenant}
               onUpdate={handleTenantUpdate}
@@ -190,13 +211,13 @@ export function TenantList({ tenants }: TenantListProps) {
             <TableBody>
               {showInactive && pendingInvitations.map((invitation) => (
                 <PendingInvitationRow
-                  key={invitation.id}
+                  key={getUniqueKey(invitation.id)}
                   invitation={invitation}
                 />
               ))}
               {filteredTenants.map((tenant) => (
                 <TenantRow
-                  key={tenant.id}
+                  key={getUniqueKey(tenant.id)}
                   tenant={tenant}
                   onDelete={handleDeleteTenant}
                   onUpdate={handleTenantUpdate}
