@@ -38,7 +38,8 @@ export function MetricCard({
 
   const shouldAnimate = title === 'dashboard.metrics.totalProperties' || 
                        title === 'dashboard.metrics.activeTenants' || 
-                       title === 'dashboard.metrics.pendingMaintenance';
+                       title === 'dashboard.metrics.pendingMaintenance' ||
+                       title === 'dashboard.metrics.monthlyRevenue';
 
   return (
     <Card 
