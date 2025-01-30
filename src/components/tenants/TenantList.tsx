@@ -97,15 +97,29 @@ export function TenantList({ tenants }: TenantListProps) {
         throw interactionsError;
       }
 
-      // Update tenancy status
-      const { error: tenancyError } = await supabase
+      // Get current tenancy status
+      const { data: tenancyData, error: tenancyFetchError } = await supabase
         .from('tenancies')
-        .update({ status: 'inactive' })
-        .eq('tenant_id', tenantId);
+        .select('status')
+        .eq('tenant_id', tenantId)
+        .single();
 
-      if (tenancyError) {
-        console.error("Error updating tenancy:", tenancyError);
-        throw tenancyError;
+      if (tenancyFetchError) {
+        console.error("Error fetching tenancy:", tenancyFetchError);
+        throw tenancyFetchError;
+      }
+
+      // Only update tenancy if it's not already inactive
+      if (tenancyData && tenancyData.status !== 'inactive') {
+        const { error: tenancyError } = await supabase
+          .from('tenancies')
+          .update({ status: 'inactive' })
+          .eq('tenant_id', tenantId);
+
+        if (tenancyError) {
+          console.error("Error updating tenancy:", tenancyError);
+          throw tenancyError;
+        }
       }
 
       console.log("Successfully deleted tenant data");
