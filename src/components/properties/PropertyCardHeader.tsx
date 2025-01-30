@@ -23,7 +23,7 @@ export function PropertyCardHeader({ property }: PropertyCardHeaderProps) {
           </p>
           <p className="text-lg font-medium flex items-center gap-2 text-blue-600 justify-center">
             <Wallet className="h-5 w-5" />
-            ${property.monthly_rent}/{t('properties.rent.period')}
+            {t('common.currency.usd')}{property.monthly_rent} {t('properties.rent.period')}
           </p>
         </div>
         {property.type && (
