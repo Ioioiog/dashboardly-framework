@@ -19,7 +19,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
         {[...Array(4)].map((_, i) => (
           <MetricCard
             key={i}
-            title="Loading..."
+            title={t('dashboard.metrics.loading')}
             value="..."
             icon={Home}
             className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
@@ -45,14 +45,14 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
             icon={Home}
             route="/properties"
             className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
-            description="Total managed properties"
+            description={t('dashboard.metrics.totalPropertiesDesc')}
           />
           <MetricCard
             title={t('dashboard.metrics.monthlyRevenue')}
             value={formatAmount(metrics.monthlyRevenue || 0)}
             icon={Wallet}
             onClick={handleRevenueClick}
-            description={t('dashboard.revenue.title')}
+            description={t('dashboard.metrics.monthlyRevenueDesc')}
             className="bg-white shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
           />
           <MetricCard
@@ -61,7 +61,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
             icon={Users}
             route="/tenants"
             className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
-            description="Currently active tenants"
+            description={t('dashboard.metrics.activeTenantsDesc')}
           />
           <MetricCard
             title={t('dashboard.metrics.pendingMaintenance')}
@@ -69,7 +69,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
             icon={Wrench}
             route="/maintenance"
             className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
-            description="Pending maintenance requests"
+            description={t('dashboard.metrics.pendingMaintenanceDesc')}
           />
         </div>
 
@@ -91,7 +91,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           icon={Home}
           route="/properties"
           className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
-          description="Your rented properties"
+          description={t('dashboard.metrics.rentedPropertiesDesc')}
         />
         <MetricCard
           title={t('dashboard.metrics.pendingMaintenance')}
@@ -99,7 +99,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           icon={Wrench}
           route="/maintenance"
           className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
-          description="Open maintenance requests"
+          description={t('dashboard.metrics.openMaintenanceDesc')}
         />
         <MetricCard
           title={t('dashboard.metrics.paymentStatus')}
@@ -107,7 +107,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           icon={Wallet}
           onClick={handleRevenueClick}
           className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
-          description="Click to view monthly payments"
+          description={t('dashboard.metrics.paymentStatusDesc')}
         />
       </div>
 
