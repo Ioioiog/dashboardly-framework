@@ -51,7 +51,7 @@ export function useCurrency() {
     },
   });
 
-  // Fetch exchange rates
+  // Fetch exchange rates with 24-hour caching
   const { data: exchangeRates } = useQuery<ExchangeRates>({
     queryKey: ["exchange-rates"],
     queryFn: async () => {
@@ -73,8 +73,10 @@ export function useCurrency() {
       console.log('Received exchange rates:', rates);
       return { rates };
     },
-    // Cache for 1 hour since rates don't change frequently
-    staleTime: 60 * 60 * 1000,
+    // Cache for 24 hours since rates don't change frequently
+    staleTime: 24 * 60 * 60 * 1000,
+    // Keep cached data for 24 hours
+    cacheTime: 24 * 60 * 60 * 1000,
     // Retry up to 3 times
     retry: 3,
   });
