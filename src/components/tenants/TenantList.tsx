@@ -158,8 +158,13 @@ export function TenantList({ tenants }: TenantListProps) {
       propertyName.includes(searchString) ||
       propertyAddress.includes(searchString);
 
-    // Log tenant status for debugging
-    console.log(`Tenant ${tenant.email} status:`, tenant.tenancy?.status);
+    // Enhanced logging for tenant status filtering
+    console.log(`Tenant ${tenant.email} details:`, {
+      tenancyStatus: tenant.tenancy?.status,
+      showInactive,
+      matchesSearch,
+      willBeIncluded: matchesSearch && (showInactive ? true : tenant.tenancy?.status === 'active')
+    });
     
     const matchesStatus = showInactive ? true : tenant.tenancy?.status === 'active';
 
