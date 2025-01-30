@@ -51,7 +51,6 @@ export function SubscriptionSettings() {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
 
-      // First get property IDs owned by the landlord
       const { data: properties, error: propError } = await supabase
         .from("properties")
         .select("id")
@@ -61,7 +60,6 @@ export function SubscriptionSettings() {
 
       if (!properties?.length) return 0;
 
-      // Then count active tenancies for these properties
       const { count, error } = await supabase
         .from("tenancies")
         .select("*", { count: 'exact', head: true })
@@ -79,11 +77,26 @@ export function SubscriptionSettings() {
   const usagePercentage = ((tenantCount || 0) / tenantLimit) * 100;
 
   const handleUpgrade = async (planName: string) => {
-    // TODO: Implement Stripe integration for subscription upgrade
-    toast({
-      title: "Coming Soon",
-      description: "Subscription upgrades will be available soon!",
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
+        body: { planName }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('Failed to get checkout URL');
+      }
+    } catch (error) {
+      console.error('Error upgrading subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start upgrade process. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!profile?.role || profile.role !== "landlord") {
@@ -108,9 +121,7 @@ export function SubscriptionSettings() {
                 <span>Tenant Usage</span>
                 <span>{tenantCount} / {tenantLimit}</span>
               </div>
-              <div className="w-full bg-secondary">
-                <Progress value={usagePercentage} className="w-full" />
-              </div>
+              <Progress value={usagePercentage} className="w-full" />
               {usagePercentage >= 80 && (
                 <div className="flex items-center gap-2 mt-2 text-yellow-600">
                   <AlertTriangle className="h-4 w-4" />
