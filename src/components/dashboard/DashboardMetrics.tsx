@@ -4,10 +4,12 @@ import { MetricCard } from "./MetricCard";
 import { useMetrics } from "@/hooks/useMetrics";
 import { useTranslation } from "react-i18next";
 import { RevenueDetailsModal } from "./RevenueDetailsModal";
+import { useCurrency } from "@/hooks/useCurrency";
 
 export function DashboardMetrics({ userId, userRole }: { userId: string; userRole: "landlord" | "tenant" }) {
   const { t } = useTranslation();
   const [showRevenueDetails, setShowRevenueDetails] = useState(false);
+  const { formatAmount } = useCurrency();
   
   const { data: metrics, isLoading } = useMetrics(userId, userRole);
 
@@ -47,7 +49,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           />
           <MetricCard
             title={t('dashboard.metrics.monthlyRevenue')}
-            value={`$${metrics.monthlyRevenue?.toLocaleString()}`}
+            value={formatAmount(metrics.monthlyRevenue || 0)}
             icon={Wallet}
             onClick={handleRevenueClick}
             description={t('dashboard.revenue.title')}

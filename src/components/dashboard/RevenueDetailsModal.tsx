@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface RevenueDetail {
   property_name: string;
@@ -14,6 +15,8 @@ interface RevenueDetailsModalProps {
 }
 
 export function RevenueDetailsModal({ open, onOpenChange, revenueDetails }: RevenueDetailsModalProps) {
+  const { formatAmount } = useCurrency();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
@@ -35,7 +38,7 @@ export function RevenueDetailsModal({ open, onOpenChange, revenueDetails }: Reve
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">${detail.amount.toLocaleString()}</p>
+                    <p className="font-semibold">{formatAmount(detail.amount)}</p>
                     <span className={`text-sm ${
                       detail.status === 'paid' 
                         ? 'text-green-600' 
