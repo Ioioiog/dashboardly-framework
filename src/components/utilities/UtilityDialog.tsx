@@ -137,7 +137,7 @@ export function UtilityDialog({ properties, onUtilityCreated }: UtilityDialogPro
     <div className="flex items-center gap-2">
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className="flex items-center gap-2">
+          <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add Utility Bill
           </Button>
