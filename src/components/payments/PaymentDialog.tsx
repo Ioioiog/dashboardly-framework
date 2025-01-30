@@ -27,10 +27,12 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface PaymentFormData {
   tenancy_id: string;
   amount: number;
+  currency: string;
   due_date: string;
   status: string;
 }
@@ -55,6 +57,7 @@ interface PaymentDialogProps {
 export function PaymentDialog({ tenancies, onPaymentCreated }: PaymentDialogProps) {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const { availableCurrencies } = useCurrency();
   const form = useForm<PaymentFormData>({
     defaultValues: {
       amount: 0,
@@ -69,6 +72,7 @@ export function PaymentDialog({ tenancies, onPaymentCreated }: PaymentDialogProp
         {
           tenancy_id: data.tenancy_id,
           amount: data.amount,
+          currency: data.currency,
           due_date: data.due_date,
           status: data.status,
         },
@@ -131,24 +135,53 @@ export function PaymentDialog({ tenancies, onPaymentCreated }: PaymentDialogProp
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Amount</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Currency</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {availableCurrencies.map((currency) => (
+                          <SelectItem key={currency.code} value={currency.code}>
+                            {currency.code} - {currency.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="due_date"

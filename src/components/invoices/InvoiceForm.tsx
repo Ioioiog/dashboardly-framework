@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface InvoiceFormValues {
   property_id: string;
@@ -14,6 +15,7 @@ interface InvoiceFormValues {
   document?: File;
   tenant_email?: string;
   amount: number;
+  currency: string;
 }
 
 interface InvoiceFormProps {
@@ -28,6 +30,7 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [tenantEmail, setTenantEmail] = useState<string | null>(null);
+  const { availableCurrencies } = useCurrency();
 
   // Fetch properties when component mounts
   useEffect(() => {
@@ -144,11 +147,12 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
       // Format the due date as an ISO string date
       const dueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-      // Create the invoice
+      // Create the invoice with currency
       const { data: invoice, error: invoiceError } = await supabase
         .from("invoices")
         .insert({
           amount: values.amount,
+          currency: values.currency,
           due_date: dueDate,
           landlord_id: user.id,
           property_id: values.property_id,
@@ -246,16 +250,37 @@ export function InvoiceForm({ onSuccess }: InvoiceFormProps) {
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="amount">Amount</Label>
-        <Input
-          id="amount"
-          type="number"
-          step="0.01"
-          required
-          {...form.register("amount", { valueAsNumber: true })}
-          placeholder="Enter invoice amount"
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="amount">Amount</Label>
+          <Input
+            id="amount"
+            type="number"
+            step="0.01"
+            required
+            {...form.register("amount", { valueAsNumber: true })}
+            placeholder="Enter invoice amount"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="currency">Currency</Label>
+          <Select 
+            onValueChange={(value) => form.setValue("currency", value)}
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableCurrencies.map((currency) => (
+                <SelectItem key={currency.code} value={currency.code}>
+                  {currency.code} - {currency.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-2">

@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/utils/propertyUtils";
 import { Plus, Upload, Download } from "lucide-react";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface UtilityDialogProps {
   properties: Property[];
@@ -25,15 +26,17 @@ export function UtilityDialog({ properties, onUtilityCreated }: UtilityDialogPro
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const { toast } = useToast();
+  const { availableCurrencies } = useCurrency();
 
   const [utilityType, setUtilityType] = useState("");
   const [amount, setAmount] = useState("");
+  const [currency, setCurrency] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
   const handleSubmit = async () => {
-    if (!utilityType || !amount || !propertyId || !dueDate) {
+    if (!utilityType || !amount || !propertyId || !dueDate || !currency) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -52,6 +55,7 @@ export function UtilityDialog({ properties, onUtilityCreated }: UtilityDialogPro
           {
             type: utilityType,
             amount: parseFloat(amount),
+            currency: currency,
             property_id: propertyId,
             due_date: dueDate,
             status: "pending",
@@ -159,15 +163,33 @@ export function UtilityDialog({ properties, onUtilityCreated }: UtilityDialogPro
               </Select>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="amount">Amount</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="amount">Amount</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="currency">Currency</Label>
+                <Select value={currency} onValueChange={setCurrency}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableCurrencies.map((curr) => (
+                      <SelectItem key={curr.code} value={curr.code}>
+                        {curr.code} - {curr.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="grid gap-2">
