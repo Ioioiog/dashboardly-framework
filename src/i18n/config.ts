@@ -1,14 +1,25 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import enTranslations from './locales/en.json';
+// English translations
+import enCommon from './locales/en/common.json';
+import enProperties from './locales/en/properties.json';
+import enDashboard from './locales/en/dashboard.json';
+import enAuth from './locales/en/auth.json';
+
+// Spanish translations
 import esTranslations from './locales/es.json';
+// French translations
 import frTranslations from './locales/fr.json';
+// Romanian translations
 import roTranslations from './locales/ro.json';
 
 const resources = {
   en: {
-    translation: enTranslations,
+    common: enCommon,
+    properties: enProperties,
+    dashboard: enDashboard,
+    auth: enAuth
   },
   es: {
     translation: esTranslations,
@@ -30,11 +41,14 @@ i18n
     interpolation: {
       escapeValue: false,
     },
-    returnObjects: true, // Add this line to enable returning objects
+    returnObjects: true,
     debug: process.env.NODE_ENV === 'development',
     react: {
       useSuspense: false
     },
+    // Add namespaces configuration
+    ns: ['common', 'properties', 'dashboard', 'auth'],
+    defaultNS: 'common'
   })
   .then(() => {
     console.log('i18n initialized successfully');

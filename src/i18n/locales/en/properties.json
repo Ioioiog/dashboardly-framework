@@ -1,0 +1,95 @@
+{
+  "title": {
+    "landlord": "Manage Properties",
+    "tenant": "Your Properties"
+  },
+  "description": {
+    "landlord": "Manage and monitor your property portfolio",
+    "tenant": "View your rented properties and related information"
+  },
+  "addProperty": "Add Property",
+  "editProperty": "Edit Property",
+  "deleteProperty": "Delete Property",
+  "propertyDetails": "Property Details",
+  "name": "Property Name",
+  "address": "Address",
+  "type": "Property Type",
+  "monthlyRent": "Monthly Rent",
+  "status": "Status",
+  "availableFrom": "Available From",
+  "description": "Description",
+  "noProperties": "No properties found",
+  "empty": {
+    "landlord": "You haven't added any properties yet. Click the button above to add your first property.",
+    "tenant": "You don't have any properties assigned to you yet.",
+    "tenant.contact": "Please contact your landlord if you believe this is an error."
+  },
+  "types": {
+    "apartment": "Apartment",
+    "house": "House",
+    "condo": "Condo",
+    "commercial": "Commercial"
+  },
+  "filters": {
+    "searchPlaceholder": "Search properties...",
+    "type": "Filter by type",
+    "status": "Filter by status",
+    "all": "All Properties",
+    "occupied": "Show only occupied properties"
+  },
+  "sort": {
+    "nameAsc": "Name (A-Z)",
+    "nameDesc": "Name (Z-A)",
+    "rentAsc": "Rent (Low to High)",
+    "rentDesc": "Rent (High to Low)",
+    "dateAsc": "Date Added (Oldest)",
+    "dateDesc": "Date Added (Newest)"
+  },
+  "view": {
+    "grid": "Grid View",
+    "list": "List View"
+  },
+  "tenant": {
+    "assign": "Assign Tenant",
+    "remove": "Remove Tenant",
+    "none": "No tenant assigned",
+    "current": "Current Tenant",
+    "dates": {
+      "start": "Start Date",
+      "end": "End Date",
+      "edit": "Edit Dates",
+      "save": "Save Changes"
+    }
+  },
+  "utilities": {
+    "analyze": "Analyze Invoice History",
+    "stats": {
+      "title": "Utility Statistics",
+      "average": "Average Monthly Cost",
+      "total": "Total Utilities",
+      "highest": "Highest Bill",
+      "lowest": "Lowest Bill"
+    }
+  },
+  "rent": {
+    "period": "month"
+  },
+  "toast": {
+    "success": {
+      "added": "Property added successfully",
+      "updated": "Property updated successfully",
+      "deleted": "Property deleted successfully",
+      "tenantAssigned": "Tenant assigned successfully",
+      "tenantRemoved": "Tenant removed successfully",
+      "datesUpdated": "Tenancy dates updated successfully"
+    },
+    "error": {
+      "add": "Failed to add property",
+      "update": "Failed to update property",
+      "delete": "Failed to delete property",
+      "assignTenant": "Failed to assign tenant",
+      "removeTenant": "Failed to remove tenant",
+      "updateDates": "Failed to update tenancy dates"
+    }
+  }
+}
