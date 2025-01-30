@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { useSettingsSync } from "@/hooks/useSettingsSync";
 
 const currencies = [
   { value: 'USD', label: '🇺🇸 USD - US Dollar (USD)' },
@@ -13,6 +14,7 @@ const currencies = [
 export function CurrencySelector() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  useSettingsSync(); // Add real-time sync
 
   const handleCurrencyChange = async (value: string) => {
     try {
@@ -24,7 +26,14 @@ export function CurrencySelector() {
 
       const { error } = await supabase
         .from('profiles')
-        .update({ currency_preference: value })
+        .update({ 
+          currency_preference: value,
+          settings: {
+            currency: value,
+            language: localStorage.getItem('language') || 'en',
+            theme: 'light'
+          }
+        })
         .eq('id', user?.id);
 
       if (error) throw error;

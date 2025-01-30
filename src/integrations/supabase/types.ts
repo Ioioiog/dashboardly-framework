@@ -527,6 +527,7 @@ export type Database = {
           last_name: string | null
           phone: string | null
           role: string
+          settings: Json | null
           stripe_account_id: string | null
           updated_at: string
         }
@@ -540,6 +541,7 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           role?: string
+          settings?: Json | null
           stripe_account_id?: string | null
           updated_at?: string
         }
@@ -553,6 +555,7 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           role?: string
+          settings?: Json | null
           stripe_account_id?: string | null
           updated_at?: string
         }
