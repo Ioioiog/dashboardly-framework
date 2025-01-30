@@ -117,7 +117,6 @@ export function TenantList({ tenants }: TenantListProps) {
 
       // Force a refresh of the tenants data
       await queryClient.invalidateQueries({ queryKey: ["tenants"] });
-      handleTenantUpdate();
     } catch (error) {
       console.error("Error in deletion process:", error);
       toast({
@@ -160,9 +159,6 @@ export function TenantList({ tenants }: TenantListProps) {
     return matchesSearch && matchesStatus;
   });
 
-  // Ensure unique keys by combining tenant ID with a timestamp
-  const getUniqueKey = (id: string) => `${id}-${Date.now()}`;
-
   return (
     <div className="space-y-6 animate-fade-in">
       <TenantListHeader
@@ -178,13 +174,13 @@ export function TenantList({ tenants }: TenantListProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
           {showInactive && pendingInvitations.map((invitation) => (
             <PendingInvitationCard
-              key={getUniqueKey(invitation.id)}
+              key={`invitation-${invitation.id}`}
               invitation={invitation}
             />
           ))}
           {filteredTenants.map((tenant) => (
             <TenantCard
-              key={getUniqueKey(tenant.id)}
+              key={`tenant-${tenant.id}`}
               tenant={tenant}
               onDelete={handleDeleteTenant}
               onUpdate={handleTenantUpdate}
@@ -211,13 +207,13 @@ export function TenantList({ tenants }: TenantListProps) {
             <TableBody>
               {showInactive && pendingInvitations.map((invitation) => (
                 <PendingInvitationRow
-                  key={getUniqueKey(invitation.id)}
+                  key={`invitation-${invitation.id}`}
                   invitation={invitation}
                 />
               ))}
               {filteredTenants.map((tenant) => (
                 <TenantRow
-                  key={getUniqueKey(tenant.id)}
+                  key={`tenant-${tenant.id}`}
                   tenant={tenant}
                   onDelete={handleDeleteTenant}
                   onUpdate={handleTenantUpdate}
