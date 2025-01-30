@@ -104,7 +104,6 @@ export function CurrencySelector() {
               src="https://www.cursbnr.ro/insert/cursvalutar.php?w=300&b=f7f7f7&bl=dcdcdc&ttc=0a6eab&tc=000000&diff=1&ron=1&cb=1&pics=1"
               title="BNR Exchange Rates"
             />
-            <p className="text-sm text-muted-foreground">oferit de CursBNR.ro</p>
           </div>
         </CardContent>
       </Card>
