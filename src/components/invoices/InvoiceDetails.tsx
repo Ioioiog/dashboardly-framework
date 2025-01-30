@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Invoice } from "@/types/invoice";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface InvoiceDetailsProps {
   invoice: Invoice;
@@ -8,6 +9,8 @@ interface InvoiceDetailsProps {
 }
 
 export function InvoiceDetails({ invoice, userRole }: InvoiceDetailsProps) {
+  const { formatAmount } = useCurrency();
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div>
@@ -30,7 +33,7 @@ export function InvoiceDetails({ invoice, userRole }: InvoiceDetailsProps) {
       )}
       <div>
         <div className="text-sm font-medium text-gray-500">Amount</div>
-        <div>${invoice.amount.toFixed(2)}</div>
+        <div>{formatAmount(invoice.amount)}</div>
       </div>
       <div>
         <div className="text-sm font-medium text-gray-500">Due Date</div>

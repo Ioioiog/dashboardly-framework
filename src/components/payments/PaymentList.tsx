@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface PaymentListProps {
   payments: PaymentWithRelations[];
@@ -25,8 +26,8 @@ interface PaymentListProps {
 export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { formatAmount } = useCurrency();
 
-  // Function to refresh payments data
   const refreshPayments = () => {
     console.log("Refreshing payments data...");
     queryClient.invalidateQueries({ queryKey: ["payments"] });
@@ -147,7 +148,7 @@ export const PaymentList = ({ payments, userRole }: PaymentListProps) => {
                 </div>
               </TableCell>
             )}
-            <TableCell>${payment.amount}</TableCell>
+            <TableCell>{formatAmount(payment.amount)}</TableCell>
             <TableCell>{format(new Date(payment.due_date), "PPP")}</TableCell>
             <TableCell>
               {payment.paid_date

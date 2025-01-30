@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PaymentActions } from "@/components/payments/PaymentActions";
 import { Button } from "@/components/ui/button";
 import { FileText, Trash2 } from "lucide-react";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface Utility {
   id: string;
@@ -26,6 +27,7 @@ interface UtilityListProps {
 
 export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityListProps) {
   const { toast } = useToast();
+  const { formatAmount } = useCurrency();
 
   const handleStatusUpdate = async (utilityId: string, newStatus: string) => {
     try {
@@ -178,7 +180,7 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
                 </div>
                 <div>
                   <div className="text-sm font-medium text-gray-500">Amount</div>
-                  <div>${utility.amount.toFixed(2)}</div>
+                  <div>{formatAmount(utility.amount)}</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-gray-500">Due Date</div>
