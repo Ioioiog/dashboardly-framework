@@ -36,8 +36,6 @@ export function MetricCard({
     }
   };
 
-  console.log("Rendering MetricCard with icon:", Icon.name); // Debug log
-
   const shouldAnimate = title === 'dashboard.metrics.totalProperties' || 
                        title === 'dashboard.metrics.activeTenants' || 
                        title === 'dashboard.metrics.pendingMaintenance';
@@ -68,7 +66,9 @@ export function MetricCard({
             <CardTitle className="text-sm font-medium">
               {t(title)}
             </CardTitle>
-            <Icon className="h-5 w-5 text-muted-foreground" />
+            <div className="flex items-center justify-center w-8 h-8">
+              <Icon className="h-6 w-6 text-muted-foreground" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{value}</div>
