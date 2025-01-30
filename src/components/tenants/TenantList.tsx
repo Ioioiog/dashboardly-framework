@@ -14,19 +14,17 @@ import { useToast } from "@/hooks/use-toast";
 import { TenantListHeader } from "./TenantListHeader";
 import { TenantCard } from "./TenantCard";
 import { TenantRow } from "./TenantRow";
-import { PendingInvitationCard } from "./PendingInvitationCard";
-import { PendingInvitationRow } from "./PendingInvitationRow";
 
 interface TenantListProps {
   tenants: Tenant[];
+  isLandlord?: boolean;
 }
 
-export function TenantList({ tenants }: TenantListProps) {
+export function TenantList({ tenants, isLandlord = false }: TenantListProps) {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [showInactive, setShowInactive] = useState(false);
-  const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
   const { toast } = useToast();
 
   const handleTenantUpdate = () => {
@@ -124,6 +122,7 @@ export function TenantList({ tenants }: TenantListProps) {
               onDelete={handleDeleteTenant}
               onUpdate={handleTenantUpdate}
               getTenantDisplayName={getTenantDisplayName}
+              isLandlord={isLandlord}
             />
           ))}
         </div>
@@ -150,6 +149,7 @@ export function TenantList({ tenants }: TenantListProps) {
                   onDelete={handleDeleteTenant}
                   onUpdate={handleTenantUpdate}
                   getTenantDisplayName={getTenantDisplayName}
+                  isLandlord={isLandlord}
                 />
               ))}
             </TableBody>

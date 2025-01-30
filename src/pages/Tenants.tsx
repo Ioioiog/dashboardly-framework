@@ -220,7 +220,10 @@ const Tenants = () => {
                 ))}
               </div>
             ) : (
-              <TenantList tenants={tenants} />
+              <TenantList 
+                tenants={tenants} 
+                isLandlord={userRole === 'landlord'}
+              />
             )}
           </div>
         </div>

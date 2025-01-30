@@ -10,6 +10,7 @@ interface TenantCardProps {
   onDelete: (tenantId: string) => Promise<void>;
   onUpdate: () => void;
   getTenantDisplayName: (tenant: Tenant) => string;
+  isLandlord?: boolean;
 }
 
 export function TenantCard({
@@ -17,6 +18,7 @@ export function TenantCard({
   onDelete,
   onUpdate,
   getTenantDisplayName,
+  isLandlord = false,
 }: TenantCardProps) {
   if (!tenant || !tenant.property) return null;
 
@@ -25,7 +27,12 @@ export function TenantCard({
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <h3 className="font-semibold">{getTenantDisplayName(tenant)}</h3>
         {tenant.tenancy && (
-          <TenancyStatus status={tenant.tenancy.status} />
+          <TenancyStatus 
+            status={tenant.tenancy.status} 
+            tenancyId={tenant.tenancy.id}
+            onStatusChange={onUpdate}
+            isLandlord={isLandlord}
+          />
         )}
       </CardHeader>
       <CardContent>
