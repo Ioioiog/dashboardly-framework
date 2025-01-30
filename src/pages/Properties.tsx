@@ -9,7 +9,6 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
-import { cn } from "@/lib/utils";
 
 export default function Properties() {
   const { t } = useTranslation();
