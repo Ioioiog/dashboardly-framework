@@ -51,16 +51,22 @@ export function SubscriptionSettings() {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
 
+      // First get property IDs owned by the landlord
+      const { data: properties, error: propError } = await supabase
+        .from("properties")
+        .select("id")
+        .eq("landlord_id", user?.id);
+
+      if (propError) throw propError;
+
+      if (!properties?.length) return 0;
+
+      // Then count active tenancies for these properties
       const { count, error } = await supabase
         .from("tenancies")
         .select("*", { count: 'exact', head: true })
         .eq("status", "active")
-        .in("property_id", 
-          supabase
-            .from("properties")
-            .select("id")
-            .eq("landlord_id", user?.id)
-        );
+        .in("property_id", properties.map(p => p.id));
 
       if (error) throw error;
       return count || 0;
@@ -102,7 +108,9 @@ export function SubscriptionSettings() {
                 <span>Tenant Usage</span>
                 <span>{tenantCount} / {tenantLimit}</span>
               </div>
-              <Progress value={usagePercentage} />
+              <div className="w-full bg-secondary">
+                <Progress value={usagePercentage} className="w-full" />
+              </div>
               {usagePercentage >= 80 && (
                 <div className="flex items-center gap-2 mt-2 text-yellow-600">
                   <AlertTriangle className="h-4 w-4" />
