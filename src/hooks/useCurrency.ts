@@ -13,6 +13,25 @@ interface ExchangeRates {
   };
 }
 
+const convertCurrency = (amount: number, fromCurrency: string, toCurrency: string, rates: ExchangeRates['rates']): number => {
+  if (fromCurrency === toCurrency) return amount;
+
+  // All rates are in RON from CursBNR, so we need to:
+  // 1. Convert the amount to RON first (if not already in RON)
+  // 2. Then convert from RON to target currency
+  
+  let amountInRON = amount;
+  if (fromCurrency !== 'RON') {
+    amountInRON = amount * rates[fromCurrency];
+  }
+
+  if (toCurrency === 'RON') {
+    return amountInRON;
+  }
+
+  return amountInRON / rates[toCurrency];
+};
+
 export function useCurrency() {
   // Fetch user's currency preference
   const { data: preference } = useQuery({
@@ -44,9 +63,9 @@ export function useCurrency() {
         // Fallback to default rates if API fails
         return {
           rates: {
-            USD: 1,
-            EUR: 0.92,
-            RON: 4.56
+            USD: 4.56,
+            EUR: 4.97,
+            RON: 1
           }
         };
       }
@@ -60,14 +79,22 @@ export function useCurrency() {
     retry: 3,
   });
 
-  const formatAmount = (amount: number) => {
-    const currency = preference?.currency_preference || 'USD';
-    const rate = exchangeRates?.rates[currency as keyof typeof exchangeRates.rates] || 1;
-    const convertedAmount = amount * rate;
+  const formatAmount = (amount: number, fromCurrency: string = 'USD') => {
+    const targetCurrency = preference?.currency_preference || 'USD';
+    const rates = exchangeRates?.rates;
+
+    if (!rates) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: targetCurrency,
+      }).format(amount);
+    }
+
+    const convertedAmount = convertCurrency(amount, fromCurrency, targetCurrency, rates);
 
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: currency,
+      currency: targetCurrency,
     }).format(convertedAmount);
   };
 

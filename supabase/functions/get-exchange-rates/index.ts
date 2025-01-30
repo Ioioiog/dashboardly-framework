@@ -26,11 +26,15 @@ serve(async (req) => {
     const data = await response.json();
     console.log('Received data from CursBNR:', data);
 
-    // Extract and format the rates we need
-    const rates: Record<string, number> = {
-      USD: 1, // Base currency
-      EUR: data.find((rate: ExchangeRate) => rate.currency === 'EUR')?.rate || 0.92,
-      RON: data.find((rate: ExchangeRate) => rate.currency === 'RON')?.rate || 4.56,
+    // Extract RON and EUR rates from the API response
+    const eurRate = data.find((rate: ExchangeRate) => rate.currency === 'EUR')?.rate || 0.92;
+    const usdRate = data.find((rate: ExchangeRate) => rate.currency === 'USD')?.rate || 1;
+
+    // Calculate and format all possible conversion rates
+    const rates = {
+      USD: usdRate,
+      EUR: eurRate,
+      RON: 1, // Base rate in RON since CursBNR provides rates in RON
     };
 
     console.log('Formatted exchange rates:', rates);
