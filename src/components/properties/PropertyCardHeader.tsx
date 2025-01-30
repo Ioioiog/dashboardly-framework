@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, Coins } from "lucide-react";
+import { Calendar, Wallet } from "lucide-react";
 import { Property } from "@/utils/propertyUtils";
 import { useTranslation } from "react-i18next";
 
@@ -22,7 +22,7 @@ export function PropertyCardHeader({ property }: PropertyCardHeaderProps) {
             {property.address}
           </p>
           <p className="text-lg font-medium flex items-center gap-2 text-blue-600 justify-center">
-            <Coins className="h-5 w-5" />
+            <Wallet className="h-5 w-5" />
             ${property.monthly_rent}/{t('properties.rent.period')}
           </p>
         </div>
