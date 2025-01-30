@@ -34,6 +34,7 @@ export function useTenants() {
           address: detail.property_address,
         },
         tenancy: {
+          id: detail.tenancy_id,
           start_date: detail.start_date,
           end_date: detail.end_date,
           status: detail.tenancy_status,
