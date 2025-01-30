@@ -19,6 +19,12 @@ serve(async (req) => {
   }
 
   try {
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeKey) {
+      console.error('STRIPE_SECRET_KEY not found in environment variables');
+      throw new Error('Stripe configuration error');
+    }
+
     const { planName } = await req.json();
     const priceId = PRICE_IDS[planName as keyof typeof PRICE_IDS];
 
@@ -39,11 +45,13 @@ serve(async (req) => {
       throw new Error('User not found');
     }
 
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+    console.log('Creating Stripe instance with provided key...');
+    const stripe = new Stripe(stripeKey, {
       apiVersion: '2023-10-16',
     });
 
     // Check if customer exists
+    console.log('Checking for existing customer with email:', user.email);
     const customers = await stripe.customers.list({
       email: user.email,
       limit: 1,
@@ -53,6 +61,7 @@ serve(async (req) => {
 
     // Create customer if doesn't exist
     if (!customerId) {
+      console.log('Creating new customer...');
       const customer = await stripe.customers.create({
         email: user.email,
         metadata: {
@@ -63,6 +72,7 @@ serve(async (req) => {
     }
 
     // Create checkout session
+    console.log('Creating checkout session...');
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
@@ -79,6 +89,7 @@ serve(async (req) => {
       },
     });
 
+    console.log('Checkout session created successfully:', session.id);
     return new Response(
       JSON.stringify({ url: session.url }),
       { 
