@@ -80,14 +80,16 @@
     }
   },
   "rent": {
-    "period": "month"
+    "period": "month",
+    "amount": "Monthly Rent",
+    "perPeriod": "per month"
   },
-  "actions": {
-    "reportIssue": "Report Issue",
-    "viewDocuments": "View Documents",
-    "analyzeHistory": "Analyze Invoice History",
-    "edit": "Edit",
-    "delete": "Delete"
+  "type": "Property Type",
+  "types": {
+    "apartment": "Apartment",
+    "house": "House",
+    "condo": "Condo",
+    "commercial": "Commercial"
   },
   "toast": {
     "success": {

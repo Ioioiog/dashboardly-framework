@@ -50,12 +50,12 @@
     "nameDesc": "Nombre (Z-A)",
     "rentAsc": "Alquiler (Menor a Mayor)",
     "rentDesc": "Alquiler (Mayor a Menor)",
-    "dateAsc": "Fecha Agregada (Más Antigua)",
-    "dateDesc": "Fecha Agregada (Más Reciente)"
+    "dateAsc": "Fecha Añadida (Más Antigua)",
+    "dateDesc": "Fecha Añadida (Más Reciente)"
   },
   "view": {
-    "grid": "Vista de Cuadrícula",
-    "list": "Vista de Lista"
+    "grid": "Vista en Cuadrícula",
+    "list": "Vista en Lista"
   },
   "tenant": {
     "assign": "Asignar Inquilino",
@@ -80,29 +80,28 @@
     }
   },
   "rent": {
-    "period": "mes"
+    "period": "mes",
+    "amount": "Alquiler Mensual",
+    "perPeriod": "por mes"
   },
-  "actions": {
-    "reportIssue": "Reportar Problema",
-    "viewDocuments": "Ver Documentos",
-    "analyzeHistory": "Analizar Historial",
-    "edit": "Editar",
-    "delete": "Eliminar"
+  "type": "Tipo de Propiedad",
+  "types": {
+    "apartment": "Apartamento",
+    "house": "Casa",
+    "condo": "Condominio",
+    "commercial": "Comercial"
   },
   "toast": {
     "success": {
-      "added": "Propiedad agregada exitosamente",
-      "propertyAdded": "La propiedad se ha añadido correctamente",
+      "added": "Propiedad añadida exitosamente",
       "updated": "Propiedad actualizada exitosamente",
-      "propertyUpdated": "La propiedad se ha actualizado correctamente",
       "deleted": "Propiedad eliminada exitosamente",
-      "propertyDeleted": "La propiedad se ha eliminado correctamente",
       "tenantAssigned": "Inquilino asignado exitosamente",
       "tenantRemoved": "Inquilino eliminado exitosamente",
       "datesUpdated": "Fechas de arrendamiento actualizadas exitosamente"
     },
     "error": {
-      "add": "Error al agregar propiedad",
+      "add": "Error al añadir propiedad",
       "update": "Error al actualizar propiedad",
       "delete": "Error al eliminar propiedad",
       "assignTenant": "Error al asignar inquilino",

@@ -72,7 +72,9 @@
     }
   },
   "rent": {
-    "period": "mois"
+    "period": "mois",
+    "amount": "Loyer Mensuel",
+    "perPeriod": "par mois"
   },
   "actions": {
     "reportIssue": "Signaler un Problème",

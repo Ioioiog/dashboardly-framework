@@ -17,7 +17,7 @@
   "propertyDetails": "Detalii Proprietate",
   "name": "Numele Proprietății",
   "address": "Adresă",
-  "type": "Tipul Proprietății",
+  "type": "Tip Proprietate",
   "monthlyRent": "Chirie Lunară",
   "status": "Stare",
   "availableFrom": "Disponibil Din",
@@ -80,7 +80,9 @@
     }
   },
   "rent": {
-    "period": "lună"
+    "period": "lună",
+    "amount": "Chirie Lunară",
+    "perPeriod": "pe lună"
   },
   "actions": {
     "reportIssue": "Raportează Problemă",

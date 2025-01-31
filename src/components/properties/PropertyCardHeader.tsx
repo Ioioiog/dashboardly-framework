@@ -23,12 +23,12 @@ export function PropertyCardHeader({ property }: PropertyCardHeaderProps) {
           </p>
           <p className="text-lg font-medium flex items-center gap-2 text-blue-600 justify-center">
             <Wallet className="h-5 w-5" />
-            {t('common.currency.usd')}{property.monthly_rent} {t('properties.rent.period')}
+            {t('common.currency.usd')}{property.monthly_rent} / {t('properties.rent.period')}
           </p>
         </div>
         {property.type && (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700 mx-auto">
-            {t('properties.type')}: {property.type}
+            {t('properties.type')}: {t(`properties.types.${property.type.toLowerCase()}`)}
           </span>
         )}
         {property.description && (
