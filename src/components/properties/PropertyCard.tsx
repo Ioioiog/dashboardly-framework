@@ -62,40 +62,46 @@ export function PropertyCard({
   };
 
   const cardClassName = viewMode === "list" 
-    ? "flex flex-row items-start gap-6 hover:shadow-lg transition-all duration-300 animate-fade-in bg-white" 
-    : "hover:shadow-lg transition-all duration-300 animate-fade-in bg-white";
+    ? "flex flex-row items-start gap-6 hover:shadow-lg transition-all duration-300 animate-fade-in bg-white border-none" 
+    : "hover:shadow-lg transition-all duration-300 animate-fade-in bg-white border-none";
 
   const contentClassName = viewMode === "list" ? "flex-1" : "";
 
   return (
     <>
       <Card className={cardClassName}>
-        <CardContent className={`p-6 ${contentClassName}`}>
-          <PropertyCardHeader property={property} />
-          
-          {userRole === "tenant" ? (
-            <PropertyCardTenantSection 
-              property={property}
-              onAssignTenant={() => setShowAssignTenant(true)}
-            />
-          ) : (
-            <PropertyCardLandlordSection 
-              property={property}
-              isDeleting={isDeleting}
-              onDeleteTenancy={handleDeleteTenancy}
-              onAssignTenant={() => setShowAssignTenant(true)}
-            />
-          )}
-        </CardContent>
+        <CardContent className={`p-0 ${contentClassName}`}>
+          <div className="overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6">
+              <PropertyCardHeader property={property} />
+            </div>
+            
+            <div className="p-6">
+              {userRole === "tenant" ? (
+                <PropertyCardTenantSection 
+                  property={property}
+                  onAssignTenant={() => setShowAssignTenant(true)}
+                />
+              ) : (
+                <PropertyCardLandlordSection 
+                  property={property}
+                  isDeleting={isDeleting}
+                  onDeleteTenancy={handleDeleteTenancy}
+                  onAssignTenant={() => setShowAssignTenant(true)}
+                />
+              )}
+            </div>
+          </div>
 
-        <PropertyCardFooter 
-          property={property}
-          userRole={userRole}
-          viewMode={viewMode}
-          onShowUtilityStats={() => setShowUtilityStats(true)}
-          onEdit={() => onEdit?.(property, {})}
-          onDelete={() => onDelete?.(property)}
-        />
+          <PropertyCardFooter 
+            property={property}
+            userRole={userRole}
+            viewMode={viewMode}
+            onShowUtilityStats={() => setShowUtilityStats(true)}
+            onEdit={() => onEdit?.(property, {})}
+            onDelete={() => onDelete?.(property)}
+          />
+        </CardContent>
       </Card>
 
       <UtilityStatsDialog
