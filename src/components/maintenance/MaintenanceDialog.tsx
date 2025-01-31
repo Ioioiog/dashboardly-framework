@@ -30,16 +30,23 @@ export default function MaintenanceDialog({
   const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
   const { existingRequest, createMutation, updateMutation } = useMaintenanceRequest(requestId);
 
-  // Add back the service providers query
+  // Add service providers query
   const { data: serviceProviders } = useQuery({
     queryKey: ["service-providers"],
     enabled: userRole === "landlord",
     queryFn: async () => {
+      console.log("Fetching service providers");
       const { data, error } = await supabase
         .from("profiles")
         .select("id, first_name, last_name")
         .eq("role", "service_provider");
-      if (error) throw error;
+
+      if (error) {
+        console.error("Error fetching service providers:", error);
+        throw error;
+      }
+
+      console.log("Fetched service providers:", data);
       return data;
     },
   });
