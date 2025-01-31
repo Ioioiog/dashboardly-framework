@@ -766,6 +766,95 @@ export type Database = {
           },
         ]
       }
+      service_provider_profiles: {
+        Row: {
+          availability_hours: Json | null
+          business_name: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          id: string
+          rating: number | null
+          review_count: number | null
+          service_area: string[] | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          availability_hours?: Json | null
+          business_name?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id: string
+          rating?: number | null
+          review_count?: number | null
+          service_area?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          availability_hours?: Json | null
+          business_name?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          rating?: number | null
+          review_count?: number | null
+          service_area?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      service_provider_services: {
+        Row: {
+          base_price: number | null
+          category: Database["public"]["Enums"]["service_category"]
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          price_unit: string | null
+          provider_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_price?: number | null
+          category: Database["public"]["Enums"]["service_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          price_unit?: string | null
+          provider_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number | null
+          category?: Database["public"]["Enums"]["service_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price_unit?: string | null
+          provider_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_provider_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_provider_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_plans: {
         Row: {
           created_at: string
@@ -1303,6 +1392,16 @@ export type Database = {
       meter_type: "electricity" | "water" | "gas"
       property_type: "Apartment" | "House" | "Condo" | "Commercial"
       scraping_status: "pending" | "in_progress" | "completed" | "failed"
+      service_category:
+        | "plumbing"
+        | "electrical"
+        | "hvac"
+        | "carpentry"
+        | "cleaning"
+        | "painting"
+        | "landscaping"
+        | "general_maintenance"
+        | "other"
       subscription_plan: "free" | "basic" | "premium" | "gold"
       tenant_action_type:
         | "invitation_sent"

@@ -1,13 +1,16 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 const AuthPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [selectedRole, setSelectedRole] = useState("tenant");
 
   useEffect(() => {
     const checkSession = async () => {
@@ -76,6 +79,26 @@ const AuthPage = () => {
             simplificăm administrarea chiriilor
           </p>
         </div>
+
+        <div className="mb-6">
+          <Label htmlFor="role-select" className="text-sm font-medium text-gray-700">
+            Select Role
+          </Label>
+          <Select
+            value={selectedRole}
+            onValueChange={(value) => setSelectedRole(value)}
+          >
+            <SelectTrigger className="w-full mt-1">
+              <SelectValue placeholder="Select your role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="tenant">Tenant</SelectItem>
+              <SelectItem value="landlord">Landlord</SelectItem>
+              <SelectItem value="service_provider">Service Provider</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <Auth
           supabaseClient={supabase}
           appearance={{
@@ -124,6 +147,11 @@ const AuthPage = () => {
                 loading_button_label: 'Signing up ...',
               },
             },
+          }}
+          onlyThirdPartyProviders={false}
+          magicLink={false}
+          queryParams={{
+            role: selectedRole
           }}
         />
       </div>
