@@ -6,6 +6,8 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TenantDashboardProps {
   userId: string;
@@ -25,15 +27,36 @@ export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboar
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  console.log("TenantDashboard - tenantInfo:", tenantInfo);
+  // Fetch all active tenancies for the tenant
+  const { data: tenancies, isLoading } = useQuery({
+    queryKey: ["tenant-properties", userId],
+    queryFn: async () => {
+      console.log("Fetching tenant properties for user:", userId);
+      const { data, error } = await supabase
+        .from('tenancies')
+        .select(`
+          id,
+          status,
+          start_date,
+          end_date,
+          property:properties (
+            id,
+            name,
+            address
+          )
+        `)
+        .eq('tenant_id', userId)
+        .eq('status', 'active');
 
-  if (!tenantInfo) {
-    return (
-      <div className="p-6 space-y-6 max-w-7xl mx-auto">
-        <p className="text-muted-foreground">Loading tenant information...</p>
-      </div>
-    );
-  }
+      if (error) {
+        console.error("Error fetching tenant properties:", error);
+        throw error;
+      }
+
+      console.log("Fetched tenant properties:", data);
+      return data;
+    },
+  });
 
   const quickActions = [
     {
@@ -50,6 +73,14 @@ export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboar
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <p className="text-muted-foreground">Loading tenant information...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       {/* Header Section */}
@@ -57,58 +88,58 @@ export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboar
         <DashboardHeader userName={userName} />
       </section>
 
-      {/* Property Information */}
+      {/* Properties Section */}
       <section className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">{t('dashboard.propertyInfo')}</h2>
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('dashboard.property')}
-              </CardTitle>
-              <Home className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{tenantInfo.property_name}</div>
-              <p className="text-sm text-muted-foreground mt-1">{tenantInfo.property_address}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('dashboard.leaseDetails')}
-              </CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {format(new Date(tenantInfo.start_date), 'MMM d, yyyy')}
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {tenantInfo.end_date 
-                  ? t('dashboard.leaseEnd', { date: format(new Date(tenantInfo.end_date), 'MMM d, yyyy') })
-                  : t('dashboard.ongoingLease')}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('dashboard.status')}
-              </CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold capitalize">
-                {tenantInfo.status}
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {t('dashboard.tenancyStatus')}
-              </p>
-            </CardContent>
-          </Card>
+        <div className="grid gap-6 md:grid-cols-1">
+          {tenancies?.map((tenancy) => (
+            <Card key={tenancy.id} className="border border-gray-200">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-lg font-medium">
+                  {tenancy.property.name}
+                </CardTitle>
+                <Home className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Address</p>
+                    <p className="text-base font-medium">{tenancy.property.address}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Start Date</p>
+                    <p className="text-base font-medium">
+                      {format(new Date(tenancy.start_date), 'MMM d, yyyy')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">End Date</p>
+                    <p className="text-base font-medium">
+                      {tenancy.end_date 
+                        ? format(new Date(tenancy.end_date), 'MMM d, yyyy')
+                        : t('dashboard.ongoingLease')}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate('/maintenance')}
+                  >
+                    Report Issue
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate('/documents')}
+                  >
+                    View Documents
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 
