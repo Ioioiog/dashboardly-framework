@@ -98,7 +98,7 @@ const Index = () => {
           console.log("Fetching tenant information...");
           const { data: tenancy, error: tenancyError } = await supabase.rpc(
             'get_latest_tenancy',
-            { tenant_id: currentUserId }
+            { p_tenant_id: currentUserId }  // Changed from tenant_id to p_tenant_id
           );
 
           if (tenancyError) {
