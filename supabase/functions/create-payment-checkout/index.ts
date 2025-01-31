@@ -14,17 +14,17 @@ serve(async (req) => {
 
   try {
     const { paymentId } = await req.json();
-    console.log('Creating payment session for payment ID:', paymentId);
+    console.log('Creating payment session for invoice ID:', paymentId);
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     );
 
-    // Get the utility details including the property and landlord info
-    console.log('Fetching utility details...');
-    const { data: utility, error: utilityError } = await supabaseClient
-      .from('utilities')
+    // Get the invoice details including the property and landlord info
+    console.log('Fetching invoice details...');
+    const { data: invoice, error: invoiceError } = await supabaseClient
+      .from('invoices')
       .select(`
         *,
         property:properties (
@@ -39,19 +39,19 @@ serve(async (req) => {
       .eq('id', paymentId)
       .single();
 
-    console.log('Utility query result:', { utility, utilityError });
+    console.log('Invoice query result:', { invoice, invoiceError });
 
-    if (utilityError) {
-      console.error('Error fetching utility:', utilityError);
-      throw new Error('Error fetching utility details');
+    if (invoiceError) {
+      console.error('Error fetching invoice:', invoiceError);
+      throw new Error('Error fetching invoice details');
     }
 
-    if (!utility) {
-      console.error('Utility not found for ID:', paymentId);
-      throw new Error('Utility not found');
+    if (!invoice) {
+      console.error('Invoice not found for ID:', paymentId);
+      throw new Error('Invoice not found');
     }
 
-    const stripeAccountId = utility.property?.landlord?.stripe_account_id;
+    const stripeAccountId = invoice.property?.landlord?.stripe_account_id;
     if (!stripeAccountId) {
       console.error('Landlord has not connected Stripe account');
       throw new Error('Landlord has not connected Stripe account');
@@ -90,22 +90,22 @@ serve(async (req) => {
       line_items: [
         {
           price_data: {
-            currency: 'usd',
+            currency: invoice.currency.toLowerCase(),
             product_data: {
-              name: `${utility.type} Bill`,
-              description: `Utility payment for ${utility.property.address}`,
+              name: `Invoice Payment`,
+              description: `Payment for ${invoice.property.address}`,
             },
-            unit_amount: Math.round(utility.amount * 100), // Convert to cents
+            unit_amount: Math.round(invoice.amount * 100), // Convert to cents
           },
           quantity: 1,
         },
       ],
       mode: 'payment',
-      success_url: `${req.headers.get('origin')}/utilities?success=true`,
-      cancel_url: `${req.headers.get('origin')}/utilities?canceled=true`,
+      success_url: `${req.headers.get('origin')}/invoices?success=true`,
+      cancel_url: `${req.headers.get('origin')}/invoices?canceled=true`,
       customer_email: profile.email,
       metadata: {
-        utility_id: utility.id,
+        invoice_id: invoice.id,
       },
       payment_intent_data: {
         transfer_data: {
