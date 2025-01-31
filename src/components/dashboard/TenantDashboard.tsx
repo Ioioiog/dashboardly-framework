@@ -11,14 +11,13 @@ interface TenantDashboardProps {
   userId: string;
   userName: string;
   tenantInfo: {
-    property: {
-      name: string;
-      address: string;
-      monthly_rent: number;
-      type: string;
-    };
+    tenancy_id: string;
+    status: string;
     start_date: string;
     end_date?: string;
+    property_id: string;
+    property_name: string;
+    property_address: string;
   };
 }
 
@@ -70,8 +69,8 @@ export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboar
               <Home className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{tenantInfo.property.name}</div>
-              <p className="text-sm text-muted-foreground mt-1">{tenantInfo.property.address}</p>
+              <div className="text-2xl font-bold">{tenantInfo.property_name}</div>
+              <p className="text-sm text-muted-foreground mt-1">{tenantInfo.property_address}</p>
             </CardContent>
           </Card>
 
@@ -97,16 +96,16 @@ export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboar
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
-                {t('dashboard.monthlyRent')}
+                {t('dashboard.status')}
               </CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                ${tenantInfo.property.monthly_rent}
+              <div className="text-2xl font-bold capitalize">
+                {tenantInfo.status}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
-                {tenantInfo.property.type}
+                {t('dashboard.tenancyStatus')}
               </p>
             </CardContent>
           </Card>
