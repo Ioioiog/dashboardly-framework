@@ -37,7 +37,7 @@ serve(async (req) => {
         )
       `)
       .eq('id', paymentId)
-      .single();
+      .maybeSingle();
 
     console.log('Invoice query result:', { invoice, invoiceError });
 
@@ -73,7 +73,7 @@ serve(async (req) => {
       .from('profiles')
       .select('email')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError || !profile?.email) {
       console.error('Profile fetch error:', profileError);
