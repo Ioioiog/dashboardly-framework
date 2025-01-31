@@ -25,7 +25,8 @@ const Index = () => {
         
         if (sessionError) {
           console.error("Session error:", sessionError);
-          throw sessionError;
+          navigate("/auth");
+          return;
         }
 
         if (!session) {
@@ -71,6 +72,7 @@ const Index = () => {
         }
 
         console.log("Profile loaded successfully:", profile);
+        console.log("Setting user role:", profile.role);
         
         // Validate and set user role
         if (profile.role !== "landlord" && profile.role !== "tenant" && profile.role !== "service_provider") {
