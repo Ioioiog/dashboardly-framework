@@ -1,15 +1,17 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Home, Users } from "lucide-react";
+import { Building2, Home, Wrench } from "lucide-react";
 import { RoleSpecificForm } from "@/components/auth/RoleSpecificForm";
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ const AuthPage = () => {
   const [showRoleForm, setShowRoleForm] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [view, setView] = useState<"roles" | "login" | "register" | "forgot-password">("roles");
 
   useEffect(() => {
     const checkSession = async () => {
@@ -50,51 +53,70 @@ const AuthPage = () => {
     };
 
     checkSession();
+  }, [navigate, toast]);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event);
-      
-      if (event === 'SIGNED_IN' && session) {
-        console.log("User signed in, updating metadata with role:", selectedRole);
-        
-        try {
-          const { error: updateError } = await supabase.auth.updateUser({
-            data: { role: selectedRole }
-          });
+  const handleRoleSelect = (role: string) => {
+    setSelectedRole(role);
+    setView("login");
+  };
 
-          if (updateError) {
-            console.error("Error updating user metadata:", updateError);
-            throw updateError;
-          }
-
-          if (session.user.email) {
-            setUserEmail(session.user.email);
-            setShowRoleForm(true);
-          }
-        } catch (error) {
-          console.error("Error in auth state change:", error);
-          toast({
-            title: "Error",
-            description: "Failed to update user role. Please try again.",
-            variant: "destructive",
-          });
-        }
-      } else if (event === 'SIGNED_OUT') {
-        console.log("User signed out");
-        toast({
-          title: "Signed out",
-          description: "You have been signed out successfully.",
-        });
-      }
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: userEmail,
+      password,
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate, toast, selectedRole]);
+    if (error) {
+      toast({
+        title: "Login Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      navigate("/dashboard");
+    }
+  };
 
-  const handleRoleFormComplete = () => {
-    navigate("/dashboard", { replace: true });
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { error } = await supabase.auth.signUp({
+      email: userEmail,
+      password,
+    });
+
+    if (error) {
+      toast({
+        title: "Registration Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Registration Successful",
+        description: "Check your email for confirmation.",
+      });
+      setView("login");
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { error } = await supabase.auth.resetPasswordForEmail(userEmail);
+
+    if (error) {
+      toast({
+        title: "Reset Password Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Check your email",
+        description: "We've sent you a password reset link.",
+      });
+      setView("login");
+    }
   };
 
   return (
@@ -102,131 +124,123 @@ const AuthPage = () => {
       <Card className="w-full max-w-md bg-white shadow-lg rounded-xl">
         <CardHeader className="space-y-1 text-center">
           <div className="flex items-center justify-center mb-6">
-            <h1 className="text-3xl font-bold">
-              <span className="text-blue-600">Admin</span>
-              <span className="text-blue-800">Chirii</span>
-              <span className="text-slate-500 font-light">.ro</span>
-            </h1>
+            <img 
+              src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
+              alt="AdminChirii Logo" 
+              className="h-12"
+            />
           </div>
-          <CardTitle className="text-2xl">Property Management</CardTitle>
-          <CardDescription>
-            {showRoleForm ? "Complete your profile" : "Choose your role and sign in to your account"}
-          </CardDescription>
+          
+          {view === "roles" && (
+            <>
+              <CardTitle className="text-2xl">Choose Your Role</CardTitle>
+              <CardDescription>Select your role to continue</CardDescription>
+            </>
+          )}
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {showRoleForm ? (
-            <RoleSpecificForm 
-              role={selectedRole}
-              email={userEmail}
-              onComplete={handleRoleFormComplete}
-            />
-          ) : (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="role-select" className="text-sm font-medium text-gray-700">
-                  I am a...
-                </Label>
-                <Select
-                  value={selectedRole}
-                  onValueChange={(value) => setSelectedRole(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tenant" className="flex items-center gap-2">
-                      <Home className="w-4 h-4" /> Tenant
-                    </SelectItem>
-                    <SelectItem value="landlord" className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4" /> Landlord
-                    </SelectItem>
-                    <SelectItem value="service_provider" className="flex items-center gap-2">
-                      <Users className="w-4 h-4" /> Service Provider
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+          {view === "roles" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button
+                onClick={() => handleRoleSelect("tenant")}
+                className="flex flex-col items-center p-6 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors"
+              >
+                <Home className="w-8 h-8 mb-2 text-blue-500" />
+                <span className="font-medium">Tenant</span>
+              </button>
+              
+              <button
+                onClick={() => handleRoleSelect("landlord")}
+                className="flex flex-col items-center p-6 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors"
+              >
+                <Building2 className="w-8 h-8 mb-2 text-blue-500" />
+                <span className="font-medium">Landlord</span>
+              </button>
+              
+              <button
+                onClick={() => handleRoleSelect("service_provider")}
+                className="flex flex-col items-center p-6 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors"
+              >
+                <Wrench className="w-8 h-8 mb-2 text-blue-500" />
+                <span className="font-medium">Service Provider</span>
+              </button>
+            </div>
+          )}
+
+          {view !== "roles" && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <CardTitle className="text-2xl mb-2">
+                  {view === "login" ? "Login" : view === "register" ? "Create Account" : "Reset Password"}
+                </CardTitle>
+                <CardDescription>
+                  {view === "forgot-password" && "Enter your email address and we'll send you instructions to reset your password."}
+                </CardDescription>
               </div>
 
-              <Auth
-                supabaseClient={supabase}
-                appearance={{
-                  theme: ThemeSupa,
-                  variables: {
-                    default: {
-                      colors: {
-                        brand: '#007bff',
-                        brandAccent: '#0056b3',
-                        brandButtonText: 'white',
-                        defaultButtonBackground: 'white',
-                        defaultButtonBackgroundHover: '#f8fafc',
-                        defaultButtonBorder: 'lightgray',
-                        defaultButtonText: 'gray',
-                        dividerBackground: '#e2e8f0',
-                        inputBackground: 'white',
-                        inputBorder: '#e2e8f0',
-                        inputBorderHover: '#cbd5e1',
-                        inputBorderFocus: '#007bff',
-                        inputText: 'black',
-                        inputLabelText: '#475569',
-                        inputPlaceholder: '#94a3b8',
-                      },
-                      borderWidths: {
-                        buttonBorderWidth: '1px',
-                        inputBorderWidth: '1px',
-                      },
-                      radii: {
-                        borderRadiusButton: '0.5rem',
-                        buttonBorderRadius: '0.5rem',
-                        inputBorderRadius: '0.5rem',
-                      },
-                    },
-                  },
-                  className: {
-                    container: 'w-full',
-                    button: 'w-full px-4 py-2 rounded-lg font-medium transition-colors',
-                    input: 'rounded-lg border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                    label: 'text-sm font-medium text-gray-700',
-                    loader: 'w-6 h-6 border-2 border-blue-600',
-                  },
-                }}
-                providers={[]}
-                redirectTo={window.location.origin}
-                localization={{
-                  variables: {
-                    sign_in: {
-                      email_label: 'Email address',
-                      password_label: 'Password',
-                      email_input_placeholder: 'Enter your email',
-                      password_input_placeholder: 'Enter your password',
-                      button_label: 'Sign in',
-                      loading_button_label: 'Signing in...',
-                      social_provider_text: 'Sign in with {{provider}}',
-                      link_text: "Don't have an account? Sign up",
-                    },
-                    sign_up: {
-                      email_label: 'Email address',
-                      password_label: 'Create password',
-                      email_input_placeholder: 'Enter your email',
-                      password_input_placeholder: 'Create a secure password',
-                      button_label: 'Sign up',
-                      loading_button_label: 'Signing up...',
-                      social_provider_text: 'Sign up with {{provider}}',
-                      link_text: "Already have an account? Sign in",
-                    },
-                    forgotten_password: {
-                      link_text: 'Forgot password?',
-                      button_label: 'Send reset instructions',
-                      loading_button_label: 'Sending reset instructions...',
-                      confirmation_text: 'Check your email for the password reset link',
-                    },
-                  },
-                }}
-                onlyThirdPartyProviders={false}
-                magicLink={false}
-              />
-              {password && <PasswordStrength password={password} />}
-            </>
+              <form onSubmit={view === "login" ? handleLogin : view === "register" ? handleRegister : handleForgotPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                {view !== "forgot-password" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder={view === "login" ? "Enter your password" : "Create password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    {view === "register" && <PasswordStrength password={password} />}
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600">
+                  {view === "login" ? "Login" : view === "register" ? "Register" : "Reset Password"}
+                </Button>
+              </form>
+
+              <div className="flex flex-col space-y-2 text-center text-sm">
+                {view === "login" && (
+                  <>
+                    <button onClick={() => setView("forgot-password")} className="text-blue-500 hover:underline">
+                      Forgot Password?
+                    </button>
+                    <button onClick={() => setView("register")} className="text-blue-500 hover:underline">
+                      Don't have an account? Register
+                    </button>
+                  </>
+                )}
+                {(view === "register" || view === "forgot-password") && (
+                  <button onClick={() => setView("login")} className="text-blue-500 hover:underline">
+                    Back to Login
+                  </button>
+                )}
+                <button onClick={() => setView("roles")} className="text-gray-500 hover:underline">
+                  ← Back to Role Selection
+                </button>
+              </div>
+            </div>
+          )}
+
+          {showRoleForm && (
+            <RoleSpecificForm
+              role={selectedRole}
+              email={userEmail}
+              onComplete={() => navigate("/dashboard")}
+            />
           )}
         </CardContent>
       </Card>
