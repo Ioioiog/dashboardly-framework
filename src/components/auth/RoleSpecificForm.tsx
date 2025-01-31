@@ -32,6 +32,7 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log("Submitting form with role:", role);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -40,22 +41,55 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
         throw new Error("No authenticated user found");
       }
 
-      const { error } = await supabase
+      console.log("Updating user metadata with role:", role);
+      
+      // First update the user's metadata to include the role
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { role: role }
+      });
+
+      if (updateError) {
+        console.error("Error updating user metadata:", updateError);
+        throw updateError;
+      }
+
+      // Then update the profile
+      const profileData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.phone,
+        role: role,
+      };
+
+      console.log("Updating profile with data:", profileData);
+
+      const { error: profileError } = await supabase
         .from('profiles')
-        .update({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone: formData.phone,
-          ...(role === 'service_provider' && {
-            service_provider_profiles: {
-              business_name: formData.businessName,
-              service_area: [formData.serviceArea],
-            }
-          })
-        })
+        .update(profileData)
         .eq('id', user.id);
 
-      if (error) throw error;
+      if (profileError) {
+        console.error("Error updating profile:", profileError);
+        throw profileError;
+      }
+
+      // If user is a service provider, create/update service provider profile
+      if (role === 'service_provider') {
+        console.log("Creating service provider profile");
+        
+        const { error: spError } = await supabase
+          .from('service_provider_profiles')
+          .upsert({
+            id: user.id,
+            business_name: formData.businessName,
+            service_area: [formData.serviceArea],
+          });
+
+        if (spError) {
+          console.error("Error updating service provider profile:", spError);
+          throw spError;
+        }
+      }
 
       toast({
         title: "Profile updated",

@@ -53,9 +53,29 @@ const AuthPage = () => {
       console.log("Auth state changed:", event);
       
       if (event === 'SIGNED_IN' && session) {
-        if (session.user.email) {
-          setUserEmail(session.user.email);
-          setShowRoleForm(true);
+        console.log("User signed in, updating metadata with role:", selectedRole);
+        
+        try {
+          const { error: updateError } = await supabase.auth.updateUser({
+            data: { role: selectedRole }
+          });
+
+          if (updateError) {
+            console.error("Error updating user metadata:", updateError);
+            throw updateError;
+          }
+
+          if (session.user.email) {
+            setUserEmail(session.user.email);
+            setShowRoleForm(true);
+          }
+        } catch (error) {
+          console.error("Error in auth state change:", error);
+          toast({
+            title: "Error",
+            description: "Failed to update user role. Please try again.",
+            variant: "destructive",
+          });
         }
       } else if (event === 'SIGNED_OUT') {
         console.log("User signed out");
@@ -69,23 +89,10 @@ const AuthPage = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, toast]);
+  }, [navigate, toast, selectedRole]);
 
   const handleRoleFormComplete = () => {
     navigate("/dashboard", { replace: true });
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case "tenant":
-        return <Home className="w-4 h-4" />;
-      case "landlord":
-        return <Building2 className="w-4 h-4" />;
-      case "service_provider":
-        return <Users className="w-4 h-4" />;
-      default:
-        return null;
-    }
   };
 
   return (
@@ -215,9 +222,6 @@ const AuthPage = () => {
                 }}
                 onlyThirdPartyProviders={false}
                 magicLink={false}
-                queryParams={{
-                  role: selectedRole
-                }}
               />
             </>
           )}
