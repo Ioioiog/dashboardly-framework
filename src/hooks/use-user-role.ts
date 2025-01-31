@@ -27,11 +27,12 @@ export function useUserRole() {
 
         console.log("Fetching role for user:", user.id);
 
+        // Explicitly select role from profiles
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", user.id)
-          .maybeSingle();
+          .single();
 
         if (profileError) {
           console.error("Error fetching user profile:", profileError);
@@ -39,15 +40,28 @@ export function useUserRole() {
           return;
         }
 
-        console.log("User profile data:", profile);
-        
-        if (profile?.role && mounted) {
-          console.log("Setting user role to:", profile.role);
-          setUserRole(profile.role as UserRole);
-        } else {
+        if (!profile?.role) {
           console.log("No role found in profile");
           if (mounted) setUserRole(null);
+          return;
         }
+
+        // Validate role type
+        const validRole = profile.role === "landlord" || 
+                         profile.role === "tenant" || 
+                         profile.role === "service_provider";
+
+        if (!validRole) {
+          console.error("Invalid role found:", profile.role);
+          if (mounted) setUserRole(null);
+          return;
+        }
+
+        console.log("Setting user role to:", profile.role);
+        if (mounted) {
+          setUserRole(profile.role as UserRole);
+        }
+
       } catch (error) {
         console.error("Unexpected error in getUserRole:", error);
         if (mounted) setUserRole(null);

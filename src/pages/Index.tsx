@@ -23,6 +23,8 @@ const Index = () => {
       try {
         console.log("Initializing authentication state...");
         setIsLoading(true);
+        
+        // Get current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -41,7 +43,7 @@ const Index = () => {
         console.log("Current user ID:", currentUserId);
         setUserId(currentUserId);
 
-        // Fetch profile with role
+        // Fetch profile with role - using explicit select to ensure we get the role
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role, first_name, last_name')
@@ -75,8 +77,12 @@ const Index = () => {
 
         console.log("Profile loaded successfully:", profile);
         
-        // Validate and set user role
-        if (profile.role !== "landlord" && profile.role !== "tenant" && profile.role !== "service_provider") {
+        // Validate role type
+        const validRole = profile.role === "landlord" || 
+                         profile.role === "tenant" || 
+                         profile.role === "service_provider";
+
+        if (!validRole) {
           console.error("Invalid role found:", profile.role);
           toast({
             title: "Error",
@@ -86,8 +92,9 @@ const Index = () => {
           return;
         }
 
-        console.log("Setting user role:", profile.role);
-        setUserRole(profile.role);
+        // Set user role with type assertion since we've validated it
+        setUserRole(profile.role as "landlord" | "tenant" | "service_provider");
+        console.log("Setting user role to:", profile.role);
         
         // Set user name from profile
         const fullName = [profile.first_name, profile.last_name]
