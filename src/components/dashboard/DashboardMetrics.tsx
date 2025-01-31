@@ -16,7 +16,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
   console.log("DashboardMetrics - userRole:", userRole);
   console.log("DashboardMetrics - metrics:", metrics);
 
-  if (isLoading) {
+  if (isLoading || !metrics) {
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-fade-in">
         {[...Array(4)].map((_, i) => (
@@ -31,8 +31,6 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
       </div>
     );
   }
-
-  if (!metrics) return null;
 
   const handleRevenueClick = () => {
     setShowRevenueDetails(true);
@@ -75,7 +73,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-fade-in">
           <MetricCard
             title={t('dashboard.metrics.totalProperties')}
-            value={metrics.totalProperties}
+            value={metrics.totalProperties || 0}
             icon={Home}
             route="/properties"
             className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
@@ -91,7 +89,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           />
           <MetricCard
             title={t('dashboard.metrics.activeTenants')}
-            value={metrics.activeTenants}
+            value={metrics.activeTenants || 0}
             icon={Users}
             route="/tenants"
             className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
@@ -99,7 +97,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
           />
           <MetricCard
             title={t('dashboard.metrics.pendingMaintenance')}
-            value={metrics.pendingMaintenance}
+            value={metrics.pendingMaintenance || 0}
             icon={Wrench}
             route="/maintenance"
             className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
@@ -121,7 +119,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
       <div className="grid gap-6 md:grid-cols-3 animate-fade-in">
         <MetricCard
           title={t('dashboard.metrics.totalProperties')}
-          value={metrics.totalProperties}
+          value={metrics.totalProperties || 0}
           icon={Home}
           route="/properties"
           className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
@@ -129,7 +127,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
         />
         <MetricCard
           title={t('dashboard.metrics.pendingMaintenance')}
-          value={metrics.pendingMaintenance}
+          value={metrics.pendingMaintenance || 0}
           icon={Wrench}
           route="/maintenance"
           className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
@@ -137,7 +135,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
         />
         <MetricCard
           title={t('dashboard.metrics.paymentStatus')}
-          value={metrics.paymentStatus}
+          value={metrics.paymentStatus || 'N/A'}
           icon={Wallet}
           onClick={handleRevenueClick}
           className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
