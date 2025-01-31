@@ -178,21 +178,22 @@ const AuthPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
-      {/* Modern animated background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 animate-gradient">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+          <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+        </div>
       </div>
 
-      <Card className="w-full max-w-md bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg relative z-10 transition-all duration-300 hover:shadow-xl border border-gray-200/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-        <CardContent className="p-8">
-          <div className="flex items-center justify-center mb-8">
+      <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm relative z-10 transition-all duration-300 hover:shadow-blue-500/20 border-0 shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:bg-slate-900/90 dark:text-white">
+        <CardContent className="space-y-6 px-8">
+          <div className="flex items-center justify-center mb-6">
             <img 
               src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
               alt="AdminChirii Logo" 
-              className="h-16 transform hover:scale-105 transition-transform duration-300 drop-shadow-lg"
+              className="h-20 drop-shadow-md"
             />
           </div>
 
@@ -211,18 +212,6 @@ const AuthPage = () => {
           )}
         </CardContent>
       </Card>
-
-      {showRoleForm && (
-        <Card className="w-full max-w-md mt-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg relative z-10">
-          <CardContent className="p-6">
-            <RoleSpecificForm
-              role={selectedRole}
-              email={userEmail}
-              onComplete={handleRoleFormComplete}
-            />
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

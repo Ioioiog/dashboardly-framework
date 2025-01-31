@@ -12,28 +12,25 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
       title: "Tenant",
       description: "Find and manage your rental properties",
       icon: Home,
-      gradient: "from-blue-500 to-blue-600",
     },
     {
       id: "landlord",
       title: "Landlord",
       description: "Manage your properties and tenants",
       icon: Building2,
-      gradient: "from-purple-500 to-purple-600",
     },
     {
       id: "service_provider",
       title: "Service Provider",
       description: "Offer maintenance and repair services",
       icon: Wrench,
-      gradient: "from-indigo-500 to-indigo-600",
     },
   ];
 
   return (
     <>
-      <div className="text-center pb-8">
-        <CardTitle className="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+      <div className="text-center pb-8 animate-fade-in">
+        <CardTitle className="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-800">
           Choose Your Role
         </CardTitle>
         <CardDescription className="text-gray-600 dark:text-gray-400 text-lg">
@@ -41,31 +38,22 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
         </CardDescription>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in">
         {roles.map((role) => {
           const Icon = role.icon;
           return (
             <button
               key={role.id}
               onClick={() => onRoleSelect(role.id)}
-              className="group relative overflow-hidden rounded-xl p-px hover:scale-[1.01] transition-all duration-300"
+              className="flex flex-col items-center p-8 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 bg-white/50 dark:bg-slate-800/50 group"
             >
-              <div className="absolute inset-0 bg-gradient-to-r opacity-75 group-hover:opacity-100 transition-opacity duration-300"
-                   style={{ backgroundImage: `linear-gradient(45deg, var(--${role.gradient}-start), var(--${role.gradient}-end))` }}>
+              <div className="mb-4 p-3 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-500 transition-transform group-hover:scale-110">
+                <Icon className="w-8 h-8" />
               </div>
-              <div className="relative flex items-center gap-4 rounded-xl bg-white dark:bg-gray-900 p-5 transition-transform">
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${role.gradient} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                  <Icon className="h-6 w-6" />
-                </div>
-                <div className="text-left">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    {role.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {role.description}
-                  </p>
-                </div>
-              </div>
+              <h3 className="text-lg font-semibold mb-2">{role.title}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                {role.description}
+              </p>
             </button>
           );
         })}
