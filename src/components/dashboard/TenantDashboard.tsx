@@ -9,7 +9,19 @@ interface TenantDashboardProps {
 }
 
 export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboardProps) {
-  if (!tenantInfo) {
+  // Add safety check for tenantInfo
+  const formattedTenantInfo = tenantInfo ? {
+    property: {
+      name: tenantInfo.property_name,
+      address: tenantInfo.property_address,
+      monthly_rent: 0, // You'll need to add this to your tenant_details view
+      type: "Apartment" // You'll need to add this to your tenant_details view
+    },
+    start_date: tenantInfo.start_date,
+    end_date: tenantInfo.end_date
+  } : null;
+
+  if (!formattedTenantInfo) {
     return (
       <div className="p-6 space-y-6 max-w-7xl mx-auto">
         <p className="text-muted-foreground">Loading tenant information...</p>
@@ -26,7 +38,7 @@ export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboar
 
       {/* Tenant Info Section */}
       <section className="bg-white rounded-xl shadow-sm p-6">
-        <TenantInfo tenantInfo={tenantInfo} />
+        <TenantInfo tenantInfo={formattedTenantInfo} />
       </section>
 
       {/* Metrics Section */}

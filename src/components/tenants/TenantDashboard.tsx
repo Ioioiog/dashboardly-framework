@@ -19,6 +19,19 @@ interface TenantDashboardProps {
 export const TenantDashboard = ({ tenantInfo }: TenantDashboardProps) => {
   const { t } = useTranslation();
 
+  // Add safety check for undefined tenantInfo
+  if (!tenantInfo || !tenantInfo.property) {
+    return (
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="bg-white shadow-md">
+          <CardContent>
+            <p className="text-muted-foreground">Loading tenant information...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-6 md:grid-cols-3">
       <Card className="bg-white shadow-md hover:shadow-lg transition-all duration-300">
