@@ -27,11 +27,12 @@ const Settings = () => {
       label: 'Financial & Payments',
       icon: Wallet,
     },
-    {
+    // Only show Property Providers for landlords
+    ...(userRole === 'landlord' ? [{
       id: 'providers' as SettingsSection,
       label: 'Property Providers',
       icon: Building2,
-    },
+    }] : []),
     {
       id: 'preferences' as SettingsSection,
       label: 'Preferences',
@@ -51,11 +52,12 @@ const Settings = () => {
       case 'financial':
         return <FinancialSettings />;
       case 'providers':
-        return <PropertyProvidersSettings />;
+        // Only render PropertyProvidersSettings for landlords
+        return userRole === 'landlord' ? <PropertyProvidersSettings /> : null;
       case 'preferences':
         return <PreferencesSettings />;
       case 'subscription':
-        return <SubscriptionSettings />;
+        return userRole === 'landlord' ? <SubscriptionSettings /> : null;
       default:
         return <AccountSettings />;
     }
