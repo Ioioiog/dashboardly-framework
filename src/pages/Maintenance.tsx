@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Wrench, AlertTriangle } from "lucide-react";
+import { Plus, Wrench, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import MaintenanceList from "@/components/maintenance/MaintenanceList";
@@ -10,8 +10,10 @@ import MaintenanceDialog from "@/components/maintenance/MaintenanceDialog";
 import MaintenanceFilters from "@/components/maintenance/MaintenanceFilters";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
+type MaintenanceSection = 'requests' | 'providers';
 
 interface Filters {
   status: MaintenanceStatus | "all";
@@ -25,6 +27,7 @@ export default function Maintenance() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
+  const [activeSection, setActiveSection] = React.useState<MaintenanceSection>('requests');
   const [filters, setFilters] = React.useState<Filters>({
     status: "all",
     priority: "all",
@@ -98,6 +101,19 @@ export default function Maintenance() {
     setIsDialogOpen(false);
   };
 
+  const navigationItems = [
+    {
+      id: 'requests' as MaintenanceSection,
+      label: 'Maintenance Requests',
+      icon: Wrench,
+    },
+    {
+      id: 'providers' as MaintenanceSection,
+      label: 'Service Providers',
+      icon: Users,
+    },
+  ];
+
   return (
     <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
@@ -117,44 +133,62 @@ export default function Maintenance() {
                 {t("maintenance.description")}
               </p>
             </div>
-            <Button 
-              onClick={() => setIsDialogOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              {t("maintenance.newRequest")}
-            </Button>
+            {activeSection === 'requests' && (
+              <Button 
+                onClick={() => setIsDialogOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                {t("maintenance.newRequest")}
+              </Button>
+            )}
           </div>
 
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
+          <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto">
+            {navigationItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={activeSection === item.id ? 'default' : 'ghost'}
+                className={cn(
+                  "flex-shrink-0 gap-2",
+                  activeSection === item.id && "bg-primary text-primary-foreground"
+                )}
+                onClick={() => setActiveSection(item.id)}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Button>
+            ))}
           </div>
 
-          {maintenanceRequests?.length === 0 && !isLoading ? (
-            <div className="text-center py-16 bg-white rounded-lg shadow-sm">
-              <AlertTriangle className="mx-auto h-12 w-12 text-yellow-500" />
-              <h3 className="mt-4 text-lg font-semibold text-gray-900">
-                {t("maintenance.noRequests")}
-              </h3>
-              <p className="mt-2 text-gray-500">
-                {t("maintenance.createRequestPrompt")}
-              </p>
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <MaintenanceList
-                requests={maintenanceRequests || []}
-                isLoading={isLoading}
-                onRequestClick={handleRequestClick}
+          {activeSection === 'requests' && (
+            <>
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <MaintenanceList
+                  requests={maintenanceRequests || []}
+                  isLoading={isLoading}
+                  onRequestClick={handleRequestClick}
+                />
+              </div>
+
+              <MaintenanceDialog
+                open={isDialogOpen}
+                onOpenChange={handleDialogClose}
+                requestId={selectedRequestId}
               />
-            </div>
+            </>
           )}
 
-          <MaintenanceDialog
-            open={isDialogOpen}
-            onOpenChange={handleDialogClose}
-            requestId={selectedRequestId}
-          />
+          {activeSection === 'providers' && (
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <h2 className="text-lg font-semibold mb-4">Service Providers List</h2>
+              <p className="text-gray-500">Service providers management coming soon...</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
