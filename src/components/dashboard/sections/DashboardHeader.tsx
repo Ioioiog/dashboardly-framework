@@ -5,15 +5,15 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ userName }: DashboardHeaderProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('dashboard');
   
   return (
     <div className="space-y-2">
       <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-        {t('dashboard.title')}
+        {t('title')}
       </h1>
       <p className="text-muted-foreground">
-        {t('dashboard.welcome')} <span className="font-medium text-primary">{userName}</span>! {t('dashboard.overview')}
+        {t('welcome')} <span className="font-medium text-primary">{userName}</span>! {t('overview')}
       </p>
     </div>
   );
