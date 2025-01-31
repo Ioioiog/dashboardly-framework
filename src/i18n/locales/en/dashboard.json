@@ -24,15 +24,39 @@
     "monthlyEarningsDesc": "Earnings from completed jobs this month"
   },
   "revenue": {
+    "title": "Revenue Overview",
     "history": "Revenue History",
     "predictions": "Revenue Predictions",
+    "noData": "No revenue data available",
     "noUpcomingPayments": "No upcoming payments",
-    "upcomingPayments": "Upcoming Payments"
+    "upcomingPayments": "Upcoming Payments",
+    "monthlyAverage": "Monthly Average",
+    "totalRevenue": "Total Revenue",
+    "performance": "Performance",
+    "vs": "vs last month",
+    "details": {
+      "title": "Revenue Details",
+      "property": "Property",
+      "amount": "Amount",
+      "dueDate": "Due Date",
+      "status": "Status",
+      "noDetails": "No revenue details available for this month"
+    }
   },
   "sections": {
     "trackMoney": "Track your money",
     "maintenance": "Maintenance Overview",
     "properties": "Property Overview",
     "tenants": "Tenant Overview"
-  }
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "maintenance": "Report Maintenance",
+    "maintenanceDesc": "Submit a new maintenance request",
+    "documents": "View Documents",
+    "documentsDesc": "Access property documents",
+    "viewMore": "View More"
+  },
+  "propertyInfo": "Property Information",
+  "ongoingLease": "Ongoing Lease"
 }

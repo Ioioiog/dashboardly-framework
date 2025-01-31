@@ -24,15 +24,39 @@
     "monthlyEarningsDesc": "Gains des travaux terminés ce mois-ci"
   },
   "revenue": {
+    "title": "Aperçu des Revenus",
     "history": "Historique des Revenus",
     "predictions": "Prévisions des Revenus",
+    "noData": "Aucune donnée de revenu disponible",
     "noUpcomingPayments": "Aucun paiement à venir",
-    "upcomingPayments": "Paiements à Venir"
+    "upcomingPayments": "Paiements à Venir",
+    "monthlyAverage": "Moyenne Mensuelle",
+    "totalRevenue": "Revenu Total",
+    "performance": "Performance",
+    "vs": "vs mois précédent",
+    "details": {
+      "title": "Détails des Revenus",
+      "property": "Propriété",
+      "amount": "Montant",
+      "dueDate": "Date d'échéance",
+      "status": "Statut",
+      "noDetails": "Aucun détail de revenu disponible pour ce mois"
+    }
   },
   "sections": {
     "trackMoney": "Suivez votre argent",
     "maintenance": "Aperçu de la Maintenance",
     "properties": "Aperçu des Propriétés",
     "tenants": "Aperçu des Locataires"
-  }
+  },
+  "quickActions": {
+    "title": "Actions Rapides",
+    "maintenance": "Signaler Maintenance",
+    "maintenanceDesc": "Soumettre une nouvelle demande de maintenance",
+    "documents": "Voir Documents",
+    "documentsDesc": "Accéder aux documents de propriété",
+    "viewMore": "Voir Plus"
+  },
+  "propertyInfo": "Information sur la Propriété",
+  "ongoingLease": "Bail en Cours"
 }
