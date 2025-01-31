@@ -19,6 +19,27 @@ export default function Properties() {
 
   console.log("Properties page - User Role:", userRole);
 
+  // Early return if user is a service provider
+  if (userRole === "service_provider") {
+    return (
+      <div className="flex h-screen bg-gradient-to-br from-dashboard-background to-gray-50">
+        <DashboardSidebar />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-900">
+                {t("properties.serviceProvider.notAvailable")}
+              </h1>
+              <p className="mt-2 text-gray-600">
+                {t("properties.serviceProvider.description")}
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   const handleAdd = async (data: any): Promise<boolean> => {
     try {
       console.log("Attempting to add new property:", data);
@@ -140,8 +161,8 @@ export default function Properties() {
     }
   };
 
-  if (!userRole) {
-    console.log("No user role found, returning null");
+  if (!userRole || (userRole !== "landlord" && userRole !== "tenant")) {
+    console.log("No user role found or invalid role, returning null");
     return null;
   }
 
