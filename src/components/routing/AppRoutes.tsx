@@ -12,6 +12,9 @@ import Maintenance from "@/pages/Maintenance";
 import MeterReadings from "@/pages/MeterReadings";
 import ServiceProviderProfile from "@/pages/ServiceProviderProfile";
 import ServiceAreas from "@/pages/ServiceAreas";
+import Services from "@/pages/Services";
+import Earnings from "@/pages/Earnings";
+import ServiceProviderDashboard from "@/pages/ServiceProviderDashboard";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import TenantRegistration from "@/pages/TenantRegistration";
 import { ResetPassword } from "@/components/auth/ResetPassword";
@@ -30,14 +33,50 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/update-password" element={<UpdatePassword />} />
       <Route path="/tenant-registration" element={<TenantRegistration />} />
+      
+      {/* Service Provider Routes */}
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <Index />
+            <ServiceProviderDashboard />
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/service-provider-profile"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ServiceProviderProfile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service-areas"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ServiceAreas />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/services"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Services />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/earnings"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Earnings />
+          </ProtectedRoute>
+        }
+      />
+      
+      {/* Standard Routes */}
       <Route
         path="/properties"
         element={
@@ -115,22 +154,6 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <Maintenance />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/service-provider-profile"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <ServiceProviderProfile />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/service-areas"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <ServiceAreas />
           </ProtectedRoute>
         }
       />
