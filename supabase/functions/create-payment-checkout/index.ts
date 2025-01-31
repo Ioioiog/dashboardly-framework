@@ -27,13 +27,13 @@ serve(async (req) => {
       .from('invoices')
       .select(`
         *,
+        landlord:landlord_id (
+          stripe_account_id,
+          email
+        ),
         property:properties (
           name,
-          address,
-          landlord:profiles (
-            stripe_account_id,
-            email
-          )
+          address
         )
       `)
       .eq('id', paymentId)
@@ -51,7 +51,7 @@ serve(async (req) => {
       throw new Error('Invoice not found');
     }
 
-    const stripeAccountId = invoice.property?.landlord?.stripe_account_id;
+    const stripeAccountId = invoice.landlord?.stripe_account_id;
     if (!stripeAccountId) {
       console.error('Landlord has not connected Stripe account');
       throw new Error('Landlord has not connected Stripe account');
@@ -92,7 +92,7 @@ serve(async (req) => {
           price_data: {
             currency: invoice.currency.toLowerCase(),
             product_data: {
-              name: `Invoice Payment`,
+              name: `Invoice Payment for ${invoice.property.name}`,
               description: `Payment for ${invoice.property.address}`,
             },
             unit_amount: Math.round(invoice.amount * 100), // Convert to cents
