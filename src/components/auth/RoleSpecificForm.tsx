@@ -45,7 +45,11 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
       
       // First update the user's metadata to include the role
       const { error: updateError } = await supabase.auth.updateUser({
-        data: { role: role }
+        data: { 
+          role: role,
+          first_name: formData.firstName,
+          last_name: formData.lastName
+        }
       });
 
       if (updateError) {
@@ -59,6 +63,7 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
         last_name: formData.lastName,
         phone: formData.phone,
         role: role,
+        email: email
       };
 
       console.log("Updating profile with data:", profileData);
