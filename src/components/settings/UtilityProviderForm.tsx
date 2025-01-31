@@ -209,6 +209,7 @@ export function UtilityProviderForm() {
     } finally {
       setIsLoading(false);
     }
+  };
 
   if (userRole !== 'landlord') {
     return null;
