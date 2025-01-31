@@ -2,14 +2,11 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
-import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
-import { DashboardHeader } from "@/components/dashboard/sections/DashboardHeader";
-import { RevenueSection } from "@/components/dashboard/sections/RevenueSection";
-import { UpcomingIncomeSection } from "@/components/dashboard/sections/UpcomingIncomeSection";
-import ServiceProviderDashboard from "./ServiceProviderDashboard";
-import { TenantDashboard } from "@/components/tenants/TenantDashboard";
+import { LandlordDashboard } from "@/components/dashboard/LandlordDashboard";
+import { TenantDashboard } from "@/components/dashboard/TenantDashboard";
+import { ServiceProviderDashboard } from "@/components/dashboard/ServiceProviderDashboard";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -153,32 +150,11 @@ const Index = () => {
 
     switch (userRole) {
       case "landlord":
-        return (
-          <div className="p-4 space-y-4">
-            <DashboardHeader userName={userName} />
-            <section className="bg-white rounded-lg shadow-sm p-4">
-              <DashboardMetrics userId={userId} userRole={userRole} />
-            </section>
-            <RevenueSection userId={userId} />
-            <UpcomingIncomeSection userId={userId} />
-          </div>
-        );
+        return <LandlordDashboard userId={userId} userName={userName} />;
       case "tenant":
-        return tenantInfo ? (
-          <div className="p-4 space-y-4">
-            <DashboardHeader userName={userName} />
-            <TenantDashboard tenantInfo={tenantInfo} />
-            <section className="bg-white rounded-lg shadow-sm p-4">
-              <DashboardMetrics userId={userId} userRole={userRole} />
-            </section>
-          </div>
-        ) : (
-          <div className="p-4">
-            <p>Loading tenant information...</p>
-          </div>
-        );
+        return <TenantDashboard userId={userId} userName={userName} tenantInfo={tenantInfo} />;
       case "service_provider":
-        return <ServiceProviderDashboard />;
+        return <ServiceProviderDashboard userId={userId} />;
       default:
         console.error("Invalid user role:", userRole);
         return null;
