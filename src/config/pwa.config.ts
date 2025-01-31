@@ -1,6 +1,6 @@
 import type { VitePWAOptions } from 'vite-plugin-pwa'
 
-export const pwaConfig: VitePWAOptions = {
+export const pwaConfig: Partial<VitePWAOptions> = {
   registerType: 'autoUpdate',
   includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
   manifest: {
@@ -96,5 +96,11 @@ export const pwaConfig: VitePWAOptions = {
     skipWaiting: true,
     clientsClaim: true,
     cleanupOutdatedCaches: true
-  }
+  },
+  // Adding the missing required properties
+  injectRegister: 'auto',
+  minify: true,
+  injectManifest: false,
+  includeManifestIcons: true,
+  disable: false
 }
