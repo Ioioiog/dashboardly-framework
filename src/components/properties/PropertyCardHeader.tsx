@@ -3,6 +3,7 @@ import { Calendar, Wallet, Home } from "lucide-react";
 import { Property } from "@/utils/propertyUtils";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 interface PropertyCardHeaderProps {
   property: Property;
