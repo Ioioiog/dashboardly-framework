@@ -65,7 +65,7 @@ const AuthPage = () => {
       email: userEmail,
       password,
       options: {
-        data: {
+        metadata: {
           role: selectedRole,
         },
       }
