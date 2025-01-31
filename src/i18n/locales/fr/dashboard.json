@@ -21,7 +21,8 @@
     "completedJobs": "Travaux Terminés",
     "completedJobsDesc": "Travaux terminés ce mois-ci",
     "monthlyEarnings": "Gains Mensuels",
-    "monthlyEarningsDesc": "Gains des travaux terminés ce mois-ci"
+    "monthlyEarningsDesc": "Gains des travaux terminés ce mois-ci",
+    "noPayments": "Aucun paiement"
   },
   "revenue": {
     "title": "Aperçu des Revenus",

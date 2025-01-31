@@ -21,7 +21,8 @@
     "completedJobs": "Lucrări Finalizate",
     "completedJobsDesc": "Lucrări finalizate în această lună",
     "monthlyEarnings": "Câștiguri Lunare",
-    "monthlyEarningsDesc": "Câștiguri din lucrările finalizate în această lună"
+    "monthlyEarningsDesc": "Câștiguri din lucrările finalizate în această lună",
+    "noPayments": "Fără plăți"
   },
   "revenue": {
     "title": "Prezentare Venituri",

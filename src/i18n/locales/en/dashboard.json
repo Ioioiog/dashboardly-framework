@@ -21,7 +21,8 @@
     "completedJobs": "Completed Jobs",
     "completedJobsDesc": "Jobs completed this month",
     "monthlyEarnings": "Monthly Earnings",
-    "monthlyEarningsDesc": "Earnings from completed jobs this month"
+    "monthlyEarningsDesc": "Earnings from completed jobs this month",
+    "noPayments": "No payments"
   },
   "revenue": {
     "title": "Revenue Overview",
