@@ -28,10 +28,6 @@
     "tenant": "Nu ai nicio proprietate atribuită încă.",
     "tenant.contact": "Te rugăm să contactezi proprietarul dacă crezi că este o eroare."
   },
-  "error": {
-    "invalidData": "Date proprietate invalide",
-    "fetch": "Eroare la încărcarea proprietăților"
-  },
   "types": {
     "apartment": "Apartament",
     "house": "Casă",
@@ -84,12 +80,12 @@
     "amount": "Chirie Lunară",
     "perPeriod": "pe lună"
   },
-  "actions": {
-    "reportIssue": "Raportează Problemă",
-    "viewDocuments": "Vezi Documente",
-    "analyzeHistory": "Analizează Istoric",
-    "edit": "Editează",
-    "delete": "Șterge"
+  "type": "Tip Proprietate",
+  "types": {
+    "apartment": "Apartament",
+    "house": "Casă",
+    "condo": "Condominium",
+    "commercial": "Comercial"
   },
   "toast": {
     "success": {

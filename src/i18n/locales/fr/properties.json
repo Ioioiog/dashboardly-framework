@@ -7,6 +7,10 @@
     "landlord": "Gérez et surveillez votre portefeuille immobilier",
     "tenant": "Consultez vos propriétés louées et les informations associées"
   },
+  "serviceProvider": {
+    "notAvailable": "Propriétés Indisponibles",
+    "description": "En tant que prestataire de services, vous n'avez pas accès à la section des propriétés. Veuillez utiliser la section de gestion des services."
+  },
   "addProperty": "Ajouter une Propriété",
   "editProperty": "Modifier la Propriété",
   "deleteProperty": "Supprimer la Propriété",
@@ -76,18 +80,21 @@
     "amount": "Loyer Mensuel",
     "perPeriod": "par mois"
   },
-  "actions": {
-    "reportIssue": "Signaler un Problème",
-    "viewDocuments": "Voir les Documents",
-    "analyzeHistory": "Analyser l'Historique",
-    "edit": "Modifier",
-    "delete": "Supprimer"
+  "type": "Type de Propriété",
+  "types": {
+    "apartment": "Appartement",
+    "house": "Maison",
+    "condo": "Copropriété",
+    "commercial": "Commercial"
   },
   "toast": {
     "success": {
       "added": "Propriété ajoutée avec succès",
+      "propertyAdded": "La propriété a été ajoutée avec succès",
       "updated": "Propriété mise à jour avec succès",
+      "propertyUpdated": "La propriété a été mise à jour avec succès",
       "deleted": "Propriété supprimée avec succès",
+      "propertyDeleted": "La propriété a été supprimée avec succès",
       "tenantAssigned": "Locataire assigné avec succès",
       "tenantRemoved": "Locataire retiré avec succès",
       "datesUpdated": "Dates de location mises à jour avec succès"
