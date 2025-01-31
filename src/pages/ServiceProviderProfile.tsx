@@ -10,6 +10,9 @@ import { ServiceList } from "@/components/service-provider/ServiceList";
 import { ServiceForm } from "@/components/service-provider/ServiceForm";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { Building2, ClipboardList, UserCircle, cn } from "lucide-react";
+
+type Section = 'profile' | 'services' | 'availability';
 
 interface ServiceProviderProfile {
   business_name: string | null;
@@ -25,11 +28,30 @@ export default function ServiceProviderProfile() {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [showServiceForm, setShowServiceForm] = useState(false);
+  const [activeSection, setActiveSection] = useState<Section>('profile');
   const { toast } = useToast();
 
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  const navigationItems = [
+    {
+      id: 'profile' as Section,
+      label: 'Profile Information',
+      icon: UserCircle,
+    },
+    {
+      id: 'services' as Section,
+      label: 'Services',
+      icon: ClipboardList,
+    },
+    {
+      id: 'availability' as Section,
+      label: 'Service Areas',
+      icon: Building2,
+    },
+  ];
 
   const fetchProfile = async () => {
     try {
@@ -88,22 +110,10 @@ export default function ServiceProviderProfile() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-screen bg-gradient-to-br from-dashboard-background to-gray-50">
-        <DashboardSidebar />
-        <main className="flex-1 p-6">
-          <div>Loading...</div>
-        </main>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex h-screen bg-gradient-to-br from-dashboard-background to-gray-50">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto p-6 space-y-6">
+  const renderSection = () => {
+    switch (activeSection) {
+      case 'profile':
+        return (
           <Card>
             <CardHeader>
               <CardTitle>Service Provider Profile</CardTitle>
@@ -178,7 +188,9 @@ export default function ServiceProviderProfile() {
               </form>
             </CardContent>
           </Card>
-
+        );
+      case 'services':
+        return (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Services</CardTitle>
@@ -188,13 +200,64 @@ export default function ServiceProviderProfile() {
               <ServiceList onEdit={() => setShowServiceForm(true)} />
             </CardContent>
           </Card>
+        );
+      case 'availability':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Service Areas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">Configure your service areas and availability.</p>
+            </CardContent>
+          </Card>
+        );
+    }
+  };
 
-          <Dialog open={showServiceForm} onOpenChange={setShowServiceForm}>
-            <DialogContent>
-              <ServiceForm onSuccess={() => setShowServiceForm(false)} />
-            </DialogContent>
-          </Dialog>
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-gradient-to-br from-dashboard-background to-gray-50">
+        <DashboardSidebar />
+        <main className="flex-1 p-6">
+          <div>Loading...</div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen bg-gradient-to-br from-dashboard-background to-gray-50">
+      <DashboardSidebar />
+      <main className="flex-1 overflow-y-auto">
+        <div className="container mx-auto p-6 space-y-6">
+          <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto">
+            {navigationItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={activeSection === item.id ? 'default' : 'ghost'}
+                className={cn(
+                  "flex-shrink-0 gap-2",
+                  activeSection === item.id && "bg-primary text-primary-foreground"
+                )}
+                onClick={() => setActiveSection(item.id)}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Button>
+            ))}
+          </div>
+
+          <div className="bg-card p-6 rounded-lg shadow-sm">
+            {renderSection()}
+          </div>
         </div>
+
+        <Dialog open={showServiceForm} onOpenChange={setShowServiceForm}>
+          <DialogContent>
+            <ServiceForm onSuccess={() => setShowServiceForm(false)} />
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
