@@ -149,14 +149,13 @@ export function LandlordFields({ serviceProviders, formData, onChange }: Landlor
       </div>
 
       <Select
-        value={formData.assigned_to || ""}
-        onValueChange={(value) => onChange("assigned_to", value || null)}
+        value={formData.assigned_to || undefined}
+        onValueChange={(value) => onChange("assigned_to", value)}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select a service provider" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">None</SelectItem>
           {serviceProviders?.map((provider) => (
             <SelectItem key={provider.id} value={provider.id}>
               {provider.first_name} {provider.last_name}
