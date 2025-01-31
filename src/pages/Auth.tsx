@@ -134,7 +134,7 @@ const AuthPage = () => {
             <img 
               src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
               alt="AdminChirii Logo" 
-              className="h-12 drop-shadow-md"
+              className="h-20 drop-shadow-md" // Changed from h-12 to h-20
             />
           </div>
 
