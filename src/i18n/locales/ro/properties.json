@@ -1,111 +1,45 @@
 {
-  "title": {
-    "landlord": "Gestionează Proprietățile",
-    "tenant": "Proprietățile Tale"
-  },
-  "description": {
-    "landlord": "Gestionează și monitorizează portofoliul tău imobiliar",
-    "tenant": "Vizualizează proprietățile închiriate și informațiile aferente"
-  },
-  "serviceProvider": {
-    "notAvailable": "Proprietăți Indisponibile",
-    "description": "Ca furnizor de servicii, nu aveți acces la secțiunea de proprietăți. Vă rugăm să utilizați secțiunea de gestionare a serviciilor."
-  },
-  "addProperty": "Adaugă Proprietate",
-  "editProperty": "Editează Proprietatea",
-  "deleteProperty": "Șterge Proprietatea",
-  "propertyDetails": "Detalii Proprietate",
-  "name": "Numele Proprietății",
-  "address": "Adresă",
-  "type": "Tip Proprietate",
-  "monthlyRent": "Chirie Lunară",
-  "status": "Stare",
-  "availableFrom": "Disponibil Din",
-  "description": "Descriere",
-  "noProperties": "Nu s-au găsit proprietăți",
-  "empty": {
-    "landlord": "Nu ai adăugat încă nicio proprietate. Click pe butonul de mai sus pentru a adăuga prima ta proprietate.",
-    "tenant": "Nu ai nicio proprietate atribuită încă.",
-    "tenant.contact": "Te rugăm să contactezi proprietarul dacă crezi că este o eroare."
+  "title": "Proprietăți",
+  "add": "Adaugă Proprietate",
+  "edit": "Editează Proprietatea",
+  "delete": "Șterge Proprietatea",
+  "details": {
+    "name": "Numele Proprietății",
+    "address": "Adresă",
+    "type": "Tipul Proprietății",
+    "monthlyRent": "Chirie Lunară",
+    "description": "Descriere",
+    "availableFrom": "Disponibil Din"
   },
   "types": {
     "apartment": "Apartament",
     "house": "Casă",
     "condo": "Condominium",
-    "commercial": "Comercial"
+    "studio": "Garsonieră",
+    "office": "Spațiu de Birou",
+    "retail": "Spațiu Comercial",
+    "other": "Altele"
+  },
+  "status": {
+    "available": "Disponibil",
+    "rented": "Închiriat",
+    "maintenance": "În Mentenanță",
+    "unavailable": "Indisponibil"
   },
   "filters": {
-    "searchPlaceholder": "Caută proprietăți...",
+    "search": "Caută proprietăți...",
     "type": "Filtrează după tip",
     "status": "Filtrează după stare",
-    "all": "Toate Proprietățile",
-    "occupied": "Arată doar proprietățile ocupate"
+    "sortBy": "Sortează după",
+    "viewMode": "Mod de vizualizare"
   },
-  "sort": {
-    "nameAsc": "Nume (A-Z)",
-    "nameDesc": "Nume (Z-A)",
-    "rentAsc": "Chirie (Crescător)",
-    "rentDesc": "Chirie (Descrescător)",
-    "dateAsc": "Data Adăugării (Cel mai vechi)",
-    "dateDesc": "Data Adăugării (Cel mai recent)"
+  "messages": {
+    "addSuccess": "Proprietate adăugată cu succes",
+    "editSuccess": "Proprietate actualizată cu succes",
+    "deleteSuccess": "Proprietate ștearsă cu succes",
+    "deleteConfirm": "Sigur doriți să ștergeți această proprietate?",
+    "error": "A apărut o eroare la procesarea cererii"
   },
-  "view": {
-    "grid": "Vizualizare Grid",
-    "list": "Vizualizare Listă"
-  },
-  "tenant": {
-    "assign": "Atribuie Chiriaș",
-    "remove": "Elimină Chiriașul",
-    "none": "Niciun chiriaș atribuit",
-    "current": "Chiriașul Actual",
-    "dates": {
-      "start": "Data de Început",
-      "end": "Data de Sfârșit",
-      "edit": "Editează Datele",
-      "save": "Salvează Modificările"
-    }
-  },
-  "utilities": {
-    "analyze": "Analizează Istoricul Facturilor",
-    "stats": {
-      "title": "Statistici Utilități",
-      "average": "Cost Lunar Mediu",
-      "total": "Total Utilități",
-      "highest": "Cea Mai Mare Factură",
-      "lowest": "Cea Mai Mică Factură"
-    }
-  },
-  "rent": {
-    "period": "lună",
-    "amount": "Chirie Lunară",
-    "perPeriod": "pe lună"
-  },
-  "type": "Tip Proprietate",
-  "types": {
-    "apartment": "Apartament",
-    "house": "Casă",
-    "condo": "Condominium",
-    "commercial": "Comercial"
-  },
-  "toast": {
-    "success": {
-      "added": "Proprietate adăugată cu succes",
-      "propertyAdded": "Proprietatea a fost adăugată cu succes",
-      "updated": "Proprietate actualizată cu succes",
-      "propertyUpdated": "Proprietatea a fost actualizată cu succes",
-      "deleted": "Proprietate ștearsă cu succes",
-      "propertyDeleted": "Proprietatea a fost ștearsă cu succes",
-      "tenantAssigned": "Chiriaș atribuit cu succes",
-      "tenantRemoved": "Chiriaș eliminat cu succes",
-      "datesUpdated": "Datele contractului actualizate cu succes"
-    },
-    "error": {
-      "add": "Eroare la adăugarea proprietății",
-      "update": "Eroare la actualizarea proprietății",
-      "delete": "Eroare la ștergerea proprietății",
-      "assignTenant": "Eroare la atribuirea chiriașului",
-      "removeTenant": "Eroare la eliminarea chiriașului",
-      "updateDates": "Eroare la actualizarea datelor contractului"
-    }
-  }
+  "noProperties": "Nu s-au găsit proprietăți",
+  "loading": "Se încarcă proprietățile..."
 }

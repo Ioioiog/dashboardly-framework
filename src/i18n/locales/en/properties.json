@@ -1,115 +1,45 @@
 {
-  "title": {
-    "landlord": "Manage Properties",
-    "tenant": "Your Properties"
-  },
-  "description": {
-    "landlord": "Manage and monitor your property portfolio",
-    "tenant": "View your rented properties and related information"
-  },
-  "serviceProvider": {
-    "notAvailable": "Properties Not Available",
-    "description": "As a service provider, you don't have access to the properties section. Please use the service management section instead."
-  },
-  "addProperty": "Add Property",
-  "editProperty": "Edit Property",
-  "deleteProperty": "Delete Property",
-  "propertyDetails": "Property Details",
-  "name": "Property Name",
-  "address": "Address",
-  "type": "Property Type",
-  "monthlyRent": "Monthly Rent",
-  "status": "Status",
-  "availableFrom": "Available From",
-  "description": "Description",
-  "noProperties": "No properties found",
-  "empty": {
-    "landlord": "You haven't added any properties yet. Click the button above to add your first property.",
-    "tenant": "You don't have any properties assigned to you yet.",
-    "tenant.contact": "Please contact your landlord if you believe this is an error."
-  },
-  "error": {
-    "invalidData": "Invalid property data",
-    "fetch": "Failed to fetch properties"
+  "title": "Properties",
+  "add": "Add Property",
+  "edit": "Edit Property",
+  "delete": "Delete Property",
+  "details": {
+    "name": "Property Name",
+    "address": "Address",
+    "type": "Property Type",
+    "monthlyRent": "Monthly Rent",
+    "description": "Description",
+    "availableFrom": "Available From"
   },
   "types": {
     "apartment": "Apartment",
     "house": "House",
-    "condo": "Condo",
-    "commercial": "Commercial"
+    "condo": "Condominium",
+    "studio": "Studio",
+    "office": "Office Space",
+    "retail": "Retail Space",
+    "other": "Other"
+  },
+  "status": {
+    "available": "Available",
+    "rented": "Rented",
+    "maintenance": "Under Maintenance",
+    "unavailable": "Unavailable"
   },
   "filters": {
-    "searchPlaceholder": "Search properties...",
+    "search": "Search properties...",
     "type": "Filter by type",
     "status": "Filter by status",
-    "all": "All Properties",
-    "occupied": "Show only occupied properties"
+    "sortBy": "Sort by",
+    "viewMode": "View mode"
   },
-  "sort": {
-    "nameAsc": "Name (A-Z)",
-    "nameDesc": "Name (Z-A)",
-    "rentAsc": "Rent (Low to High)",
-    "rentDesc": "Rent (High to Low)",
-    "dateAsc": "Date Added (Oldest)",
-    "dateDesc": "Date Added (Newest)"
+  "messages": {
+    "addSuccess": "Property added successfully",
+    "editSuccess": "Property updated successfully",
+    "deleteSuccess": "Property deleted successfully",
+    "deleteConfirm": "Are you sure you want to delete this property?",
+    "error": "An error occurred while processing your request"
   },
-  "view": {
-    "grid": "Grid View",
-    "list": "List View"
-  },
-  "tenant": {
-    "assign": "Assign Tenant",
-    "remove": "Remove Tenant",
-    "none": "No tenant assigned",
-    "current": "Current Tenant",
-    "dates": {
-      "start": "Start Date",
-      "end": "End Date",
-      "edit": "Edit Dates",
-      "save": "Save Changes"
-    }
-  },
-  "utilities": {
-    "analyze": "Analyze Invoice History",
-    "stats": {
-      "title": "Utility Statistics",
-      "average": "Average Monthly Cost",
-      "total": "Total Utilities",
-      "highest": "Highest Bill",
-      "lowest": "Lowest Bill"
-    }
-  },
-  "rent": {
-    "period": "month",
-    "amount": "Monthly Rent",
-    "perPeriod": "per month"
-  },
-  "type": "Property Type",
-  "types": {
-    "apartment": "Apartment",
-    "house": "House",
-    "condo": "Condo",
-    "commercial": "Commercial"
-  },
-  "toast": {
-    "success": {
-      "added": "Property added successfully",
-      "propertyAdded": "The property has been added successfully",
-      "updated": "Property updated successfully",
-      "propertyUpdated": "The property has been updated successfully",
-      "deleted": "Property deleted successfully",
-      "propertyDeleted": "The property has been deleted successfully",
-      "tenantAssigned": "Tenant assigned successfully",
-      "tenantRemoved": "Tenant removed successfully",
-      "datesUpdated": "Tenancy dates updated successfully"
-    },
-    "error": {
-      "add": "Failed to add property",
-      "update": "Failed to update property",
-      "delete": "Failed to delete property",
-      "assignTenant": "Failed to assign tenant",
-      "removeTenant": "Failed to remove tenant",
-      "updateDates": "Failed to update tenancy dates"
-    }
-  }
+  "noProperties": "No properties found",
+  "loading": "Loading properties..."
 }

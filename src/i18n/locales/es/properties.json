@@ -1,112 +1,45 @@
 {
-  "title": {
-    "landlord": "Administrar Propiedades",
-    "tenant": "Tus Propiedades"
-  },
-  "description": {
-    "landlord": "Administra y monitorea tu cartera de propiedades",
-    "tenant": "Ver tus propiedades alquiladas e información relacionada"
-  },
-  "serviceProvider": {
-    "notAvailable": "Propiedades No Disponibles",
-    "description": "Como proveedor de servicios, no tienes acceso a la sección de propiedades. Por favor, utiliza la sección de gestión de servicios."
-  },
-  "addProperty": "Agregar Propiedad",
-  "editProperty": "Editar Propiedad",
-  "deleteProperty": "Eliminar Propiedad",
-  "propertyDetails": "Detalles de la Propiedad",
-  "name": "Nombre de la Propiedad",
-  "address": "Dirección",
-  "type": "Tipo de Propiedad",
-  "monthlyRent": "Alquiler Mensual",
-  "status": "Estado",
-  "availableFrom": "Disponible Desde",
-  "description": "Descripción",
-  "noProperties": "No se encontraron propiedades",
-  "empty": {
-    "landlord": "Aún no has agregado ninguna propiedad. Haz clic en el botón de arriba para agregar tu primera propiedad.",
-    "tenant": "No tienes ninguna propiedad asignada todavía.",
-    "tenant.contact": "Por favor, contacta a tu arrendador si crees que esto es un error."
-  },
-  "error": {
-    "invalidData": "Datos de propiedad inválidos",
-    "fetch": "Error al obtener las propiedades"
+  "title": "Propiedades",
+  "add": "Añadir Propiedad",
+  "edit": "Editar Propiedad",
+  "delete": "Eliminar Propiedad",
+  "details": {
+    "name": "Nombre de la Propiedad",
+    "address": "Dirección",
+    "type": "Tipo de Propiedad",
+    "monthlyRent": "Alquiler Mensual",
+    "description": "Descripción",
+    "availableFrom": "Disponible Desde"
   },
   "types": {
     "apartment": "Apartamento",
     "house": "Casa",
     "condo": "Condominio",
-    "commercial": "Comercial"
+    "studio": "Estudio",
+    "office": "Espacio de Oficina",
+    "retail": "Local Comercial",
+    "other": "Otro"
+  },
+  "status": {
+    "available": "Disponible",
+    "rented": "Alquilado",
+    "maintenance": "En Mantenimiento",
+    "unavailable": "No Disponible"
   },
   "filters": {
-    "searchPlaceholder": "Buscar propiedades...",
+    "search": "Buscar propiedades...",
     "type": "Filtrar por tipo",
     "status": "Filtrar por estado",
-    "all": "Todas las Propiedades",
-    "occupied": "Mostrar solo propiedades ocupadas"
+    "sortBy": "Ordenar por",
+    "viewMode": "Modo de vista"
   },
-  "sort": {
-    "nameAsc": "Nombre (A-Z)",
-    "nameDesc": "Nombre (Z-A)",
-    "rentAsc": "Alquiler (Menor a Mayor)",
-    "rentDesc": "Alquiler (Mayor a Menor)",
-    "dateAsc": "Fecha Añadida (Más Antigua)",
-    "dateDesc": "Fecha Añadida (Más Reciente)"
+  "messages": {
+    "addSuccess": "Propiedad añadida con éxito",
+    "editSuccess": "Propiedad actualizada con éxito",
+    "deleteSuccess": "Propiedad eliminada con éxito",
+    "deleteConfirm": "¿Está seguro de que desea eliminar esta propiedad?",
+    "error": "Ocurrió un error al procesar su solicitud"
   },
-  "view": {
-    "grid": "Vista en Cuadrícula",
-    "list": "Vista en Lista"
-  },
-  "tenant": {
-    "assign": "Asignar Inquilino",
-    "remove": "Eliminar Inquilino",
-    "none": "Sin inquilino asignado",
-    "current": "Inquilino Actual",
-    "dates": {
-      "start": "Fecha de Inicio",
-      "end": "Fecha de Finalización",
-      "edit": "Editar Fechas",
-      "save": "Guardar Cambios"
-    }
-  },
-  "utilities": {
-    "analyze": "Analizar Historial de Facturas",
-    "stats": {
-      "title": "Estadísticas de Servicios",
-      "average": "Costo Mensual Promedio",
-      "total": "Total de Servicios",
-      "highest": "Factura Más Alta",
-      "lowest": "Factura Más Baja"
-    }
-  },
-  "rent": {
-    "period": "mes",
-    "amount": "Alquiler Mensual",
-    "perPeriod": "por mes"
-  },
-  "type": "Tipo de Propiedad",
-  "types": {
-    "apartment": "Apartamento",
-    "house": "Casa",
-    "condo": "Condominio",
-    "commercial": "Comercial"
-  },
-  "toast": {
-    "success": {
-      "added": "Propiedad añadida exitosamente",
-      "updated": "Propiedad actualizada exitosamente",
-      "deleted": "Propiedad eliminada exitosamente",
-      "tenantAssigned": "Inquilino asignado exitosamente",
-      "tenantRemoved": "Inquilino eliminado exitosamente",
-      "datesUpdated": "Fechas de arrendamiento actualizadas exitosamente"
-    },
-    "error": {
-      "add": "Error al añadir propiedad",
-      "update": "Error al actualizar propiedad",
-      "delete": "Error al eliminar propiedad",
-      "assignTenant": "Error al asignar inquilino",
-      "removeTenant": "Error al eliminar inquilino",
-      "updateDates": "Error al actualizar fechas de arrendamiento"
-    }
-  }
+  "noProperties": "No se encontraron propiedades",
+  "loading": "Cargando propiedades..."
 }
