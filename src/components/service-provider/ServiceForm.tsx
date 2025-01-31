@@ -6,13 +6,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Database } from "@/integrations/supabase/types";
+
+type ServiceCategory = Database["public"]["Enums"]["service_category"];
 
 interface ServiceFormProps {
   onSuccess: () => void;
   service?: {
     id: string;
     name: string;
-    category: string;
+    category: ServiceCategory;
     description: string | null;
     base_price: number | null;
     price_unit: string | null;
@@ -22,7 +25,7 @@ interface ServiceFormProps {
 export function ServiceForm({ onSuccess, service }: ServiceFormProps) {
   const [formData, setFormData] = useState({
     name: service?.name || "",
-    category: service?.category || "general_maintenance",
+    category: service?.category || "general_maintenance" as ServiceCategory,
     description: service?.description || "",
     base_price: service?.base_price?.toString() || "",
     price_unit: service?.price_unit || "per hour",
@@ -42,6 +45,7 @@ export function ServiceForm({ onSuccess, service }: ServiceFormProps) {
         ...formData,
         base_price: formData.base_price ? parseFloat(formData.base_price) : null,
         provider_id: user.id,
+        category: formData.category as ServiceCategory
       };
 
       const { error } = service
@@ -88,7 +92,7 @@ export function ServiceForm({ onSuccess, service }: ServiceFormProps) {
         <Label htmlFor="category">Category</Label>
         <Select
           value={formData.category}
-          onValueChange={(value) => setFormData({ ...formData, category: value })}
+          onValueChange={(value: ServiceCategory) => setFormData({ ...formData, category: value })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select category" />
