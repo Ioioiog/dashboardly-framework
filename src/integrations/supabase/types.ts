@@ -307,6 +307,7 @@ export type Database = {
           property_id: string
           read_by_landlord: boolean | null
           read_by_tenant: boolean | null
+          service_provider_fee: number | null
           service_provider_notes: string | null
           status: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id: string
@@ -325,6 +326,7 @@ export type Database = {
           property_id: string
           read_by_landlord?: boolean | null
           read_by_tenant?: boolean | null
+          service_provider_fee?: number | null
           service_provider_notes?: string | null
           status?: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id: string
@@ -343,6 +345,7 @@ export type Database = {
           property_id?: string
           read_by_landlord?: boolean | null
           read_by_tenant?: boolean | null
+          service_provider_fee?: number | null
           service_provider_notes?: string | null
           status?: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id?: string
