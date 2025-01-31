@@ -90,6 +90,9 @@ export default function Properties() {
                     {t("properties.title.landlord")}
                   </h1>
                 </div>
+                <p className="mt-4 text-gray-600">
+                  {t("properties.description.landlord")}
+                </p>
               </header>
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <DashboardProperties userRole="landlord" />
@@ -143,7 +146,7 @@ export default function Properties() {
                 <CardContent className="p-6">
                   <div className="text-center">
                     <p className="text-lg text-gray-600">
-                      {t("properties.noActiveLeases")}
+                      {t("properties.empty.tenant")}
                     </p>
                   </div>
                 </CardContent>
