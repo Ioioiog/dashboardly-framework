@@ -9,6 +9,7 @@ import { DashboardHeader } from "@/components/dashboard/sections/DashboardHeader
 import { RevenueSection } from "@/components/dashboard/sections/RevenueSection";
 import { UpcomingIncomeSection } from "@/components/dashboard/sections/UpcomingIncomeSection";
 import ServiceProviderDashboard from "./ServiceProviderDashboard";
+import { TenantDashboard } from "@/components/tenants/TenantDashboard";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ const Index = () => {
   const [userId, setUserId] = React.useState<string | null>(null);
   const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | "service_provider" | null>(null);
   const [userName, setUserName] = React.useState<string>("");
+  const [tenantInfo, setTenantInfo] = React.useState<any>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -80,6 +82,20 @@ const Index = () => {
           .join(" ");
         setUserName(fullName || "there");
 
+        // If user is a tenant, fetch their tenancy information
+        if (profile.role === 'tenant') {
+          const { data: tenancy, error: tenancyError } = await supabase.rpc(
+            'get_latest_tenancy',
+            { tenant_id: currentUserId }
+          );
+
+          if (tenancyError) {
+            console.error("Error fetching tenancy:", tenancyError);
+          } else if (tenancy && tenancy.length > 0) {
+            setTenantInfo(tenancy[0]);
+          }
+        }
+
       } catch (error: any) {
         console.error("Error in checkUser:", error);
         if (error.status === 401 || error.code === 'PGRST301') {
@@ -122,12 +138,17 @@ const Index = () => {
       case "service_provider":
         return <ServiceProviderDashboard />;
       case "tenant":
-        return (
+        return tenantInfo ? (
           <div className="p-4 space-y-4">
             <DashboardHeader userName={userName} />
+            <TenantDashboard tenantInfo={tenantInfo} />
             <section className="bg-white rounded-lg shadow-sm p-4">
               <DashboardMetrics userId={userId} userRole={userRole} />
             </section>
+          </div>
+        ) : (
+          <div className="p-4">
+            <p>Loading tenant information...</p>
           </div>
         );
       case "landlord":

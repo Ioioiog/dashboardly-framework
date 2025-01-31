@@ -4,7 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, Calendar, DollarSign } from "lucide-react";
 
 interface TenantDashboardProps {
-  tenantInfo: any;
+  tenantInfo: {
+    property: {
+      name: string;
+      address: string;
+      monthly_rent: number;
+      type: string;
+    };
+    start_date: string;
+    end_date?: string;
+  };
 }
 
 export const TenantDashboard = ({ tenantInfo }: TenantDashboardProps) => {
@@ -12,7 +21,7 @@ export const TenantDashboard = ({ tenantInfo }: TenantDashboardProps) => {
 
   return (
     <div className="grid gap-6 md:grid-cols-3">
-      <Card>
+      <Card className="bg-white shadow-md hover:shadow-lg transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
             {t('tenants.dashboard.property')}
@@ -27,7 +36,7 @@ export const TenantDashboard = ({ tenantInfo }: TenantDashboardProps) => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-white shadow-md hover:shadow-lg transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
             {t('tenants.dashboard.leasePeriod')}
@@ -46,7 +55,7 @@ export const TenantDashboard = ({ tenantInfo }: TenantDashboardProps) => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-white shadow-md hover:shadow-lg transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
             {t('tenants.dashboard.monthlyRent')}
