@@ -46,7 +46,7 @@ export default function Properties() {
       
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error("No authenticated user found");
+        throw new Error(t("common.error.noUser"));
       }
 
       const propertyData = {
@@ -88,7 +88,7 @@ export default function Properties() {
         toast({
           variant: "destructive",
           title: t("common.error"),
-          description: "Invalid property data",
+          description: t("properties.error.invalidData"),
         });
         return false;
       }
@@ -118,7 +118,7 @@ export default function Properties() {
 
       toast({
         title: t("properties.toast.success.updated"),
-        description: t("properties.toast.success.updated"),
+        description: t("properties.toast.success.propertyUpdated"),
       });
       
       setShowDialog(false);
@@ -146,7 +146,7 @@ export default function Properties() {
 
       toast({
         title: t("properties.toast.success.deleted"),
-        description: t("properties.toast.success.deleted"),
+        description: t("properties.toast.success.propertyDeleted"),
       });
       
       return true;
