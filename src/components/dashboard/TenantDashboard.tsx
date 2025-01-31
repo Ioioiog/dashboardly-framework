@@ -11,17 +11,26 @@ interface TenantDashboardProps {
 export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboardProps) {
   if (!tenantInfo) {
     return (
-      <div className="p-4">
-        <p>Loading tenant information...</p>
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <p className="text-muted-foreground">Loading tenant information...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <DashboardHeader userName={userName} />
-      <TenantInfo tenantInfo={tenantInfo} />
-      <section className="bg-white rounded-lg shadow-sm p-4">
+    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      {/* Header Section */}
+      <section className="bg-white rounded-xl shadow-sm p-6 transition-all duration-200 hover:shadow-md">
+        <DashboardHeader userName={userName} />
+      </section>
+
+      {/* Tenant Info Section */}
+      <section className="bg-white rounded-xl shadow-sm p-6">
+        <TenantInfo tenantInfo={tenantInfo} />
+      </section>
+
+      {/* Metrics Section */}
+      <section className="bg-white rounded-xl shadow-sm p-6">
         <DashboardMetrics userId={userId} userRole="tenant" />
       </section>
     </div>
