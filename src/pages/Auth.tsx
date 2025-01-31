@@ -63,12 +63,7 @@ const AuthPage = () => {
     e.preventDefault();
     const { error } = await supabase.auth.signInWithPassword({
       email: userEmail,
-      password,
-      options: {
-        metadata: {
-          role: selectedRole,
-        },
-      }
+      password
     });
 
     if (error) {
