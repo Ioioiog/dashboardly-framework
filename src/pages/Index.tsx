@@ -41,12 +41,12 @@ const Index = () => {
         console.log("Current user ID:", currentUserId);
         setUserId(currentUserId);
 
-        // Fetch profile with explicit filter for current user
+        // Fetch profile with role
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role, first_name, last_name')
           .eq('id', currentUserId)
-          .maybeSingle();
+          .single();
 
         if (profileError) {
           console.error("Profile fetch error:", profileError);
@@ -74,14 +74,20 @@ const Index = () => {
         }
 
         console.log("Profile loaded successfully:", profile);
-        console.log("User role from profile:", profile.role);
         
         // Validate and set user role
-        const validRole = profile.role === "landlord" || profile.role === "tenant" || profile.role === "service_provider"
-          ? profile.role
-          : null;
-          
-        setUserRole(validRole);
+        if (profile.role === "landlord" || profile.role === "tenant" || profile.role === "service_provider") {
+          console.log("Setting user role to:", profile.role);
+          setUserRole(profile.role);
+        } else {
+          console.error("Invalid role found:", profile.role);
+          toast({
+            title: "Error",
+            description: "Invalid user role. Please contact support.",
+            variant: "destructive",
+          });
+          return;
+        }
         
         // Set user name from profile
         const fullName = [profile.first_name, profile.last_name]
