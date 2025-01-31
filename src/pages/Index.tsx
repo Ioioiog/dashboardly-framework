@@ -73,11 +73,7 @@ const Index = () => {
         console.log("Profile loaded successfully:", profile);
         
         // Validate and set user role
-        const validRole = profile.role === "landlord" || profile.role === "tenant" || profile.role === "service_provider";
-        if (validRole) {
-          console.log("Setting user role:", profile.role);
-          setUserRole(profile.role as "landlord" | "tenant" | "service_provider");
-        } else {
+        if (profile.role !== "landlord" && profile.role !== "tenant" && profile.role !== "service_provider") {
           console.error("Invalid role found:", profile.role);
           toast({
             title: "Error",
@@ -86,6 +82,8 @@ const Index = () => {
           });
           return;
         }
+
+        setUserRole(profile.role);
         
         // Set user name from profile
         const fullName = [profile.first_name, profile.last_name]
@@ -156,15 +154,21 @@ const Index = () => {
     console.log("Rendering dashboard for role:", userRole);
 
     switch (userRole) {
+      case "service_provider":
+        return <ServiceProviderDashboard userId={userId} userName={userName} />;
       case "tenant":
         return <TenantDashboard userId={userId} userName={userName} tenantInfo={tenantInfo} />;
       case "landlord":
         return <LandlordDashboard userId={userId} userName={userName} />;
-      case "service_provider":
-        return <ServiceProviderDashboard userId={userId} />;
       default:
         console.error("Invalid user role:", userRole);
-        return null;
+        return (
+          <div className="p-4">
+            <h1 className="text-xl font-semibold text-red-600">
+              Invalid user role. Please contact support.
+            </h1>
+          </div>
+        );
     }
   };
 
