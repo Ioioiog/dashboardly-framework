@@ -1,32 +1,63 @@
 {
-  "maintenance": {
-    "title": "Maintenance Requests",
-    "description": "Submit and track maintenance requests for your properties",
-    "newRequest": "New Request",
-    "activeRequests": "Active Requests",
-    "completedRequests": "Completed Requests",
-    "noActiveRequests": "No Active Requests",
-    "noActiveRequestsMessage": "You don't have any active maintenance requests at the moment.",
-    "noCompletedRequests": "No Completed Requests",
-    "noCompletedRequestsMessage": "You don't have any completed maintenance requests yet.",
-    "filters": {
-      "status": "Status",
-      "priority": "Priority",
+  "title": "Dashboard",
+  "welcome": "Welcome",
+  "overview": "Here's an overview of your activities",
+  "metrics": {
+    "loading": "Loading...",
+    "totalProperties": "Total Properties",
+    "totalPropertiesDesc": "Total properties managed",
+    "monthlyRevenue": "Monthly Revenue",
+    "monthlyRevenueDesc": "Current month's revenue",
+    "activeTenants": "Active Tenants",
+    "activeTenantsDesc": "Currently active tenants",
+    "pendingMaintenance": "Pending Maintenance",
+    "pendingMaintenanceDesc": "Pending maintenance requests",
+    "paymentStatus": "Payment Status",
+    "paymentStatusDesc": "Click to view monthly payments",
+    "rentedPropertiesDesc": "Your rented properties",
+    "openMaintenanceDesc": "Open maintenance requests",
+    "activeJobs": "Active Jobs",
+    "activeJobsDesc": "Ongoing maintenance jobs",
+    "completedJobs": "Completed Jobs",
+    "completedJobsDesc": "Jobs completed this month",
+    "monthlyEarnings": "Monthly Earnings",
+    "monthlyEarningsDesc": "Earnings from completed jobs this month",
+    "noPayments": "No payments"
+  },
+  "revenue": {
+    "title": "Revenue Overview",
+    "history": "Revenue History",
+    "predictions": "Revenue Predictions",
+    "noData": "No revenue data available",
+    "noUpcomingPayments": "No upcoming payments",
+    "upcomingPayments": "Upcoming Payments",
+    "monthlyAverage": "Monthly Average",
+    "totalRevenue": "Total Revenue",
+    "performance": "Performance",
+    "vs": "vs previous month",
+    "details": {
+      "title": "Revenue Details",
       "property": "Property",
-      "allStatuses": "All Statuses",
-      "allPriorities": "All Priorities",
-      "allProperties": "All Properties"
-    },
-    "status": {
-      "pending": "Pending",
-      "in_progress": "In Progress",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
-    },
-    "priority": {
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High"
+      "amount": "Amount",
+      "dueDate": "Due Date",
+      "status": "Status",
+      "noDetails": "No revenue details available for this month"
     }
-  }
+  },
+  "sections": {
+    "trackMoney": "Track your money",
+    "maintenance": "Maintenance Overview",
+    "properties": "Properties Overview",
+    "tenants": "Tenants Overview"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "maintenance": "Report Maintenance",
+    "maintenanceDesc": "Submit new maintenance request",
+    "documents": "View Documents",
+    "documentsDesc": "Access property documents",
+    "viewMore": "View More"
+  },
+  "propertyInfo": "Property Information",
+  "ongoingLease": "Ongoing Lease"
 }
