@@ -73,5 +73,30 @@
   },
   "rent": {
     "period": "lună"
+  },
+  "actions": {
+    "reportIssue": "Raportează Problemă",
+    "viewDocuments": "Vezi Documente",
+    "analyzeHistory": "Analizează Istoric",
+    "edit": "Editează",
+    "delete": "Șterge"
+  },
+  "toast": {
+    "success": {
+      "added": "Proprietate adăugată cu succes",
+      "updated": "Proprietate actualizată cu succes",
+      "deleted": "Proprietate ștearsă cu succes",
+      "tenantAssigned": "Chiriaș atribuit cu succes",
+      "tenantRemoved": "Chiriaș eliminat cu succes",
+      "datesUpdated": "Datele contractului actualizate cu succes"
+    },
+    "error": {
+      "add": "Eroare la adăugarea proprietății",
+      "update": "Eroare la actualizarea proprietății",
+      "delete": "Eroare la ștergerea proprietății",
+      "assignTenant": "Eroare la atribuirea chiriașului",
+      "removeTenant": "Eroare la eliminarea chiriașului",
+      "updateDates": "Eroare la actualizarea datelor contractului"
+    }
   }
 }

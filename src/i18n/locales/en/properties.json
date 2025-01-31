@@ -74,6 +74,13 @@
   "rent": {
     "period": "month"
   },
+  "actions": {
+    "reportIssue": "Report Issue",
+    "viewDocuments": "View Documents",
+    "analyzeHistory": "Analyze Invoice History",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
   "toast": {
     "success": {
       "added": "Property added successfully",

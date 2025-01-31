@@ -73,5 +73,30 @@
   },
   "rent": {
     "period": "mois"
+  },
+  "actions": {
+    "reportIssue": "Signaler un Problème",
+    "viewDocuments": "Voir les Documents",
+    "analyzeHistory": "Analyser l'Historique",
+    "edit": "Modifier",
+    "delete": "Supprimer"
+  },
+  "toast": {
+    "success": {
+      "added": "Propriété ajoutée avec succès",
+      "updated": "Propriété mise à jour avec succès",
+      "deleted": "Propriété supprimée avec succès",
+      "tenantAssigned": "Locataire assigné avec succès",
+      "tenantRemoved": "Locataire retiré avec succès",
+      "datesUpdated": "Dates de location mises à jour avec succès"
+    },
+    "error": {
+      "add": "Échec de l'ajout de la propriété",
+      "update": "Échec de la mise à jour de la propriété",
+      "delete": "Échec de la suppression de la propriété",
+      "assignTenant": "Échec de l'assignation du locataire",
+      "removeTenant": "Échec du retrait du locataire",
+      "updateDates": "Échec de la mise à jour des dates de location"
+    }
   }
 }

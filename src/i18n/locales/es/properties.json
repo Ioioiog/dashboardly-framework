@@ -73,5 +73,30 @@
   },
   "rent": {
     "period": "mes"
+  },
+  "actions": {
+    "reportIssue": "Reportar Problema",
+    "viewDocuments": "Ver Documentos",
+    "analyzeHistory": "Analizar Historial",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "toast": {
+    "success": {
+      "added": "Propiedad agregada exitosamente",
+      "updated": "Propiedad actualizada exitosamente",
+      "deleted": "Propiedad eliminada exitosamente",
+      "tenantAssigned": "Inquilino asignado exitosamente",
+      "tenantRemoved": "Inquilino eliminado exitosamente",
+      "datesUpdated": "Fechas de arrendamiento actualizadas exitosamente"
+    },
+    "error": {
+      "add": "Error al agregar propiedad",
+      "update": "Error al actualizar propiedad",
+      "delete": "Error al eliminar propiedad",
+      "assignTenant": "Error al asignar inquilino",
+      "removeTenant": "Error al eliminar inquilino",
+      "updateDates": "Error al actualizar fechas de arrendamiento"
+    }
   }
 }
