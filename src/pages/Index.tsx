@@ -95,6 +95,7 @@ const Index = () => {
 
         // If user is a tenant, fetch their tenancy information
         if (profile.role === 'tenant') {
+          console.log("Fetching tenant information...");
           const { data: tenancy, error: tenancyError } = await supabase.rpc(
             'get_latest_tenancy',
             { tenant_id: currentUserId }
@@ -103,6 +104,7 @@ const Index = () => {
           if (tenancyError) {
             console.error("Error fetching tenancy:", tenancyError);
           } else if (tenancy && tenancy.length > 0) {
+            console.log("Tenant information loaded:", tenancy[0]);
             setTenantInfo(tenancy[0]);
           }
         }
@@ -149,10 +151,10 @@ const Index = () => {
     console.log("Rendering dashboard for role:", userRole);
 
     switch (userRole) {
-      case "landlord":
-        return <LandlordDashboard userId={userId} userName={userName} />;
       case "tenant":
         return <TenantDashboard userId={userId} userName={userName} tenantInfo={tenantInfo} />;
+      case "landlord":
+        return <LandlordDashboard userId={userId} userName={userName} />;
       case "service_provider":
         return <ServiceProviderDashboard userId={userId} />;
       default:
