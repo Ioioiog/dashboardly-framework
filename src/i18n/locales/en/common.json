@@ -48,5 +48,48 @@
     "paid": "Paid",
     "unpaid": "Unpaid",
     "overdue": "Overdue"
+  },
+  "maintenance": {
+    "title": "Maintenance Requests",
+    "description": "Manage and track maintenance requests for your properties",
+    "newRequest": "New Request",
+    "activeRequests": "Active Requests",
+    "completedRequests": "Completed Requests",
+    "noActiveRequests": "No Active Requests",
+    "noActiveRequestsMessage": "There are no active maintenance requests at this time.",
+    "noCompletedRequests": "No Completed Requests",
+    "noCompletedRequestsMessage": "There are no completed maintenance requests to display.",
+    "ticket": "Ticket",
+    "property": "Property",
+    "created": "Created",
+    "filters": {
+      "status": "Status",
+      "allStatuses": "All Statuses",
+      "priority": "Priority",
+      "allPriorities": "All Priorities",
+      "property": "Property",
+      "allProperties": "All Properties"
+    },
+    "status": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "form": {
+      "title": "Title",
+      "description": "Description",
+      "property": "Property",
+      "selectProperty": "Select a property",
+      "priority": "Priority",
+      "selectPriority": "Select priority",
+      "status": "Status",
+      "selectStatus": "Select status"
+    }
   }
 }
