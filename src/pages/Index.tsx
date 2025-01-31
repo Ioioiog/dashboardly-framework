@@ -25,7 +25,6 @@ const Index = () => {
         console.log("Initializing authentication state...");
         setIsLoading(true);
         
-        // Get current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -44,7 +43,7 @@ const Index = () => {
         console.log("Current user ID:", currentUserId);
         setUserId(currentUserId);
 
-        // Fetch profile with role - using explicit select to ensure we get the role
+        // Fetch profile with role
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role, first_name, last_name')

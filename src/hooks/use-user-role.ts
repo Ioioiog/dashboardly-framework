@@ -70,8 +70,17 @@ export function useUserRole() {
 
     getUserRole();
 
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
+      if (event === 'SIGNED_IN') {
+        await getUserRole();
+      } else if (event === 'SIGNED_OUT') {
+        setUserRole(null);
+      }
+    });
+
     return () => {
       mounted = false;
+      subscription.unsubscribe();
     };
   }, []);
 

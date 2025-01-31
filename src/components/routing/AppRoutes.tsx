@@ -34,12 +34,12 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
       <Route path="/update-password" element={<UpdatePassword />} />
       <Route path="/tenant-registration" element={<TenantRegistration />} />
       
-      {/* Service Provider Routes */}
+      {/* Protected Routes */}
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <ServiceProviderDashboard />
+            <Index />
           </ProtectedRoute>
         }
       />
