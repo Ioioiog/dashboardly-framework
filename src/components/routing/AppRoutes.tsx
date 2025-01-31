@@ -11,6 +11,7 @@ import Invoices from "@/pages/Invoices";
 import Maintenance from "@/pages/Maintenance";
 import MeterReadings from "@/pages/MeterReadings";
 import ServiceProviderProfile from "@/pages/ServiceProviderProfile";
+import ServiceAreas from "@/pages/ServiceAreas";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import TenantRegistration from "@/pages/TenantRegistration";
 import { ResetPassword } from "@/components/auth/ResetPassword";
@@ -122,6 +123,14 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <ServiceProviderProfile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service-areas"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ServiceAreas />
           </ProtectedRoute>
         }
       />
