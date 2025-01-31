@@ -7,12 +7,54 @@ interface Metrics {
   activeTenants?: number;
   pendingMaintenance: number;
   paymentStatus?: string;
+  activeJobs?: number;
+  completedJobs?: number;
+  monthlyEarnings?: number;
   revenueDetails?: Array<{
     property_name: string;
     amount: number;
     due_date: string;
     status: string;
   }>;
+}
+
+async function fetchServiceProviderMetrics(userId: string): Promise<Metrics> {
+  console.log("Fetching service provider metrics for user:", userId);
+  
+  const currentDate = new Date();
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+  const [activeJobs, completedJobs, earnings] = await Promise.all([
+    supabase
+      .from("maintenance_requests")
+      .select("id", { count: "exact" })
+      .eq("assigned_to", userId)
+      .eq("status", "in_progress"),
+    supabase
+      .from("maintenance_requests")
+      .select("id", { count: "exact" })
+      .eq("assigned_to", userId)
+      .eq("status", "completed")
+      .gte("updated_at", firstDayOfMonth.toISOString())
+      .lte("updated_at", lastDayOfMonth.toISOString()),
+    supabase
+      .from("maintenance_requests")
+      .select("service_provider_fee")
+      .eq("assigned_to", userId)
+      .eq("status", "completed")
+      .gte("updated_at", firstDayOfMonth.toISOString())
+      .lte("updated_at", lastDayOfMonth.toISOString())
+  ]);
+
+  const monthlyEarnings = earnings.data?.reduce((sum, job) => sum + (job.service_provider_fee || 0), 0) || 0;
+
+  return {
+    activeJobs: activeJobs.count || 0,
+    completedJobs: completedJobs.count || 0,
+    monthlyEarnings: monthlyEarnings,
+    pendingMaintenance: 0 // Required by type but not used for service providers
+  };
 }
 
 async function fetchLandlordMetrics(userId: string): Promise<Metrics> {
@@ -173,12 +215,18 @@ async function fetchTenantMetrics(userId: string): Promise<Metrics> {
   };
 }
 
-export function useMetrics(userId: string, userRole: "landlord" | "tenant") {
+export function useMetrics(userId: string, userRole: "landlord" | "tenant" | "service_provider") {
   return useQuery({
     queryKey: ["dashboard-metrics", userId, userRole],
-    queryFn: () =>
-      userRole === "landlord"
-        ? fetchLandlordMetrics(userId)
-        : fetchTenantMetrics(userId),
+    queryFn: () => {
+      switch (userRole) {
+        case "landlord":
+          return fetchLandlordMetrics(userId);
+        case "tenant":
+          return fetchTenantMetrics(userId);
+        case "service_provider":
+          return fetchServiceProviderMetrics(userId);
+      }
+    },
   });
 }

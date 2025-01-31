@@ -15,6 +15,12 @@
     "paymentStatus": "Payment Status",
     "paymentStatusDesc": "Click to view monthly payments",
     "rentedPropertiesDesc": "Your rented properties",
-    "openMaintenanceDesc": "Open maintenance requests"
+    "openMaintenanceDesc": "Open maintenance requests",
+    "activeJobs": "Active Jobs",
+    "activeJobsDesc": "Currently active maintenance jobs",
+    "completedJobs": "Completed Jobs",
+    "completedJobsDesc": "Jobs completed this month",
+    "monthlyEarnings": "Monthly Earnings",
+    "monthlyEarningsDesc": "Earnings from completed jobs this month"
   }
 }

@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { RevenueDetailsModal } from "./RevenueDetailsModal";
 import { useCurrency } from "@/hooks/useCurrency";
 
-export function DashboardMetrics({ userId, userRole }: { userId: string; userRole: "landlord" | "tenant" }) {
+export function DashboardMetrics({ userId, userRole }: { userId: string; userRole: "landlord" | "tenant" | "service_provider" }) {
   const { t } = useTranslation();
   const [showRevenueDetails, setShowRevenueDetails] = useState(false);
   const { formatAmount } = useCurrency();
@@ -34,6 +34,37 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
   const handleRevenueClick = () => {
     setShowRevenueDetails(true);
   };
+
+  if (userRole === "service_provider") {
+    return (
+      <div className="grid gap-6 md:grid-cols-3 animate-fade-in">
+        <MetricCard
+          title={t('dashboard.metrics.activeJobs')}
+          value={metrics.activeJobs || 0}
+          icon={Wrench}
+          route="/maintenance"
+          className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
+          description={t('dashboard.metrics.activeJobsDesc')}
+        />
+        <MetricCard
+          title={t('dashboard.metrics.completedJobs')}
+          value={metrics.completedJobs || 0}
+          icon={Home}
+          route="/maintenance"
+          className="bg-white shadow-md hover:shadow-lg transition-all duration-300"
+          description={t('dashboard.metrics.completedJobsDesc')}
+        />
+        <MetricCard
+          title={t('dashboard.metrics.monthlyEarnings')}
+          value={formatAmount(metrics.monthlyEarnings || 0)}
+          icon={Wallet}
+          onClick={handleRevenueClick}
+          className="bg-white shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+          description={t('dashboard.metrics.monthlyEarningsDesc')}
+        />
+      </div>
+    );
+  }
 
   if (userRole === "landlord") {
     return (

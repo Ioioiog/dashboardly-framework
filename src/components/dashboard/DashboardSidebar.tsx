@@ -12,6 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Clipboard,
+  UserCog,
+  Building2,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -43,18 +45,59 @@ export const DashboardSidebar = () => {
     return location.pathname.startsWith(href);
   };
 
-  const menuItems = [
+  const serviceProviderMenuItems = [
     {
       title: "Dashboard",
       icon: LayoutDashboard,
       href: "/dashboard",
-      roles: ["landlord", "tenant", "service_provider"],
+      roles: ["service_provider"],
+    },
+    {
+      title: "Maintenance Jobs",
+      icon: Wrench,
+      href: "/maintenance",
+      roles: ["service_provider"],
+      notificationType: "maintenance"
+    },
+    {
+      title: "Profile",
+      icon: UserCog,
+      href: "/service-provider-profile",
+      roles: ["service_provider"],
+    },
+    {
+      title: "Service Areas",
+      icon: Building2,
+      href: "/service-areas",
+      roles: ["service_provider"],
+    },
+    {
+      title: "Chat",
+      icon: MessageCircle,
+      href: "/chat",
+      roles: ["service_provider"],
+      notificationType: "messages"
+    },
+    {
+      title: "Settings",
+      icon: Settings,
+      href: "/settings",
+      roles: ["service_provider"],
+    },
+  ];
+
+  const standardMenuItems = [
+    {
+      title: "Dashboard",
+      icon: LayoutDashboard,
+      href: "/dashboard",
+      roles: ["landlord", "tenant"],
     },
     {
       title: "Properties",
       icon: Home,
       href: "/properties",
-      roles: ["landlord", "tenant", "service_provider"],
+      roles: ["landlord", "tenant"],
     },
     {
       title: "Tenants",
@@ -66,7 +109,7 @@ export const DashboardSidebar = () => {
       title: "Maintenance",
       icon: Wrench,
       href: "/maintenance",
-      roles: ["landlord", "tenant", "service_provider"],
+      roles: ["landlord", "tenant"],
       notificationType: "maintenance"
     },
     {
@@ -104,17 +147,18 @@ export const DashboardSidebar = () => {
       title: "Chat",
       icon: MessageCircle,
       href: "/chat",
-      roles: ["landlord", "tenant", "service_provider"],
+      roles: ["landlord", "tenant"],
       notificationType: "messages"
     },
     {
       title: "Settings",
       icon: Settings,
       href: "/settings",
-      roles: ["landlord", "tenant", "service_provider"],
+      roles: ["landlord", "tenant"],
     },
   ];
 
+  const menuItems = userRole === "service_provider" ? serviceProviderMenuItems : standardMenuItems;
   const filteredMenuItems = menuItems.filter(
     (item) => !userRole || item.roles.includes(userRole)
   );
