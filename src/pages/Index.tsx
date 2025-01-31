@@ -16,11 +16,13 @@ const Index = () => {
   const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | "service_provider" | null>(null);
   const [userName, setUserName] = React.useState<string>("");
   const [tenantInfo, setTenantInfo] = React.useState<any>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   useEffect(() => {
     const checkUser = async () => {
       try {
         console.log("Initializing authentication state...");
+        setIsLoading(true);
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -72,7 +74,6 @@ const Index = () => {
         }
 
         console.log("Profile loaded successfully:", profile);
-        console.log("Setting user role:", profile.role);
         
         // Validate and set user role
         if (profile.role !== "landlord" && profile.role !== "tenant" && profile.role !== "service_provider") {
@@ -85,6 +86,7 @@ const Index = () => {
           return;
         }
 
+        console.log("Setting user role:", profile.role);
         setUserRole(profile.role);
         
         // Set user name from profile
@@ -105,7 +107,7 @@ const Index = () => {
             console.error("Error fetching tenancy:", tenancyError);
             toast({
               title: "Error",
-              description: "Failed to load tenancy information. Please try refreshing the page.",
+              description: "Failed to load tenancy information.",
               variant: "destructive",
             });
           } else if (tenancy && tenancy.length > 0) {
@@ -125,6 +127,8 @@ const Index = () => {
           description: error.message || "An unexpected error occurred",
           variant: "destructive",
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -134,6 +138,8 @@ const Index = () => {
       async (event, session) => {
         console.log("Auth state changed:", event);
         if (event === 'SIGNED_OUT' || !session) {
+          setUserRole(null);
+          setUserId(null);
           navigate("/auth");
           return;
         }
@@ -145,6 +151,16 @@ const Index = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate, toast, t]);
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   // Render different dashboards based on user role
   const renderDashboard = () => {
@@ -159,7 +175,11 @@ const Index = () => {
       case "service_provider":
         return <ServiceProviderDashboard userId={userId} userName={userName} />;
       case "tenant":
-        return <TenantDashboard userId={userId} userName={userName} tenantInfo={tenantInfo} />;
+        return tenantInfo ? (
+          <TenantDashboard userId={userId} userName={userName} tenantInfo={tenantInfo} />
+        ) : (
+          <div className="p-4">Loading tenant information...</div>
+        );
       case "landlord":
         return <LandlordDashboard userId={userId} userName={userName} />;
       default:
