@@ -13,6 +13,9 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
   
   const { data: metrics, isLoading } = useMetrics(userId, userRole);
 
+  console.log("DashboardMetrics - userRole:", userRole);
+  console.log("DashboardMetrics - metrics:", metrics);
+
   if (isLoading) {
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-fade-in">
