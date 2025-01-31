@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Wrench, Users } from "lucide-react";
+import { Plus, Wrench } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import MaintenanceList from "@/components/maintenance/MaintenanceList";
@@ -11,9 +11,11 @@ import MaintenanceFilters from "@/components/maintenance/MaintenanceFilters";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { useUserRole } from "@/hooks/use-user-role";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { NoDataCard } from "@/components/dashboard/charts/NoDataCard";
 
 type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
-type MaintenanceSection = 'requests' | 'providers';
 
 interface Filters {
   status: MaintenanceStatus | "all";
@@ -25,9 +27,9 @@ export default function Maintenance() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { userRole } = useUserRole();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
-  const [activeSection, setActiveSection] = React.useState<MaintenanceSection>('requests');
   const [filters, setFilters] = React.useState<Filters>({
     status: "all",
     priority: "all",
@@ -101,24 +103,20 @@ export default function Maintenance() {
     setIsDialogOpen(false);
   };
 
-  const navigationItems = [
-    {
-      id: 'requests' as MaintenanceSection,
-      label: 'Maintenance Requests',
-      icon: Wrench,
-    },
-    {
-      id: 'providers' as MaintenanceSection,
-      label: 'Service Providers',
-      icon: Users,
-    },
-  ];
+  const activeRequests = maintenanceRequests?.filter(
+    (request) => request.status !== "completed"
+  ) || [];
+
+  const completedRequests = maintenanceRequests?.filter(
+    (request) => request.status === "completed"
+  ) || [];
 
   return (
     <div className="flex h-screen bg-dashboard-background">
       <DashboardSidebar />
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-8 space-y-8">
+          {/* Header Section */}
           <div className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm">
             <div className="space-y-4">
               <div className="flex items-center gap-4">
@@ -133,62 +131,82 @@ export default function Maintenance() {
                 {t("maintenance.description")}
               </p>
             </div>
-            {activeSection === 'requests' && (
-              <Button 
-                onClick={() => setIsDialogOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                {t("maintenance.newRequest")}
-              </Button>
-            )}
+            <Button 
+              onClick={() => setIsDialogOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              {t("maintenance.newRequest")}
+            </Button>
           </div>
 
-          <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto">
-            {navigationItems.map((item) => (
-              <Button
-                key={item.id}
-                variant={activeSection === item.id ? 'default' : 'ghost'}
-                className={cn(
-                  "flex-shrink-0 gap-2",
-                  activeSection === item.id && "bg-primary text-primary-foreground"
-                )}
-                onClick={() => setActiveSection(item.id)}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </Button>
-            ))}
+          {/* Filters Section */}
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
           </div>
 
-          {activeSection === 'requests' && (
-            <>
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
-              </div>
-
+          {/* Active Requests Section */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-semibold">
+              {t("maintenance.activeRequests")}
+            </h2>
+            {isLoading ? (
+              <Card className="p-8">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </Card>
+            ) : activeRequests.length > 0 ? (
               <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                 <MaintenanceList
-                  requests={maintenanceRequests || []}
-                  isLoading={isLoading}
+                  requests={activeRequests}
+                  isLoading={false}
                   onRequestClick={handleRequestClick}
                 />
               </div>
-
-              <MaintenanceDialog
-                open={isDialogOpen}
-                onOpenChange={handleDialogClose}
-                requestId={selectedRequestId}
+            ) : (
+              <NoDataCard 
+                title={t("maintenance.noActiveRequests")}
+                message={t("maintenance.noActiveRequestsMessage")}
               />
-            </>
-          )}
+            )}
+          </div>
 
-          {activeSection === 'providers' && (
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h2 className="text-lg font-semibold mb-4">Service Providers List</h2>
-              <p className="text-gray-500">Service providers management coming soon...</p>
-            </div>
-          )}
+          {/* Completed Requests Section */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-semibold">
+              {t("maintenance.completedRequests")}
+            </h2>
+            {isLoading ? (
+              <Card className="p-8">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </Card>
+            ) : completedRequests.length > 0 ? (
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <MaintenanceList
+                  requests={completedRequests}
+                  isLoading={false}
+                  onRequestClick={handleRequestClick}
+                />
+              </div>
+            ) : (
+              <NoDataCard 
+                title={t("maintenance.noCompletedRequests")}
+                message={t("maintenance.noCompletedRequestsMessage")}
+              />
+            )}
+          </div>
+
+          {/* Maintenance Request Dialog */}
+          <MaintenanceDialog
+            open={isDialogOpen}
+            onOpenChange={handleDialogClose}
+            requestId={selectedRequestId}
+          />
         </div>
       </div>
     </div>
