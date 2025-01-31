@@ -7,6 +7,10 @@
     "landlord": "Administra y monitorea tu cartera de propiedades",
     "tenant": "Ver tus propiedades alquiladas e información relacionada"
   },
+  "serviceProvider": {
+    "notAvailable": "Propiedades No Disponibles",
+    "description": "Como proveedor de servicios, no tienes acceso a la sección de propiedades. Por favor, utiliza la sección de gestión de servicios."
+  },
   "addProperty": "Agregar Propiedad",
   "editProperty": "Editar Propiedad",
   "deleteProperty": "Eliminar Propiedad",
@@ -23,6 +27,10 @@
     "landlord": "Aún no has agregado ninguna propiedad. Haz clic en el botón de arriba para agregar tu primera propiedad.",
     "tenant": "No tienes ninguna propiedad asignada todavía.",
     "tenant.contact": "Por favor, contacta a tu arrendador si crees que esto es un error."
+  },
+  "error": {
+    "invalidData": "Datos de propiedad inválidos",
+    "fetch": "Error al obtener las propiedades"
   },
   "types": {
     "apartment": "Apartamento",
@@ -84,8 +92,11 @@
   "toast": {
     "success": {
       "added": "Propiedad agregada exitosamente",
+      "propertyAdded": "La propiedad se ha añadido correctamente",
       "updated": "Propiedad actualizada exitosamente",
+      "propertyUpdated": "La propiedad se ha actualizado correctamente",
       "deleted": "Propiedad eliminada exitosamente",
+      "propertyDeleted": "La propiedad se ha eliminado correctamente",
       "tenantAssigned": "Inquilino asignado exitosamente",
       "tenantRemoved": "Inquilino eliminado exitosamente",
       "datesUpdated": "Fechas de arrendamiento actualizadas exitosamente"

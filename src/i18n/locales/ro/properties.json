@@ -7,6 +7,10 @@
     "landlord": "Gestionează și monitorizează portofoliul tău imobiliar",
     "tenant": "Vizualizează proprietățile închiriate și informațiile aferente"
   },
+  "serviceProvider": {
+    "notAvailable": "Proprietăți Indisponibile",
+    "description": "Ca furnizor de servicii, nu aveți acces la secțiunea de proprietăți. Vă rugăm să utilizați secțiunea de gestionare a serviciilor."
+  },
   "addProperty": "Adaugă Proprietate",
   "editProperty": "Editează Proprietatea",
   "deleteProperty": "Șterge Proprietatea",
@@ -23,6 +27,10 @@
     "landlord": "Nu ai adăugat încă nicio proprietate. Click pe butonul de mai sus pentru a adăuga prima ta proprietate.",
     "tenant": "Nu ai nicio proprietate atribuită încă.",
     "tenant.contact": "Te rugăm să contactezi proprietarul dacă crezi că este o eroare."
+  },
+  "error": {
+    "invalidData": "Date proprietate invalide",
+    "fetch": "Eroare la încărcarea proprietăților"
   },
   "types": {
     "apartment": "Apartament",
@@ -84,8 +92,11 @@
   "toast": {
     "success": {
       "added": "Proprietate adăugată cu succes",
+      "propertyAdded": "Proprietatea a fost adăugată cu succes",
       "updated": "Proprietate actualizată cu succes",
+      "propertyUpdated": "Proprietatea a fost actualizată cu succes",
       "deleted": "Proprietate ștearsă cu succes",
+      "propertyDeleted": "Proprietatea a fost ștearsă cu succes",
       "tenantAssigned": "Chiriaș atribuit cu succes",
       "tenantRemoved": "Chiriaș eliminat cu succes",
       "datesUpdated": "Datele contractului actualizate cu succes"

@@ -7,6 +7,10 @@
     "landlord": "Manage and monitor your property portfolio",
     "tenant": "View your rented properties and related information"
   },
+  "serviceProvider": {
+    "notAvailable": "Properties Not Available",
+    "description": "As a service provider, you don't have access to the properties section. Please use the service management section instead."
+  },
   "addProperty": "Add Property",
   "editProperty": "Edit Property",
   "deleteProperty": "Delete Property",
@@ -23,6 +27,10 @@
     "landlord": "You haven't added any properties yet. Click the button above to add your first property.",
     "tenant": "You don't have any properties assigned to you yet.",
     "tenant.contact": "Please contact your landlord if you believe this is an error."
+  },
+  "error": {
+    "invalidData": "Invalid property data",
+    "fetch": "Failed to fetch properties"
   },
   "types": {
     "apartment": "Apartment",
@@ -84,8 +92,11 @@
   "toast": {
     "success": {
       "added": "Property added successfully",
+      "propertyAdded": "The property has been added successfully",
       "updated": "Property updated successfully",
+      "propertyUpdated": "The property has been updated successfully",
       "deleted": "Property deleted successfully",
+      "propertyDeleted": "The property has been deleted successfully",
       "tenantAssigned": "Tenant assigned successfully",
       "tenantRemoved": "Tenant removed successfully",
       "datesUpdated": "Tenancy dates updated successfully"

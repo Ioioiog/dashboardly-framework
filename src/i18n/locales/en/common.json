@@ -25,6 +25,9 @@
   "search": "Search",
   "filter": "Filter",
   "sort": "Sort",
+  "error": {
+    "noUser": "No authenticated user found"
+  },
   "currency": {
     "usd": "$",
     "eur": "€",
