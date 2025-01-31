@@ -34,6 +34,7 @@ export const DashboardSidebar = () => {
   const { data: notifications, markAsRead } = useSidebarNotifications();
 
   console.log("Current notifications:", notifications);
+  console.log("Current user role:", userRole);
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -47,13 +48,13 @@ export const DashboardSidebar = () => {
       title: "Dashboard",
       icon: LayoutDashboard,
       href: "/dashboard",
-      roles: ["landlord", "tenant"],
+      roles: ["landlord", "tenant", "service_provider"],
     },
     {
       title: "Properties",
       icon: Home,
       href: "/properties",
-      roles: ["landlord", "tenant"],
+      roles: ["landlord", "tenant", "service_provider"],
     },
     {
       title: "Tenants",
@@ -65,7 +66,7 @@ export const DashboardSidebar = () => {
       title: "Maintenance",
       icon: Wrench,
       href: "/maintenance",
-      roles: ["landlord", "tenant"],
+      roles: ["landlord", "tenant", "service_provider"],
       notificationType: "maintenance"
     },
     {
@@ -103,14 +104,14 @@ export const DashboardSidebar = () => {
       title: "Chat",
       icon: MessageCircle,
       href: "/chat",
-      roles: ["landlord", "tenant"],
+      roles: ["landlord", "tenant", "service_provider"],
       notificationType: "messages"
     },
     {
       title: "Settings",
       icon: Settings,
       href: "/settings",
-      roles: ["landlord", "tenant"],
+      roles: ["landlord", "tenant", "service_provider"],
     },
   ];
 
