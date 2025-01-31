@@ -1,17 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Home, Wrench } from "lucide-react";
-import { RoleSpecificForm } from "@/components/auth/RoleSpecificForm";
-import { PasswordStrength } from "@/components/auth/PasswordStrength";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { RoleSelection } from "@/components/auth/RoleSelection";
+import { AuthForms } from "@/components/auth/AuthForms";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -119,11 +112,15 @@ const AuthPage = () => {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    if (view === "login") return handleLogin(e);
+    if (view === "register") return handleRegister(e);
+    return handleForgotPassword(e);
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Background with modern gradient and animation */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 animate-gradient">
-        {/* Shiny effect elements */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
           <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
@@ -132,7 +129,7 @@ const AuthPage = () => {
       </div>
 
       <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm relative z-10 transition-all duration-300 hover:shadow-blue-500/20 border-0 shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:bg-slate-900/90 dark:text-white">
-        <CardHeader className="space-y-1 text-center pb-8">
+        <CardContent className="space-y-6 px-8">
           <div className="flex items-center justify-center mb-6">
             <img 
               src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
@@ -140,118 +137,18 @@ const AuthPage = () => {
               className="h-12 drop-shadow-md"
             />
           </div>
-          
-          {view === "roles" && (
-            <>
-              <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-800">Choose Your Role</CardTitle>
-              <CardDescription className="text-gray-600 dark:text-gray-400">Select your role to continue</CardDescription>
-            </>
-          )}
-        </CardHeader>
-        
-        <CardContent className="space-y-6 px-8">
-          {view === "roles" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button
-                onClick={() => handleRoleSelect("tenant")}
-                className="flex flex-col items-center p-6 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 bg-white/50 dark:bg-slate-800/50"
-              >
-                <Home className="w-8 h-8 mb-3 text-blue-500" />
-                <span className="font-medium">Tenant</span>
-              </button>
-              
-              <button
-                onClick={() => handleRoleSelect("landlord")}
-                className="flex flex-col items-center p-6 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 bg-white/50 dark:bg-slate-800/50"
-              >
-                <Building2 className="w-8 h-8 mb-3 text-blue-500" />
-                <span className="font-medium">Landlord</span>
-              </button>
-              
-              <button
-                onClick={() => handleRoleSelect("service_provider")}
-                className="flex flex-col items-center p-6 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 bg-white/50 dark:bg-slate-800/50"
-              >
-                <Wrench className="w-8 h-8 mb-3 text-blue-500" />
-                <span className="font-medium">Service Provider</span>
-              </button>
-            </div>
-          )}
 
-          {view !== "roles" && (
-            <div className="space-y-6">
-              <div className="text-center mb-8">
-                <CardTitle className="text-2xl mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-800">
-                  {view === "login" ? "Login" : view === "register" ? "Create Account" : "Reset Password"}
-                </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">
-                  {view === "forgot-password" && "Enter your email address and we'll send you instructions to reset your password."}
-                </CardDescription>
-              </div>
-
-              <form onSubmit={view === "login" ? handleLogin : view === "register" ? handleRegister : handleForgotPassword} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={userEmail}
-                    onChange={(e) => setUserEmail(e.target.value)}
-                    required
-                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800/50"
-                  />
-                </div>
-
-                {view !== "forgot-password" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder={view === "login" ? "Enter your password" : "Create password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-slate-800/50"
-                    />
-                    {view === "register" && <PasswordStrength password={password} />}
-                  </div>
-                )}
-
-                <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 rounded-lg transition-all duration-300 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40">
-                  {view === "login" ? "Login" : view === "register" ? "Register" : "Reset Password"}
-                </Button>
-              </form>
-
-              <div className="flex flex-col space-y-2 text-center text-sm mt-6">
-                {view === "login" && (
-                  <>
-                    <button onClick={() => setView("forgot-password")} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-                      Forgot Password?
-                    </button>
-                    <button onClick={() => setView("register")} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-                      Don't have an account? Register
-                    </button>
-                  </>
-                )}
-                {(view === "register" || view === "forgot-password") && (
-                  <button onClick={() => setView("login")} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-                    Back to Login
-                  </button>
-                )}
-                <button onClick={() => setView("roles")} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors">
-                  ← Back to Role Selection
-                </button>
-              </div>
-            </div>
-          )}
-
-          {showRoleForm && (
-            <RoleSpecificForm
-              role={selectedRole}
-              email={userEmail}
-              onComplete={() => navigate("/dashboard")}
+          {view === "roles" ? (
+            <RoleSelection onRoleSelect={handleRoleSelect} />
+          ) : (
+            <AuthForms
+              view={view}
+              userEmail={userEmail}
+              password={password}
+              onEmailChange={(e) => setUserEmail(e.target.value)}
+              onPasswordChange={(e) => setPassword(e.target.value)}
+              onSubmit={handleSubmit}
+              onViewChange={setView}
             />
           )}
         </CardContent>
