@@ -10,6 +10,7 @@ import Chat from "@/pages/Chat";
 import Invoices from "@/pages/Invoices";
 import Maintenance from "@/pages/Maintenance";
 import MeterReadings from "@/pages/MeterReadings";
+import ServiceProviderProfile from "@/pages/ServiceProviderProfile";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import TenantRegistration from "@/pages/TenantRegistration";
 import { ResetPassword } from "@/components/auth/ResetPassword";
@@ -27,10 +28,7 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/update-password" element={<UpdatePassword />} />
-      <Route
-        path="/tenant-registration"
-        element={<TenantRegistration />}
-      />
+      <Route path="/tenant-registration" element={<TenantRegistration />} />
       <Route
         path="/dashboard"
         element={
@@ -116,6 +114,14 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <Maintenance />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service-provider-profile"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ServiceProviderProfile />
           </ProtectedRoute>
         }
       />
