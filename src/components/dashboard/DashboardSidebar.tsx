@@ -14,6 +14,7 @@ import {
   Clipboard,
   UserCog,
   Building2,
+  Wallet,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -51,12 +52,6 @@ export const DashboardSidebar = () => {
       icon: LayoutDashboard,
       href: "/dashboard",
       roles: ["service_provider"],
-    },
-    {
-      title: "Maintenance Jobs",
-      icon: Wrench,
-      href: "/maintenance",
-      roles: ["service_provider"],
       notificationType: "maintenance"
     },
     {
@@ -72,7 +67,27 @@ export const DashboardSidebar = () => {
       roles: ["service_provider"],
     },
     {
-      title: "Chat",
+      title: "Services",
+      icon: Wrench,
+      href: "/services",
+      roles: ["service_provider"],
+    },
+    {
+      title: "Job Requests",
+      icon: Clipboard,
+      href: "/maintenance",
+      roles: ["service_provider"],
+      notificationType: "maintenance"
+    },
+    {
+      title: "Earnings",
+      icon: Wallet,
+      href: "/earnings",
+      roles: ["service_provider"],
+      notificationType: "payments"
+    },
+    {
+      title: "Messages",
       icon: MessageCircle,
       href: "/chat",
       roles: ["service_provider"],
