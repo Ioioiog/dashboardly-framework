@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { LandlordDashboard } from "@/components/dashboard/LandlordDashboard";
 import { TenantDashboard } from "@/components/dashboard/TenantDashboard";
 import { ServiceProviderDashboard } from "@/components/dashboard/ServiceProviderDashboard";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -169,13 +169,10 @@ const Index = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-dashboard-background">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-y-auto">
-        {renderDashboard()}
-      </main>
-    </div>
+    <DashboardLayout>
+      {renderDashboard()}
+    </DashboardLayout>
   );
-}
+};
 
 export default Index;
