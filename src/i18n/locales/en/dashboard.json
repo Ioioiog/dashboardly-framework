@@ -22,5 +22,17 @@
     "completedJobsDesc": "Jobs completed this month",
     "monthlyEarnings": "Monthly Earnings",
     "monthlyEarningsDesc": "Earnings from completed jobs this month"
+  },
+  "revenue": {
+    "history": "Revenue History",
+    "predictions": "Revenue Predictions",
+    "noUpcomingPayments": "No upcoming payments",
+    "upcomingPayments": "Upcoming Payments"
+  },
+  "sections": {
+    "trackMoney": "Track your money",
+    "maintenance": "Maintenance Overview",
+    "properties": "Property Overview",
+    "tenants": "Tenant Overview"
   }
 }

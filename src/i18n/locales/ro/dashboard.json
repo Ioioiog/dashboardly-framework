@@ -1,0 +1,38 @@
+{
+  "title": "Panou de Control",
+  "welcome": "Bun venit",
+  "overview": "Iată o prezentare generală a activităților tale",
+  "metrics": {
+    "loading": "Se încarcă...",
+    "totalProperties": "Total Proprietăți",
+    "totalPropertiesDesc": "Total proprietăți gestionate",
+    "monthlyRevenue": "Venit Lunar",
+    "monthlyRevenueDesc": "Venitul lunii curente",
+    "activeTenants": "Chiriași Activi",
+    "activeTenantsDesc": "Chiriași activi în prezent",
+    "pendingMaintenance": "Mentenanță în Așteptare",
+    "pendingMaintenanceDesc": "Cereri de mentenanță în așteptare",
+    "paymentStatus": "Stare Plăți",
+    "paymentStatusDesc": "Click pentru a vedea plățile lunare",
+    "rentedPropertiesDesc": "Proprietățile tale închiriate",
+    "openMaintenanceDesc": "Cereri de mentenanță deschise",
+    "activeJobs": "Lucrări Active",
+    "activeJobsDesc": "Lucrări de mentenanță în curs",
+    "completedJobs": "Lucrări Finalizate",
+    "completedJobsDesc": "Lucrări finalizate în această lună",
+    "monthlyEarnings": "Câștiguri Lunare",
+    "monthlyEarningsDesc": "Câștiguri din lucrările finalizate în această lună"
+  },
+  "revenue": {
+    "history": "Istoric Venituri",
+    "predictions": "Previziuni Venituri",
+    "noUpcomingPayments": "Nu există plăți viitoare",
+    "upcomingPayments": "Plăți Viitoare"
+  },
+  "sections": {
+    "trackMoney": "Urmărește-ți banii",
+    "maintenance": "Prezentare Mentenanță",
+    "properties": "Prezentare Proprietăți",
+    "tenants": "Prezentare Chiriași"
+  }
+}

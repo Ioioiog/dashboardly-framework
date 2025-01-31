@@ -1,0 +1,38 @@
+{
+  "title": "Tableau de Bord",
+  "welcome": "Bienvenue",
+  "overview": "Voici un aperçu de vos activités",
+  "metrics": {
+    "loading": "Chargement...",
+    "totalProperties": "Total des Propriétés",
+    "totalPropertiesDesc": "Total des propriétés gérées",
+    "monthlyRevenue": "Revenu Mensuel",
+    "monthlyRevenueDesc": "Revenu du mois en cours",
+    "activeTenants": "Locataires Actifs",
+    "activeTenantsDesc": "Locataires actuellement actifs",
+    "pendingMaintenance": "Maintenance en Attente",
+    "pendingMaintenanceDesc": "Demandes de maintenance en attente",
+    "paymentStatus": "État des Paiements",
+    "paymentStatusDesc": "Cliquez pour voir les paiements mensuels",
+    "rentedPropertiesDesc": "Vos propriétés louées",
+    "openMaintenanceDesc": "Demandes de maintenance ouvertes",
+    "activeJobs": "Travaux Actifs",
+    "activeJobsDesc": "Travaux de maintenance en cours",
+    "completedJobs": "Travaux Terminés",
+    "completedJobsDesc": "Travaux terminés ce mois-ci",
+    "monthlyEarnings": "Gains Mensuels",
+    "monthlyEarningsDesc": "Gains des travaux terminés ce mois-ci"
+  },
+  "revenue": {
+    "history": "Historique des Revenus",
+    "predictions": "Prévisions des Revenus",
+    "noUpcomingPayments": "Aucun paiement à venir",
+    "upcomingPayments": "Paiements à Venir"
+  },
+  "sections": {
+    "trackMoney": "Suivez votre argent",
+    "maintenance": "Aperçu de la Maintenance",
+    "properties": "Aperçu des Propriétés",
+    "tenants": "Aperçu des Locataires"
+  }
+}

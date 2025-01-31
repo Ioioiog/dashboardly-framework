@@ -26,12 +26,27 @@
   "filter": "Filter",
   "sort": "Sort",
   "error": {
-    "noUser": "No authenticated user found"
+    "noUser": "No authenticated user found",
+    "invalidData": "Invalid data provided",
+    "networkError": "Network error occurred",
+    "unauthorized": "Unauthorized access",
+    "notFound": "Resource not found",
+    "serverError": "Server error occurred"
   },
   "currency": {
     "usd": "$",
     "eur": "€",
     "gbp": "£",
     "ron": "RON"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "overdue": "Overdue"
   }
 }

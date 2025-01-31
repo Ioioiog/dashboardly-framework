@@ -1,0 +1,38 @@
+{
+  "title": "Panel de Control",
+  "welcome": "Bienvenido",
+  "overview": "Aquí tienes un resumen de tus actividades",
+  "metrics": {
+    "loading": "Cargando...",
+    "totalProperties": "Total de Propiedades",
+    "totalPropertiesDesc": "Total de propiedades gestionadas",
+    "monthlyRevenue": "Ingresos Mensuales",
+    "monthlyRevenueDesc": "Ingresos del mes actual",
+    "activeTenants": "Inquilinos Activos",
+    "activeTenantsDesc": "Inquilinos actualmente activos",
+    "pendingMaintenance": "Mantenimiento Pendiente",
+    "pendingMaintenanceDesc": "Solicitudes de mantenimiento pendientes",
+    "paymentStatus": "Estado de Pagos",
+    "paymentStatusDesc": "Haz clic para ver los pagos mensuales",
+    "rentedPropertiesDesc": "Tus propiedades alquiladas",
+    "openMaintenanceDesc": "Solicitudes de mantenimiento abiertas",
+    "activeJobs": "Trabajos Activos",
+    "activeJobsDesc": "Trabajos de mantenimiento en curso",
+    "completedJobs": "Trabajos Completados",
+    "completedJobsDesc": "Trabajos completados este mes",
+    "monthlyEarnings": "Ganancias Mensuales",
+    "monthlyEarningsDesc": "Ganancias de trabajos completados este mes"
+  },
+  "revenue": {
+    "history": "Historial de Ingresos",
+    "predictions": "Predicciones de Ingresos",
+    "noUpcomingPayments": "No hay pagos próximos",
+    "upcomingPayments": "Próximos Pagos"
+  },
+  "sections": {
+    "trackMoney": "Controla tu dinero",
+    "maintenance": "Resumen de Mantenimiento",
+    "properties": "Resumen de Propiedades",
+    "tenants": "Resumen de Inquilinos"
+  }
+}
