@@ -67,10 +67,16 @@ export default function MaintenanceDialog({
           serviceProviders={serviceProviders || []}
           existingRequest={existingRequest}
           onSubmit={async (data) => {
+            // Add tenant_id to the form data
+            const formDataWithTenant = {
+              ...data,
+              tenant_id: currentUserId,
+            };
+            
             if (requestId) {
-              await updateMutation.mutateAsync(data);
+              await updateMutation.mutateAsync(formDataWithTenant);
             } else {
-              await createMutation.mutateAsync(data);
+              await createMutation.mutateAsync(formDataWithTenant);
             }
             onOpenChange(false);
           }}

@@ -84,6 +84,7 @@ export function MaintenanceRequestForm({
               }}
               onChange={(field, value) => form.setValue(field as any, value)}
               serviceProviders={serviceProviders || []}
+              userRole={userRole}
             />
           </div>
         </div>
