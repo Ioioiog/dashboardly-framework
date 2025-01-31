@@ -52,7 +52,11 @@ const AuthPage = () => {
   const handleRoleSelect = (role: string) => {
     console.log("Selected role:", role);
     setSelectedRole(role);
-    setView("register");
+    setView("login"); // Automatically switch to login view after role selection
+    toast({
+      title: "Welcome!",
+      description: `Please sign in or create an account as a ${role.replace('_', ' ')}.`,
+    });
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -60,6 +64,11 @@ const AuthPage = () => {
     const { error } = await supabase.auth.signInWithPassword({
       email: userEmail,
       password,
+      options: {
+        data: {
+          role: selectedRole,
+        },
+      }
     });
 
     if (error) {
