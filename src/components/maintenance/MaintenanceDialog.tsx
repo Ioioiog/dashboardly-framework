@@ -1,15 +1,12 @@
-import React from "react";
+import { useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useMaintenanceRequest } from "../maintenance/hooks/useMaintenanceRequest";
+import { useMaintenanceProperties } from "../maintenance/hooks/useMaintenanceProperties";
+import { MaintenanceRequestForm } from "./forms/MaintenanceRequestForm";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useAuthState } from "@/hooks/useAuthState";
-import { MaintenanceRequestForm } from "./forms/MaintenanceRequestForm";
-import { useMaintenanceRequest } from "./hooks/useMaintenanceRequest";
-import { useMaintenanceProperties } from "./hooks/useMaintenanceProperties";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -22,15 +19,14 @@ export default function MaintenanceDialog({
   onOpenChange,
   requestId,
 }: MaintenanceDialogProps) {
-  const { t } = useTranslation();
-  const { toast } = useToast();
   const { userRole } = useUserRole();
   const { currentUserId } = useAuthState();
+  const queryClient = useQueryClient();
 
   const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
   const { existingRequest, createMutation, updateMutation } = useMaintenanceRequest(requestId);
 
-  // Add service providers query
+  // Add service providers query with automatic refresh after creation
   const { data: serviceProviders } = useQuery({
     queryKey: ["service-providers"],
     enabled: userRole === "landlord",
@@ -51,80 +47,36 @@ export default function MaintenanceDialog({
     },
   });
 
-  const defaultValues = {
-    title: "",
-    description: "",
-    property_id: "",
-    priority: "low",
-    status: "pending",
-    notes: "",
-    assigned_to: "",
-    service_provider_notes: "",
-    images: [],
-    tenant_id: currentUserId || "",
-    ...existingRequest,
-  };
-
-  const handleSubmit = (values: any) => {
-    // Validate required fields
-    if (!values.property_id) {
-      toast({
-        title: "Error",
-        description: "Please select a property",
-        variant: "destructive",
-      });
-      return;
+  // Refresh service providers list when dialog opens
+  useEffect(() => {
+    if (open && userRole === "landlord") {
+      queryClient.invalidateQueries({ queryKey: ["service-providers"] });
     }
-
-    if (!values.title) {
-      toast({
-        title: "Error",
-        description: "Please enter a title",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!values.description) {
-      toast({
-        title: "Error",
-        description: "Please enter a description",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    console.log("Submitting maintenance request with values:", values);
-
-    if (requestId) {
-      updateMutation.mutate(values);
-    } else {
-      createMutation.mutate(values);
-    }
-  };
+  }, [open, userRole, queryClient]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[900px]">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{requestId ? t("maintenance.form.updateRequest") : t("maintenance.form.createRequest")}</DialogTitle>
+          <DialogTitle>
+            {requestId ? "Edit Maintenance Request" : "New Maintenance Request"}
+          </DialogTitle>
         </DialogHeader>
         <MaintenanceRequestForm
-          defaultValues={defaultValues}
-          onSubmit={handleSubmit}
           properties={properties || []}
+          serviceProviders={serviceProviders || []}
+          existingRequest={existingRequest}
+          onSubmit={async (data) => {
+            if (requestId) {
+              await updateMutation.mutateAsync(data);
+            } else {
+              await createMutation.mutateAsync(data);
+            }
+            onOpenChange(false);
+          }}
+          isSubmitting={createMutation.isPending || updateMutation.isPending}
           userRole={userRole!}
-          serviceProviders={serviceProviders}
         />
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
-        </div>
       </DialogContent>
     </Dialog>
   );
