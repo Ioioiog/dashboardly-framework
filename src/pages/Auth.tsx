@@ -33,8 +33,8 @@ const AuthPage = () => {
         }
 
         if (session) {
-          console.log("Active session found, redirecting to dashboard");
-          navigate("/dashboard", { replace: true });
+          console.log("Active session found, redirecting to index");
+          navigate("/", { replace: true });
         }
       } catch (err) {
         console.error("Error checking session:", err);
@@ -52,7 +52,7 @@ const AuthPage = () => {
   const handleRoleSelect = (role: string) => {
     console.log("Selected role:", role);
     setSelectedRole(role);
-    setView("login"); // Automatically switch to login view after role selection
+    setView("login");
     toast({
       title: "Welcome!",
       description: `Please sign in or create an account as a ${role.replace('_', ' ')}.`,
@@ -74,7 +74,7 @@ const AuthPage = () => {
         variant: "destructive",
       });
     } else {
-      navigate("/dashboard");
+      navigate("/");
     }
   };
 
