@@ -19,7 +19,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
   if (isLoading || !metrics) {
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-fade-in">
-        {[...Array(4)].map((_, i) => (
+        {[...Array(userRole === 'service_provider' ? 3 : 4)].map((_, i) => (
           <MetricCard
             key={i}
             title={t('dashboard.metrics.loading')}

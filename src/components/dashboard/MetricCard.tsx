@@ -28,6 +28,11 @@ export function MetricCard({
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
 
+  if (!Icon) {
+    console.error("Icon is undefined for metric card:", title);
+    return null;
+  }
+
   const handleClick = () => {
     if (onClick) {
       onClick();
@@ -73,7 +78,7 @@ export function MetricCard({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{value}</div>
+            <div className="text-2xl font-bold">{value || '0'}</div>
             {description && (
               <p className="text-xs text-muted-foreground mt-1">
                 {t(description)}
