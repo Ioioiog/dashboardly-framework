@@ -52,19 +52,43 @@ export function useCurrency() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("currency_preference")
-        .eq("id", user.id)
-        .single();
-
-      if (error) throw error;
-
       // Get the most up-to-date preference from localStorage if it exists
       const localCurrency = localStorage.getItem('currency');
       if (localCurrency) {
         console.log('Using currency from localStorage:', localCurrency);
         return { currency_preference: localCurrency };
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("currency_preference")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching currency preference:', error);
+        return { currency_preference: 'USD' };
+      }
+
+      if (!data) {
+        console.log('No profile found, creating one with default currency...');
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            id: user.id,
+            currency_preference: 'USD',
+            settings: {
+              currency: 'USD',
+              language: 'en',
+              theme: 'light'
+            }
+          });
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+        }
+
+        return { currency_preference: 'USD' };
       }
 
       console.log('Using currency from database:', data.currency_preference);
