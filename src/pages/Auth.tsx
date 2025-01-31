@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { RoleSelection } from "@/components/auth/RoleSelection";
 import { AuthForms } from "@/components/auth/AuthForms";
+import { RoleSpecificForm } from "@/components/auth/RoleSpecificForm";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -49,6 +50,7 @@ const AuthPage = () => {
   }, [navigate, toast]);
 
   const handleRoleSelect = (role: string) => {
+    console.log("Selected role:", role);
     setSelectedRole(role);
     setView("login");
   };
@@ -61,6 +63,7 @@ const AuthPage = () => {
     });
 
     if (error) {
+      console.error("Login error:", error);
       toast({
         title: "Login Error",
         description: error.message,
@@ -73,23 +76,45 @@ const AuthPage = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signUp({
-      email: userEmail,
-      password,
-    });
+    console.log("Registering with role:", selectedRole);
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: userEmail,
+        password,
+        options: {
+          data: {
+            role: selectedRole,
+          },
+        },
+      });
 
-    if (error) {
+      if (error) {
+        console.error("Registration error:", error);
+        toast({
+          title: "Registration Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        console.log("Registration successful:", data);
+        if (selectedRole === 'service_provider') {
+          setShowRoleForm(true);
+        } else {
+          toast({
+            title: "Registration Successful",
+            description: "Please check your email for confirmation.",
+          });
+          setView("login");
+        }
+      }
+    } catch (error) {
+      console.error("Unexpected registration error:", error);
       toast({
         title: "Registration Error",
-        description: error.message,
+        description: "An unexpected error occurred during registration.",
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Registration Successful",
-        description: "Check your email for confirmation.",
-      });
-      setView("login");
     }
   };
 
@@ -118,6 +143,38 @@ const AuthPage = () => {
     return handleForgotPassword(e);
   };
 
+  const handleRoleFormComplete = () => {
+    setShowRoleForm(false);
+    setView("login");
+    toast({
+      title: "Profile Updated",
+      description: "Your service provider profile has been created.",
+    });
+  };
+
+  if (showRoleForm) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 animate-gradient">
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+            <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+          </div>
+        </div>
+        <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm relative z-10">
+          <CardContent className="p-6">
+            <RoleSpecificForm
+              role={selectedRole}
+              email={userEmail}
+              onComplete={handleRoleFormComplete}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 animate-gradient">
@@ -134,7 +191,7 @@ const AuthPage = () => {
             <img 
               src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
               alt="AdminChirii Logo" 
-              className="h-20 drop-shadow-md" // Changed from h-12 to h-20
+              className="h-20 drop-shadow-md"
             />
           </div>
 
