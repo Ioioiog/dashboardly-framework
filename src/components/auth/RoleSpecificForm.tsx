@@ -43,12 +43,10 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
 
       console.log("Updating user metadata and profile for user:", user.id);
       
-      // First update the user's metadata
+      // First update the user's metadata with role
       const { error: updateError } = await supabase.auth.updateUser({
         data: { 
-          role: role,
-          first_name: formData.firstName,
-          last_name: formData.lastName
+          role: role // Ensure role is explicitly set here
         }
       });
 
@@ -57,14 +55,14 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
         throw updateError;
       }
 
-      // Then update the profile
+      // Then update the profile with role
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          role: role,
+          role: role, // Explicitly set role in profiles table
           email: email
         })
         .eq('id', user.id);
@@ -92,6 +90,19 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
           console.error("Error updating service provider profile:", spError);
           throw spError;
         }
+      }
+
+      // Verify the role was set correctly
+      const { data: verifyProfile, error: verifyError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (verifyError) {
+        console.error("Error verifying profile update:", verifyError);
+      } else {
+        console.log("Verified profile role:", verifyProfile.role);
       }
 
       toast({
