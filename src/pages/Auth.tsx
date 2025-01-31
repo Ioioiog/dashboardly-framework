@@ -8,11 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Home, Users } from "lucide-react";
+import { RoleSpecificForm } from "@/components/auth/RoleSpecificForm";
 
 const AuthPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedRole, setSelectedRole] = useState("tenant");
+  const [showRoleForm, setShowRoleForm] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
     const checkSession = async () => {
@@ -50,16 +53,16 @@ const AuthPage = () => {
       console.log("Auth state changed:", event);
       
       if (event === 'SIGNED_IN' && session) {
-        console.log("Sign in successful, redirecting to dashboard");
-        navigate("/dashboard", { replace: true });
+        if (session.user.email) {
+          setUserEmail(session.user.email);
+          setShowRoleForm(true);
+        }
       } else if (event === 'SIGNED_OUT') {
         console.log("User signed out");
         toast({
           title: "Signed out",
           description: "You have been signed out successfully.",
         });
-      } else if (event === 'USER_UPDATED') {
-        console.log("User profile updated");
       }
     });
 
@@ -67,6 +70,10 @@ const AuthPage = () => {
       subscription.unsubscribe();
     };
   }, [navigate, toast]);
+
+  const handleRoleFormComplete = () => {
+    navigate("/dashboard", { replace: true });
+  };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -94,116 +101,126 @@ const AuthPage = () => {
           </div>
           <CardTitle className="text-2xl">Welcome back</CardTitle>
           <CardDescription>
-            Choose your role and sign in to your account
+            {showRoleForm ? "Complete your profile" : "Choose your role and sign in to your account"}
           </CardDescription>
         </CardHeader>
         
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="role-select" className="text-sm font-medium text-gray-700">
-              I am a...
-            </Label>
-            <Select
-              value={selectedRole}
-              onValueChange={(value) => setSelectedRole(value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select your role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tenant" className="flex items-center gap-2">
-                  <Home className="w-4 h-4" /> Tenant
-                </SelectItem>
-                <SelectItem value="landlord" className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4" /> Landlord
-                </SelectItem>
-                <SelectItem value="service_provider" className="flex items-center gap-2">
-                  <Users className="w-4 h-4" /> Service Provider
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {showRoleForm ? (
+            <RoleSpecificForm 
+              role={selectedRole}
+              email={userEmail}
+              onComplete={handleRoleFormComplete}
+            />
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="role-select" className="text-sm font-medium text-gray-700">
+                  I am a...
+                </Label>
+                <Select
+                  value={selectedRole}
+                  onValueChange={(value) => setSelectedRole(value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tenant" className="flex items-center gap-2">
+                      <Home className="w-4 h-4" /> Tenant
+                    </SelectItem>
+                    <SelectItem value="landlord" className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4" /> Landlord
+                    </SelectItem>
+                    <SelectItem value="service_provider" className="flex items-center gap-2">
+                      <Users className="w-4 h-4" /> Service Provider
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <Auth
-            supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#2563eb',
-                    brandAccent: '#1d4ed8',
-                    brandButtonText: 'white',
-                    defaultButtonBackground: 'white',
-                    defaultButtonBackgroundHover: '#f8fafc',
-                    defaultButtonBorder: 'lightgray',
-                    defaultButtonText: 'gray',
-                    dividerBackground: '#e2e8f0',
-                    inputBackground: 'white',
-                    inputBorder: '#e2e8f0',
-                    inputBorderHover: '#cbd5e1',
-                    inputBorderFocus: '#2563eb',
-                    inputText: 'black',
-                    inputLabelText: '#475569',
-                    inputPlaceholder: '#94a3b8',
+              <Auth
+                supabaseClient={supabase}
+                appearance={{
+                  theme: ThemeSupa,
+                  variables: {
+                    default: {
+                      colors: {
+                        brand: '#2563eb',
+                        brandAccent: '#1d4ed8',
+                        brandButtonText: 'white',
+                        defaultButtonBackground: 'white',
+                        defaultButtonBackgroundHover: '#f8fafc',
+                        defaultButtonBorder: 'lightgray',
+                        defaultButtonText: 'gray',
+                        dividerBackground: '#e2e8f0',
+                        inputBackground: 'white',
+                        inputBorder: '#e2e8f0',
+                        inputBorderHover: '#cbd5e1',
+                        inputBorderFocus: '#2563eb',
+                        inputText: 'black',
+                        inputLabelText: '#475569',
+                        inputPlaceholder: '#94a3b8',
+                      },
+                      borderWidths: {
+                        buttonBorderWidth: '1px',
+                        inputBorderWidth: '1px',
+                      },
+                      radii: {
+                        borderRadiusButton: '0.5rem',
+                        buttonBorderRadius: '0.5rem',
+                        inputBorderRadius: '0.5rem',
+                      },
+                    },
                   },
-                  borderWidths: {
-                    buttonBorderWidth: '1px',
-                    inputBorderWidth: '1px',
+                  className: {
+                    container: 'w-full',
+                    button: 'w-full px-4 py-2 rounded-lg font-medium transition-colors',
+                    input: 'rounded-lg border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                    label: 'text-sm font-medium text-gray-700',
+                    loader: 'w-6 h-6 border-2 border-blue-600',
                   },
-                  radii: {
-                    borderRadiusButton: '0.5rem',
-                    buttonBorderRadius: '0.5rem',
-                    inputBorderRadius: '0.5rem',
+                }}
+                providers={[]}
+                redirectTo={window.location.origin}
+                localization={{
+                  variables: {
+                    sign_in: {
+                      email_label: 'Email address',
+                      password_label: 'Password',
+                      email_input_placeholder: 'Enter your email',
+                      password_input_placeholder: 'Enter your password',
+                      button_label: 'Sign in',
+                      loading_button_label: 'Signing in...',
+                      social_provider_text: 'Sign in with {{provider}}',
+                      link_text: "Don't have an account? Sign up",
+                    },
+                    sign_up: {
+                      email_label: 'Email address',
+                      password_label: 'Create password',
+                      email_input_placeholder: 'Enter your email',
+                      password_input_placeholder: 'Create a secure password',
+                      button_label: 'Sign up',
+                      loading_button_label: 'Signing up...',
+                      social_provider_text: 'Sign up with {{provider}}',
+                      link_text: "Already have an account? Sign in",
+                    },
+                    forgotten_password: {
+                      link_text: 'Forgot password?',
+                      button_label: 'Send reset instructions',
+                      loading_button_label: 'Sending reset instructions...',
+                      confirmation_text: 'Check your email for the password reset link',
+                    },
                   },
-                },
-              },
-              className: {
-                container: 'w-full',
-                button: 'w-full px-4 py-2 rounded-lg font-medium transition-colors',
-                input: 'rounded-lg border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                label: 'text-sm font-medium text-gray-700',
-                loader: 'w-6 h-6 border-2 border-blue-600',
-              },
-            }}
-            providers={[]}
-            redirectTo={window.location.origin}
-            localization={{
-              variables: {
-                sign_in: {
-                  email_label: 'Email address',
-                  password_label: 'Password',
-                  email_input_placeholder: 'Enter your email',
-                  password_input_placeholder: 'Enter your password',
-                  button_label: 'Sign in',
-                  loading_button_label: 'Signing in...',
-                  social_provider_text: 'Sign in with {{provider}}',
-                  link_text: "Don't have an account? Sign up",
-                },
-                sign_up: {
-                  email_label: 'Email address',
-                  password_label: 'Create password',
-                  email_input_placeholder: 'Enter your email',
-                  password_input_placeholder: 'Create a secure password',
-                  button_label: 'Sign up',
-                  loading_button_label: 'Signing up...',
-                  social_provider_text: 'Sign up with {{provider}}',
-                  link_text: "Already have an account? Sign in",
-                },
-                forgotten_password: {
-                  link_text: 'Forgot password?',
-                  button_label: 'Send reset instructions',
-                  loading_button_label: 'Sending reset instructions...',
-                  confirmation_text: 'Check your email for the password reset link',
-                },
-              },
-            }}
-            onlyThirdPartyProviders={false}
-            magicLink={false}
-            queryParams={{
-              role: selectedRole
-            }}
-          />
+                }}
+                onlyThirdPartyProviders={false}
+                magicLink={false}
+                queryParams={{
+                  role: selectedRole
+                }}
+              />
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
