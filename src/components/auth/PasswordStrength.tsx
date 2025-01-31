@@ -1,4 +1,5 @@
 import { Progress } from "@/components/ui/progress";
+import { Check } from "lucide-react";
 
 interface PasswordStrengthProps {
   password: string;
@@ -26,20 +27,24 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
   const strengthColor = getStrengthColor(strength);
 
   return (
-    <div className="space-y-2">
-      <Progress value={strength} className={strengthColor} />
-      <ul className="text-sm space-y-1 text-gray-500">
-        <li className={password.length >= 8 ? "text-green-600" : ""}>
-          ✓ 8+ characters
+    <div className="space-y-3 animate-fade-in">
+      <Progress value={strength} className={`h-2 ${strengthColor}`} />
+      <ul className="grid grid-cols-2 gap-2 text-sm text-gray-500">
+        <li className={`flex items-center gap-1.5 ${password.length >= 8 ? "text-green-600" : ""}`}>
+          <Check className={`h-4 w-4 ${password.length >= 8 ? "opacity-100" : "opacity-40"}`} />
+          8+ characters
         </li>
-        <li className={/[A-Z]/.test(password) ? "text-green-600" : ""}>
-          ✓ 1 uppercase letter
+        <li className={`flex items-center gap-1.5 ${/[A-Z]/.test(password) ? "text-green-600" : ""}`}>
+          <Check className={`h-4 w-4 ${/[A-Z]/.test(password) ? "opacity-100" : "opacity-40"}`} />
+          Uppercase letter
         </li>
-        <li className={/[0-9]/.test(password) ? "text-green-600" : ""}>
-          ✓ 1 number
+        <li className={`flex items-center gap-1.5 ${/[0-9]/.test(password) ? "text-green-600" : ""}`}>
+          <Check className={`h-4 w-4 ${/[0-9]/.test(password) ? "opacity-100" : "opacity-40"}`} />
+          Number
         </li>
-        <li className={/[^A-Za-z0-9]/.test(password) ? "text-green-600" : ""}>
-          ✓ 1 special character
+        <li className={`flex items-center gap-1.5 ${/[^A-Za-z0-9]/.test(password) ? "text-green-600" : ""}`}>
+          <Check className={`h-4 w-4 ${/[^A-Za-z0-9]/.test(password) ? "opacity-100" : "opacity-40"}`} />
+          Special character
         </li>
       </ul>
     </div>
