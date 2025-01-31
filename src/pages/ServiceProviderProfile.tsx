@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ServiceList } from "@/components/service-provider/ServiceList";
 import { ServiceForm } from "@/components/service-provider/ServiceForm";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 
 interface ServiceProviderProfile {
   business_name: string | null;
@@ -88,101 +89,113 @@ export default function ServiceProviderProfile() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-screen bg-gradient-to-br from-dashboard-background to-gray-50">
+        <DashboardSidebar />
+        <main className="flex-1 p-6">
+          <div>Loading...</div>
+        </main>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Service Provider Profile</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="business_name">Business Name</Label>
-              <Input
-                id="business_name"
-                value={profile?.business_name || ""}
-                onChange={(e) => setProfile({ ...profile!, business_name: e.target.value })}
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={profile?.description || ""}
-                onChange={(e) => setProfile({ ...profile!, description: e.target.value })}
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="contact_phone">Contact Phone</Label>
-              <Input
-                id="contact_phone"
-                value={profile?.contact_phone || ""}
-                onChange={(e) => setProfile({ ...profile!, contact_phone: e.target.value })}
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="contact_email">Contact Email</Label>
-              <Input
-                id="contact_email"
-                value={profile?.contact_email || ""}
-                onChange={(e) => setProfile({ ...profile!, contact_email: e.target.value })}
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                value={profile?.website || ""}
-                onChange={(e) => setProfile({ ...profile!, website: e.target.value })}
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="flex justify-end space-x-2">
-              {isEditing ? (
-                <>
-                  <Button type="submit" disabled={isLoading}>
-                    Save Changes
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsEditing(false)}
-                  >
-                    Cancel
-                  </Button>
-                </>
-              ) : (
-                <Button type="button" onClick={() => setIsEditing(true)}>
-                  Edit Profile
-                </Button>
-              )}
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="flex h-screen bg-gradient-to-br from-dashboard-background to-gray-50">
+      <DashboardSidebar />
+      <main className="flex-1 overflow-y-auto">
+        <div className="container mx-auto p-6 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Service Provider Profile</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="business_name">Business Name</Label>
+                  <Input
+                    id="business_name"
+                    value={profile?.business_name || ""}
+                    onChange={(e) => setProfile({ ...profile!, business_name: e.target.value })}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={profile?.description || ""}
+                    onChange={(e) => setProfile({ ...profile!, description: e.target.value })}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contact_phone">Contact Phone</Label>
+                  <Input
+                    id="contact_phone"
+                    value={profile?.contact_phone || ""}
+                    onChange={(e) => setProfile({ ...profile!, contact_phone: e.target.value })}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contact_email">Contact Email</Label>
+                  <Input
+                    id="contact_email"
+                    value={profile?.contact_email || ""}
+                    onChange={(e) => setProfile({ ...profile!, contact_email: e.target.value })}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="website">Website</Label>
+                  <Input
+                    id="website"
+                    value={profile?.website || ""}
+                    onChange={(e) => setProfile({ ...profile!, website: e.target.value })}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  {isEditing ? (
+                    <>
+                      <Button type="submit" disabled={isLoading}>
+                        Save Changes
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsEditing(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <Button type="button" onClick={() => setIsEditing(true)}>
+                      Edit Profile
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Services</CardTitle>
-          <Button onClick={() => setShowServiceForm(true)}>Add Service</Button>
-        </CardHeader>
-        <CardContent>
-          <ServiceList onEdit={() => setShowServiceForm(true)} />
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Services</CardTitle>
+              <Button onClick={() => setShowServiceForm(true)}>Add Service</Button>
+            </CardHeader>
+            <CardContent>
+              <ServiceList onEdit={() => setShowServiceForm(true)} />
+            </CardContent>
+          </Card>
 
-      <Dialog open={showServiceForm} onOpenChange={setShowServiceForm}>
-        <DialogContent>
-          <ServiceForm onSuccess={() => setShowServiceForm(false)} />
-        </DialogContent>
-      </Dialog>
+          <Dialog open={showServiceForm} onOpenChange={setShowServiceForm}>
+            <DialogContent>
+              <ServiceForm onSuccess={() => setShowServiceForm(false)} />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </main>
     </div>
   );
 }
