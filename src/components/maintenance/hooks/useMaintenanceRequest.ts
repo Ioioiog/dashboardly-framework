@@ -29,6 +29,8 @@ export function useMaintenanceRequest(requestId?: string) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       
+      console.log(`Attempting to upload file: ${fileName}`);
+      
       const { error: uploadError } = await supabase.storage
         .from('maintenance-images')
         .upload(fileName, file);
@@ -42,9 +44,11 @@ export function useMaintenanceRequest(requestId?: string) {
         .from('maintenance-images')
         .getPublicUrl(fileName);
         
+      console.log(`Generated public URL: ${publicUrl}`);
       uploadedUrls.push(publicUrl);
     }
     
+    console.log('Generated image URLs:', uploadedUrls);
     return uploadedUrls;
   }, []);
 
@@ -54,13 +58,18 @@ export function useMaintenanceRequest(requestId?: string) {
     queryFn: async () => {
       if (!requestId) return null;
       
+      console.log(`Fetching maintenance request with ID: ${requestId}`);
+      
       const { data, error } = await supabase
         .from("maintenance_requests")
         .select("*")
         .eq("id", requestId)
         .maybeSingle();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching maintenance request:', error);
+        throw error;
+      }
       return data;
     },
   });
@@ -69,11 +78,13 @@ export function useMaintenanceRequest(requestId?: string) {
     mutationFn: async (values: any) => {
       // Validate required fields
       if (!values.property_id || !values.tenant_id || !values.title || !values.description) {
+        console.error('Missing required fields:', { values });
         throw new Error("Required fields are missing");
       }
 
       let imageUrls: string[] = [];
       if (values.images?.length > 0 && values.images[0] instanceof File) {
+        console.log('Processing images:', values.images);
         imageUrls = await handleImageUpload(values.images as File[]);
       }
 
@@ -119,16 +130,19 @@ export function useMaintenanceRequest(requestId?: string) {
   const updateMutation = useMutation({
     mutationFn: async (values: any) => {
       if (!requestId) {
+        console.error('No request ID provided for update');
         throw new Error("Request ID is required for updates");
       }
 
       // Validate required fields
       if (!values.property_id || !values.tenant_id || !values.title || !values.description) {
+        console.error('Missing required fields:', { values });
         throw new Error("Required fields are missing");
       }
 
       let imageUrls: string[] = values.images as string[];
       if (values.images?.length > 0 && values.images[0] instanceof File) {
+        console.log('Processing new images for update:', values.images);
         imageUrls = await handleImageUpload(values.images as File[]);
       }
 
