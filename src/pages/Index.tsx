@@ -8,13 +8,14 @@ import { useTranslation } from "react-i18next";
 import { DashboardHeader } from "@/components/dashboard/sections/DashboardHeader";
 import { RevenueSection } from "@/components/dashboard/sections/RevenueSection";
 import { UpcomingIncomeSection } from "@/components/dashboard/sections/UpcomingIncomeSection";
+import ServiceProviderDashboard from "./ServiceProviderDashboard";
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [userId, setUserId] = React.useState<string | null>(null);
-  const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | null>(null);
+  const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | "service_provider" | null>(null);
   const [userName, setUserName] = React.useState<string>("");
 
   useEffect(() => {
@@ -47,7 +48,6 @@ const Index = () => {
 
         if (profileError) {
           console.error("Profile fetch error:", profileError);
-          // If there's an auth error, sign out and redirect
           if (profileError.code === 'PGRST301') {
             await supabase.auth.signOut();
             navigate("/auth");
@@ -72,7 +72,7 @@ const Index = () => {
         }
 
         console.log("Profile loaded successfully:", profile);
-        setUserRole(profile.role as "landlord" | "tenant");
+        setUserRole(profile.role as "landlord" | "tenant" | "service_provider");
         
         // Set user name from profile
         const fullName = [profile.first_name, profile.last_name]
@@ -82,7 +82,6 @@ const Index = () => {
 
       } catch (error: any) {
         console.error("Error in checkUser:", error);
-        // If there's an auth error, redirect to login
         if (error.status === 401 || error.code === 'PGRST301') {
           navigate("/auth");
           return;
@@ -113,28 +112,43 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, [navigate, toast, t]);
 
+  // Render different dashboards based on user role
+  const renderDashboard = () => {
+    if (!userId || !userRole) return null;
+
+    switch (userRole) {
+      case "service_provider":
+        return <ServiceProviderDashboard />;
+      case "tenant":
+        return (
+          <div className="p-4 space-y-4">
+            <DashboardHeader userName={userName} />
+            <section className="bg-white rounded-lg shadow-sm p-4">
+              <DashboardMetrics userId={userId} userRole={userRole} />
+            </section>
+          </div>
+        );
+      case "landlord":
+        return (
+          <div className="p-4 space-y-4">
+            <DashboardHeader userName={userName} />
+            <section className="bg-white rounded-lg shadow-sm p-4">
+              <DashboardMetrics userId={userId} userRole={userRole} />
+            </section>
+            <RevenueSection userId={userId} />
+            <UpcomingIncomeSection userId={userId} />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-dashboard-background">
       <DashboardSidebar />
       <main className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-4">
-          <DashboardHeader userName={userName} />
-
-          {userId && userRole && (
-            <div className="space-y-4">
-              <section className="bg-white rounded-lg shadow-sm p-4">
-                <DashboardMetrics userId={userId} userRole={userRole} />
-              </section>
-
-              {userRole === "landlord" && (
-                <>
-                  <RevenueSection userId={userId} />
-                  <UpcomingIncomeSection userId={userId} />
-                </>
-              )}
-            </div>
-          )}
-        </div>
+        {renderDashboard()}
       </main>
     </div>
   );
