@@ -52,7 +52,7 @@ const AuthPage = () => {
   const handleRoleSelect = (role: string) => {
     console.log("Selected role:", role);
     setSelectedRole(role);
-    setView("register"); // Changed to automatically go to register view when role is selected
+    setView("register");
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -79,12 +79,13 @@ const AuthPage = () => {
     console.log("Starting registration process with role:", selectedRole);
     
     try {
+      // Explicitly set the role in user metadata
       const { data, error } = await supabase.auth.signUp({
         email: userEmail,
         password,
         options: {
           data: {
-            role: selectedRole,
+            role: selectedRole, // Ensure role is explicitly set
           },
         },
       });
@@ -98,6 +99,8 @@ const AuthPage = () => {
         });
       } else {
         console.log("Registration successful:", data);
+        console.log("User metadata:", data.user?.user_metadata);
+        
         if (selectedRole === 'service_provider') {
           console.log("Showing service provider form for additional details");
           setShowRoleForm(true);
