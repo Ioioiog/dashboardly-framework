@@ -1,24 +1,6 @@
-import React, { useState } from "react";
-import {
-  LayoutDashboard,
-  Home,
-  Users,
-  Wrench,
-  FileText,
-  CreditCard,
-  Settings,
-  Droplets,
-  MessageCircle,
-  ChevronLeft,
-  ChevronRight,
-  Clipboard,
-  UserCog,
-  Building2,
-  Wallet,
-} from "lucide-react";
-import { useLocation } from "react-router-dom";
+import React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useUserRole } from "@/hooks/use-user-role";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -29,154 +11,11 @@ import { useSidebarNotifications } from "@/hooks/use-sidebar-notifications";
 import { SidebarLogo } from "./sidebar/SidebarLogo";
 import { SidebarMenuItem } from "./sidebar/SidebarMenuItem";
 import { SignOutButton } from "./sidebar/SignOutButton";
+import { useSidebarState } from "@/hooks/use-sidebar-state";
 
 export const DashboardSidebar = () => {
-  const { userRole } = useUserRole();
-  const location = useLocation();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const { isExpanded, setIsExpanded, filteredMenuItems, isActive } = useSidebarState();
   const { data: notifications, markAsRead } = useSidebarNotifications();
-
-  console.log("Current notifications:", notifications);
-  console.log("Current user role:", userRole);
-
-  const isActive = (href: string) => {
-    if (href === "/dashboard") {
-      return location.pathname === href;
-    }
-    return location.pathname.startsWith(href);
-  };
-
-  const serviceProviderMenuItems = [
-    {
-      title: "Dashboard",
-      icon: LayoutDashboard,
-      href: "/dashboard",
-      roles: ["service_provider"],
-      notificationType: "maintenance"
-    },
-    {
-      title: "Profile",
-      icon: UserCog,
-      href: "/service-provider-profile",
-      roles: ["service_provider"],
-    },
-    {
-      title: "Service Areas",
-      icon: Building2,
-      href: "/service-areas",
-      roles: ["service_provider"],
-    },
-    {
-      title: "Services",
-      icon: Wrench,
-      href: "/services",
-      roles: ["service_provider"],
-    },
-    {
-      title: "Job Requests",
-      icon: Clipboard,
-      href: "/maintenance",
-      roles: ["service_provider"],
-      notificationType: "maintenance"
-    },
-    {
-      title: "Earnings",
-      icon: Wallet,
-      href: "/earnings",
-      roles: ["service_provider"],
-      notificationType: "payments"
-    },
-    {
-      title: "Messages",
-      icon: MessageCircle,
-      href: "/chat",
-      roles: ["service_provider"],
-      notificationType: "messages"
-    },
-    {
-      title: "Settings",
-      icon: Settings,
-      href: "/settings",
-      roles: ["service_provider"],
-    },
-  ];
-
-  const standardMenuItems = [
-    {
-      title: "Dashboard",
-      icon: LayoutDashboard,
-      href: "/dashboard",
-      roles: ["landlord", "tenant"],
-    },
-    {
-      title: "Properties",
-      icon: Home,
-      href: "/properties",
-      roles: ["landlord", "tenant"],
-    },
-    {
-      title: "Tenants",
-      icon: Users,
-      href: "/tenants",
-      roles: ["landlord"],
-    },
-    {
-      title: "Maintenance",
-      icon: Wrench,
-      href: "/maintenance",
-      roles: ["landlord", "tenant"],
-      notificationType: "maintenance"
-    },
-    {
-      title: "Documents",
-      icon: FileText,
-      href: "/documents",
-      roles: ["landlord", "tenant"],
-    },
-    {
-      title: "Invoices",
-      icon: FileText,
-      href: "/invoices",
-      roles: ["landlord", "tenant"],
-    },
-    {
-      title: "Payments",
-      icon: CreditCard,
-      href: "/payments",
-      roles: ["landlord", "tenant"],
-      notificationType: "payments"
-    },
-    {
-      title: "Utilities",
-      icon: Droplets,
-      href: "/utilities",
-      roles: ["landlord", "tenant"],
-    },
-    {
-      title: "Meter Readings",
-      icon: Clipboard,
-      href: "/meter-readings",
-      roles: ["landlord", "tenant"],
-    },
-    {
-      title: "Chat",
-      icon: MessageCircle,
-      href: "/chat",
-      roles: ["landlord", "tenant"],
-      notificationType: "messages"
-    },
-    {
-      title: "Settings",
-      icon: Settings,
-      href: "/settings",
-      roles: ["landlord", "tenant"],
-    },
-  ];
-
-  const menuItems = userRole === "service_provider" ? serviceProviderMenuItems : standardMenuItems;
-  const filteredMenuItems = menuItems.filter(
-    (item) => !userRole || item.roles.includes(userRole)
-  );
 
   const handleNotificationClick = (type: string) => {
     console.log(`Marking ${type} notifications as read`);
