@@ -32,12 +32,13 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log("Submitting form with role:", role);
+    console.log("Starting role-specific form submission for role:", role);
 
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       
       if (!user) {
+        console.error("No authenticated user found");
         throw new Error("No authenticated user found");
       }
 
@@ -46,7 +47,9 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
       // First update the user's metadata with role
       const { error: updateError } = await supabase.auth.updateUser({
         data: { 
-          role: role // Ensure role is explicitly set here
+          role: role,
+          first_name: formData.firstName,
+          last_name: formData.lastName
         }
       });
 
@@ -55,22 +58,28 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
         throw updateError;
       }
 
-      // Then update the profile with role
+      console.log("Successfully updated user metadata with role:", role);
+
+      // Then update the profile
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          id: user.id,
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          role: role, // Explicitly set role in profiles table
+          role: role,
           email: email
-        })
-        .eq('id', user.id);
+        }, {
+          onConflict: 'id'
+        });
 
       if (profileError) {
         console.error("Error updating profile:", profileError);
         throw profileError;
       }
+
+      console.log("Successfully updated profile with role:", role);
 
       // If user is a service provider, create/update service provider profile
       if (role === 'service_provider') {
@@ -84,12 +93,16 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
             service_area: [formData.serviceArea],
             contact_email: email,
             contact_phone: formData.phone
+          }, {
+            onConflict: 'id'
           });
 
         if (spError) {
           console.error("Error updating service provider profile:", spError);
           throw spError;
         }
+
+        console.log("Successfully created service provider profile");
       }
 
       // Verify the role was set correctly
@@ -103,6 +116,14 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
         console.error("Error verifying profile update:", verifyError);
       } else {
         console.log("Verified profile role:", verifyProfile.role);
+      }
+
+      // Refresh the session to ensure role changes are reflected
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        console.error("Error refreshing session:", refreshError);
+      } else {
+        console.log("Successfully refreshed session");
       }
 
       toast({
