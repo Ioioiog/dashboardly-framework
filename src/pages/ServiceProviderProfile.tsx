@@ -10,7 +10,8 @@ import { ServiceList } from "@/components/service-provider/ServiceList";
 import { ServiceForm } from "@/components/service-provider/ServiceForm";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
-import { Building2, ClipboardList, UserCircle, cn } from "lucide-react";
+import { Building2, ClipboardList, UserCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Section = 'profile' | 'services' | 'availability';
 
@@ -214,17 +215,6 @@ export default function ServiceProviderProfile() {
         );
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen bg-gradient-to-br from-dashboard-background to-gray-50">
-        <DashboardSidebar />
-        <main className="flex-1 p-6">
-          <div>Loading...</div>
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-dashboard-background to-gray-50">
