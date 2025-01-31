@@ -74,7 +74,14 @@ const Index = () => {
         }
 
         console.log("Profile loaded successfully:", profile);
-        setUserRole(profile.role as "landlord" | "tenant" | "service_provider");
+        console.log("User role from profile:", profile.role);
+        
+        // Validate and set user role
+        const validRole = profile.role === "landlord" || profile.role === "tenant" || profile.role === "service_provider"
+          ? profile.role
+          : null;
+          
+        setUserRole(validRole);
         
         // Set user name from profile
         const fullName = [profile.first_name, profile.last_name]
@@ -130,7 +137,10 @@ const Index = () => {
 
   // Render different dashboards based on user role
   const renderDashboard = () => {
-    if (!userId || !userRole) return null;
+    if (!userId || !userRole) {
+      console.log("No userId or userRole available");
+      return null;
+    }
 
     console.log("Rendering dashboard for role:", userRole);
 
@@ -163,6 +173,7 @@ const Index = () => {
           </div>
         );
       default:
+        console.error("Invalid user role:", userRole);
         return null;
     }
   };
