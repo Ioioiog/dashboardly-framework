@@ -20,7 +20,7 @@ const Index = () => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        console.log("Checking user session...");
+        console.log("Initializing authentication state...");
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -71,12 +71,12 @@ const Index = () => {
         }
 
         console.log("Profile loaded successfully:", profile);
-        console.log("User profile data:", profile);
         
         // Validate and set user role
-        if (profile.role === "landlord" || profile.role === "tenant" || profile.role === "service_provider") {
-          console.log("Setting user role to:", profile.role);
-          setUserRole(profile.role);
+        const validRole = profile.role === "landlord" || profile.role === "tenant" || profile.role === "service_provider";
+        if (validRole) {
+          console.log("Setting user role:", profile.role);
+          setUserRole(profile.role as "landlord" | "tenant" | "service_provider");
         } else {
           console.error("Invalid role found:", profile.role);
           toast({
@@ -91,7 +91,7 @@ const Index = () => {
         const fullName = [profile.first_name, profile.last_name]
           .filter(Boolean)
           .join(" ");
-        setUserName(fullName || "there");
+        setUserName(fullName || "User");
 
         // If user is a tenant, fetch their tenancy information
         if (profile.role === 'tenant') {
