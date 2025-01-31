@@ -23,5 +23,48 @@
     "pending": "În așteptare",
     "completed": "Finalizat",
     "cancelled": "Anulat"
+  },
+  "maintenance": {
+    "title": "Cereri de Mentenanță",
+    "description": "Gestionează și urmărește cererile de mentenanță pentru proprietățile tale",
+    "newRequest": "Cerere Nouă",
+    "activeRequests": "Cereri Active",
+    "completedRequests": "Cereri Finalizate",
+    "noActiveRequests": "Nicio Cerere Activă",
+    "noActiveRequestsMessage": "Nu există cereri de mentenanță active în acest moment.",
+    "noCompletedRequests": "Nicio Cerere Finalizată",
+    "noCompletedRequestsMessage": "Nu există cereri de mentenanță finalizate de afișat.",
+    "filters": {
+      "status": "Stare",
+      "priority": "Prioritate",
+      "property": "Proprietate",
+      "allStatuses": "Toate Stările",
+      "allPriorities": "Toate Prioritățile",
+      "allProperties": "Toate Proprietățile"
+    },
+    "status": {
+      "pending": "În Așteptare",
+      "in_progress": "În Desfășurare",
+      "completed": "Finalizat",
+      "cancelled": "Anulat"
+    },
+    "priority": {
+      "low": "Scăzută",
+      "medium": "Medie", 
+      "high": "Ridicată"
+    },
+    "form": {
+      "title": "Titlu",
+      "description": "Descriere",
+      "property": "Proprietate",
+      "selectProperty": "Selectează proprietatea",
+      "priority": "Prioritate",
+      "selectPriority": "Selectează prioritatea",
+      "status": "Stare",
+      "selectStatus": "Selectează starea"
+    },
+    "ticket": "Tichet",
+    "property": "Proprietate",
+    "created": "Creat la"
   }
 }

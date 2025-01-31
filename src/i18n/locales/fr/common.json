@@ -23,5 +23,48 @@
     "pending": "En attente",
     "completed": "Terminé",
     "cancelled": "Annulé"
+  },
+  "maintenance": {
+    "title": "Demandes de Maintenance",
+    "description": "Gérez et suivez les demandes de maintenance de vos propriétés",
+    "newRequest": "Nouvelle Demande",
+    "activeRequests": "Demandes Actives",
+    "completedRequests": "Demandes Terminées",
+    "noActiveRequests": "Aucune Demande Active",
+    "noActiveRequestsMessage": "Il n'y a pas de demandes de maintenance actives pour le moment.",
+    "noCompletedRequests": "Aucune Demande Terminée",
+    "noCompletedRequestsMessage": "Il n'y a pas de demandes de maintenance terminées à afficher.",
+    "filters": {
+      "status": "Statut",
+      "priority": "Priorité",
+      "property": "Propriété",
+      "allStatuses": "Tous les Statuts",
+      "allPriorities": "Toutes les Priorités",
+      "allProperties": "Toutes les Propriétés"
+    },
+    "status": {
+      "pending": "En Attente",
+      "in_progress": "En Cours",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "priority": {
+      "low": "Basse",
+      "medium": "Moyenne",
+      "high": "Haute"
+    },
+    "form": {
+      "title": "Titre",
+      "description": "Description",
+      "property": "Propriété",
+      "selectProperty": "Sélectionner une propriété",
+      "priority": "Priorité",
+      "selectPriority": "Sélectionner la priorité",
+      "status": "Statut",
+      "selectStatus": "Sélectionner le statut"
+    },
+    "ticket": "Ticket",
+    "property": "Propriété",
+    "created": "Créé le"
   }
 }
