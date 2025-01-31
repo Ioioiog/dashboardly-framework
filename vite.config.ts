@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => ({
         name: 'AdminChirii.ro',
         short_name: 'AdminChirii',
         description: 'Property management platform',
-        theme_color: '#ffffff',
+        theme_color: '#4169E1',
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
@@ -38,19 +38,19 @@ export default defineConfig(({ mode }) => ({
         ],
         icons: [
           {
-            src: '/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png',
+            src: '/lovable-uploads/db1b2738-7e16-492b-9a02-a0f53d9da02b.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/40d8c354-0818-47dd-81c4-1b8031beedb8.png',
+            src: '/lovable-uploads/db1b2738-7e16-492b-9a02-a0f53d9da02b.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/lovable-uploads/40d8c354-0818-47dd-81c4-1b8031beedb8.png',
+            src: '/lovable-uploads/db1b2738-7e16-492b-9a02-a0f53d9da02b.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
