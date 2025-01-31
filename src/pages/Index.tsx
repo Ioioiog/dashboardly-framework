@@ -74,6 +74,7 @@ const Index = () => {
         }
 
         console.log("Profile loaded successfully:", profile);
+        console.log("User profile data:", profile);
         
         // Validate and set user role
         if (profile.role === "landlord" || profile.role === "tenant" || profile.role === "service_provider") {
@@ -151,8 +152,17 @@ const Index = () => {
     console.log("Rendering dashboard for role:", userRole);
 
     switch (userRole) {
-      case "service_provider":
-        return <ServiceProviderDashboard />;
+      case "landlord":
+        return (
+          <div className="p-4 space-y-4">
+            <DashboardHeader userName={userName} />
+            <section className="bg-white rounded-lg shadow-sm p-4">
+              <DashboardMetrics userId={userId} userRole={userRole} />
+            </section>
+            <RevenueSection userId={userId} />
+            <UpcomingIncomeSection userId={userId} />
+          </div>
+        );
       case "tenant":
         return tenantInfo ? (
           <div className="p-4 space-y-4">
@@ -167,17 +177,8 @@ const Index = () => {
             <p>Loading tenant information...</p>
           </div>
         );
-      case "landlord":
-        return (
-          <div className="p-4 space-y-4">
-            <DashboardHeader userName={userName} />
-            <section className="bg-white rounded-lg shadow-sm p-4">
-              <DashboardMetrics userId={userId} userRole={userRole} />
-            </section>
-            <RevenueSection userId={userId} />
-            <UpcomingIncomeSection userId={userId} />
-          </div>
-        );
+      case "service_provider":
+        return <ServiceProviderDashboard />;
       default:
         console.error("Invalid user role:", userRole);
         return null;
