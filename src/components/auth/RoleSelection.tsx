@@ -30,7 +30,7 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
   return (
     <>
       <div className="text-center pb-8 animate-fade-in">
-        <CardTitle className="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-800">
+        <CardTitle className="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-800 animate-gradient">
           Choose Your Role
         </CardTitle>
         <CardDescription className="text-gray-600 dark:text-gray-400 text-lg">
@@ -38,22 +38,42 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
         </CardDescription>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in">
-        {roles.map((role) => {
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
+        {roles.map((role, index) => {
           const Icon = role.icon;
           return (
             <button
               key={role.id}
               onClick={() => onRoleSelect(role.id)}
-              className="flex flex-col items-center p-8 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 bg-white/50 dark:bg-slate-800/50 group"
+              className="group relative flex flex-col items-center p-8 rounded-xl border border-gray-100 dark:border-gray-800 
+                       hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 
+                       hover:shadow-xl hover:shadow-blue-500/20 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm
+                       transform hover:-translate-y-1 hover:scale-[1.02]
+                       animate-fade-in"
+              style={{
+                animationDelay: `${index * 150}ms`
+              }}
             >
-              <div className="mb-4 p-3 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-500 transition-transform group-hover:scale-110">
-                <Icon className="w-8 h-8" />
+              <div className="relative mb-4 p-4 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 
+                            dark:from-blue-900/30 dark:to-blue-800/30 
+                            group-hover:from-blue-100 group-hover:to-blue-200
+                            dark:group-hover:from-blue-800/40 dark:group-hover:to-blue-700/40
+                            transition-all duration-300 transform group-hover:scale-110">
+                <Icon className="w-8 h-8 text-blue-500 dark:text-blue-400 
+                               transition-transform duration-300 group-hover:rotate-[360deg]" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">{role.title}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+              <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200
+                           transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                {role.title}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center
+                          transition-colors duration-300 group-hover:text-gray-600 dark:group-hover:text-gray-300">
                 {role.description}
               </p>
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/0 to-blue-500/0 
+                            group-hover:from-blue-500/5 group-hover:to-blue-600/5 
+                            dark:group-hover:from-blue-400/10 dark:group-hover:to-blue-500/10 
+                            transition-all duration-300" />
             </button>
           );
         })}
