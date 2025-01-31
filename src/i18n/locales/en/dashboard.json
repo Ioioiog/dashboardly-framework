@@ -49,15 +49,5 @@
     "maintenance": "Maintenance Overview",
     "properties": "Properties Overview",
     "tenants": "Tenants Overview"
-  },
-  "quickActions": {
-    "title": "Quick Actions",
-    "maintenance": "Report Maintenance",
-    "maintenanceDesc": "Submit new maintenance request",
-    "documents": "View Documents",
-    "documentsDesc": "Access property documents",
-    "viewMore": "View More"
-  },
-  "propertyInfo": "Property Information",
-  "ongoingLease": "Ongoing Lease"
+  }
 }

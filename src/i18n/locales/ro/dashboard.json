@@ -49,15 +49,5 @@
     "maintenance": "Prezentare Mentenanță",
     "properties": "Prezentare Proprietăți",
     "tenants": "Prezentare Chiriași"
-  },
-  "quickActions": {
-    "title": "Acțiuni Rapide",
-    "maintenance": "Raportează Mentenanță",
-    "maintenanceDesc": "Trimite o nouă cerere de mentenanță",
-    "documents": "Vezi Documente",
-    "documentsDesc": "Accesează documentele proprietății",
-    "viewMore": "Vezi Mai Mult"
-  },
-  "propertyInfo": "Informații Proprietate",
-  "ongoingLease": "Contract în Derulare"
+  }
 }

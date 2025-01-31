@@ -49,15 +49,5 @@
     "maintenance": "Resumen de Mantenimiento",
     "properties": "Resumen de Propiedades",
     "tenants": "Resumen de Inquilinos"
-  },
-  "quickActions": {
-    "title": "Acciones Rápidas",
-    "maintenance": "Reportar Mantenimiento",
-    "maintenanceDesc": "Enviar nueva solicitud de mantenimiento",
-    "documents": "Ver Documentos",
-    "documentsDesc": "Acceder a documentos de propiedad",
-    "viewMore": "Ver Más"
-  },
-  "propertyInfo": "Información de la Propiedad",
-  "ongoingLease": "Contrato en Curso"
+  }
 }

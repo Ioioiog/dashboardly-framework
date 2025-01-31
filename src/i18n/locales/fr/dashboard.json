@@ -49,15 +49,5 @@
     "maintenance": "Aperçu de la Maintenance",
     "properties": "Aperçu des Propriétés",
     "tenants": "Aperçu des Locataires"
-  },
-  "quickActions": {
-    "title": "Actions Rapides",
-    "maintenance": "Signaler Maintenance",
-    "maintenanceDesc": "Soumettre une nouvelle demande de maintenance",
-    "documents": "Voir Documents",
-    "documentsDesc": "Accéder aux documents de propriété",
-    "viewMore": "Voir Plus"
-  },
-  "propertyInfo": "Information sur la Propriété",
-  "ongoingLease": "Bail en Cours"
+  }
 }
