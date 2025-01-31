@@ -35,15 +35,15 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
     console.log("Submitting form with role:", role);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
       if (!user) {
         throw new Error("No authenticated user found");
       }
 
-      console.log("Updating user metadata with role:", role);
+      console.log("Updating user metadata and profile for user:", user.id);
       
-      // First update the user's metadata to include the role
+      // First update the user's metadata
       const { error: updateError } = await supabase.auth.updateUser({
         data: { 
           role: role,
@@ -58,19 +58,15 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
       }
 
       // Then update the profile
-      const profileData = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone: formData.phone,
-        role: role,
-        email: email
-      };
-
-      console.log("Updating profile with data:", profileData);
-
       const { error: profileError } = await supabase
         .from('profiles')
-        .update(profileData)
+        .update({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone,
+          role: role,
+          email: email
+        })
         .eq('id', user.id);
 
       if (profileError) {
@@ -88,6 +84,8 @@ export function RoleSpecificForm({ role, email, onComplete }: RoleSpecificFormPr
             id: user.id,
             business_name: formData.businessName,
             service_area: [formData.serviceArea],
+            contact_email: email,
+            contact_phone: formData.phone
           });
 
         if (spError) {
