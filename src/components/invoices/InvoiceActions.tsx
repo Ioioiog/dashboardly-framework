@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { FileText, Trash2, Eye, Mail } from "lucide-react";
+import { FileText, Trash2, Eye, Mail, CreditCard } from "lucide-react";
 import { PaymentActions } from "@/components/payments/PaymentActions";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -103,6 +103,29 @@ export function InvoiceActions({
     }
   };
 
+  const handlePayment = async () => {
+    try {
+      console.log("Creating payment session for invoice:", invoiceId);
+      
+      const { data, error } = await supabase.functions.invoke('create-payment-checkout', {
+        body: { paymentId: invoiceId }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Error creating payment session:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to initiate payment.",
+      });
+    }
+  };
+
   return (
     <div className="flex items-center gap-4">
       <Button
@@ -145,6 +168,17 @@ export function InvoiceActions({
             Delete
           </Button>
         </>
+      )}
+      {userRole === "tenant" && status !== "paid" && (
+        <Button
+          variant="default"
+          size="sm"
+          onClick={handlePayment}
+          className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+        >
+          <CreditCard className="h-4 w-4" />
+          Pay Now
+        </Button>
       )}
       {userRole === "landlord" ? (
         <div className="flex gap-2">
