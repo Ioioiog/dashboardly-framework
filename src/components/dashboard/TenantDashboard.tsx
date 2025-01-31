@@ -76,7 +76,7 @@ export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboar
   if (isLoading) {
     return (
       <div className="p-6 space-y-6 max-w-7xl mx-auto">
-        <p className="text-muted-foreground">Loading tenant information...</p>
+        <p className="text-muted-foreground">{t('dashboard.metrics.loading')}</p>
       </div>
     );
   }
@@ -128,14 +128,14 @@ export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboar
                       size="sm"
                       onClick={() => navigate('/maintenance')}
                     >
-                      Report Issue
+                      {t('dashboard.quickActions.maintenance')}
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => navigate('/documents')}
                     >
-                      View Documents
+                      {t('dashboard.quickActions.documents')}
                     </Button>
                   </div>
                 </div>

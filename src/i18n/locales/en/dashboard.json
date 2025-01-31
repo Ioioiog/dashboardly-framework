@@ -1,53 +1,32 @@
 {
   "title": "Dashboard",
-  "welcome": "Welcome",
-  "overview": "Here's an overview of your activities",
+  "welcome": "Welcome back",
+  "overview": "Here's an overview of your rental home",
+  "propertyInfo": "Your Rental Property",
+  "ongoingLease": "Ongoing Lease",
   "metrics": {
+    "title": "Your Activity Overview",
     "loading": "Loading...",
-    "totalProperties": "Total Properties",
-    "totalPropertiesDesc": "Total properties managed",
-    "monthlyRevenue": "Monthly Revenue",
-    "monthlyRevenueDesc": "Current month's revenue",
-    "activeTenants": "Active Tenants",
-    "activeTenantsDesc": "Currently active tenants",
-    "pendingMaintenance": "Pending Maintenance",
-    "pendingMaintenanceDesc": "Pending maintenance requests",
+    "totalProperties": "Property Details",
+    "totalPropertiesDesc": "Information about your rental",
+    "monthlyRevenue": "Monthly Rent",
+    "monthlyRevenueDesc": "Your current monthly rent",
+    "activeTenants": "Lease Status",
+    "activeTenantsDesc": "Your current lease status",
+    "pendingMaintenance": "Maintenance",
+    "pendingMaintenanceDesc": "Open maintenance requests",
     "paymentStatus": "Payment Status",
-    "paymentStatusDesc": "Click to view monthly payments",
-    "rentedPropertiesDesc": "Your rented properties",
-    "openMaintenanceDesc": "Open maintenance requests",
-    "activeJobs": "Active Jobs",
-    "activeJobsDesc": "Ongoing maintenance jobs",
-    "completedJobs": "Completed Jobs",
-    "completedJobsDesc": "Jobs completed this month",
-    "monthlyEarnings": "Monthly Earnings",
-    "monthlyEarningsDesc": "Earnings from completed jobs this month",
-    "noPayments": "No payments"
+    "paymentStatusDesc": "Your recent payments",
+    "rentedPropertiesDesc": "Your rental property details",
+    "openMaintenanceDesc": "Current maintenance requests",
+    "noPayments": "No recent payments"
   },
-  "revenue": {
-    "title": "Revenue Overview",
-    "history": "Revenue History",
-    "predictions": "Revenue Predictions",
-    "noData": "No revenue data available",
-    "noUpcomingPayments": "No upcoming payments",
-    "upcomingPayments": "Upcoming Payments",
-    "monthlyAverage": "Monthly Average",
-    "totalRevenue": "Total Revenue",
-    "performance": "Performance",
-    "vs": "vs previous month",
-    "details": {
-      "title": "Revenue Details",
-      "property": "Property",
-      "amount": "Amount",
-      "dueDate": "Due Date",
-      "status": "Status",
-      "noDetails": "No revenue details available for this month"
-    }
-  },
-  "sections": {
-    "trackMoney": "Track your money",
-    "maintenance": "Maintenance Overview",
-    "properties": "Properties Overview",
-    "tenants": "Tenants Overview"
+  "quickActions": {
+    "title": "Quick Actions",
+    "maintenance": "Report an Issue",
+    "maintenanceDesc": "Submit a maintenance request for your property",
+    "documents": "View Documents",
+    "documentsDesc": "Access your lease and other important documents",
+    "viewMore": "Take Action"
   }
 }
