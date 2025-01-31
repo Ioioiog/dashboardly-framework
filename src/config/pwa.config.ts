@@ -100,7 +100,6 @@ export const pwaConfig: Partial<VitePWAOptions> = {
   // Adding the missing required properties
   injectRegister: 'auto',
   minify: true,
-  injectManifest: false,
   includeManifestIcons: true,
   disable: false
 }
