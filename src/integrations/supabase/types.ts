@@ -1359,7 +1359,7 @@ export type Database = {
       }
       get_latest_tenancy: {
         Args: {
-          tenant_id: string
+          p_tenant_id: string
         }
         Returns: {
           tenancy_id: string

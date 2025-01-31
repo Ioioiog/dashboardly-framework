@@ -12,14 +12,21 @@ import { SidebarLogo } from "./sidebar/SidebarLogo";
 import { SidebarMenuItem } from "./sidebar/SidebarMenuItem";
 import { SignOutButton } from "./sidebar/SignOutButton";
 import { useSidebarState } from "@/hooks/use-sidebar-state";
+import { useNavigate } from "react-router-dom";
 
 export const DashboardSidebar = () => {
   const { isExpanded, setIsExpanded, filteredMenuItems, isActive } = useSidebarState();
   const { data: notifications, markAsRead } = useSidebarNotifications();
+  const navigate = useNavigate();
 
   const handleNotificationClick = (type: string) => {
     console.log(`Marking ${type} notifications as read`);
     markAsRead(type);
+  };
+
+  const handleDashboardClick = () => {
+    console.log("Navigating to dashboard");
+    navigate("/dashboard");
   };
 
   return (
