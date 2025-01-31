@@ -37,7 +37,9 @@ export function UtilityProviderForm() {
 
   const { toast } = useToast();
   const { userRole } = useUserRole();
-  const { properties } = useProperties({ userRole: userRole || 'tenant' });
+  // Convert UserRole to the expected type for useProperties
+  const role = userRole === "service_provider" ? "tenant" : userRole || "tenant";
+  const { properties } = useProperties({ userRole: role });
 
   const fetchProviders = async () => {
     try {
