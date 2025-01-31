@@ -40,44 +40,75 @@ export function LandlordFields({ serviceProviders, formData, onChange }: Landlor
       setIsCreating(true);
       console.log("Creating new service provider:", newProvider);
 
-      // Create auth user with service provider role
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: newProvider.email,
-        password: "tempPass123!", // You might want to generate this randomly
-        options: {
-          data: {
-            role: "service_provider",
+      // First check if the user already exists
+      const { data: existingProfiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, role')
+        .eq('email', newProvider.email)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') { // PGRST116 means no rows returned
+        throw profileError;
+      }
+
+      if (existingProfiles) {
+        // Update existing profile to service provider role if they exist
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: newProvider.first_name,
+            last_name: newProvider.last_name,
+            phone: newProvider.phone,
+            role: 'service_provider',
+          })
+          .eq('id', existingProfiles.id);
+
+        if (updateError) throw updateError;
+
+        toast({
+          title: "Success",
+          description: "Existing user updated as service provider successfully.",
+        });
+      } else {
+        // Create new auth user with service provider role
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: newProvider.email,
+          password: "tempPass123!", // You might want to generate this randomly
+          options: {
+            data: {
+              role: "service_provider",
+            },
           },
-        },
-      });
+        });
 
-      if (authError) throw authError;
+        if (authError) throw authError;
 
-      // Profile is created automatically via trigger, but we need to update the details
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          first_name: newProvider.first_name,
-          last_name: newProvider.last_name,
-          phone: newProvider.phone,
-          role: "service_provider",
-        })
-        .eq("id", authData.user!.id);
+        // Profile is created automatically via trigger, but we need to update the details
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({
+            first_name: newProvider.first_name,
+            last_name: newProvider.last_name,
+            phone: newProvider.phone,
+            role: "service_provider",
+          })
+          .eq("id", authData.user!.id);
 
-      if (updateError) throw updateError;
+        if (updateError) throw updateError;
 
-      toast({
-        title: "Success",
-        description: "Service provider created successfully. They will receive an email to set their password.",
-      });
+        toast({
+          title: "Success",
+          description: "Service provider created successfully. They will receive an email to set their password.",
+        });
+      }
 
       setIsCreateDialogOpen(false);
       setNewProvider({ first_name: "", last_name: "", email: "", phone: "" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating service provider:", error);
       toast({
         title: "Error",
-        description: "Failed to create service provider. Please try again.",
+        description: error.message || "Failed to create service provider. Please try again.",
         variant: "destructive",
       });
     } finally {
