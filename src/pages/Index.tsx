@@ -116,6 +116,8 @@ const Index = () => {
   const renderDashboard = () => {
     if (!userId || !userRole) return null;
 
+    console.log("Rendering dashboard for role:", userRole);
+
     switch (userRole) {
       case "service_provider":
         return <ServiceProviderDashboard />;

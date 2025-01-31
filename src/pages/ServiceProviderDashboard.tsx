@@ -1,4 +1,3 @@
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
 import { useAuthState } from "@/hooks/useAuthState";
 
@@ -8,11 +7,11 @@ const ServiceProviderDashboard = () => {
   if (!currentUserId) return null;
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="p-4 space-y-4">
       <h1 className="text-2xl font-bold mb-6">Service Provider Dashboard</h1>
-      <div className="grid gap-6">
+      <section className="bg-white rounded-lg shadow-sm p-4">
         <DashboardMetrics userId={currentUserId} userRole="service_provider" />
-      </div>
+      </section>
     </div>
   );
 };
