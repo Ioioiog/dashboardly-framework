@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Home, Users } from "lucide-react";
 import { RoleSpecificForm } from "@/components/auth/RoleSpecificForm";
+import { PasswordStrength } from "@/components/auth/PasswordStrength";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const AuthPage = () => {
   const [selectedRole, setSelectedRole] = useState("tenant");
   const [showRoleForm, setShowRoleForm] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     const checkSession = async () => {
@@ -96,8 +98,8 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f9f9f9] p-4">
+      <Card className="w-full max-w-md bg-white shadow-lg rounded-xl">
         <CardHeader className="space-y-1 text-center">
           <div className="flex items-center justify-center mb-6">
             <h1 className="text-3xl font-bold">
@@ -106,7 +108,7 @@ const AuthPage = () => {
               <span className="text-slate-500 font-light">.ro</span>
             </h1>
           </div>
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
+          <CardTitle className="text-2xl">Property Management</CardTitle>
           <CardDescription>
             {showRoleForm ? "Complete your profile" : "Choose your role and sign in to your account"}
           </CardDescription>
@@ -153,8 +155,8 @@ const AuthPage = () => {
                   variables: {
                     default: {
                       colors: {
-                        brand: '#2563eb',
-                        brandAccent: '#1d4ed8',
+                        brand: '#007bff',
+                        brandAccent: '#0056b3',
                         brandButtonText: 'white',
                         defaultButtonBackground: 'white',
                         defaultButtonBackgroundHover: '#f8fafc',
@@ -164,7 +166,7 @@ const AuthPage = () => {
                         inputBackground: 'white',
                         inputBorder: '#e2e8f0',
                         inputBorderHover: '#cbd5e1',
-                        inputBorderFocus: '#2563eb',
+                        inputBorderFocus: '#007bff',
                         inputText: 'black',
                         inputLabelText: '#475569',
                         inputPlaceholder: '#94a3b8',
@@ -223,6 +225,7 @@ const AuthPage = () => {
                 onlyThirdPartyProviders={false}
                 magicLink={false}
               />
+              {password && <PasswordStrength password={password} />}
             </>
           )}
         </CardContent>
