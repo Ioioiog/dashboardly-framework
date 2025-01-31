@@ -79,13 +79,12 @@ const AuthPage = () => {
     console.log("Starting registration process with role:", selectedRole);
     
     try {
-      // Explicitly set the role in user metadata
       const { data, error } = await supabase.auth.signUp({
         email: userEmail,
         password,
         options: {
           data: {
-            role: selectedRole, // Ensure role is explicitly set
+            role: selectedRole,
           },
         },
       });
@@ -97,20 +96,19 @@ const AuthPage = () => {
           description: error.message,
           variant: "destructive",
         });
+        return;
+      }
+
+      console.log("Registration successful:", data);
+      
+      if (selectedRole === 'service_provider') {
+        setShowRoleForm(true);
       } else {
-        console.log("Registration successful:", data);
-        console.log("User metadata:", data.user?.user_metadata);
-        
-        if (selectedRole === 'service_provider') {
-          console.log("Showing service provider form for additional details");
-          setShowRoleForm(true);
-        } else {
-          toast({
-            title: "Registration Successful",
-            description: "Please check your email for confirmation.",
-          });
-          setView("login");
-        }
+        toast({
+          title: "Registration Successful",
+          description: "Please check your email for confirmation.",
+        });
+        setView("login");
       }
     } catch (error) {
       console.error("Unexpected registration error:", error);
