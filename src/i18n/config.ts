@@ -11,16 +11,19 @@ import enAuth from './locales/en/auth.json';
 import esCommon from './locales/es/common.json';
 import esProperties from './locales/es/properties.json';
 import esDashboard from './locales/es/dashboard.json';
+import esAuth from './locales/es/auth.json';
 
 // French translations
 import frCommon from './locales/fr/common.json';
 import frProperties from './locales/fr/properties.json';
 import frDashboard from './locales/fr/dashboard.json';
+import frAuth from './locales/fr/auth.json';
 
 // Romanian translations
 import roCommon from './locales/ro/common.json';
 import roProperties from './locales/ro/properties.json';
 import roDashboard from './locales/ro/dashboard.json';
+import roAuth from './locales/ro/auth.json';
 
 const resources = {
   en: {
@@ -33,16 +36,19 @@ const resources = {
     common: esCommon,
     properties: esProperties,
     dashboard: esDashboard,
+    auth: esAuth,
   },
   fr: {
     common: frCommon,
     properties: frProperties,
     dashboard: frDashboard,
+    auth: frAuth,
   },
   ro: {
     common: roCommon,
     properties: roProperties,
     dashboard: roDashboard,
+    auth: roAuth,
   },
 };
 
