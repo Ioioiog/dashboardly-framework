@@ -7,16 +7,17 @@ import { LandlordDashboard } from "@/components/dashboard/LandlordDashboard";
 import { TenantDashboard } from "@/components/dashboard/TenantDashboard";
 import { ServiceProviderDashboard } from "@/components/dashboard/ServiceProviderDashboard";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { useUserRole } from "@/hooks/use-user-role";
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [userId, setUserId] = React.useState<string | null>(null);
-  const [userRole, setUserRole] = React.useState<"landlord" | "tenant" | "service_provider" | null>(null);
   const [userName, setUserName] = React.useState<string>("");
   const [tenantInfo, setTenantInfo] = React.useState<any>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const { userRole } = useUserRole();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -77,25 +78,6 @@ const Index = () => {
 
         console.log("Profile loaded successfully:", profile);
         
-        // Validate role type
-        const validRole = profile.role === "landlord" || 
-                         profile.role === "tenant" || 
-                         profile.role === "service_provider";
-
-        if (!validRole) {
-          console.error("Invalid role found:", profile.role);
-          toast({
-            title: "Error",
-            description: "Invalid user role. Please contact support.",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        // Set user role with type assertion since we've validated it
-        setUserRole(profile.role as "landlord" | "tenant" | "service_provider");
-        console.log("Setting user role to:", profile.role);
-        
         // Set user name from profile
         const fullName = [profile.first_name, profile.last_name]
           .filter(Boolean)
@@ -140,23 +122,6 @@ const Index = () => {
     };
 
     checkUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed:", event);
-        if (event === 'SIGNED_OUT' || !session) {
-          setUserRole(null);
-          setUserId(null);
-          navigate("/auth");
-          return;
-        }
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          await checkUser();
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
   }, [navigate, toast, t]);
 
   if (isLoading) {
