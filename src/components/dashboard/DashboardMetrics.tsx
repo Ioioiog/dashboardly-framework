@@ -135,7 +135,7 @@ export function DashboardMetrics({ userId, userRole }: { userId: string; userRol
         />
         <MetricCard
           title={t('dashboard.metrics.paymentStatus')}
-          value={metrics.paymentStatus || 'N/A'}
+          value={metrics.paymentStatus || t('dashboard.metrics.noPayments')}
           icon={Wallet}
           onClick={handleRevenueClick}
           className="bg-white shadow-md hover:shadow-lg transition-all duration-300"

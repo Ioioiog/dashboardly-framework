@@ -13,7 +13,7 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
         {t('dashboard.title')}
       </h1>
       <p className="text-muted-foreground">
-        {t('dashboard.welcome')}, <span className="font-medium text-primary">{userName}</span>! {t('dashboard.overview')}
+        {t('dashboard.welcome')} <span className="font-medium text-primary">{userName}</span>! {t('dashboard.overview')}
       </p>
     </div>
   );
