@@ -25,22 +25,36 @@ export interface MaintenanceFormValues {
 }
 
 interface MaintenanceRequestFormProps {
-  defaultValues: MaintenanceFormValues;
-  onSubmit: (values: MaintenanceFormValues) => void;
   properties: Property[];
-  userRole: string;
   serviceProviders?: Array<{ id: string; first_name: string; last_name: string; }>;
+  userRole: string;
+  existingRequest?: MaintenanceFormValues;
+  onSubmit: (values: MaintenanceFormValues) => void;
+  isSubmitting?: boolean;
 }
 
 export function MaintenanceRequestForm({
-  defaultValues,
-  onSubmit,
   properties,
-  userRole,
   serviceProviders,
+  userRole,
+  existingRequest,
+  onSubmit,
+  isSubmitting
 }: MaintenanceRequestFormProps) {
-  const form = useForm<MaintenanceFormValues>({ defaultValues });
-  const isExistingRequest = defaultValues.title !== "";
+  const form = useForm<MaintenanceFormValues>({
+    defaultValues: existingRequest || {
+      title: "",
+      description: "",
+      property_id: "",
+      priority: "low",
+      status: "pending",
+      notes: "",
+      assigned_to: "",
+      service_provider_notes: "",
+      images: [],
+      tenant_id: ""
+    }
+  });
 
   return (
     <Form {...form}>
@@ -51,7 +65,7 @@ export function MaintenanceRequestForm({
               form={form}
               properties={properties}
               userRole={userRole}
-              isExistingRequest={isExistingRequest}
+              isExistingRequest={!!existingRequest}
             />
 
             <ImageUpload
@@ -63,16 +77,20 @@ export function MaintenanceRequestForm({
 
           <div className="space-y-4">
             <LandlordFields
-              form={form}
-              serviceProviders={serviceProviders}
-              userRole={userRole}
+              formData={{
+                assigned_to: form.watch("assigned_to"),
+                service_provider_notes: form.watch("service_provider_notes"),
+                notes: form.watch("notes")
+              }}
+              onChange={(field, value) => form.setValue(field as any, value)}
+              serviceProviders={serviceProviders || []}
             />
           </div>
         </div>
 
         <div className="flex justify-end space-x-2 pt-4">
-          <Button type="submit">
-            {isExistingRequest ? "Update Request" : "Create Request"}
+          <Button type="submit" disabled={isSubmitting}>
+            {existingRequest ? "Update Request" : "Create Request"}
           </Button>
         </div>
       </form>

@@ -14,8 +14,8 @@ interface ServiceProvider {
   last_name: string | null;
 }
 
-interface LandlordFieldsProps {
-  serviceProviders: ServiceProvider[] | null;
+export interface LandlordFieldsProps {
+  serviceProviders: ServiceProvider[];
   formData: {
     assigned_to: string | null;
     service_provider_notes: string | null;
