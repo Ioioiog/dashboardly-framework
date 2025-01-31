@@ -91,7 +91,7 @@ export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboar
       {/* Properties Section */}
       <section className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">{t('dashboard.propertyInfo')}</h2>
-        <div className="grid gap-6 md:grid-cols-1">
+        <div className="grid gap-6 md:grid-cols-3">
           {tenancies?.map((tenancy) => (
             <Card key={tenancy.id} className="border border-gray-200">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -100,42 +100,44 @@ export function TenantDashboard({ userId, userName, tenantInfo }: TenantDashboar
                 </CardTitle>
                 <Home className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-3">
+              <CardContent>
+                <div className="space-y-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Address</p>
                     <p className="text-base font-medium">{tenancy.property.address}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Start Date</p>
-                    <p className="text-base font-medium">
-                      {format(new Date(tenancy.start_date), 'MMM d, yyyy')}
-                    </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Start Date</p>
+                      <p className="text-base font-medium">
+                        {format(new Date(tenancy.start_date), 'MMM d, yyyy')}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">End Date</p>
+                      <p className="text-base font-medium">
+                        {tenancy.end_date 
+                          ? format(new Date(tenancy.end_date), 'MMM d, yyyy')
+                          : t('dashboard.ongoingLease')}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">End Date</p>
-                    <p className="text-base font-medium">
-                      {tenancy.end_date 
-                        ? format(new Date(tenancy.end_date), 'MMM d, yyyy')
-                        : t('dashboard.ongoingLease')}
-                    </p>
+                  <div className="flex justify-end space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate('/maintenance')}
+                    >
+                      Report Issue
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate('/documents')}
+                    >
+                      View Documents
+                    </Button>
                   </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => navigate('/maintenance')}
-                  >
-                    Report Issue
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => navigate('/documents')}
-                  >
-                    View Documents
-                  </Button>
                 </div>
               </CardContent>
             </Card>
