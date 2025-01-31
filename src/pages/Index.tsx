@@ -98,11 +98,16 @@ const Index = () => {
           console.log("Fetching tenant information...");
           const { data: tenancy, error: tenancyError } = await supabase.rpc(
             'get_latest_tenancy',
-            { p_tenant_id: currentUserId }  // Changed from tenant_id to p_tenant_id
+            { p_tenant_id: currentUserId }
           );
 
           if (tenancyError) {
             console.error("Error fetching tenancy:", tenancyError);
+            toast({
+              title: "Error",
+              description: "Failed to load tenancy information. Please try refreshing the page.",
+              variant: "destructive",
+            });
           } else if (tenancy && tenancy.length > 0) {
             console.log("Tenant information loaded:", tenancy[0]);
             setTenantInfo(tenancy[0]);
