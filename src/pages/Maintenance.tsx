@@ -10,7 +10,6 @@ import MaintenanceDialog from "@/components/maintenance/MaintenanceDialog";
 import MaintenanceFilters from "@/components/maintenance/MaintenanceFilters";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { useQueryClient } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NoDataCard } from "@/components/dashboard/charts/NoDataCard";
@@ -63,6 +62,8 @@ export default function Maintenance() {
     queryKey: ["maintenance-requests", filters],
     queryFn: async () => {
       console.log("Fetching maintenance requests with filters:", filters);
+      console.log("Current user role:", userRole);
+      
       let query = supabase
         .from("maintenance_requests")
         .select(`
@@ -85,10 +86,13 @@ export default function Maintenance() {
       }
 
       const { data, error } = await query;
+      
       if (error) {
         console.error("Error fetching maintenance requests:", error);
         throw error;
       }
+      
+      console.log("Fetched maintenance requests:", data);
       return data;
     },
   });
