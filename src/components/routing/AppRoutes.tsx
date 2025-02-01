@@ -8,7 +8,6 @@ import Financial from "@/pages/Financial";
 import Utilities from "@/pages/Utilities";
 import Chat from "@/pages/Chat";
 import Maintenance from "@/pages/Maintenance";
-import MeterReadings from "@/pages/MeterReadings";
 import ServiceProviderProfile from "@/pages/ServiceProviderProfile";
 import ServiceAreas from "@/pages/ServiceAreas";
 import Services from "@/pages/Services";
@@ -121,14 +120,6 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <Utilities />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/meter-readings"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <MeterReadings />
           </ProtectedRoute>
         }
       />
