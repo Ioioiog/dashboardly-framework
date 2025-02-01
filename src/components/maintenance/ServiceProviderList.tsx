@@ -9,11 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthState } from "@/hooks/useAuthState";
 
-interface ServiceProviderProfile {
-  first_name: string | null;
-  last_name: string | null;
-}
-
 interface ServiceProviderService {
   name: string;
   base_price?: number;
@@ -31,7 +26,10 @@ interface ServiceProvider {
   service_area?: string[];
   rating?: number;
   review_count?: number;
-  profile: ServiceProviderProfile;
+  profile: {
+    first_name: string | null;
+    last_name: string | null;
+  };
   services?: ServiceProviderService[];
   isPreferred?: boolean;
 }
@@ -62,7 +60,7 @@ export function ServiceProviderList() {
         throw preferredError;
       }
 
-      // Then get service provider profiles and their services
+      // Get service provider profiles that have a corresponding profile entry
       const { data: providers, error: providersError } = await supabase
         .from("service_provider_profiles")
         .select(`
@@ -75,7 +73,7 @@ export function ServiceProviderList() {
           service_area,
           rating,
           review_count,
-          profiles:id (
+          profiles (
             first_name,
             last_name
           ),
@@ -85,7 +83,8 @@ export function ServiceProviderList() {
             base_price,
             price_unit
           )
-        `);
+        `)
+        .not('profiles', 'is', null);
 
       if (providersError) {
         console.error("Error fetching providers:", providersError);
@@ -145,7 +144,7 @@ export function ServiceProviderList() {
       
       toast({
         title: provider.isPreferred ? "Removed from preferred providers" : "Added to preferred providers",
-        description: `${provider.profile.first_name} ${provider.profile.last_name} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
+        description: `${provider.business_name || `${provider.profile.first_name} ${provider.profile.last_name}`} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
       });
     } catch (error) {
       console.error('Error updating preferred status:', error);
