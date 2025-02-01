@@ -58,7 +58,7 @@ const Financial = () => {
   ];
 
   // Only allow landlord or tenant roles to access this page
-  if (userRole === "service_provider") {
+  if (!userRole || userRole === "service_provider") {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
@@ -71,7 +71,7 @@ const Financial = () => {
 
   const renderSection = () => {
     // Early return if role is not landlord or tenant
-    if (!userRole || userRole === "service_provider") return null;
+    if (userRole !== "landlord" && userRole !== "tenant") return null;
 
     switch (activeSection) {
       case 'invoices':
