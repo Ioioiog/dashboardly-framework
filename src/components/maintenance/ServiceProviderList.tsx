@@ -36,6 +36,20 @@ interface ServiceProvider {
   isPreferred?: boolean;
 }
 
+interface SupabaseServiceProvider {
+  id: string;
+  business_name: string | null;
+  description: string | null;
+  contact_phone: string | null;
+  contact_email: string | null;
+  website: string | null;
+  service_area: string[] | null;
+  rating: number | null;
+  review_count: number | null;
+  profiles: ServiceProviderProfile | null;
+  services: ServiceProviderService[];
+}
+
 export function ServiceProviderList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -88,10 +102,9 @@ export function ServiceProviderList() {
       const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
       // Format and sort the providers data
-      const formattedProviders: ServiceProvider[] = providers.map(provider => ({
+      const formattedProviders: ServiceProvider[] = (providers as SupabaseServiceProvider[]).map(provider => ({
         ...provider,
         isPreferred: preferredIds.has(provider.id),
-        // Extract profile from the nested structure
         profile: provider.profiles || { 
           first_name: null, 
           last_name: null 
