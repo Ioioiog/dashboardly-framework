@@ -9,8 +9,10 @@ import { RoleSpecificForm } from "@/components/auth/RoleSpecificForm";
 import { 
   Home, Building2, Wrench, MessageSquare, FileText, Settings, 
   Receipt, Bell, Calendar, CreditCard, User, Lock, Key, 
-  Shield, Globe, Mail, Wallet, Users, Home2
+  Shield, Globe, Mail, Wallet, Users, HomeIcon
 } from "lucide-react";
+
+// ... keep existing code (useState, useEffect, handlers)
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -222,7 +224,7 @@ const AuthPage = () => {
           <FloatingIcon icon={Mail} className="bottom-1/3 right-2/3 animate-float-6" />
           <FloatingIcon icon={Wallet} className="top-2/5 left-3/4 animate-float-7" />
           <FloatingIcon icon={Users} className="bottom-2/5 right-3/4 animate-float-8" />
-          <FloatingIcon icon={Home2} className="top-3/4 left-1/3 animate-float-9" />
+          <FloatingIcon icon={HomeIcon} className="top-3/4 left-1/3 animate-float-9" />
         </div>
       </div>
 
