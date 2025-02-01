@@ -33,6 +33,7 @@ export function TenantList({ tenants, isLandlord = false }: TenantListProps) {
 
   const handleDeleteTenant = async (tenantId: string) => {
     try {
+      console.log("Deleting tenant:", tenantId);
       const { error: observationsError } = await supabase
         .from('tenant_observations')
         .delete()
@@ -117,7 +118,7 @@ export function TenantList({ tenants, isLandlord = false }: TenantListProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTenants.map((tenant) => (
             <TenantCard
-              key={tenant.id}
+              key={`${tenant.id}-${tenant.tenancy?.id || 'no-tenancy'}`}
               tenant={tenant}
               onDelete={handleDeleteTenant}
               onUpdate={handleTenantUpdate}
@@ -144,7 +145,7 @@ export function TenantList({ tenants, isLandlord = false }: TenantListProps) {
             <TableBody>
               {filteredTenants.map((tenant) => (
                 <TenantRow
-                  key={tenant.id}
+                  key={`${tenant.id}-${tenant.tenancy?.id || 'no-tenancy'}`}
                   tenant={tenant}
                   onDelete={handleDeleteTenant}
                   onUpdate={handleTenantUpdate}
