@@ -15,6 +15,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { Card } from "@/components/ui/card";
 import { NoDataCard } from "@/components/dashboard/charts/NoDataCard";
 import { Badge } from "@/components/ui/badge";
+import { useAuthState } from "@/hooks/useAuthState";
 
 type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
 
@@ -26,11 +27,34 @@ interface Filters {
 
 type MaintenanceSection = "requests" | "providers";
 
+interface ServiceProvider {
+  id: string;
+  business_name?: string;
+  description?: string;
+  contact_phone?: string;
+  contact_email?: string;
+  website?: string;
+  service_area?: string[];
+  rating?: number;
+  review_count?: number;
+  profiles?: {
+    first_name: string;
+    last_name: string;
+  };
+  services?: Array<{
+    name: string;
+    base_price?: number;
+    price_unit?: string;
+  }>;
+  isPreferred?: boolean;
+}
+
 export default function Maintenance() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { userRole } = useUserRole();
+  const { currentUserId } = useAuthState();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
   const [activeSection, setActiveSection] = React.useState<MaintenanceSection>("requests");
@@ -40,7 +64,6 @@ export default function Maintenance() {
     propertyId: "all",
   });
 
-  // Set up real-time subscription
   useEffect(() => {
     const channel = supabase
       .channel('maintenance-changes')
@@ -127,7 +150,7 @@ export default function Maintenance() {
             )
           )
         `)
-        .eq('landlord_id', auth.uid());
+        .eq('landlord_id', currentUserId);
 
       if (preferredError) {
         console.error("Error fetching preferred providers:", preferredError);
@@ -157,13 +180,13 @@ export default function Maintenance() {
       }
 
       // Create a set of preferred provider IDs for quick lookup
-      const preferredIds = new Set(preferredProviders.map(p => p.service_provider_id));
+      const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
       // Mark providers as preferred or available
-      const formattedProviders = allProviders.map(provider => ({
+      const formattedProviders = allProviders?.map(provider => ({
         ...provider,
         isPreferred: preferredIds.has(provider.id)
-      }));
+      })) || [];
 
       // Sort providers: preferred first, then by name
       return formattedProviders.sort((a, b) => {
@@ -218,7 +241,7 @@ export default function Maintenance() {
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {serviceProviders.map((provider) => (
+        {serviceProviders.map((provider: ServiceProvider) => (
           <Card key={provider.id} className={cn(
             "p-6 space-y-4",
             provider.isPreferred && "border-2 border-primary"
@@ -326,13 +349,13 @@ export default function Maintenance() {
                         await supabase
                           .from('landlord_service_providers')
                           .delete()
-                          .eq('landlord_id', auth.uid())
+                          .eq('landlord_id', currentUserId)
                           .eq('service_provider_id', provider.id);
                       } else {
                         await supabase
                           .from('landlord_service_providers')
                           .insert({
-                            landlord_id: auth.uid(),
+                            landlord_id: currentUserId,
                             service_provider_id: provider.id
                           });
                       }
