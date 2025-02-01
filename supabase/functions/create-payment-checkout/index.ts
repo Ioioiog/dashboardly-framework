@@ -35,11 +35,6 @@ serve(async (req) => {
     console.log('Authenticated user:', user.id);
 
     // Get the invoice details including the property and landlord info
-    console.log('Fetching invoice details with query:', {
-      id: paymentId,
-      select: `*, landlord:profiles!invoices_landlord_id_fkey (stripe_account_id, email), property:properties (name, address)`
-    });
-
     const { data: invoice, error: invoiceError } = await supabaseClient
       .from('invoices')
       .select(`
@@ -56,11 +51,9 @@ serve(async (req) => {
       .eq('id', paymentId)
       .maybeSingle();
 
-    console.log('Invoice query result:', { invoice, invoiceError });
-
     if (invoiceError) {
       console.error('Error fetching invoice:', invoiceError);
-      throw new Error(`Error fetching invoice: ${invoiceError.message}`);
+      throw new Error('Error fetching invoice details');
     }
 
     if (!invoice) {
@@ -79,33 +72,15 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
-    // Create or retrieve customer
-    let customer;
-    const customers = await stripe.customers.list({
-      email: user.email,
-      limit: 1,
-    });
-
-    if (customers.data.length > 0) {
-      customer = customers.data[0];
-    } else {
-      customer = await stripe.customers.create({
-        email: user.email,
-        metadata: {
-          supabase_user_id: user.id,
-        },
-      });
-    }
-
     console.log('Creating payment session...');
     const session = await stripe.checkout.sessions.create({
-      customer: customer.id,
+      payment_method_types: ['card'],
       line_items: [
         {
           price_data: {
             currency: invoice.currency.toLowerCase(),
             product_data: {
-              name: `Invoice Payment for ${invoice.property.name}`,
+              name: `Rent Payment - ${invoice.property.name}`,
               description: `Payment for ${invoice.property.address}`,
             },
             unit_amount: Math.round(invoice.amount * 100), // Convert to cents
@@ -114,15 +89,17 @@ serve(async (req) => {
         },
       ],
       mode: 'payment',
-      success_url: `${req.headers.get('origin')}/invoices?success=true`,
-      cancel_url: `${req.headers.get('origin')}/invoices?canceled=true`,
+      success_url: `${req.headers.get('origin')}/financial?success=true`,
+      cancel_url: `${req.headers.get('origin')}/financial?canceled=true`,
+      customer_email: user.email, // Pre-fill customer email
       metadata: {
         invoice_id: invoice.id,
         tenant_id: user.id,
+        property_id: invoice.property_id,
       },
       payment_intent_data: {
         transfer_data: {
-          destination: stripeAccountId,
+          destination: stripeAccountId, // Transfer payment to landlord's connected account
         },
       },
     });
