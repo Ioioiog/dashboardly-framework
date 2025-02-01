@@ -60,7 +60,7 @@ export function ServiceProviderList() {
         throw preferredError;
       }
 
-      // Get service provider profiles that have a corresponding profile entry
+      // Get service provider profiles with a join to profiles table
       const { data: providers, error: providersError } = await supabase
         .from("service_provider_profiles")
         .select(`
@@ -73,7 +73,7 @@ export function ServiceProviderList() {
           service_area,
           rating,
           review_count,
-          profiles (
+          profiles!service_provider_profiles_id_fkey (
             first_name,
             last_name
           ),
@@ -83,8 +83,7 @@ export function ServiceProviderList() {
             base_price,
             price_unit
           )
-        `)
-        .not('profiles', 'is', null);
+        `);
 
       if (providersError) {
         console.error("Error fetching providers:", providersError);
@@ -187,7 +186,7 @@ export function ServiceProviderList() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {serviceProviders.map((provider) => (
+      {serviceProviders?.map((provider) => (
         <Card 
           key={provider.id} 
           className={cn(
