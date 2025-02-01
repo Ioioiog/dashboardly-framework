@@ -193,11 +193,11 @@ const AuthPage = () => {
 
       <Card className="w-full max-w-md bg-white/90 backdrop-blur-sm relative z-10 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 border-0">
         <CardContent className="space-y-6 px-8">
-          <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center justify-center mb-6 bg-transparent">
             <img 
               src="/lovable-uploads/ee7b7c5d-7f56-451d-800e-19c3beac7ebd.png" 
               alt="AdminChirii Logo" 
-              className="h-20 drop-shadow-md"
+              className="h-20 drop-shadow-md mix-blend-multiply"
             />
           </div>
 
