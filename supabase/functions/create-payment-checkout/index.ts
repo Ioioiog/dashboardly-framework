@@ -32,16 +32,25 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    // Get user's email from profiles
+    console.log('Authenticated user:', user.id);
+
+    // Get user's email from profiles with more detailed error logging
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
-      .select('email')
+      .select('email, id')
       .eq('id', user.id)
       .single();
 
-    if (profileError || !profile?.email) {
+    console.log('Profile query result:', { profile, profileError });
+
+    if (profileError) {
       console.error('Profile fetch error:', profileError);
-      throw new Error('User profile not found');
+      throw new Error(`User profile fetch failed: ${profileError.message}`);
+    }
+
+    if (!profile?.email) {
+      console.error('No email found in profile for user:', user.id);
+      throw new Error('User profile email not found');
     }
 
     // Get the invoice details including the property and landlord info
