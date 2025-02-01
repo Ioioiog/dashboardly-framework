@@ -269,14 +269,14 @@ export function ServiceProviderList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end mb-6">
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
               Create New Provider
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Create Service Provider</DialogTitle>
             </DialogHeader>
@@ -288,6 +288,7 @@ export function ServiceProviderList() {
                     id="first_name"
                     value={newProvider.first_name}
                     onChange={(e) => setNewProvider(prev => ({ ...prev, first_name: e.target.value }))}
+                    className="w-full"
                   />
                 </div>
                 <div className="space-y-2">
@@ -296,6 +297,7 @@ export function ServiceProviderList() {
                     id="last_name"
                     value={newProvider.last_name}
                     onChange={(e) => setNewProvider(prev => ({ ...prev, last_name: e.target.value }))}
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -306,6 +308,7 @@ export function ServiceProviderList() {
                   type="email"
                   value={newProvider.email}
                   onChange={(e) => setNewProvider(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full"
                 />
               </div>
               <div className="space-y-2">
@@ -315,10 +318,11 @@ export function ServiceProviderList() {
                   type="tel"
                   value={newProvider.phone}
                   onChange={(e) => setNewProvider(prev => ({ ...prev, phone: e.target.value }))}
+                  className="w-full"
                 />
               </div>
               <Button 
-                className="w-full" 
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
                 onClick={handleCreateServiceProvider}
                 disabled={isCreating}
               >
@@ -329,15 +333,44 @@ export function ServiceProviderList() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {serviceProviders?.map((provider) => (
-          <ServiceProviderCard
-            key={provider.id}
-            provider={provider}
-            onPreferredToggle={handlePreferredToggle}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : !serviceProviders?.length ? (
+        <Card className="p-8">
+          <div className="text-center space-y-4">
+            <Building2 className="mx-auto h-12 w-12 text-gray-400" />
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium text-gray-900">No Service Providers Found</h3>
+              <p className="text-sm text-gray-500 max-w-sm mx-auto">
+                There are currently no service providers available. Click the button above to add your first service provider.
+              </p>
+            </div>
+          </div>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {serviceProviders?.map((provider) => (
+            <ServiceProviderCard
+              key={provider.id}
+              provider={provider}
+              onPreferredToggle={handlePreferredToggle}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -237,9 +237,17 @@ export default function Maintenance() {
             </>
           ) : (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold">
-                {t("maintenance.serviceProviders")}
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">
+                  {t("maintenance.serviceProviders")}
+                </h2>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <List className="h-4 w-4 mr-2" />
+                    Filter
+                  </Button>
+                </div>
+              </div>
               <ServiceProviderList />
             </div>
           )}
