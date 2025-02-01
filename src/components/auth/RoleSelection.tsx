@@ -45,31 +45,29 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
             <button
               key={role.id}
               onClick={() => onRoleSelect(role.id)}
-              className="group relative flex flex-col items-center p-8 rounded-[2.5rem] border-0
+              className="group relative flex flex-col items-center p-8 rounded-[2.5rem]
                        transition-all duration-300 
                        hover:shadow-2xl hover:shadow-blue-500/10
-                       bg-gradient-to-br from-white/[0.02] to-white/[0.05]
-                       dark:from-slate-800/[0.02] dark:to-slate-800/[0.05]
-                       backdrop-blur-md
+                       bg-transparent
+                       backdrop-blur-[2px]
                        transform hover:-translate-y-1 hover:scale-[1.02]
                        animate-fade-in
                        before:absolute before:inset-0 before:rounded-[2.5rem] 
-                       before:bg-gradient-to-br before:from-blue-500/0 before:to-blue-600/0
+                       before:bg-gradient-to-br before:from-transparent before:to-transparent
                        before:transition-colors before:duration-300
-                       hover:before:from-blue-500/[0.03] hover:before:to-blue-600/[0.03]
+                       hover:before:from-blue-500/[0.02] hover:before:to-blue-600/[0.02]
                        after:absolute after:inset-0 after:rounded-[2.5rem] 
-                       after:border after:border-white/10 after:dark:border-slate-700/10"
+                       after:border after:border-white/5 after:dark:border-slate-700/5"
               style={{
                 animationDelay: `${index * 150}ms`
               }}
             >
               <div className="relative mb-6 p-5 rounded-2xl 
-                            bg-gradient-to-br from-blue-500/[0.02] to-blue-600/[0.02]
-                            dark:from-blue-400/[0.02] dark:to-blue-500/[0.02]
+                            bg-transparent
                             transition-all duration-300 transform 
                             group-hover:scale-110 group-hover:rotate-3
                             before:absolute before:inset-0 before:rounded-2xl
-                            before:bg-gradient-to-br before:from-blue-500/[0.02] before:to-blue-600/[0.02]
+                            before:bg-gradient-to-br before:from-blue-500/[0.01] before:to-blue-600/[0.01]
                             before:opacity-0 group-hover:before:opacity-100
                             before:transition-opacity before:duration-300">
                 <Icon className="w-10 h-10 text-blue-500 dark:text-blue-400 
