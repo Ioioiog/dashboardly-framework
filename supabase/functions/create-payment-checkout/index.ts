@@ -35,20 +35,25 @@ serve(async (req) => {
     console.log('Authenticated user:', user.id);
 
     // Get user's email from profiles with more detailed error logging
-    const { data: profile, error: profileError } = await supabaseClient
+    const { data: profiles, error: profileError } = await supabaseClient
       .from('profiles')
       .select('email, id')
-      .eq('id', user.id)
-      .single();
+      .eq('id', user.id);
 
-    console.log('Profile query result:', { profile, profileError });
+    console.log('Profile query result:', { profiles, profileError });
 
     if (profileError) {
       console.error('Profile fetch error:', profileError);
       throw new Error(`User profile fetch failed: ${profileError.message}`);
     }
 
-    if (!profile?.email) {
+    if (!profiles || profiles.length === 0) {
+      console.error('No profile found for user:', user.id);
+      throw new Error('User profile not found');
+    }
+
+    const profile = profiles[0];
+    if (!profile.email) {
       console.error('No email found in profile for user:', user.id);
       throw new Error('User profile email not found');
     }
