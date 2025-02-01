@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Building2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -6,6 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthState } from "@/hooks/useAuthState";
 import { ServiceProviderCard } from "./service-provider/ServiceProviderCard";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface ServiceProviderService {
   name: string;
@@ -36,6 +40,14 @@ export function ServiceProviderList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { currentUserId } = useAuthState();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newProvider, setNewProvider] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+  });
 
   const { data: serviceProviders, isLoading } = useQuery({
     queryKey: ["service-providers-details"],
@@ -105,6 +117,84 @@ export function ServiceProviderList() {
     },
     enabled: !!currentUserId
   });
+
+  const handleCreateServiceProvider = async () => {
+    try {
+      setIsCreating(true);
+      console.log("Creating new service provider:", newProvider);
+
+      const { data: existingProfiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, role')
+        .eq('email', newProvider.email)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+
+      if (existingProfiles) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: newProvider.first_name,
+            last_name: newProvider.last_name,
+            phone: newProvider.phone,
+            role: 'service_provider',
+          })
+          .eq('id', existingProfiles.id);
+
+        if (updateError) throw updateError;
+
+        toast({
+          title: "Success",
+          description: "Existing user updated as service provider successfully.",
+        });
+      } else {
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: newProvider.email,
+          password: "tempPass123!",
+          options: {
+            data: {
+              role: "service_provider",
+            },
+          },
+        });
+
+        if (authError) throw authError;
+
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({
+            first_name: newProvider.first_name,
+            last_name: newProvider.last_name,
+            phone: newProvider.phone,
+            role: "service_provider",
+          })
+          .eq("id", authData.user!.id);
+
+        if (updateError) throw updateError;
+
+        toast({
+          title: "Success",
+          description: "Service provider created successfully. They will receive an email to set their password.",
+        });
+      }
+
+      setIsCreateDialogOpen(false);
+      setNewProvider({ first_name: "", last_name: "", email: "", phone: "" });
+      queryClient.invalidateQueries({ queryKey: ['service-providers-details'] });
+    } catch (error: any) {
+      console.error("Error creating service provider:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create service provider. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const handlePreferredToggle = async (provider: ServiceProvider) => {
     if (!currentUserId) {
@@ -178,14 +268,76 @@ export function ServiceProviderList() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {serviceProviders?.map((provider) => (
-        <ServiceProviderCard
-          key={provider.id}
-          provider={provider}
-          onPreferredToggle={handlePreferredToggle}
-        />
-      ))}
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              Create New Provider
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Service Provider</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="first_name">First Name</Label>
+                  <Input
+                    id="first_name"
+                    value={newProvider.first_name}
+                    onChange={(e) => setNewProvider(prev => ({ ...prev, first_name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="last_name">Last Name</Label>
+                  <Input
+                    id="last_name"
+                    value={newProvider.last_name}
+                    onChange={(e) => setNewProvider(prev => ({ ...prev, last_name: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={newProvider.email}
+                  onChange={(e) => setNewProvider(prev => ({ ...prev, email: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={newProvider.phone}
+                  onChange={(e) => setNewProvider(prev => ({ ...prev, phone: e.target.value }))}
+                />
+              </div>
+              <Button 
+                className="w-full" 
+                onClick={handleCreateServiceProvider}
+                disabled={isCreating}
+              >
+                {isCreating ? "Creating..." : "Create Service Provider"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {serviceProviders?.map((provider) => (
+          <ServiceProviderCard
+            key={provider.id}
+            provider={provider}
+            onPreferredToggle={handlePreferredToggle}
+          />
+        ))}
+      </div>
     </div>
   );
 }
