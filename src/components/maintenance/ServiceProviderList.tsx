@@ -26,7 +26,7 @@ interface ServiceProvider {
   service_area?: string[];
   rating?: number;
   review_count?: number;
-  profile: {
+  profiles: {
     first_name: string | null;
     last_name: string | null;
   };
@@ -98,16 +98,12 @@ export function ServiceProviderList() {
       const formattedProviders = (providers || [])
         .map(provider => ({
           ...provider,
-          profile: {
-            first_name: provider.profiles?.first_name,
-            last_name: provider.profiles?.last_name
-          },
           isPreferred: preferredIds.has(provider.id)
         }))
         .sort((a, b) => {
           if (a.isPreferred === b.isPreferred) {
-            const aName = a.business_name || `${a.profile.first_name} ${a.profile.last_name}`;
-            const bName = b.business_name || `${b.profile.first_name} ${b.profile.last_name}`;
+            const aName = a.business_name || `${a.profiles.first_name} ${a.profiles.last_name}`;
+            const bName = b.business_name || `${b.profiles.first_name} ${b.profiles.last_name}`;
             return aName.localeCompare(bName);
           }
           return a.isPreferred ? -1 : 1;
@@ -144,7 +140,7 @@ export function ServiceProviderList() {
       
       toast({
         title: provider.isPreferred ? "Removed from preferred providers" : "Added to preferred providers",
-        description: `${provider.business_name || `${provider.profile.first_name} ${provider.profile.last_name}`} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
+        description: `${provider.business_name || `${provider.profiles.first_name} ${provider.profiles.last_name}`} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
       });
     } catch (error) {
       console.error('Error updating preferred status:', error);
@@ -203,7 +199,7 @@ export function ServiceProviderList() {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-semibold">
-                  {provider.business_name || `${provider.profile.first_name} ${provider.profile.last_name}`}
+                  {provider.business_name || `${provider.profiles.first_name} ${provider.profiles.last_name}`}
                 </h3>
                 {provider.isPreferred && (
                   <Badge variant="secondary" className="ml-2">
