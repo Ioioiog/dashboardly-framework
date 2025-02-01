@@ -73,7 +73,7 @@ export function ServiceProviderList() {
           service_area,
           rating,
           review_count,
-          profile:profiles!service_provider_profiles_id_fkey (
+          profile:profiles (
             first_name,
             last_name
           ),
