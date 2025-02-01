@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Wrench, Users, List } from "lucide-react";
+import { Plus, Wrench, Users, List, Phone, Mail, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import MaintenanceList from "@/components/maintenance/MaintenanceList";
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Card } from "@/components/ui/card";
 import { NoDataCard } from "@/components/dashboard/charts/NoDataCard";
+import { Badge } from "@/components/ui/badge";
 
 type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
 
@@ -102,15 +103,40 @@ export default function Maintenance() {
   });
 
   const { data: serviceProviders } = useQuery({
-    queryKey: ["service-providers"],
+    queryKey: ["service-providers-details"],
     enabled: activeSection === "providers",
     queryFn: async () => {
+      console.log("Fetching service providers with details");
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name")
-        .eq("role", "service_provider");
+        .from("service_provider_profiles")
+        .select(`
+          id,
+          business_name,
+          description,
+          contact_phone,
+          contact_email,
+          website,
+          service_area,
+          rating,
+          review_count,
+          profiles:id (
+            first_name,
+            last_name
+          ),
+          services:service_provider_services (
+            name,
+            category,
+            base_price,
+            price_unit
+          )
+        `);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching service providers:", error);
+        throw error;
+      }
+
+      console.log("Fetched service providers:", data);
       return data;
     },
   });
@@ -146,12 +172,126 @@ export default function Maintenance() {
     },
   ];
 
+  const renderServiceProviderList = () => {
+    if (!serviceProviders?.length) {
+      return (
+        <NoDataCard
+          title={t("maintenance.noServiceProviders")}
+          message={t("maintenance.noServiceProvidersMessage")}
+        />
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {serviceProviders.map((provider) => (
+          <Card key={provider.id} className="p-6 space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {provider.business_name || `${provider.profiles.first_name} ${provider.profiles.last_name}`}
+                </h3>
+                {provider.description && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {provider.description}
+                  </p>
+                )}
+              </div>
+              {provider.rating && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  ⭐ {provider.rating.toFixed(1)}
+                  {provider.review_count > 0 && (
+                    <span className="text-xs">({provider.review_count})</span>
+                  )}
+                </Badge>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              {provider.services?.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Services:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {provider.services.map((service, idx) => (
+                      <Badge key={idx} variant="outline">
+                        {service.name}
+                        {service.base_price && (
+                          <span className="ml-1">
+                            (${service.base_price}/{service.price_unit})
+                          </span>
+                        )}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {provider.service_area?.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Service Areas:</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {provider.service_area.map((area, idx) => (
+                      <Badge key={idx} variant="secondary">
+                        {area}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col space-y-2 pt-4">
+              {provider.contact_phone && (
+                <a
+                  href={`tel:${provider.contact_phone}`}
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  <Phone className="h-4 w-4" />
+                  {provider.contact_phone}
+                </a>
+              )}
+              {provider.contact_email && (
+                <a
+                  href={`mailto:${provider.contact_email}`}
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  <Mail className="h-4 w-4" />
+                  {provider.contact_email}
+                </a>
+              )}
+              {provider.website && (
+                <a
+                  href={provider.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  <Globe className="h-4 w-4" />
+                  Website
+                </a>
+              )}
+            </div>
+
+            <div className="pt-4 flex justify-end">
+              <Button
+                variant="outline"
+                onClick={() => handleRequestClick(undefined)}
+                className="w-full sm:w-auto"
+              >
+                Create Maintenance Request
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="flex h-screen bg-background">
       <DashboardSidebar />
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-8 space-y-8">
-          {/* Header Section */}
           <div className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm">
             <div className="space-y-4">
               <div className="flex items-center gap-4">
@@ -175,7 +315,6 @@ export default function Maintenance() {
             </Button>
           </div>
 
-          {/* Navigation Menu */}
           <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto">
             {navigationItems.map((item) => (
               <Button
@@ -195,12 +334,10 @@ export default function Maintenance() {
 
           {activeSection === "requests" ? (
             <>
-              {/* Filters Section */}
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
               </div>
 
-              {/* Active Requests Section */}
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold">
                   {t("maintenance.activeRequests")}
@@ -228,7 +365,6 @@ export default function Maintenance() {
                 )}
               </div>
 
-              {/* Completed Requests Section */}
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold">
                   {t("maintenance.completedRequests")}
@@ -257,24 +393,14 @@ export default function Maintenance() {
               </div>
             </>
           ) : (
-            /* Service Providers List Section */
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <div className="space-y-4">
-                {serviceProviders?.map((provider) => (
-                  <div key={provider.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{provider.first_name} {provider.last_name}</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
-                  </div>
-                ))}
-              </div>
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold">
+                {t("maintenance.serviceProviders")}
+              </h2>
+              {renderServiceProviderList()}
             </div>
           )}
 
-          {/* Maintenance Request Dialog */}
           <MaintenanceDialog
             open={isDialogOpen}
             onOpenChange={handleDialogClose}
