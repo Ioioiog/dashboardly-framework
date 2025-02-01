@@ -73,7 +73,7 @@ export function ServiceProviderList() {
           service_area,
           rating,
           review_count,
-          profile:profiles (
+          profile:profiles!service_provider_profiles_id_fkey (
             first_name,
             last_name
           ),
@@ -97,6 +97,7 @@ export function ServiceProviderList() {
       const formattedProviders = (providers || [])
         .map(provider => ({
           ...provider,
+          profile: provider.profile[0], // Access the first element of the profile array
           isPreferred: preferredIds.has(provider.id)
         }))
         .sort((a, b) => {
