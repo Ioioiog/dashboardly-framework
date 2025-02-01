@@ -27,25 +27,29 @@ interface Filters {
 
 type MaintenanceSection = "requests" | "providers";
 
+interface ServiceProviderProfile {
+  first_name: string;
+  last_name: string;
+}
+
+interface ServiceProviderService {
+  name: string;
+  base_price?: number;
+  price_unit?: string;
+}
+
 interface ServiceProvider {
   id: string;
-  business_name?: string;
-  description?: string;
-  contact_phone?: string;
-  contact_email?: string;
-  website?: string;
+  business_name?: string | null;
+  description?: string | null;
+  contact_phone?: string | null;
+  contact_email?: string | null;
+  website?: string | null;
   service_area?: string[];
   rating?: number;
   review_count?: number;
-  profiles?: {
-    first_name: string;
-    last_name: string;
-  };
-  services?: Array<{
-    name: string;
-    base_price?: number;
-    price_unit?: string;
-  }>;
+  profiles: ServiceProviderProfile;
+  services?: ServiceProviderService[];
   isPreferred?: boolean;
 }
 
@@ -182,11 +186,12 @@ export default function Maintenance() {
       // Create a set of preferred provider IDs for quick lookup
       const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
-      // Mark providers as preferred or available
-      const formattedProviders = allProviders?.map(provider => ({
+      // Mark providers as preferred or available and format the data
+      const formattedProviders: ServiceProvider[] = (allProviders || []).map(provider => ({
         ...provider,
-        isPreferred: preferredIds.has(provider.id)
-      })) || [];
+        isPreferred: preferredIds.has(provider.id),
+        profiles: provider.profiles as ServiceProviderProfile // Type assertion since we know the structure
+      }));
 
       // Sort providers: preferred first, then by name
       return formattedProviders.sort((a, b) => {
@@ -250,7 +255,7 @@ export default function Maintenance() {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-semibold">
-                    {provider.business_name || `${provider.profiles?.first_name} ${provider.profiles?.last_name}`}
+                    {provider.business_name || `${provider.profiles.first_name} ${provider.profiles.last_name}`}
                   </h3>
                   {provider.isPreferred && (
                     <Badge variant="secondary" className="ml-2">
@@ -364,7 +369,7 @@ export default function Maintenance() {
                       
                       toast({
                         title: provider.isPreferred ? "Removed from preferred providers" : "Added to preferred providers",
-                        description: `${provider.profiles?.first_name} ${provider.profiles?.last_name} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
+                        description: `${provider.profiles.first_name} ${provider.profiles.last_name} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
                       });
                     } catch (error) {
                       console.error('Error updating preferred status:', error);
