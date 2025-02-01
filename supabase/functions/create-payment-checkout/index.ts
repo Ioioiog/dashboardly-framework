@@ -35,27 +35,43 @@ serve(async (req) => {
     console.log('Authenticated user:', user.id);
 
     // Get user's email from profiles with more detailed error logging
-    const { data: profiles, error: profileError } = await supabaseClient
+    const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
-      .select('email, id')
-      .eq('id', user.id);
+      .select('email')
+      .eq('id', user.id)
+      .maybeSingle();
 
-    console.log('Profile query result:', { profiles, profileError });
+    console.log('Profile query result:', { profile, profileError });
 
     if (profileError) {
       console.error('Profile fetch error:', profileError);
       throw new Error(`User profile fetch failed: ${profileError.message}`);
     }
 
-    if (!profiles || profiles.length === 0) {
+    if (!profile) {
       console.error('No profile found for user:', user.id);
-      throw new Error('User profile not found');
+      
+      // Try to create a profile if it doesn't exist
+      const { error: createProfileError } = await supabaseClient
+        .from('profiles')
+        .insert({ 
+          id: user.id,
+          email: user.email,
+          role: 'tenant' 
+        });
+
+      if (createProfileError) {
+        console.error('Error creating profile:', createProfileError);
+        throw new Error('Failed to create user profile');
+      }
+
+      console.log('Created new profile for user:', user.id);
     }
 
-    const profile = profiles[0];
-    if (!profile.email) {
-      console.error('No email found in profile for user:', user.id);
-      throw new Error('User profile email not found');
+    const userEmail = profile?.email || user.email;
+    if (!userEmail) {
+      console.error('No email found for user:', user.id);
+      throw new Error('User email not found');
     }
 
     // Get the invoice details including the property and landlord info
@@ -117,7 +133,7 @@ serve(async (req) => {
       mode: 'payment',
       success_url: `${req.headers.get('origin')}/invoices?success=true`,
       cancel_url: `${req.headers.get('origin')}/invoices?canceled=true`,
-      customer_email: profile.email,
+      customer_email: userEmail,
       metadata: {
         invoice_id: invoice.id,
       },
