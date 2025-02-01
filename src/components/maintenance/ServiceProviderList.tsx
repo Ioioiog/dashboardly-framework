@@ -121,6 +121,42 @@ export function ServiceProviderList() {
   const handleCreateServiceProvider = async () => {
     try {
       setIsCreating(true);
+      
+      // Validate all required fields
+      if (!newProvider.first_name.trim() || 
+          !newProvider.last_name.trim() || 
+          !newProvider.email.trim() || 
+          !newProvider.phone.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields (First Name, Last Name, Email, and Phone).",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newProvider.email)) {
+        toast({
+          title: "Invalid Email",
+          description: "Please enter a valid email address.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate phone format (basic validation)
+      const phoneRegex = /^\+?[\d\s-]{10,}$/;
+      if (!phoneRegex.test(newProvider.phone)) {
+        toast({
+          title: "Invalid Phone Number",
+          description: "Please enter a valid phone number (minimum 10 digits).",
+          variant: "destructive",
+        });
+        return;
+      }
+
       console.log("Creating new service provider:", newProvider);
 
       const { data: existingProfiles, error: profileError } = await supabase
@@ -283,42 +319,46 @@ export function ServiceProviderList() {
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="first_name">First Name</Label>
+                  <Label htmlFor="first_name">First Name *</Label>
                   <Input
                     id="first_name"
                     value={newProvider.first_name}
                     onChange={(e) => setNewProvider(prev => ({ ...prev, first_name: e.target.value }))}
                     className="w-full"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="last_name">Last Name</Label>
+                  <Label htmlFor="last_name">Last Name *</Label>
                   <Input
                     id="last_name"
                     value={newProvider.last_name}
                     onChange={(e) => setNewProvider(prev => ({ ...prev, last_name: e.target.value }))}
                     className="w-full"
+                    required
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email *</Label>
                 <Input
                   id="email"
                   type="email"
                   value={newProvider.email}
                   onChange={(e) => setNewProvider(prev => ({ ...prev, email: e.target.value }))}
                   className="w-full"
+                  required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">Phone *</Label>
                 <Input
                   id="phone"
                   type="tel"
                   value={newProvider.phone}
                   onChange={(e) => setNewProvider(prev => ({ ...prev, phone: e.target.value }))}
                   className="w-full"
+                  required
                 />
               </div>
               <Button 
