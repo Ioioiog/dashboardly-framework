@@ -28,9 +28,16 @@ export function PersonalInfoForm({ initialProfile, isLoading, setIsLoading }: Pe
     setIsLoading(true);
 
     try {
+      console.log("Starting profile update...");
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
+      
+      if (!user) {
+        console.error("No authenticated user found");
+        throw new Error("No user found");
+      }
 
+      console.log("Updating profile for user:", user.id, "with data:", profile);
+      
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -41,7 +48,12 @@ export function PersonalInfoForm({ initialProfile, isLoading, setIsLoading }: Pe
         })
         .eq("id", user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating profile:", error);
+        throw error;
+      }
+
+      console.log("Profile updated successfully");
 
       toast({
         title: "Success",
@@ -61,6 +73,7 @@ export function PersonalInfoForm({ initialProfile, isLoading, setIsLoading }: Pe
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    console.log("Field changed:", name, "New value:", value);
     setProfile(prev => ({ ...prev, [name]: value }));
   };
 
