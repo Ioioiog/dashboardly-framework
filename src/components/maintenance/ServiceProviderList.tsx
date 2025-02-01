@@ -46,7 +46,10 @@ interface SupabaseServiceProvider {
   service_area: string[] | null;
   rating: number | null;
   review_count: number | null;
-  profiles: ServiceProviderProfile | null;
+  profiles: {
+    first_name: string | null;
+    last_name: string | null;
+  };
   services: ServiceProviderService[];
 }
 
@@ -81,7 +84,7 @@ export function ServiceProviderList() {
         .from("service_provider_profiles")
         .select(`
           *,
-          profiles (
+          profiles:profiles (
             first_name,
             last_name
           ),
