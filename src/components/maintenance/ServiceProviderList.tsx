@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Phone, Mail, Globe, Star, Building2 } from "lucide-react";
+import { Phone, Mail, Globe, Star, Building2, MapPin, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,7 +60,7 @@ export function ServiceProviderList() {
   const queryClient = useQueryClient();
   const { currentUserId } = useAuthState();
 
-  const { data: serviceProviders } = useQuery({
+  const { data: serviceProviders, isLoading } = useQuery({
     queryKey: ["service-providers-details"],
     queryFn: async () => {
       console.log("Fetching service providers with details");
@@ -180,6 +180,25 @@ export function ServiceProviderList() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="p-6 space-y-4">
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-full"></div>
+                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   if (!serviceProviders?.length) {
     return (
       <Card className="p-6">
@@ -232,9 +251,19 @@ export function ServiceProviderList() {
             )}
           </div>
 
+          {provider.service_area && provider.service_area.length > 0 && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="h-4 w-4" />
+              <span>Service Areas: {provider.service_area.join(', ')}</span>
+            </div>
+          )}
+
           {provider.services && provider.services.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-sm font-medium">Services Offered:</h4>
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Wrench className="h-4 w-4" />
+                <span>Services Offered:</span>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {provider.services.map((service, index) => (
                   <Badge key={index} variant="outline">
