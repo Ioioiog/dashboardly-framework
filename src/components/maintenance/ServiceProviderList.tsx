@@ -36,25 +36,6 @@ interface ServiceProvider {
   isPreferred?: boolean;
 }
 
-interface SupabaseServiceProviderProfile {
-  business_name: string | null;
-  description: string | null;
-  contact_phone: string | null;
-  contact_email: string | null;
-  website: string | null;
-  service_area: string[] | null;
-  rating: number | null;
-  review_count: number | null;
-  services: ServiceProviderService[] | null;
-}
-
-interface SupabaseProfile {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  service_provider_profiles: SupabaseServiceProviderProfile;
-}
-
 export function ServiceProviderList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -81,31 +62,30 @@ export function ServiceProviderList() {
         throw preferredError;
       }
 
-      // Then get all service providers with their profile and service information
+      // Then get service provider profiles and their services
       const { data: providers, error: providersError } = await supabase
-        .from("profiles")
+        .from("service_provider_profiles")
         .select(`
           id,
-          first_name,
-          last_name,
-          service_provider_profiles (
-            business_name,
-            description,
-            contact_phone,
-            contact_email,
-            website,
-            service_area,
-            rating,
-            review_count,
-            services:service_provider_services (
-              name,
-              category,
-              base_price,
-              price_unit
-            )
+          business_name,
+          description,
+          contact_phone,
+          contact_email,
+          website,
+          service_area,
+          rating,
+          review_count,
+          profiles:id (
+            first_name,
+            last_name
+          ),
+          services:service_provider_services (
+            name,
+            category,
+            base_price,
+            price_unit
           )
-        `)
-        .eq('role', 'service_provider');
+        `);
 
       if (providersError) {
         console.error("Error fetching providers:", providersError);
@@ -116,16 +96,13 @@ export function ServiceProviderList() {
       const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
       // Format and sort the providers data
-      const formattedProviders: ServiceProvider[] = (providers as unknown as SupabaseProfile[] || [])
-        .filter(provider => provider.service_provider_profiles)
+      const formattedProviders = (providers || [])
         .map(provider => ({
-          id: provider.id,
-          ...provider.service_provider_profiles,
+          ...provider,
           profile: {
-            first_name: provider.first_name,
-            last_name: provider.last_name
+            first_name: provider.profiles?.first_name,
+            last_name: provider.profiles?.last_name
           },
-          services: provider.service_provider_profiles.services || [],
           isPreferred: preferredIds.has(provider.id)
         }))
         .sort((a, b) => {
