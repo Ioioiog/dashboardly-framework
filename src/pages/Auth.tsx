@@ -171,7 +171,7 @@ const AuthPage = () => {
 
   if (showRoleForm) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-transparent">
+      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#0EA5E9]/5 via-transparent to-[#1EAEDB]/5">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/5 via-blue-800/5 to-blue-700/5">
           <div className="absolute inset-0">
             <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob"></div>
@@ -193,7 +193,7 @@ const AuthPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-transparent">
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#0EA5E9]/5 via-transparent to-[#1EAEDB]/5">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/5 via-blue-800/5 to-blue-700/5">
         <div className="absolute inset-0">
           <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob"></div>
