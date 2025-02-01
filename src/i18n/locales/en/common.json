@@ -1,8 +1,7 @@
 {
   "error": "Error",
   "success": "Success",
-  "unexpectedError": "An unexpected error occurred",
-  "loading": "Loading...",
+  "loading": "Chargement...",
   "save": "Save",
   "cancel": "Cancel",
   "delete": "Delete",
@@ -10,44 +9,20 @@
   "view": "View",
   "close": "Close",
   "confirm": "Confirm",
-  "submit": "Submit",
   "back": "Back",
   "next": "Next",
-  "yes": "Yes",
-  "no": "No",
-  "actions": "Actions",
-  "details": "Details",
-  "status": "Status",
-  "date": "Date",
-  "amount": "Amount",
-  "description": "Description",
-  "noData": "No data available",
-  "search": "Search",
-  "filter": "Filter",
-  "sort": "Sort",
-  "error": {
-    "noUser": "No authenticated user found",
-    "invalidData": "Invalid data provided",
-    "networkError": "Network error occurred",
-    "unauthorized": "Unauthorized access",
-    "notFound": "Resource not found",
-    "serverError": "Server error occurred"
-  },
+  "submit": "Submit",
   "currency": {
     "usd": "$",
     "eur": "€",
-    "gbp": "£",
-    "ron": "RON"
+    "gbp": "£"
   },
   "status": {
     "active": "Active",
     "inactive": "Inactive",
     "pending": "Pending",
     "completed": "Completed",
-    "cancelled": "Cancelled",
-    "paid": "Paid",
-    "unpaid": "Unpaid",
-    "overdue": "Overdue"
+    "cancelled": "Cancelled"
   },
   "maintenance": {
     "title": "Maintenance Requests",
@@ -59,15 +34,14 @@
     "noActiveRequestsMessage": "There are no active maintenance requests at this time.",
     "noCompletedRequests": "No Completed Requests",
     "noCompletedRequestsMessage": "There are no completed maintenance requests to display.",
-    "ticket": "Ticket",
-    "property": "Property",
-    "created": "Created",
+    "requests": "Maintenance Requests",
+    "serviceProviders": "Service Provider List",
     "filters": {
       "status": "Status",
-      "allStatuses": "All Statuses",
       "priority": "Priority",
-      "allPriorities": "All Priorities",
       "property": "Property",
+      "allStatuses": "All Statuses",
+      "allPriorities": "All Priorities",
       "allProperties": "All Properties"
     },
     "status": {
@@ -78,18 +52,21 @@
     },
     "priority": {
       "low": "Low",
-      "medium": "Medium",
+      "medium": "Medium", 
       "high": "High"
     },
     "form": {
       "title": "Title",
       "description": "Description",
       "property": "Property",
-      "selectProperty": "Select a property",
+      "selectProperty": "Select property",
       "priority": "Priority",
       "selectPriority": "Select priority",
       "status": "Status",
       "selectStatus": "Select status"
-    }
+    },
+    "ticket": "Ticket",
+    "property": "Property",
+    "created": "Created at"
   }
 }

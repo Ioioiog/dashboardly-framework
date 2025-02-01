@@ -34,6 +34,8 @@
     "noActiveRequestsMessage": "Il n'y a pas de demandes de maintenance actives pour le moment.",
     "noCompletedRequests": "Aucune Demande Terminée",
     "noCompletedRequestsMessage": "Il n'y a pas de demandes de maintenance terminées à afficher.",
+    "requests": "Demandes de Maintenance",
+    "serviceProviders": "Liste des Prestataires de Services",
     "filters": {
       "status": "Statut",
       "priority": "Priorité",

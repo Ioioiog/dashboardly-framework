@@ -9,7 +9,7 @@
   "view": "Ver",
   "close": "Cerrar",
   "confirm": "Confirmar",
-  "back": "Volver",
+  "back": "Atrás",
   "next": "Siguiente",
   "submit": "Enviar",
   "currency": {
@@ -23,5 +23,50 @@
     "pending": "Pendiente",
     "completed": "Completado",
     "cancelled": "Cancelado"
+  },
+  "maintenance": {
+    "title": "Solicitudes de Mantenimiento",
+    "description": "Gestiona y realiza seguimiento de las solicitudes de mantenimiento de tus propiedades",
+    "newRequest": "Nueva Solicitud",
+    "activeRequests": "Solicitudes Activas",
+    "completedRequests": "Solicitudes Completadas",
+    "noActiveRequests": "Sin Solicitudes Activas",
+    "noActiveRequestsMessage": "No hay solicitudes de mantenimiento activas en este momento.",
+    "noCompletedRequests": "Sin Solicitudes Completadas",
+    "noCompletedRequestsMessage": "No hay solicitudes de mantenimiento completadas para mostrar.",
+    "requests": "Solicitudes de Mantenimiento",
+    "serviceProviders": "Lista de Proveedores de Servicios",
+    "filters": {
+      "status": "Estado",
+      "priority": "Prioridad",
+      "property": "Propiedad",
+      "allStatuses": "Todos los Estados",
+      "allPriorities": "Todas las Prioridades",
+      "allProperties": "Todas las Propiedades"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "in_progress": "En Progreso",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    },
+    "priority": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "form": {
+      "title": "Título",
+      "description": "Descripción",
+      "property": "Propiedad",
+      "selectProperty": "Seleccionar propiedad",
+      "priority": "Prioridad",
+      "selectPriority": "Seleccionar prioridad",
+      "status": "Estado",
+      "selectStatus": "Seleccionar estado"
+    },
+    "ticket": "Ticket",
+    "property": "Propiedad",
+    "created": "Creado el"
   }
 }

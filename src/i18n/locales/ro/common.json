@@ -34,6 +34,8 @@
     "noActiveRequestsMessage": "Nu există cereri de mentenanță active în acest moment.",
     "noCompletedRequests": "Nicio Cerere Finalizată",
     "noCompletedRequestsMessage": "Nu există cereri de mentenanță finalizate de afișat.",
+    "requests": "Cereri de Mentenanță",
+    "serviceProviders": "Lista Furnizorilor de Servicii",
     "filters": {
       "status": "Stare",
       "priority": "Prioritate",
