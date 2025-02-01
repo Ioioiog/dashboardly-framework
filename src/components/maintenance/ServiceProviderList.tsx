@@ -46,7 +46,7 @@ interface SupabaseServiceProvider {
   service_area: string[] | null;
   rating: number | null;
   review_count: number | null;
-  profiles: {
+  profile: {
     first_name: string | null;
     last_name: string | null;
   };
@@ -81,20 +81,29 @@ export function ServiceProviderList() {
 
       // Then get all service providers with their profile and service information
       const { data: providers, error: providersError } = await supabase
-        .from("service_provider_profiles")
+        .from("profiles")
         .select(`
-          *,
-          profiles:profiles (
-            first_name,
-            last_name
-          ),
-          services:service_provider_services (
-            name,
-            category,
-            base_price,
-            price_unit
+          id,
+          first_name,
+          last_name,
+          service_provider_profiles!service_provider_profiles_id_fkey (
+            business_name,
+            description,
+            contact_phone,
+            contact_email,
+            website,
+            service_area,
+            rating,
+            review_count,
+            services:service_provider_services (
+              name,
+              category,
+              base_price,
+              price_unit
+            )
           )
-        `);
+        `)
+        .eq('role', 'service_provider');
 
       if (providersError) {
         console.error("Error fetching providers:", providersError);
@@ -105,16 +114,15 @@ export function ServiceProviderList() {
       const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
       // Format and sort the providers data
-      const formattedProviders: ServiceProvider[] = (providers as unknown as SupabaseServiceProvider[]).map(provider => ({
-        ...provider,
-        isPreferred: preferredIds.has(provider.id),
-        profile: provider.profiles || { 
-          first_name: null, 
-          last_name: null 
-        }
-      }));
-
-      return formattedProviders.sort((a, b) => {
+      const formattedProviders: ServiceProvider[] = (providers || []).map(provider => ({
+        id: provider.id,
+        ...provider.service_provider_profiles,
+        profile: {
+          first_name: provider.first_name,
+          last_name: provider.last_name
+        },
+        isPreferred: preferredIds.has(provider.id)
+      })).sort((a, b) => {
         if (a.isPreferred === b.isPreferred) {
           const aName = a.business_name || `${a.profile.first_name} ${a.profile.last_name}`;
           const bName = b.business_name || `${b.profile.first_name} ${b.profile.last_name}`;
@@ -122,6 +130,8 @@ export function ServiceProviderList() {
         }
         return a.isPreferred ? -1 : 1;
       });
+
+      return formattedProviders;
     },
     enabled: !!currentUserId
   });
