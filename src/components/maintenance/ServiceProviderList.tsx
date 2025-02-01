@@ -26,10 +26,10 @@ interface ServiceProvider {
   service_area?: string[];
   rating?: number;
   review_count?: number;
-  profile: {
+  profiles: {
     first_name: string | null;
     last_name: string | null;
-  };
+  }[];
   services?: ServiceProviderService[];
   isPreferred?: boolean;
 }
@@ -59,6 +59,8 @@ export function ServiceProviderList() {
         console.error("Error fetching preferred providers:", preferredError);
         throw preferredError;
       }
+
+      console.log("Preferred providers:", preferredProviders);
 
       // Get service provider profiles with a join to profiles table
       const { data: providers, error: providersError } = await supabase
@@ -90,6 +92,8 @@ export function ServiceProviderList() {
         throw providersError;
       }
 
+      console.log("Raw providers data:", providers);
+
       // Create a set of preferred provider IDs for quick lookup
       const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
@@ -97,18 +101,19 @@ export function ServiceProviderList() {
       const formattedProviders = (providers || [])
         .map(provider => ({
           ...provider,
-          profile: provider.profiles[0], // Access the first element of the profiles array
+          profiles: provider.profiles || [], // Ensure profiles is always an array
           isPreferred: preferredIds.has(provider.id)
         }))
         .sort((a, b) => {
           if (a.isPreferred === b.isPreferred) {
-            const aName = a.business_name || `${a.profile.first_name} ${a.profile.last_name}`;
-            const bName = b.business_name || `${b.profile.first_name} ${b.profile.last_name}`;
+            const aName = a.business_name || `${a.profiles[0]?.first_name} ${a.profiles[0]?.last_name}`;
+            const bName = b.business_name || `${b.profiles[0]?.first_name} ${b.profiles[0]?.last_name}`;
             return aName.localeCompare(bName);
           }
           return a.isPreferred ? -1 : 1;
         });
 
+      console.log("Formatted providers:", formattedProviders);
       return formattedProviders;
     },
     enabled: !!currentUserId
@@ -140,7 +145,7 @@ export function ServiceProviderList() {
       
       toast({
         title: provider.isPreferred ? "Removed from preferred providers" : "Added to preferred providers",
-        description: `${provider.business_name || `${provider.profile.first_name} ${provider.profile.last_name}`} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
+        description: `${provider.business_name || `${provider.profiles[0]?.first_name} ${provider.profiles[0]?.last_name}`} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
       });
     } catch (error) {
       console.error('Error updating preferred status:', error);
@@ -172,6 +177,7 @@ export function ServiceProviderList() {
   }
 
   if (!serviceProviders?.length) {
+    console.log("No service providers found in the data");
     return (
       <Card className="p-6">
         <div className="text-center space-y-2">
@@ -199,7 +205,7 @@ export function ServiceProviderList() {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-semibold">
-                  {provider.business_name || `${provider.profile.first_name} ${provider.profile.last_name}`}
+                  {provider.business_name || `${provider.profiles[0]?.first_name} ${provider.profiles[0]?.last_name}`}
                 </h3>
                 {provider.isPreferred && (
                   <Badge variant="secondary" className="ml-2">

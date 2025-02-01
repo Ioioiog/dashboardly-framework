@@ -818,12 +818,13 @@ export type Database = {
       service_provider_profiles: {
         Row: {
           availability_hours: Json | null
-          business_name: string | null
+          business_name: string
           contact_email: string | null
           contact_phone: string | null
           created_at: string
           description: string | null
           id: string
+          profile_id: string | null
           rating: number | null
           review_count: number | null
           service_area: string[] | null
@@ -832,12 +833,13 @@ export type Database = {
         }
         Insert: {
           availability_hours?: Json | null
-          business_name?: string | null
+          business_name: string
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
           description?: string | null
           id: string
+          profile_id?: string | null
           rating?: number | null
           review_count?: number | null
           service_area?: string[] | null
@@ -846,19 +848,35 @@ export type Database = {
         }
         Update: {
           availability_hours?: Json | null
-          business_name?: string | null
+          business_name?: string
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          profile_id?: string | null
           rating?: number | null
           review_count?: number | null
           service_area?: string[] | null
           updated_at?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_profiles"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_profiles"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_details"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
       }
       service_provider_services: {
         Row: {
