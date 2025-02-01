@@ -110,16 +110,8 @@ export default function Maintenance() {
       const { data, error } = await supabase
         .from("service_provider_profiles")
         .select(`
-          id,
-          business_name,
-          description,
-          contact_phone,
-          contact_email,
-          website,
-          service_area,
-          rating,
-          review_count,
-          profiles:id (
+          *,
+          profile:id(
             first_name,
             last_name
           ),
@@ -189,7 +181,7 @@ export default function Maintenance() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-lg font-semibold">
-                  {provider.business_name || `${provider.profiles.first_name} ${provider.profiles.last_name}`}
+                  {provider.business_name || `${provider.profile?.first_name} ${provider.profile?.last_name}`}
                 </h3>
                 {provider.description && (
                   <p className="text-sm text-muted-foreground mt-1">
