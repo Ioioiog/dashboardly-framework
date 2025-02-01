@@ -75,7 +75,7 @@ export function ServiceProviderList() {
           service_area,
           rating,
           review_count,
-          profiles!inner (
+          profiles!fk_profiles (
             first_name,
             last_name
           ),
