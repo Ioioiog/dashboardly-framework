@@ -3,14 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
-import { RoleSelection } from "@/components/auth/RoleSelection";
-import { AuthForms } from "@/components/auth/AuthForms";
 import { RoleSpecificForm } from "@/components/auth/RoleSpecificForm";
-import { 
-  Home, Building2, Wrench, MessageSquare, FileText, Settings, 
-  Receipt, Bell, Calendar, CreditCard, User, Lock, Key, 
-  Shield, Globe, Mail, Wallet, Users, HomeIcon
-} from "lucide-react";
+import { AuthBackground } from "@/components/auth/AuthBackground";
+import { FloatingIconsLayout } from "@/components/auth/FloatingIconsLayout";
+import { AuthCard } from "@/components/auth/AuthCard";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -163,40 +159,11 @@ const AuthPage = () => {
     });
   };
 
-  const FloatingIcon = ({ icon: Icon, className }: { icon: any, className: string }) => (
-    <div className={`absolute opacity-[0.08] dark:opacity-[0.12] ${className}`}>
-      <Icon size={48} />
-    </div>
-  );
-
   if (showRoleForm) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#0EA5E9]/5 via-transparent to-[#1EAEDB]/5">
-        {/* Left side icons */}
-        <div className="absolute left-0 inset-y-0 w-1/4">
-          <FloatingIcon icon={Home} className="top-[10%] left-[15%] animate-float-1" />
-          <FloatingIcon icon={Wrench} className="top-[30%] left-[25%] animate-float-3" />
-          <FloatingIcon icon={FileText} className="top-[50%] left-[15%] animate-float-5" />
-          <FloatingIcon icon={Receipt} className="bottom-[30%] left-[25%] animate-float-7" />
-          <FloatingIcon icon={Calendar} className="bottom-[10%] left-[15%] animate-float-9" />
-        </div>
-
-        {/* Right side icons */}
-        <div className="absolute right-0 inset-y-0 w-1/4">
-          <FloatingIcon icon={Building2} className="top-[15%] right-[20%] animate-float-2" />
-          <FloatingIcon icon={MessageSquare} className="top-[35%] right-[15%] animate-float-4" />
-          <FloatingIcon icon={Settings} className="top-[55%] right-[20%] animate-float-6" />
-          <FloatingIcon icon={Bell} className="bottom-[35%] right-[15%] animate-float-8" />
-        </div>
-
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/5 via-blue-800/5 to-blue-700/5">
-          <div className="absolute inset-0">
-            <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob"></div>
-            <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-900 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-2000"></div>
-            <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-700 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-4000"></div>
-          </div>
-        </div>
-
+        <FloatingIconsLayout variant="role-form" />
+        <AuthBackground />
         <Card className="w-full max-w-md bg-transparent backdrop-blur-[2px] relative z-10 border-white/5">
           <CardContent className="p-6">
             <RoleSpecificForm
@@ -212,57 +179,18 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#0EA5E9]/5 via-transparent to-[#1EAEDB]/5">
-      {/* Left side icons */}
-      <div className="absolute left-0 inset-y-0 w-1/4">
-        <FloatingIcon icon={User} className="top-[10%] left-[15%] animate-float-1" />
-        <FloatingIcon icon={Key} className="top-[30%] left-[25%] animate-float-3" />
-        <FloatingIcon icon={Globe} className="top-[50%] left-[15%] animate-float-5" />
-        <FloatingIcon icon={Wallet} className="bottom-[30%] left-[25%] animate-float-7" />
-        <FloatingIcon icon={HomeIcon} className="bottom-[10%] left-[15%] animate-float-9" />
-      </div>
-
-      {/* Right side icons */}
-      <div className="absolute right-0 inset-y-0 w-1/4">
-        <FloatingIcon icon={Lock} className="top-[15%] right-[20%] animate-float-2" />
-        <FloatingIcon icon={Shield} className="top-[35%] right-[15%] animate-float-4" />
-        <FloatingIcon icon={Mail} className="top-[55%] right-[20%] animate-float-6" />
-        <FloatingIcon icon={Users} className="bottom-[35%] right-[15%] animate-float-8" />
-        <FloatingIcon icon={CreditCard} className="bottom-[15%] right-[20%] animate-float-10" />
-      </div>
-      
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/5 via-blue-800/5 to-blue-700/5">
-        <div className="absolute inset-0">
-          <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob"></div>
-          <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-900 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-700 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-4000"></div>
-        </div>
-      </div>
-
-      <Card className="w-full max-w-md bg-transparent backdrop-blur-[2px] relative z-10 border-white/5">
-        <CardContent className="space-y-6 px-8">
-          <div className="flex items-center justify-center mb-6 bg-transparent">
-            <img 
-              src="/lovable-uploads/dcfa5555-90d2-43ca-9aad-65f0a8c8f211.png" 
-              alt="AdminChirii Logo" 
-              className="h-20 drop-shadow-md"
-            />
-          </div>
-
-          {view === "roles" ? (
-            <RoleSelection onRoleSelect={handleRoleSelect} />
-          ) : (
-            <AuthForms
-              view={view}
-              userEmail={userEmail}
-              password={password}
-              onEmailChange={(e) => setUserEmail(e.target.value)}
-              onPasswordChange={(e) => setPassword(e.target.value)}
-              onSubmit={handleSubmit}
-              onViewChange={setView}
-            />
-          )}
-        </CardContent>
-      </Card>
+      <FloatingIconsLayout variant="auth-form" />
+      <AuthBackground />
+      <AuthCard
+        view={view}
+        userEmail={userEmail}
+        password={password}
+        onEmailChange={(e) => setUserEmail(e.target.value)}
+        onPasswordChange={(e) => setPassword(e.target.value)}
+        onSubmit={handleSubmit}
+        onViewChange={setView}
+        onRoleSelect={handleRoleSelect}
+      />
     </div>
   );
 };
