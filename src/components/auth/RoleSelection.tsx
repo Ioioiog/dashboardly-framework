@@ -30,7 +30,7 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
   return (
     <>
       <div className="text-center pb-8 animate-fade-in">
-        <CardTitle className="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-800 animate-gradient">
+        <CardTitle className="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-800">
           Choose Your Role
         </CardTitle>
         <CardDescription className="text-gray-600 dark:text-gray-400 text-lg">
