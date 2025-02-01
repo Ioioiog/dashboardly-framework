@@ -247,6 +247,52 @@ export type Database = {
           },
         ]
       }
+      landlord_service_providers: {
+        Row: {
+          created_at: string
+          id: string
+          is_preferred: boolean | null
+          landlord_id: string
+          service_provider_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_preferred?: boolean | null
+          landlord_id: string
+          service_provider_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_preferred?: boolean | null
+          landlord_id?: string
+          service_provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landlord_service_providers_landlord_id_fkey"
+            columns: ["landlord_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "landlord_service_providers_landlord_id_fkey"
+            columns: ["landlord_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_details"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "landlord_service_providers_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_provider_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_request_history: {
         Row: {
           description: string

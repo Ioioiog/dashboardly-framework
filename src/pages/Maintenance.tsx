@@ -107,15 +107,43 @@ export default function Maintenance() {
     enabled: activeSection === "providers",
     queryFn: async () => {
       console.log("Fetching service providers with details");
-      const { data, error } = await supabase
+      
+      // First get the landlord's preferred providers
+      const { data: preferredProviders, error: preferredError } = await supabase
+        .from("landlord_service_providers")
+        .select(`
+          service_provider_id,
+          service_provider:service_provider_profiles!inner(
+            *,
+            profiles:profiles!service_provider_profiles_id_fkey(
+              first_name,
+              last_name
+            ),
+            services:service_provider_services(
+              name,
+              category,
+              base_price,
+              price_unit
+            )
+          )
+        `)
+        .eq('landlord_id', auth.uid());
+
+      if (preferredError) {
+        console.error("Error fetching preferred providers:", preferredError);
+        throw preferredError;
+      }
+
+      // Then get all active service providers
+      const { data: allProviders, error: allError } = await supabase
         .from("service_provider_profiles")
         .select(`
           *,
-          profiles!service_provider_profiles_id_fkey (
+          profiles:profiles!service_provider_profiles_id_fkey(
             first_name,
             last_name
           ),
-          services:service_provider_services (
+          services:service_provider_services(
             name,
             category,
             base_price,
@@ -123,13 +151,27 @@ export default function Maintenance() {
           )
         `);
 
-      if (error) {
-        console.error("Error fetching service providers:", error);
-        throw error;
+      if (allError) {
+        console.error("Error fetching all providers:", allError);
+        throw allError;
       }
 
-      console.log("Fetched service providers:", data);
-      return data;
+      // Create a set of preferred provider IDs for quick lookup
+      const preferredIds = new Set(preferredProviders.map(p => p.service_provider_id));
+
+      // Mark providers as preferred or available
+      const formattedProviders = allProviders.map(provider => ({
+        ...provider,
+        isPreferred: preferredIds.has(provider.id)
+      }));
+
+      // Sort providers: preferred first, then by name
+      return formattedProviders.sort((a, b) => {
+        if (a.isPreferred === b.isPreferred) {
+          return (a.profiles?.first_name || '').localeCompare(b.profiles?.first_name || '');
+        }
+        return a.isPreferred ? -1 : 1;
+      });
     },
   });
 
@@ -177,12 +219,22 @@ export default function Maintenance() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {serviceProviders.map((provider) => (
-          <Card key={provider.id} className="p-6 space-y-4">
+          <Card key={provider.id} className={cn(
+            "p-6 space-y-4",
+            provider.isPreferred && "border-2 border-primary"
+          )}>
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-lg font-semibold">
-                  {provider.business_name || `${provider.profiles?.first_name} ${provider.profiles?.last_name}`}
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold">
+                    {provider.business_name || `${provider.profiles?.first_name} ${provider.profiles?.last_name}`}
+                  </h3>
+                  {provider.isPreferred && (
+                    <Badge variant="secondary" className="ml-2">
+                      Preferred
+                    </Badge>
+                  )}
+                </div>
                 {provider.description && (
                   <p className="text-sm text-muted-foreground mt-1">
                     {provider.description}
@@ -264,11 +316,49 @@ export default function Maintenance() {
               )}
             </div>
 
-            <div className="pt-4 flex justify-end">
+            <div className="pt-4 flex justify-end gap-2">
+              {userRole === 'landlord' && (
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    try {
+                      if (provider.isPreferred) {
+                        await supabase
+                          .from('landlord_service_providers')
+                          .delete()
+                          .eq('landlord_id', auth.uid())
+                          .eq('service_provider_id', provider.id);
+                      } else {
+                        await supabase
+                          .from('landlord_service_providers')
+                          .insert({
+                            landlord_id: auth.uid(),
+                            service_provider_id: provider.id
+                          });
+                      }
+                      // Refetch the providers list
+                      queryClient.invalidateQueries({ queryKey: ['service-providers-details'] });
+                      
+                      toast({
+                        title: provider.isPreferred ? "Removed from preferred providers" : "Added to preferred providers",
+                        description: `${provider.profiles?.first_name} ${provider.profiles?.last_name} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
+                      });
+                    } catch (error) {
+                      console.error('Error updating preferred status:', error);
+                      toast({
+                        title: "Error",
+                        description: "Failed to update preferred status. Please try again.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                >
+                  {provider.isPreferred ? 'Remove from Preferred' : 'Add to Preferred'}
+                </Button>
+              )}
               <Button
-                variant="outline"
+                variant="default"
                 onClick={() => handleRequestClick(undefined)}
-                className="w-full sm:w-auto"
               >
                 Create Maintenance Request
               </Button>
