@@ -35,7 +35,11 @@ serve(async (req) => {
     console.log('Authenticated user:', user.id);
 
     // Get the invoice details including the property and landlord info
-    console.log('Fetching invoice details...');
+    console.log('Fetching invoice details with query:', {
+      id: paymentId,
+      select: `*, landlord:profiles!invoices_landlord_id_fkey (stripe_account_id, email), property:properties (name, address)`
+    });
+
     const { data: invoice, error: invoiceError } = await supabaseClient
       .from('invoices')
       .select(`
@@ -50,13 +54,13 @@ serve(async (req) => {
         )
       `)
       .eq('id', paymentId)
-      .single();
+      .maybeSingle();
 
     console.log('Invoice query result:', { invoice, invoiceError });
 
     if (invoiceError) {
       console.error('Error fetching invoice:', invoiceError);
-      throw new Error('Error fetching invoice details');
+      throw new Error(`Error fetching invoice: ${invoiceError.message}`);
     }
 
     if (!invoice) {
