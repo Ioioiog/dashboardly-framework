@@ -36,23 +36,6 @@ interface ServiceProvider {
   isPreferred?: boolean;
 }
 
-interface SupabaseServiceProvider {
-  id: string;
-  business_name: string | null;
-  description: string | null;
-  contact_phone: string | null;
-  contact_email: string | null;
-  website: string | null;
-  service_area: string[] | null;
-  rating: number | null;
-  review_count: number | null;
-  profile: {
-    first_name: string | null;
-    last_name: string | null;
-  };
-  services: ServiceProviderService[];
-}
-
 export function ServiceProviderList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -86,7 +69,7 @@ export function ServiceProviderList() {
           id,
           first_name,
           last_name,
-          service_provider_profiles!service_provider_profiles_id_fkey (
+          service_provider_profiles (
             business_name,
             description,
             contact_phone,
@@ -114,22 +97,26 @@ export function ServiceProviderList() {
       const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
       // Format and sort the providers data
-      const formattedProviders: ServiceProvider[] = (providers || []).map(provider => ({
-        id: provider.id,
-        ...provider.service_provider_profiles,
-        profile: {
-          first_name: provider.first_name,
-          last_name: provider.last_name
-        },
-        isPreferred: preferredIds.has(provider.id)
-      })).sort((a, b) => {
-        if (a.isPreferred === b.isPreferred) {
-          const aName = a.business_name || `${a.profile.first_name} ${a.profile.last_name}`;
-          const bName = b.business_name || `${b.profile.first_name} ${b.profile.last_name}`;
-          return aName.localeCompare(bName);
-        }
-        return a.isPreferred ? -1 : 1;
-      });
+      const formattedProviders: ServiceProvider[] = (providers || [])
+        .filter(provider => provider.service_provider_profiles)
+        .map(provider => ({
+          id: provider.id,
+          ...provider.service_provider_profiles,
+          profile: {
+            first_name: provider.first_name,
+            last_name: provider.last_name
+          },
+          services: provider.service_provider_profiles?.services || [],
+          isPreferred: preferredIds.has(provider.id)
+        }))
+        .sort((a, b) => {
+          if (a.isPreferred === b.isPreferred) {
+            const aName = a.business_name || `${a.profile.first_name} ${a.profile.last_name}`;
+            const bName = b.business_name || `${b.profile.first_name} ${b.profile.last_name}`;
+            return aName.localeCompare(bName);
+          }
+          return a.isPreferred ? -1 : 1;
+        });
 
       return formattedProviders;
     },
