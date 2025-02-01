@@ -190,7 +190,8 @@ export default function Maintenance() {
       const formattedProviders: ServiceProvider[] = (allProviders || []).map(provider => ({
         ...provider,
         isPreferred: preferredIds.has(provider.id),
-        profiles: provider.profiles as ServiceProviderProfile // Type assertion since we know the structure
+        // Extract the first profile from the array and use it as the provider's profile
+        profiles: provider.profiles[0] as ServiceProviderProfile
       }));
 
       // Sort providers: preferred first, then by name
