@@ -60,7 +60,6 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
       },
-
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -84,11 +83,29 @@ export default {
             transform: "translate(0px, 0px) scale(1)",
           },
         },
+        float: {
+          "0%, 100%": {
+            transform: "translateY(0) rotate(0)",
+          },
+          "50%": {
+            transform: "translateY(-20px) rotate(10deg)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         blob: "blob 7s infinite",
+        "float-1": "float 10s ease-in-out infinite",
+        "float-2": "float 12s ease-in-out infinite 1s",
+        "float-3": "float 11s ease-in-out infinite 2s",
+        "float-4": "float 13s ease-in-out infinite 3s",
+        "float-5": "float 12s ease-in-out infinite 4s",
+        "float-6": "float 11s ease-in-out infinite 5s",
+        "float-7": "float 10s ease-in-out infinite 6s",
+        "float-8": "float 13s ease-in-out infinite 7s",
+        "float-9": "float 11s ease-in-out infinite 8s",
+        "float-10": "float 12s ease-in-out infinite 9s",
       },
     },
   },

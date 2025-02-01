@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { RoleSelection } from "@/components/auth/RoleSelection";
 import { AuthForms } from "@/components/auth/AuthForms";
 import { RoleSpecificForm } from "@/components/auth/RoleSpecificForm";
+import { Home, Building2, Wrench, MessageSquare, FileText, Settings, Receipt, Bell, Calendar, CreditCard } from "lucide-react";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -158,6 +159,12 @@ const AuthPage = () => {
     });
   };
 
+  const FloatingIcon = ({ icon: Icon, className }: { icon: any, className: string }) => (
+    <div className={`absolute opacity-[0.03] dark:opacity-[0.05] ${className}`}>
+      <Icon size={32} />
+    </div>
+  );
+
   if (showRoleForm) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
@@ -185,9 +192,22 @@ const AuthPage = () => {
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/40 via-blue-600/40 to-blue-700/40">
         <div className="absolute inset-0">
+          {/* Blob animations */}
           <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
           <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
           <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+
+          {/* Floating icons */}
+          <FloatingIcon icon={Home} className="top-1/4 left-1/4 animate-float-1" />
+          <FloatingIcon icon={Building2} className="top-1/3 right-1/4 animate-float-2" />
+          <FloatingIcon icon={Wrench} className="bottom-1/4 left-1/3 animate-float-3" />
+          <FloatingIcon icon={MessageSquare} className="top-1/2 right-1/3 animate-float-4" />
+          <FloatingIcon icon={FileText} className="bottom-1/3 right-1/4 animate-float-5" />
+          <FloatingIcon icon={Settings} className="top-1/4 right-1/2 animate-float-6" />
+          <FloatingIcon icon={Receipt} className="bottom-1/4 right-1/3 animate-float-7" />
+          <FloatingIcon icon={Bell} className="top-1/3 left-1/3 animate-float-8" />
+          <FloatingIcon icon={Calendar} className="bottom-1/3 left-1/4 animate-float-9" />
+          <FloatingIcon icon={CreditCard} className="top-1/2 left-1/2 animate-float-10" />
         </div>
       </div>
 
