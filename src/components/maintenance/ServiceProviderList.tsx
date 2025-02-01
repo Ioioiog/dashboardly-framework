@@ -1,13 +1,11 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Phone, Mail, Globe, Star, Building2, MapPin, Wrench } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Building2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthState } from "@/hooks/useAuthState";
+import { ServiceProviderCard } from "./service-provider/ServiceProviderCard";
 
 interface ServiceProviderService {
   name: string;
@@ -49,7 +47,6 @@ export function ServiceProviderList() {
         return [];
       }
 
-      // First get the landlord's preferred providers
       const { data: preferredProviders, error: preferredError } = await supabase
         .from("landlord_service_providers")
         .select("service_provider_id")
@@ -60,9 +57,6 @@ export function ServiceProviderList() {
         throw preferredError;
       }
 
-      console.log("Preferred providers:", preferredProviders);
-
-      // Get service provider profiles with a join to profiles table
       const { data: providers, error: providersError } = await supabase
         .from("service_provider_profiles")
         .select(`
@@ -92,13 +86,9 @@ export function ServiceProviderList() {
         throw providersError;
       }
 
-      console.log("Raw providers data:", providers);
-
-      // Create a set of preferred provider IDs for quick lookup
       const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
-      // Format and sort the providers data
-      const formattedProviders = (providers || [])
+      return (providers || [])
         .map(provider => ({
           ...provider,
           profiles: Array.isArray(provider.profiles) ? provider.profiles : [provider.profiles],
@@ -112,9 +102,6 @@ export function ServiceProviderList() {
           }
           return a.isPreferred ? -1 : 1;
         });
-
-      console.log("Formatted providers:", formattedProviders);
-      return formattedProviders;
     },
     enabled: !!currentUserId
   });
@@ -177,7 +164,6 @@ export function ServiceProviderList() {
   }
 
   if (!serviceProviders?.length) {
-    console.log("No service providers found in the data");
     return (
       <Card className="p-6">
         <div className="text-center space-y-2">
@@ -194,106 +180,11 @@ export function ServiceProviderList() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {serviceProviders?.map((provider) => (
-        <Card 
-          key={provider.id} 
-          className={cn(
-            "p-6 space-y-4",
-            provider.isPreferred && "border-2 border-primary"
-          )}
-        >
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold">
-                  {provider.business_name || `${provider.profiles[0]?.first_name} ${provider.profiles[0]?.last_name}`}
-                </h3>
-                {provider.isPreferred && (
-                  <Badge variant="secondary" className="ml-2">
-                    Preferred
-                  </Badge>
-                )}
-              </div>
-              {provider.description && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {provider.description}
-                </p>
-              )}
-            </div>
-            {provider.rating && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <Star className="h-3 w-3" /> {provider.rating.toFixed(1)}
-                {provider.review_count > 0 && (
-                  <span className="text-xs">({provider.review_count})</span>
-                )}
-              </Badge>
-            )}
-          </div>
-
-          {provider.service_area && provider.service_area.length > 0 && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>Service Areas: {provider.service_area.join(', ')}</span>
-            </div>
-          )}
-
-          {provider.services && provider.services.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Wrench className="h-4 w-4" />
-                <span>Services Offered:</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {provider.services.map((service, index) => (
-                  <Badge key={index} variant="outline">
-                    {service.name}
-                    {service.base_price && ` - ${service.base_price} ${service.price_unit || ''}`}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-col space-y-2">
-            {provider.contact_phone && (
-              <a
-                href={`tel:${provider.contact_phone}`}
-                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
-              >
-                <Phone className="h-4 w-4" />
-                {provider.contact_phone}
-              </a>
-            )}
-            {provider.contact_email && (
-              <a
-                href={`mailto:${provider.contact_email}`}
-                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
-              >
-                <Mail className="h-4 w-4" />
-                {provider.contact_email}
-              </a>
-            )}
-            {provider.website && (
-              <a
-                href={provider.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
-              >
-                <Globe className="h-4 w-4" />
-                Website
-              </a>
-            )}
-          </div>
-
-          <div className="pt-4 flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => handlePreferredToggle(provider)}
-            >
-              {provider.isPreferred ? 'Remove from Preferred' : 'Add to Preferred'}
-            </Button>
-          </div>
-        </Card>
+        <ServiceProviderCard
+          key={provider.id}
+          provider={provider}
+          onPreferredToggle={handlePreferredToggle}
+        />
       ))}
     </div>
   );
