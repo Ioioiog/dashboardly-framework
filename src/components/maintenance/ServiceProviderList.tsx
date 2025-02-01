@@ -26,10 +26,10 @@ interface ServiceProvider {
   service_area?: string[];
   rating?: number;
   review_count?: number;
-  profiles: {
+  profiles: Array<{
     first_name: string | null;
     last_name: string | null;
-  }[];
+  }>;
   services?: ServiceProviderService[];
   isPreferred?: boolean;
 }
@@ -101,7 +101,7 @@ export function ServiceProviderList() {
       const formattedProviders = (providers || [])
         .map(provider => ({
           ...provider,
-          profiles: provider.profiles || [], // Ensure profiles is always an array
+          profiles: Array.isArray(provider.profiles) ? provider.profiles : [provider.profiles],
           isPreferred: preferredIds.has(provider.id)
         }))
         .sort((a, b) => {
