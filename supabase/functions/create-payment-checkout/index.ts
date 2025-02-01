@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -60,18 +61,27 @@ serve(async (req) => {
 
     if (paymentError) {
       console.error('Error fetching payment:', paymentError);
-      throw new Error('Error fetching payment details');
+      return new Response(
+        JSON.stringify({ error: 'Error fetching payment details' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
     if (!payment) {
       console.error('Payment not found for ID:', paymentId);
-      throw new Error('Payment not found');
+      return new Response(
+        JSON.stringify({ error: 'Payment not found' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+      );
     }
 
     const stripeAccountId = payment.tenancy.property.landlord.stripe_account_id;
     if (!stripeAccountId) {
       console.error('Landlord has not connected Stripe account');
-      throw new Error('Landlord has not connected Stripe account');
+      return new Response(
+        JSON.stringify({ error: 'Landlord has not connected Stripe account' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
     // Initialize Stripe
