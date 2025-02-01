@@ -33,8 +33,10 @@ export function TenantInteractionHistory({ tenantId }: TenantInteractionHistoryP
       const { data, error } = await supabase
         .from("tenant_observations")
         .select(`
-          *,
-          landlord:profiles(first_name, last_name)
+          id,
+          observation,
+          created_at,
+          landlord:profiles!tenant_observations_landlord_id_fkey(first_name, last_name)
         `)
         .eq("tenant_id", tenantId)
         .order("created_at", { ascending: false });
