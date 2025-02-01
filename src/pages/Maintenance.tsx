@@ -138,22 +138,7 @@ export default function Maintenance() {
       // First get the landlord's preferred providers
       const { data: preferredProviders, error: preferredError } = await supabase
         .from("landlord_service_providers")
-        .select(`
-          service_provider_id,
-          service_provider:service_provider_profiles!inner(
-            *,
-            profiles:profiles!service_provider_profiles_id_fkey(
-              first_name,
-              last_name
-            ),
-            services:service_provider_services(
-              name,
-              category,
-              base_price,
-              price_unit
-            )
-          )
-        `)
+        .select("service_provider_id")
         .eq('landlord_id', currentUserId);
 
       if (preferredError) {
@@ -161,12 +146,12 @@ export default function Maintenance() {
         throw preferredError;
       }
 
-      // Then get all active service providers
+      // Then get all service providers with their profile information
       const { data: allProviders, error: allError } = await supabase
         .from("service_provider_profiles")
         .select(`
           *,
-          profiles:profiles!service_provider_profiles_id_fkey(
+          profile:profiles(
             first_name,
             last_name
           ),
@@ -190,8 +175,11 @@ export default function Maintenance() {
       const formattedProviders: ServiceProvider[] = (allProviders || []).map(provider => ({
         ...provider,
         isPreferred: preferredIds.has(provider.id),
-        // Extract the first profile from the array and use it as the provider's profile
-        profiles: provider.profiles[0] as ServiceProviderProfile
+        // Extract profile information from the joined data
+        profiles: {
+          first_name: provider.profile?.first_name || '',
+          last_name: provider.profile?.last_name || ''
+        }
       }));
 
       // Sort providers: preferred first, then by name
