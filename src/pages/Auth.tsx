@@ -6,7 +6,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { RoleSelection } from "@/components/auth/RoleSelection";
 import { AuthForms } from "@/components/auth/AuthForms";
 import { RoleSpecificForm } from "@/components/auth/RoleSpecificForm";
-import { Home, Building2, Wrench, MessageSquare, FileText, Settings, Receipt, Bell, Calendar, CreditCard } from "lucide-react";
+import { 
+  Home, Building2, Wrench, MessageSquare, FileText, Settings, 
+  Receipt, Bell, Calendar, CreditCard, User, Lock, Key, 
+  Shield, Globe, Mail, Wallet, Users, Home2
+} from "lucide-react";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -160,8 +164,8 @@ const AuthPage = () => {
   };
 
   const FloatingIcon = ({ icon: Icon, className }: { icon: any, className: string }) => (
-    <div className={`absolute opacity-[0.03] dark:opacity-[0.05] ${className}`}>
-      <Icon size={32} />
+    <div className={`absolute opacity-[0.08] dark:opacity-[0.12] ${className}`}>
+      <Icon size={48} />
     </div>
   );
 
@@ -197,7 +201,7 @@ const AuthPage = () => {
           <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
           <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
 
-          {/* Floating icons */}
+          {/* Floating icons - Primary layer */}
           <FloatingIcon icon={Home} className="top-1/4 left-1/4 animate-float-1" />
           <FloatingIcon icon={Building2} className="top-1/3 right-1/4 animate-float-2" />
           <FloatingIcon icon={Wrench} className="bottom-1/4 left-1/3 animate-float-3" />
@@ -208,6 +212,17 @@ const AuthPage = () => {
           <FloatingIcon icon={Bell} className="top-1/3 left-1/3 animate-float-8" />
           <FloatingIcon icon={Calendar} className="bottom-1/3 left-1/4 animate-float-9" />
           <FloatingIcon icon={CreditCard} className="top-1/2 left-1/2 animate-float-10" />
+
+          {/* Additional floating icons - Secondary layer */}
+          <FloatingIcon icon={User} className="top-1/6 left-1/6 animate-float-1" />
+          <FloatingIcon icon={Lock} className="bottom-1/6 right-1/6 animate-float-2" />
+          <FloatingIcon icon={Key} className="top-2/3 left-1/5 animate-float-3" />
+          <FloatingIcon icon={Shield} className="bottom-2/3 right-1/5 animate-float-4" />
+          <FloatingIcon icon={Globe} className="top-1/3 left-2/3 animate-float-5" />
+          <FloatingIcon icon={Mail} className="bottom-1/3 right-2/3 animate-float-6" />
+          <FloatingIcon icon={Wallet} className="top-2/5 left-3/4 animate-float-7" />
+          <FloatingIcon icon={Users} className="bottom-2/5 right-3/4 animate-float-8" />
+          <FloatingIcon icon={Home2} className="top-3/4 left-1/3 animate-float-9" />
         </div>
       </div>
 
