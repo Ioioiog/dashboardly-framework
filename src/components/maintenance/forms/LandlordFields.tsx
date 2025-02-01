@@ -43,17 +43,20 @@ export function LandlordFields({ serviceProviders, formData, onChange, userRole 
       console.log("Creating new service provider:", newProvider);
 
       // First check if the user already exists
-      const { data: existingProfiles, error: profileError } = await supabase
+      const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
         .select('id, role')
         .eq('email', newProvider.email)
-        .single();
+        .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') { // PGRST116 means no rows returned
+      if (profileError) {
+        console.error("Error checking existing profile:", profileError);
         throw profileError;
       }
 
-      if (existingProfiles) {
+      console.log("Existing profile check result:", existingProfile);
+
+      if (existingProfile) {
         // Update existing profile to service provider role if they exist
         const { error: updateError } = await supabase
           .from('profiles')
@@ -63,15 +66,19 @@ export function LandlordFields({ serviceProviders, formData, onChange, userRole 
             phone: newProvider.phone,
             role: 'service_provider',
           })
-          .eq('id', existingProfiles.id);
+          .eq('id', existingProfile.id);
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error("Error updating existing profile:", updateError);
+          throw updateError;
+        }
 
         toast({
           title: "Success",
           description: "Existing user updated as service provider successfully.",
         });
       } else {
+        console.log("Creating new auth user for service provider");
         // Create new auth user with service provider role
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: newProvider.email,
@@ -83,7 +90,16 @@ export function LandlordFields({ serviceProviders, formData, onChange, userRole 
           },
         });
 
-        if (authError) throw authError;
+        if (authError) {
+          console.error("Error creating auth user:", authError);
+          throw authError;
+        }
+
+        if (!authData.user) {
+          throw new Error("No user data returned from auth signup");
+        }
+
+        console.log("Auth user created successfully:", authData.user.id);
 
         // Profile is created automatically via trigger, but we need to update the details
         const { error: updateError } = await supabase
@@ -94,9 +110,12 @@ export function LandlordFields({ serviceProviders, formData, onChange, userRole 
             phone: newProvider.phone,
             role: "service_provider",
           })
-          .eq("id", authData.user!.id);
+          .eq("id", authData.user.id);
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error("Error updating new profile:", updateError);
+          throw updateError;
+        }
 
         toast({
           title: "Success",
