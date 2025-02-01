@@ -115,12 +115,6 @@ export const standardMenuItems = [
     roles: ["landlord", "tenant"],
   },
   {
-    title: "Meter Readings",
-    icon: Clipboard,
-    href: "/meter-readings",
-    roles: ["landlord", "tenant"],
-  },
-  {
     title: "Chat",
     icon: MessageCircle,
     href: "/chat",
