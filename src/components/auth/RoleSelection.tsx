@@ -70,8 +70,8 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
                           transition-colors duration-300 group-hover:text-gray-600 dark:group-hover:text-gray-300">
                 {role.description}
               </p>
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/0 to-blue-500/0 
-                            group-hover:from-blue-500/5 group-hover:to-blue-600/5 
+              <div className="absolute inset-0 rounded-xl bg-transparent 
+                            group-hover:bg-gradient-to-br group-hover:from-blue-500/5 group-hover:to-blue-600/5 
                             dark:group-hover:from-blue-400/10 dark:group-hover:to-blue-500/10 
                             transition-all duration-300" />
             </button>
