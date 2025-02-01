@@ -17,7 +17,7 @@ const Utilities = () => {
   const [activeSection, setActiveSection] = useState<UtilitiesSection>('bills');
   const { userRole } = useUserRole();
   const { properties, isLoading: propertiesLoading } = useProperties({ 
-    userRole: userRole || "tenant" 
+    userRole: userRole === "landlord" || userRole === "tenant" ? userRole : "tenant"
   });
 
   // Only allow landlord or tenant roles to access this page
@@ -46,6 +46,7 @@ const Utilities = () => {
   ];
 
   const renderSection = () => {
+    // Ensure we only render for landlord or tenant roles
     if (userRole !== "landlord" && userRole !== "tenant") return null;
 
     switch (activeSection) {
