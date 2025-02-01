@@ -28,8 +28,8 @@ interface Filters {
 type MaintenanceSection = "requests" | "providers";
 
 interface ServiceProviderProfile {
-  first_name: string;
-  last_name: string;
+  first_name: string | null;
+  last_name: string | null;
 }
 
 interface ServiceProviderService {
@@ -48,7 +48,7 @@ interface ServiceProvider {
   service_area?: string[];
   rating?: number;
   review_count?: number;
-  profiles: ServiceProviderProfile;
+  profile: ServiceProviderProfile;
   services?: ServiceProviderService[];
   isPreferred?: boolean;
 }
@@ -147,11 +147,11 @@ export default function Maintenance() {
       }
 
       // Then get all service providers with their profile information
-      const { data: allProviders, error: allError } = await supabase
+      const { data: providers, error: providersError } = await supabase
         .from("service_provider_profiles")
         .select(`
           *,
-          profile:profiles(
+          profile:profiles!inner(
             first_name,
             last_name
           ),
@@ -163,29 +163,25 @@ export default function Maintenance() {
           )
         `);
 
-      if (allError) {
-        console.error("Error fetching all providers:", allError);
-        throw allError;
+      if (providersError) {
+        console.error("Error fetching providers:", providersError);
+        throw providersError;
       }
 
       // Create a set of preferred provider IDs for quick lookup
       const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
-      // Mark providers as preferred or available and format the data
-      const formattedProviders: ServiceProvider[] = (allProviders || []).map(provider => ({
+      // Format the providers data
+      const formattedProviders: ServiceProvider[] = providers.map(provider => ({
         ...provider,
         isPreferred: preferredIds.has(provider.id),
-        // Extract profile information from the joined data
-        profiles: {
-          first_name: provider.profile?.first_name || '',
-          last_name: provider.profile?.last_name || ''
-        }
+        profile: provider.profile
       }));
 
       // Sort providers: preferred first, then by name
       return formattedProviders.sort((a, b) => {
         if (a.isPreferred === b.isPreferred) {
-          return (a.profiles?.first_name || '').localeCompare(b.profiles?.first_name || '');
+          return (a.profile.first_name || '').localeCompare(b.profile.first_name || '');
         }
         return a.isPreferred ? -1 : 1;
       });
@@ -244,7 +240,7 @@ export default function Maintenance() {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-semibold">
-                    {provider.business_name || `${provider.profiles.first_name} ${provider.profiles.last_name}`}
+                    {provider.business_name || `${provider.profile.first_name} ${provider.profile.last_name}`}
                   </h3>
                   {provider.isPreferred && (
                     <Badge variant="secondary" className="ml-2">
@@ -265,39 +261,6 @@ export default function Maintenance() {
                     <span className="text-xs">({provider.review_count})</span>
                   )}
                 </Badge>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              {provider.services?.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium mb-1">Services:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {provider.services.map((service, idx) => (
-                      <Badge key={idx} variant="outline">
-                        {service.name}
-                        {service.base_price && (
-                          <span className="ml-1">
-                            (${service.base_price}/{service.price_unit})
-                          </span>
-                        )}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {provider.service_area?.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium mb-1">Service Areas:</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {provider.service_area.map((area, idx) => (
-                      <Badge key={idx} variant="secondary">
-                        {area}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
               )}
             </div>
 
@@ -358,7 +321,7 @@ export default function Maintenance() {
                       
                       toast({
                         title: provider.isPreferred ? "Removed from preferred providers" : "Added to preferred providers",
-                        description: `${provider.profiles.first_name} ${provider.profiles.last_name} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
+                        description: `${provider.profile.first_name} ${provider.profile.last_name} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
                       });
                     } catch (error) {
                       console.error('Error updating preferred status:', error);
