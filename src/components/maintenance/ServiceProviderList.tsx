@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface ServiceProviderService {
   name: string;
@@ -40,6 +41,7 @@ export function ServiceProviderList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { currentUserId } = useAuthState();
+  const { userRole } = useUserRole();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [newProvider, setNewProvider] = useState({
@@ -270,108 +272,77 @@ export function ServiceProviderList() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="p-6 space-y-4">
-            <div className="animate-pulse space-y-4">
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-full"></div>
-                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  if (!serviceProviders?.length) {
-    return (
-      <Card className="p-6">
-        <div className="text-center space-y-2">
-          <Building2 className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="text-lg font-medium">No Service Providers Found</h3>
-          <p className="text-sm text-muted-foreground">
-            There are currently no service providers available in the system.
-          </p>
-        </div>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-4">
-      <div className="flex justify-end mb-6">
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              Create New Provider
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Create Service Provider</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="first_name">First Name *</Label>
-                  <Input
-                    id="first_name"
-                    value={newProvider.first_name}
-                    onChange={(e) => setNewProvider(prev => ({ ...prev, first_name: e.target.value }))}
-                    className="w-full"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="last_name">Last Name *</Label>
-                  <Input
-                    id="last_name"
-                    value={newProvider.last_name}
-                    onChange={(e) => setNewProvider(prev => ({ ...prev, last_name: e.target.value }))}
-                    className="w-full"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newProvider.email}
-                  onChange={(e) => setNewProvider(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone *</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={newProvider.phone}
-                  onChange={(e) => setNewProvider(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full"
-                  required
-                />
-              </div>
-              <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
-                onClick={handleCreateServiceProvider}
-                disabled={isCreating}
-              >
-                {isCreating ? "Creating..." : "Create Service Provider"}
+      {userRole === "landlord" && (
+        <div className="flex justify-end mb-6">
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                Create New Provider
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Create Service Provider</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="first_name">First Name *</Label>
+                    <Input
+                      id="first_name"
+                      value={newProvider.first_name}
+                      onChange={(e) => setNewProvider(prev => ({ ...prev, first_name: e.target.value }))}
+                      className="w-full"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="last_name">Last Name *</Label>
+                    <Input
+                      id="last_name"
+                      value={newProvider.last_name}
+                      onChange={(e) => setNewProvider(prev => ({ ...prev, last_name: e.target.value }))}
+                      className="w-full"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={newProvider.email}
+                    onChange={(e) => setNewProvider(prev => ({ ...prev, email: e.target.value }))}
+                    className="w-full"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone *</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={newProvider.phone}
+                    onChange={(e) => setNewProvider(prev => ({ ...prev, phone: e.target.value }))}
+                    className="w-full"
+                    required
+                  />
+                </div>
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+                  onClick={handleCreateServiceProvider}
+                  disabled={isCreating}
+                >
+                  {isCreating ? "Creating..." : "Create Service Provider"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
