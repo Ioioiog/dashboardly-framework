@@ -102,7 +102,7 @@ export function ServiceProviderList() {
       const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
       // Format and sort the providers data
-      const formattedProviders: ServiceProvider[] = (providers as SupabaseServiceProvider[]).map(provider => ({
+      const formattedProviders: ServiceProvider[] = (providers as unknown as SupabaseServiceProvider[]).map(provider => ({
         ...provider,
         isPreferred: preferredIds.has(provider.id),
         profile: provider.profiles || { 
