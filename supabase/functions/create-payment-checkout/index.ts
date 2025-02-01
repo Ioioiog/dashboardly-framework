@@ -21,13 +21,36 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     );
 
+    // Get the authenticated user
+    const authHeader = req.headers.get('Authorization')!;
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (userError || !user) {
+      console.error('User authentication error:', userError);
+      throw new Error('Unauthorized');
+    }
+
+    // Get user's email from profiles
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('email')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile?.email) {
+      console.error('Profile fetch error:', profileError);
+      throw new Error('User profile not found');
+    }
+
     // Get the invoice details including the property and landlord info
     console.log('Fetching invoice details...');
     const { data: invoice, error: invoiceError } = await supabaseClient
       .from('invoices')
       .select(`
         *,
-        landlord:landlord_id (
+        landlord:profiles!invoices_landlord_id_fkey (
           stripe_account_id,
           email
         ),
@@ -37,7 +60,7 @@ serve(async (req) => {
         )
       `)
       .eq('id', paymentId)
-      .maybeSingle();
+      .single();
 
     console.log('Invoice query result:', { invoice, invoiceError });
 
@@ -55,29 +78,6 @@ serve(async (req) => {
     if (!stripeAccountId) {
       console.error('Landlord has not connected Stripe account');
       throw new Error('Landlord has not connected Stripe account');
-    }
-
-    // Get the authenticated user
-    const authHeader = req.headers.get('Authorization')!;
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
-
-    if (userError || !user) {
-      console.error('User authentication error:', userError);
-      throw new Error('Unauthorized');
-    }
-
-    // Get user's email from profiles
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('email')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (profileError || !profile?.email) {
-      console.error('Profile fetch error:', profileError);
-      throw new Error('User profile not found');
     }
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
