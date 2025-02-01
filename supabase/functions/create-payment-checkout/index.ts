@@ -34,46 +34,6 @@ serve(async (req) => {
 
     console.log('Authenticated user:', user.id);
 
-    // Get user's email from profiles with more detailed error logging
-    const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('email')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    console.log('Profile query result:', { profile, profileError });
-
-    if (profileError) {
-      console.error('Profile fetch error:', profileError);
-      throw new Error(`User profile fetch failed: ${profileError.message}`);
-    }
-
-    if (!profile) {
-      console.error('No profile found for user:', user.id);
-      
-      // Try to create a profile if it doesn't exist
-      const { error: createProfileError } = await supabaseClient
-        .from('profiles')
-        .insert({ 
-          id: user.id,
-          email: user.email,
-          role: 'tenant' 
-        });
-
-      if (createProfileError) {
-        console.error('Error creating profile:', createProfileError);
-        throw new Error('Failed to create user profile');
-      }
-
-      console.log('Created new profile for user:', user.id);
-    }
-
-    const userEmail = profile?.email || user.email;
-    if (!userEmail) {
-      console.error('No email found for user:', user.id);
-      throw new Error('User email not found');
-    }
-
     // Get the invoice details including the property and landlord info
     console.log('Fetching invoice details...');
     const { data: invoice, error: invoiceError } = await supabaseClient
@@ -110,13 +70,32 @@ serve(async (req) => {
       throw new Error('Landlord has not connected Stripe account');
     }
 
+    // Initialize Stripe
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     });
 
+    // Create or retrieve customer
+    let customer;
+    const customers = await stripe.customers.list({
+      email: user.email,
+      limit: 1,
+    });
+
+    if (customers.data.length > 0) {
+      customer = customers.data[0];
+    } else {
+      customer = await stripe.customers.create({
+        email: user.email,
+        metadata: {
+          supabase_user_id: user.id,
+        },
+      });
+    }
+
     console.log('Creating payment session...');
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      customer: customer.id,
       line_items: [
         {
           price_data: {
@@ -133,9 +112,9 @@ serve(async (req) => {
       mode: 'payment',
       success_url: `${req.headers.get('origin')}/invoices?success=true`,
       cancel_url: `${req.headers.get('origin')}/invoices?canceled=true`,
-      customer_email: userEmail,
       metadata: {
         invoice_id: invoice.id,
+        tenant_id: user.id,
       },
       payment_intent_data: {
         transfer_data: {
