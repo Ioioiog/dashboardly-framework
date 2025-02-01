@@ -45,19 +45,19 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
             <button
               key={role.id}
               onClick={() => onRoleSelect(role.id)}
-              className="group relative flex flex-col items-center p-8 rounded-xl border border-gray-100 dark:border-gray-800 
-                       hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 
-                       hover:shadow-xl hover:shadow-blue-500/20 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm
+              className="group relative flex flex-col items-center p-8 rounded-[2rem] border border-gray-100/10 
+                       hover:border-blue-500/30 dark:hover:border-blue-500/30 transition-all duration-300 
+                       hover:shadow-xl hover:shadow-blue-500/10 bg-white/5 dark:bg-slate-800/5 backdrop-blur-sm
                        transform hover:-translate-y-1 hover:scale-[1.02]
                        animate-fade-in"
               style={{
                 animationDelay: `${index * 150}ms`
               }}
             >
-              <div className="relative mb-4 p-4 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 
-                            dark:from-blue-900/30 dark:to-blue-800/30 
-                            group-hover:from-blue-100 group-hover:to-blue-200
-                            dark:group-hover:from-blue-800/40 dark:group-hover:to-blue-700/40
+              <div className="relative mb-4 p-4 rounded-2xl bg-gradient-to-br from-blue-50/5 to-blue-100/5 
+                            dark:from-blue-900/10 dark:to-blue-800/10 
+                            group-hover:from-blue-100/10 group-hover:to-blue-200/10
+                            dark:group-hover:from-blue-800/20 dark:group-hover:to-blue-700/20
                             transition-all duration-300 transform group-hover:scale-110">
                 <Icon className="w-8 h-8 text-blue-500 dark:text-blue-400 
                                transition-transform duration-300 group-hover:rotate-[360deg]" />
@@ -70,7 +70,7 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
                           transition-colors duration-300 group-hover:text-gray-600 dark:group-hover:text-gray-300">
                 {role.description}
               </p>
-              <div className="absolute inset-0 rounded-xl bg-transparent 
+              <div className="absolute inset-0 rounded-[2rem] bg-transparent 
                             group-hover:bg-gradient-to-br group-hover:from-blue-500/5 group-hover:to-blue-600/5 
                             dark:group-hover:from-blue-400/10 dark:group-hover:to-blue-500/10 
                             transition-all duration-300" />
