@@ -2,20 +2,18 @@ import React, { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Wrench, Users, List, Phone, Mail, Globe } from "lucide-react";
+import { Plus, Wrench, Users, List } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useToast } from "@/hooks/use-toast";
 import MaintenanceList from "@/components/maintenance/MaintenanceList";
 import MaintenanceDialog from "@/components/maintenance/MaintenanceDialog";
 import MaintenanceFilters from "@/components/maintenance/MaintenanceFilters";
+import { ServiceProviderList } from "@/components/maintenance/ServiceProviderList";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Card } from "@/components/ui/card";
 import { NoDataCard } from "@/components/dashboard/charts/NoDataCard";
-import { Badge } from "@/components/ui/badge";
-import { useAuthState } from "@/hooks/useAuthState";
 
 type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
 
@@ -27,38 +25,10 @@ interface Filters {
 
 type MaintenanceSection = "requests" | "providers";
 
-interface ServiceProviderProfile {
-  first_name: string | null;
-  last_name: string | null;
-}
-
-interface ServiceProviderService {
-  name: string;
-  base_price?: number;
-  price_unit?: string;
-}
-
-interface ServiceProvider {
-  id: string;
-  business_name?: string | null;
-  description?: string | null;
-  contact_phone?: string | null;
-  contact_email?: string | null;
-  website?: string | null;
-  service_area?: string[];
-  rating?: number;
-  review_count?: number;
-  profile: ServiceProviderProfile;
-  services?: ServiceProviderService[];
-  isPreferred?: boolean;
-}
-
 export default function Maintenance() {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const { userRole } = useUserRole();
-  const { currentUserId } = useAuthState();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
   const [activeSection, setActiveSection] = React.useState<MaintenanceSection>("requests");
@@ -129,65 +99,6 @@ export default function Maintenance() {
     },
   });
 
-  const { data: serviceProviders } = useQuery({
-    queryKey: ["service-providers-details"],
-    enabled: activeSection === "providers",
-    queryFn: async () => {
-      console.log("Fetching service providers with details");
-      
-      // First get the landlord's preferred providers
-      const { data: preferredProviders, error: preferredError } = await supabase
-        .from("landlord_service_providers")
-        .select("service_provider_id")
-        .eq('landlord_id', currentUserId);
-
-      if (preferredError) {
-        console.error("Error fetching preferred providers:", preferredError);
-        throw preferredError;
-      }
-
-      // Then get all service providers with their profile information
-      const { data: providers, error: providersError } = await supabase
-        .from("service_provider_profiles")
-        .select(`
-          *,
-          profile:profiles!inner(
-            first_name,
-            last_name
-          ),
-          services:service_provider_services(
-            name,
-            category,
-            base_price,
-            price_unit
-          )
-        `);
-
-      if (providersError) {
-        console.error("Error fetching providers:", providersError);
-        throw providersError;
-      }
-
-      // Create a set of preferred provider IDs for quick lookup
-      const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
-
-      // Format the providers data
-      const formattedProviders: ServiceProvider[] = providers.map(provider => ({
-        ...provider,
-        isPreferred: preferredIds.has(provider.id),
-        profile: provider.profile
-      }));
-
-      // Sort providers: preferred first, then by name
-      return formattedProviders.sort((a, b) => {
-        if (a.isPreferred === b.isPreferred) {
-          return (a.profile.first_name || '').localeCompare(b.profile.first_name || '');
-        }
-        return a.isPreferred ? -1 : 1;
-      });
-    },
-  });
-
   const handleRequestClick = (requestId: string) => {
     setSelectedRequestId(requestId);
     setIsDialogOpen(true);
@@ -218,136 +129,6 @@ export default function Maintenance() {
       icon: Users,
     },
   ];
-
-  const renderServiceProviderList = () => {
-    if (!serviceProviders?.length) {
-      return (
-        <NoDataCard
-          title={t("maintenance.noServiceProviders")}
-          message={t("maintenance.noServiceProvidersMessage")}
-        />
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {serviceProviders.map((provider: ServiceProvider) => (
-          <Card key={provider.id} className={cn(
-            "p-6 space-y-4",
-            provider.isPreferred && "border-2 border-primary"
-          )}>
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold">
-                    {provider.business_name || `${provider.profile.first_name} ${provider.profile.last_name}`}
-                  </h3>
-                  {provider.isPreferred && (
-                    <Badge variant="secondary" className="ml-2">
-                      Preferred
-                    </Badge>
-                  )}
-                </div>
-                {provider.description && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {provider.description}
-                  </p>
-                )}
-              </div>
-              {provider.rating && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  ⭐ {provider.rating.toFixed(1)}
-                  {provider.review_count > 0 && (
-                    <span className="text-xs">({provider.review_count})</span>
-                  )}
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex flex-col space-y-2 pt-4">
-              {provider.contact_phone && (
-                <a
-                  href={`tel:${provider.contact_phone}`}
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
-                >
-                  <Phone className="h-4 w-4" />
-                  {provider.contact_phone}
-                </a>
-              )}
-              {provider.contact_email && (
-                <a
-                  href={`mailto:${provider.contact_email}`}
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
-                >
-                  <Mail className="h-4 w-4" />
-                  {provider.contact_email}
-                </a>
-              )}
-              {provider.website && (
-                <a
-                  href={provider.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
-                >
-                  <Globe className="h-4 w-4" />
-                  Website
-                </a>
-              )}
-            </div>
-
-            <div className="pt-4 flex justify-end gap-2">
-              {userRole === 'landlord' && (
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    try {
-                      if (provider.isPreferred) {
-                        await supabase
-                          .from('landlord_service_providers')
-                          .delete()
-                          .eq('landlord_id', currentUserId)
-                          .eq('service_provider_id', provider.id);
-                      } else {
-                        await supabase
-                          .from('landlord_service_providers')
-                          .insert({
-                            landlord_id: currentUserId,
-                            service_provider_id: provider.id
-                          });
-                      }
-                      // Refetch the providers list
-                      queryClient.invalidateQueries({ queryKey: ['service-providers-details'] });
-                      
-                      toast({
-                        title: provider.isPreferred ? "Removed from preferred providers" : "Added to preferred providers",
-                        description: `${provider.profile.first_name} ${provider.profile.last_name} has been ${provider.isPreferred ? 'removed from' : 'added to'} your preferred providers list.`,
-                      });
-                    } catch (error) {
-                      console.error('Error updating preferred status:', error);
-                      toast({
-                        title: "Error",
-                        description: "Failed to update preferred status. Please try again.",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                >
-                  {provider.isPreferred ? 'Remove from Preferred' : 'Add to Preferred'}
-                </Button>
-              )}
-              <Button
-                variant="default"
-                onClick={() => handleRequestClick(undefined)}
-              >
-                Create Maintenance Request
-              </Button>
-            </div>
-          </Card>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className="flex h-screen bg-background">
@@ -459,7 +240,7 @@ export default function Maintenance() {
               <h2 className="text-xl font-semibold">
                 {t("maintenance.serviceProviders")}
               </h2>
-              {renderServiceProviderList()}
+              <ServiceProviderList />
             </div>
           )}
 
