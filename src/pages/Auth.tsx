@@ -172,14 +172,14 @@ const AuthPage = () => {
   if (showRoleForm) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-transparent">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-blue-800/20 to-blue-700/20">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/5 via-blue-800/5 to-blue-700/5">
           <div className="absolute inset-0">
-            <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-            <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-900 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-            <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-700 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+            <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob"></div>
+            <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-900 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-700 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-4000"></div>
           </div>
         </div>
-        <Card className="w-full max-w-md bg-white/30 backdrop-blur-sm relative z-10">
+        <Card className="w-full max-w-md bg-transparent backdrop-blur-[2px] relative z-10 border-white/5">
           <CardContent className="p-6">
             <RoleSpecificForm
               role={selectedRole}
@@ -194,11 +194,11 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-transparent">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-blue-800/20 to-blue-700/20">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/5 via-blue-800/5 to-blue-700/5">
         <div className="absolute inset-0">
-          <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-          <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-900 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-700 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+          <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob"></div>
+          <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-900 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-700 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-4000"></div>
 
           <FloatingIcon icon={Home} className="top-[10%] left-[15%] animate-float-1" />
           <FloatingIcon icon={Building2} className="top-[15%] right-[20%] animate-float-2" />
@@ -227,7 +227,7 @@ const AuthPage = () => {
         </div>
       </div>
 
-      <Card className="w-full max-w-md bg-white/30 backdrop-blur-sm relative z-10 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 border-0">
+      <Card className="w-full max-w-md bg-transparent backdrop-blur-[2px] relative z-10 border-white/5">
         <CardContent className="space-y-6 px-8">
           <div className="flex items-center justify-center mb-6 bg-transparent">
             <img 
