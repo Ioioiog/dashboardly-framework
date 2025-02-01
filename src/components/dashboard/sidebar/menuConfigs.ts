@@ -102,15 +102,9 @@ export const standardMenuItems = [
     roles: ["landlord", "tenant"],
   },
   {
-    title: "Invoices",
-    icon: FileText,
-    href: "/invoices",
-    roles: ["landlord", "tenant"],
-  },
-  {
-    title: "Payments",
-    icon: CreditCard,
-    href: "/payments",
+    title: "Financial",
+    icon: Wallet,
+    href: "/financial",
     roles: ["landlord", "tenant"],
     notificationType: "payments"
   },

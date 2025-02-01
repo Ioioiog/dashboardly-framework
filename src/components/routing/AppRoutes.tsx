@@ -4,10 +4,9 @@ import Properties from "@/pages/Properties";
 import Tenants from "@/pages/Tenants";
 import Documents from "@/pages/Documents";
 import Settings from "@/pages/Settings";
-import Payments from "@/pages/Payments";
+import Financial from "@/pages/Financial";
 import Utilities from "@/pages/Utilities";
 import Chat from "@/pages/Chat";
-import Invoices from "@/pages/Invoices";
 import Maintenance from "@/pages/Maintenance";
 import MeterReadings from "@/pages/MeterReadings";
 import ServiceProviderProfile from "@/pages/ServiceProviderProfile";
@@ -110,10 +109,10 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
         }
       />
       <Route
-        path="/payments"
+        path="/financial"
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <Payments />
+            <Financial />
           </ProtectedRoute>
         }
       />
@@ -138,14 +137,6 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <Chat />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/invoices"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <Invoices />
           </ProtectedRoute>
         }
       />
