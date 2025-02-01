@@ -173,12 +173,12 @@ const AuthPage = () => {
 
   if (showRoleForm) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/40 via-blue-600/40 to-blue-700/40">
+      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#1A1F2C]">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-blue-800/40 to-blue-700/40">
           <div className="absolute inset-0">
-            <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-            <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-            <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+            <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+            <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-900 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-700 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
           </div>
         </div>
         <Card className="w-full max-w-md bg-white/90 backdrop-blur-sm relative z-10">
@@ -195,13 +195,13 @@ const AuthPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/40 via-blue-600/40 to-blue-700/40">
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#1A1F2C]">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-blue-800/40 to-blue-700/40">
         <div className="absolute inset-0">
           {/* Blob animations */}
-          <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-          <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+          <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+          <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-900 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-700 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
 
           {/* Primary Layer - Top Section */}
           <FloatingIcon icon={Home} className="top-[10%] left-[15%] animate-float-1" />
