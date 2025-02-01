@@ -14,7 +14,7 @@ serve(async (req) => {
 
   try {
     const { paymentId } = await req.json();
-    console.log('Creating payment session for payment ID:', paymentId);
+    console.log('Creating payment session for invoice ID:', paymentId);
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -32,49 +32,54 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    console.log('Authenticated user:', user.id);
+    // Get user's email from profiles
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('email')
+      .eq('id', user.id)
+      .single();
 
-    // Get the payment details including the tenancy and landlord info
-    const { data: payment, error: paymentError } = await supabaseClient
-      .from('payments')
+    if (profileError || !profile?.email) {
+      console.error('Profile fetch error:', profileError);
+      throw new Error('User profile not found');
+    }
+
+    // Get the invoice details including the property and landlord info
+    console.log('Fetching invoice details...');
+    const { data: invoice, error: invoiceError } = await supabaseClient
+      .from('invoices')
       .select(`
         *,
-        tenancy:tenancies (
-          tenant:profiles!tenancies_tenant_id_fkey (
-            email,
-            stripe_account_id
-          ),
-          property:properties (
-            name,
-            address,
-            landlord:profiles!properties_landlord_id_fkey (
-              stripe_account_id
-            )
-          )
+        landlord:profiles!invoices_landlord_id_fkey (
+          stripe_account_id,
+          email
+        ),
+        property:properties (
+          name,
+          address
         )
       `)
       .eq('id', paymentId)
-      .maybeSingle();
+      .single();
 
-    console.log('Payment query result:', { payment, paymentError });
+    console.log('Invoice query result:', { invoice, invoiceError });
 
-    if (paymentError) {
-      console.error('Error fetching payment:', paymentError);
-      throw new Error('Error fetching payment details');
+    if (invoiceError) {
+      console.error('Error fetching invoice:', invoiceError);
+      throw new Error('Error fetching invoice details');
     }
 
-    if (!payment) {
-      console.error('Payment not found for ID:', paymentId);
-      throw new Error('Payment not found');
+    if (!invoice) {
+      console.error('Invoice not found for ID:', paymentId);
+      throw new Error('Invoice not found');
     }
 
-    const stripeAccountId = payment.tenancy.property.landlord.stripe_account_id;
+    const stripeAccountId = invoice.landlord?.stripe_account_id;
     if (!stripeAccountId) {
       console.error('Landlord has not connected Stripe account');
       throw new Error('Landlord has not connected Stripe account');
     }
 
-    // Initialize Stripe
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     });
@@ -85,28 +90,26 @@ serve(async (req) => {
       line_items: [
         {
           price_data: {
-            currency: payment.currency.toLowerCase(),
+            currency: invoice.currency.toLowerCase(),
             product_data: {
-              name: `Rent Payment - ${payment.tenancy.property.name}`,
-              description: `Payment for ${payment.tenancy.property.address}`,
+              name: `Invoice Payment for ${invoice.property.name}`,
+              description: `Payment for ${invoice.property.address}`,
             },
-            unit_amount: Math.round(payment.amount * 100), // Convert to cents
+            unit_amount: Math.round(invoice.amount * 100), // Convert to cents
           },
           quantity: 1,
         },
       ],
       mode: 'payment',
-      success_url: `${req.headers.get('origin')}/financial?success=true`,
-      cancel_url: `${req.headers.get('origin')}/financial?canceled=true`,
-      customer_email: user.email, // Pre-fill customer email
+      success_url: `${req.headers.get('origin')}/invoices?success=true`,
+      cancel_url: `${req.headers.get('origin')}/invoices?canceled=true`,
+      customer_email: profile.email,
       metadata: {
-        payment_id: payment.id,
-        tenant_id: user.id,
-        property_id: payment.tenancy.property.id,
+        invoice_id: invoice.id,
       },
       payment_intent_data: {
         transfer_data: {
-          destination: stripeAccountId, // Transfer payment to landlord's connected account
+          destination: stripeAccountId,
         },
       },
     });
