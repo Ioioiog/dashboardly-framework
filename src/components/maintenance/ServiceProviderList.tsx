@@ -36,21 +36,23 @@ interface ServiceProvider {
   isPreferred?: boolean;
 }
 
+interface SupabaseServiceProviderProfile {
+  business_name: string | null;
+  description: string | null;
+  contact_phone: string | null;
+  contact_email: string | null;
+  website: string | null;
+  service_area: string[] | null;
+  rating: number | null;
+  review_count: number | null;
+  services: ServiceProviderService[] | null;
+}
+
 interface SupabaseProfile {
   id: string;
   first_name: string | null;
   last_name: string | null;
-  service_provider_profiles: {
-    business_name: string | null;
-    description: string | null;
-    contact_phone: string | null;
-    contact_email: string | null;
-    website: string | null;
-    service_area: string[] | null;
-    rating: number | null;
-    review_count: number | null;
-    services: ServiceProviderService[] | null;
-  } | null;
+  service_provider_profiles: SupabaseServiceProviderProfile;
 }
 
 export function ServiceProviderList() {
@@ -114,16 +116,16 @@ export function ServiceProviderList() {
       const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
       // Format and sort the providers data
-      const formattedProviders: ServiceProvider[] = (providers as SupabaseProfile[] || [])
+      const formattedProviders: ServiceProvider[] = (providers as unknown as SupabaseProfile[] || [])
         .filter(provider => provider.service_provider_profiles)
         .map(provider => ({
           id: provider.id,
-          ...provider.service_provider_profiles!,
+          ...provider.service_provider_profiles,
           profile: {
             first_name: provider.first_name,
             last_name: provider.last_name
           },
-          services: provider.service_provider_profiles?.services || [],
+          services: provider.service_provider_profiles.services || [],
           isPreferred: preferredIds.has(provider.id)
         }))
         .sort((a, b) => {
