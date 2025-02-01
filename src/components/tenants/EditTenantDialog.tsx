@@ -31,7 +31,12 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
     setIsSubmitting(true);
 
     try {
-      console.log("Updating tenant profile...");
+      console.log("Updating tenant profile...", {
+        tenantId: tenant.id,
+        formData
+      });
+
+      // Update tenant profile
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
@@ -42,9 +47,14 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
         })
         .eq("id", tenant.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Error updating profile:", profileError);
+        throw profileError;
+      }
 
-      console.log("Updating tenancy...");
+      console.log("Profile updated successfully, updating tenancy...");
+
+      // Update tenancy details
       const { error: tenancyError } = await supabase
         .from("tenancies")
         .update({
@@ -55,7 +65,12 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
         .eq("tenant_id", tenant.id)
         .eq("status", "active");
 
-      if (tenancyError) throw tenancyError;
+      if (tenancyError) {
+        console.error("Error updating tenancy:", tenancyError);
+        throw tenancyError;
+      }
+
+      console.log("Tenancy updated successfully");
 
       toast({
         title: "Success",
@@ -68,7 +83,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
       console.error("Error updating tenant:", error);
       toast({
         title: "Error",
-        description: "Failed to update tenant information.",
+        description: "Failed to update tenant information. Please try again.",
         variant: "destructive",
       });
     } finally {
