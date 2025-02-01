@@ -172,6 +172,16 @@ const AuthPage = () => {
   if (showRoleForm) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#0EA5E9]/5 via-transparent to-[#1EAEDB]/5">
+        <FloatingIcon icon={Home} className="top-[10%] left-[15%] animate-float-1" />
+        <FloatingIcon icon={Building2} className="top-[15%] right-[20%] animate-float-2" />
+        <FloatingIcon icon={Wrench} className="top-[20%] left-[25%] animate-float-3" />
+        <FloatingIcon icon={MessageSquare} className="top-[25%] right-[30%] animate-float-4" />
+        <FloatingIcon icon={FileText} className="top-[30%] left-[35%] animate-float-5" />
+        <FloatingIcon icon={Settings} className="top-[40%] right-[40%] animate-float-6" />
+        <FloatingIcon icon={Receipt} className="bottom-[45%] left-[45%] animate-float-7" />
+        <FloatingIcon icon={Bell} className="bottom-[50%] right-[50%] animate-float-8" />
+        <FloatingIcon icon={Calendar} className="bottom-[55%] left-[55%] animate-float-9" />
+        
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/5 via-blue-800/5 to-blue-700/5">
           <div className="absolute inset-0">
             <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob"></div>
@@ -179,6 +189,7 @@ const AuthPage = () => {
             <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-700 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-4000"></div>
           </div>
         </div>
+
         <Card className="w-full max-w-md bg-transparent backdrop-blur-[2px] relative z-10 border-white/5">
           <CardContent className="p-6">
             <RoleSpecificForm
@@ -194,36 +205,22 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#0EA5E9]/5 via-transparent to-[#1EAEDB]/5">
+      <FloatingIcon icon={CreditCard} className="top-[60%] right-[60%] animate-float-10" />
+      <FloatingIcon icon={User} className="bottom-[70%] left-[10%] animate-float-1" />
+      <FloatingIcon icon={Lock} className="bottom-[75%] right-[15%] animate-float-2" />
+      <FloatingIcon icon={Key} className="bottom-[80%] left-[20%] animate-float-3" />
+      <FloatingIcon icon={Shield} className="bottom-[85%] right-[25%] animate-float-4" />
+      <FloatingIcon icon={Globe} className="bottom-[90%] left-[30%] animate-float-5" />
+      <FloatingIcon icon={Mail} className="bottom-[20%] right-[35%] animate-float-6" />
+      <FloatingIcon icon={Wallet} className="bottom-[25%] left-[40%] animate-float-7" />
+      <FloatingIcon icon={Users} className="bottom-[30%] right-[45%] animate-float-8" />
+      <FloatingIcon icon={HomeIcon} className="bottom-[35%] left-[50%] animate-float-9" />
+      
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/5 via-blue-800/5 to-blue-700/5">
         <div className="absolute inset-0">
           <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-800 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob"></div>
           <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-900 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-2000"></div>
           <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-700 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-4000"></div>
-
-          <FloatingIcon icon={Home} className="top-[10%] left-[15%] animate-float-1" />
-          <FloatingIcon icon={Building2} className="top-[15%] right-[20%] animate-float-2" />
-          <FloatingIcon icon={Wrench} className="top-[20%] left-[25%] animate-float-3" />
-          <FloatingIcon icon={MessageSquare} className="top-[25%] right-[30%] animate-float-4" />
-          <FloatingIcon icon={FileText} className="top-[30%] left-[35%] animate-float-5" />
-          <FloatingIcon icon={Settings} className="top-[40%] right-[40%] animate-float-6" />
-          <FloatingIcon icon={Receipt} className="top-[45%] left-[45%] animate-float-7" />
-          <FloatingIcon icon={Bell} className="top-[50%] right-[50%] animate-float-8" />
-          <FloatingIcon icon={Calendar} className="top-[55%] left-[55%] animate-float-9" />
-          <FloatingIcon icon={CreditCard} className="top-[60%] right-[60%] animate-float-10" />
-          <FloatingIcon icon={User} className="bottom-[70%] left-[10%] animate-float-1" />
-          <FloatingIcon icon={Lock} className="bottom-[75%] right-[15%] animate-float-2" />
-          <FloatingIcon icon={Key} className="bottom-[80%] left-[20%] animate-float-3" />
-          <FloatingIcon icon={Shield} className="bottom-[85%] right-[25%] animate-float-4" />
-          <FloatingIcon icon={Globe} className="bottom-[90%] left-[30%] animate-float-5" />
-          <FloatingIcon icon={Mail} className="bottom-[20%] right-[35%] animate-float-6" />
-          <FloatingIcon icon={Wallet} className="bottom-[25%] left-[40%] animate-float-7" />
-          <FloatingIcon icon={Users} className="bottom-[30%] right-[45%] animate-float-8" />
-          <FloatingIcon icon={HomeIcon} className="bottom-[35%] left-[50%] animate-float-9" />
-          <FloatingIcon icon={Building2} className="top-[70%] left-[60%] animate-float-1" />
-          <FloatingIcon icon={MessageSquare} className="top-[75%] right-[65%] animate-float-2" />
-          <FloatingIcon icon={Settings} className="top-[80%] left-[70%] animate-float-3" />
-          <FloatingIcon icon={Bell} className="top-[85%] right-[75%] animate-float-4" />
-          <FloatingIcon icon={User} className="top-[90%] left-[80%] animate-float-5" />
         </div>
       </div>
 
