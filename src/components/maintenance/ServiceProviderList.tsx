@@ -46,6 +46,11 @@ export function ServiceProviderList() {
     queryFn: async () => {
       console.log("Fetching service providers with details");
       
+      if (!currentUserId) {
+        console.log("No user ID available");
+        return [];
+      }
+
       // First get the landlord's preferred providers
       const { data: preferredProviders, error: preferredError } = await supabase
         .from("landlord_service_providers")
@@ -62,11 +67,11 @@ export function ServiceProviderList() {
         .from("service_provider_profiles")
         .select(`
           *,
-          profile:profiles!inner(
+          profiles (
             first_name,
             last_name
           ),
-          services:service_provider_services(
+          services:service_provider_services (
             name,
             category,
             base_price,
@@ -86,7 +91,11 @@ export function ServiceProviderList() {
       const formattedProviders: ServiceProvider[] = providers.map(provider => ({
         ...provider,
         isPreferred: preferredIds.has(provider.id),
-        profile: provider.profile
+        // Extract profile from the nested structure
+        profile: provider.profiles || { 
+          first_name: null, 
+          last_name: null 
+        }
       }));
 
       return formattedProviders.sort((a, b) => {
@@ -98,9 +107,15 @@ export function ServiceProviderList() {
         return a.isPreferred ? -1 : 1;
       });
     },
+    enabled: !!currentUserId
   });
 
   const handlePreferredToggle = async (provider: ServiceProvider) => {
+    if (!currentUserId) {
+      console.error("No user ID available");
+      return;
+    }
+
     try {
       if (provider.isPreferred) {
         await supabase
