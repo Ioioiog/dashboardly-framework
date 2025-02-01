@@ -111,7 +111,7 @@ export default function Maintenance() {
         .from("service_provider_profiles")
         .select(`
           *,
-          profile:id(
+          profiles!service_provider_profiles_id_fkey (
             first_name,
             last_name
           ),
@@ -181,7 +181,7 @@ export default function Maintenance() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-lg font-semibold">
-                  {provider.business_name || `${provider.profile?.first_name} ${provider.profile?.last_name}`}
+                  {provider.business_name || `${provider.profiles?.first_name} ${provider.profiles?.last_name}`}
                 </h3>
                 {provider.description && (
                   <p className="text-sm text-muted-foreground mt-1">
