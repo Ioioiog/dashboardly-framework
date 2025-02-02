@@ -67,7 +67,6 @@ export default function ServiceProviderProfile() {
         throw new Error("No user found");
       }
 
-      // First get the service provider profile
       const { data, error } = await supabase
         .from("service_provider_profiles")
         .select("*")
@@ -108,7 +107,6 @@ export default function ServiceProviderProfile() {
         throw new Error("No user found");
       }
 
-      // Update using the profile's ID which should match the auth user ID
       const { error } = await supabase
         .from("service_provider_profiles")
         .update({
@@ -119,7 +117,7 @@ export default function ServiceProviderProfile() {
           website: profile.website,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", profile.id);
+        .eq("id", user.id); // Use user.id instead of profile.id
 
       if (error) {
         console.error("Update error:", error);
@@ -222,7 +220,7 @@ export default function ServiceProviderProfile() {
                     id="business_name"
                     value={profile?.business_name || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, business_name: e.target.value }))}
-                    disabled={!isEditing}
+                    disabled={!isEditing || isSaving}
                     placeholder="Enter your business name"
                   />
                 </div>
@@ -232,7 +230,7 @@ export default function ServiceProviderProfile() {
                     id="description"
                     value={profile?.description || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, description: e.target.value }))}
-                    disabled={!isEditing}
+                    disabled={!isEditing || isSaving}
                     placeholder="Describe your business and services"
                   />
                 </div>
@@ -242,7 +240,7 @@ export default function ServiceProviderProfile() {
                     id="contact_phone"
                     value={profile?.contact_phone || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, contact_phone: e.target.value }))}
-                    disabled={!isEditing}
+                    disabled={!isEditing || isSaving}
                     placeholder="Enter your contact phone number"
                   />
                 </div>
@@ -252,7 +250,7 @@ export default function ServiceProviderProfile() {
                     id="contact_email"
                     value={profile?.contact_email || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, contact_email: e.target.value }))}
-                    disabled={!isEditing}
+                    disabled={!isEditing || isSaving}
                     placeholder="Enter your contact email"
                   />
                 </div>
@@ -262,7 +260,7 @@ export default function ServiceProviderProfile() {
                     id="website"
                     value={profile?.website || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, website: e.target.value }))}
-                    disabled={!isEditing}
+                    disabled={!isEditing || isSaving}
                     placeholder="Enter your website URL"
                   />
                 </div>
