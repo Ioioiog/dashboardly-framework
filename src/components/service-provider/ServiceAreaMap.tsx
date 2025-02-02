@@ -83,8 +83,8 @@ export default function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
   return (
     <MapContainer 
       style={{ height: '400px', width: '100%' }}
+      center={[0, 0] as L.LatLngExpression}
       zoom={12}
-      center={[0, 0]}
     >
       <MapController coordinates={coordinates} />
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
