@@ -24,32 +24,33 @@ interface ServiceProviderProfile {
   service_area: string[] | null;
 }
 
+const navigationItems = [
+  {
+    id: 'profile' as Section,
+    label: 'Profile Information',
+    icon: UserCircle,
+  },
+  {
+    id: 'services' as Section,
+    label: 'Services',
+    icon: ClipboardList,
+  },
+  {
+    id: 'availability' as Section,
+    label: 'Service Areas',
+    icon: Building2,
+  },
+];
+
 export default function ServiceProviderProfile() {
   const [profile, setProfile] = useState<ServiceProviderProfile | null>(null);
+  const [originalProfile, setOriginalProfile] = useState<ServiceProviderProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [activeSection, setActiveSection] = useState<Section>('profile');
   const [newArea, setNewArea] = useState("");
   const { toast } = useToast();
-
-  const navigationItems = [
-    {
-      id: 'profile' as Section,
-      label: 'Profile Information',
-      icon: UserCircle,
-    },
-    {
-      id: 'services' as Section,
-      label: 'Services',
-      icon: ClipboardList,
-    },
-    {
-      id: 'availability' as Section,
-      label: 'Service Areas',
-      icon: Building2,
-    },
-  ];
 
   useEffect(() => {
     fetchProfile();
@@ -69,6 +70,8 @@ export default function ServiceProviderProfile() {
       if (error) throw error;
       console.log("Fetched profile:", data);
       setProfile(data);
+      setOriginalProfile(data);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching profile:", error);
       toast({
@@ -76,7 +79,6 @@ export default function ServiceProviderProfile() {
         description: "Failed to load profile",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -111,6 +113,7 @@ export default function ServiceProviderProfile() {
         description: "Profile updated successfully",
       });
       setIsEditing(false);
+      setOriginalProfile(profile);
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
@@ -124,7 +127,7 @@ export default function ServiceProviderProfile() {
   };
 
   const handleCancel = () => {
-    fetchProfile();
+    setProfile(originalProfile);
     setIsEditing(false);
   };
 
@@ -207,7 +210,7 @@ export default function ServiceProviderProfile() {
                     id="business_name"
                     value={profile?.business_name || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, business_name: e.target.value }))}
-                    disabled={!isEditing || isLoading}
+                    disabled={!isEditing}
                     placeholder="Enter your business name"
                   />
                 </div>
@@ -217,7 +220,7 @@ export default function ServiceProviderProfile() {
                     id="description"
                     value={profile?.description || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, description: e.target.value }))}
-                    disabled={!isEditing || isLoading}
+                    disabled={!isEditing}
                     placeholder="Describe your business and services"
                   />
                 </div>
@@ -227,7 +230,7 @@ export default function ServiceProviderProfile() {
                     id="contact_phone"
                     value={profile?.contact_phone || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, contact_phone: e.target.value }))}
-                    disabled={!isEditing || isLoading}
+                    disabled={!isEditing}
                     placeholder="Enter your contact phone number"
                   />
                 </div>
@@ -237,7 +240,7 @@ export default function ServiceProviderProfile() {
                     id="contact_email"
                     value={profile?.contact_email || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, contact_email: e.target.value }))}
-                    disabled={!isEditing || isLoading}
+                    disabled={!isEditing}
                     placeholder="Enter your contact email"
                   />
                 </div>
@@ -247,7 +250,7 @@ export default function ServiceProviderProfile() {
                     id="website"
                     value={profile?.website || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, website: e.target.value }))}
-                    disabled={!isEditing || isLoading}
+                    disabled={!isEditing}
                     placeholder="Enter your website URL"
                   />
                 </div>
