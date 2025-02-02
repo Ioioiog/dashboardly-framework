@@ -63,6 +63,15 @@ export function MeterReadingForm({
   });
 
   const onSubmit = async (data: FormData) => {
+    if (!userId) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to submit meter readings",
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       console.log("Submitting meter reading:", data);
@@ -84,15 +93,21 @@ export function MeterReadingForm({
         tenant_id = tenancy.tenant_id;
       }
 
+      const meterReadingData = {
+        ...data,
+        tenant_id,
+        created_by: userId,
+        updated_by: userId,
+        notes: data.notes || null // Ensure notes is null if undefined
+      };
+
+      console.log("Submitting meter reading data:", meterReadingData);
+
       if (initialData) {
         // Update existing reading
         const { error: updateError } = await supabase
           .from('meter_readings')
-          .update({
-            ...data,
-            tenant_id,
-            updated_by: userId
-          })
+          .update(meterReadingData)
           .eq('id', initialData.id);
 
         if (updateError) throw updateError;
@@ -105,12 +120,7 @@ export function MeterReadingForm({
         // Insert new reading
         const { error: insertError } = await supabase
           .from('meter_readings')
-          .insert({
-            ...data,
-            tenant_id,
-            created_by: userId,
-            updated_by: userId
-          });
+          .insert(meterReadingData);
 
         if (insertError) throw insertError;
 
@@ -191,7 +201,12 @@ export function MeterReadingForm({
             <FormItem>
               <FormLabel>Reading Value</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" {...field} />
+                <Input 
+                  type="number" 
+                  step="0.01" 
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
