@@ -90,7 +90,13 @@ export default function ServiceProviderProfile() {
 
       const { error } = await supabase
         .from("service_provider_profiles")
-        .update(profile)
+        .update({
+          business_name: profile?.business_name,
+          description: profile?.description,
+          contact_phone: profile?.contact_phone,
+          contact_email: profile?.contact_email,
+          website: profile?.website
+        })
         .eq("id", user.id);
 
       if (error) throw error;
@@ -190,8 +196,9 @@ export default function ServiceProviderProfile() {
                   <Input
                     id="business_name"
                     value={profile?.business_name || ""}
-                    onChange={(e) => setProfile({ ...profile!, business_name: e.target.value })}
+                    onChange={(e) => setProfile(prev => ({ ...prev!, business_name: e.target.value }))}
                     disabled={!isEditing}
+                    placeholder="Enter your business name"
                   />
                 </div>
                 <div className="space-y-2">
@@ -199,8 +206,9 @@ export default function ServiceProviderProfile() {
                   <Textarea
                     id="description"
                     value={profile?.description || ""}
-                    onChange={(e) => setProfile({ ...profile!, description: e.target.value })}
+                    onChange={(e) => setProfile(prev => ({ ...prev!, description: e.target.value }))}
                     disabled={!isEditing}
+                    placeholder="Describe your business and services"
                   />
                 </div>
                 <div className="space-y-2">
@@ -208,8 +216,9 @@ export default function ServiceProviderProfile() {
                   <Input
                     id="contact_phone"
                     value={profile?.contact_phone || ""}
-                    onChange={(e) => setProfile({ ...profile!, contact_phone: e.target.value })}
+                    onChange={(e) => setProfile(prev => ({ ...prev!, contact_phone: e.target.value }))}
                     disabled={!isEditing}
+                    placeholder="Enter your contact phone number"
                   />
                 </div>
                 <div className="space-y-2">
@@ -217,8 +226,9 @@ export default function ServiceProviderProfile() {
                   <Input
                     id="contact_email"
                     value={profile?.contact_email || ""}
-                    onChange={(e) => setProfile({ ...profile!, contact_email: e.target.value })}
+                    onChange={(e) => setProfile(prev => ({ ...prev!, contact_email: e.target.value }))}
                     disabled={!isEditing}
+                    placeholder="Enter your contact email"
                   />
                 </div>
                 <div className="space-y-2">
@@ -226,8 +236,9 @@ export default function ServiceProviderProfile() {
                   <Input
                     id="website"
                     value={profile?.website || ""}
-                    onChange={(e) => setProfile({ ...profile!, website: e.target.value })}
+                    onChange={(e) => setProfile(prev => ({ ...prev!, website: e.target.value }))}
                     disabled={!isEditing}
+                    placeholder="Enter your website URL"
                   />
                 </div>
                 <div className="flex justify-end space-x-2">
