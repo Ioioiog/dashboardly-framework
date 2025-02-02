@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useState } from 'react';
 import L from 'leaflet';
@@ -83,7 +83,6 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
         style={{ height: '100%', width: '100%' }}
-        center={defaultPosition}
         zoom={12}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
