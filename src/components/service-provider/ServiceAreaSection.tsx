@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { MapPin, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ServiceAreaMap } from "./ServiceAreaMap";
 
 interface ServiceAreaSectionProps {
   serviceAreas: string[] | null;
@@ -101,6 +102,10 @@ export function ServiceAreaSection({ serviceAreas, onAreasUpdate }: ServiceAreaS
             </div>
             <Button onClick={handleAddArea}>Add Area</Button>
           </div>
+
+          {serviceAreas && serviceAreas.length > 0 && (
+            <ServiceAreaMap areas={serviceAreas} />
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
             {serviceAreas?.map((area, index) => (
