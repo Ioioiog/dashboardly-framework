@@ -71,7 +71,6 @@ export default function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
   return (
     <MapContainer 
       style={{ height: '400px', width: '100%' }}
-      center={[coordinates[0].lat, coordinates[0].lng]}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {coordinates.map((area, index) => (
