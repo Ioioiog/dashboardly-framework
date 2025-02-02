@@ -92,14 +92,11 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
     );
   }
 
-  // Set initial center and zoom
-  const initialCenter: L.LatLngExpression = [51.505, -0.09]; // Default center (London)
-
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        defaultCenter={initialCenter}
-        defaultZoom={7}
+        center={[51.505, -0.09]}
+        zoom={7}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={false}
       >
