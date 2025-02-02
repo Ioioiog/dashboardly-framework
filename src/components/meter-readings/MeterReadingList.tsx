@@ -93,7 +93,28 @@ export function MeterReadingList({
           `);
 
         if (userRole === 'tenant') {
-          query = query.eq('tenant_id', currentUserId);
+          // First get the properties the tenant is assigned to
+          const { data: tenancies, error: tenanciesError } = await supabase
+            .from('tenancies')
+            .select('property_id')
+            .eq('tenant_id', currentUserId)
+            .eq('status', 'active');
+
+          if (tenanciesError) {
+            console.error("Error fetching tenancies:", tenanciesError);
+            throw tenanciesError;
+          }
+
+          const propertyIds = tenancies?.map(t => t.property_id) || [];
+          console.log("Tenant's property IDs:", propertyIds);
+
+          if (propertyIds.length > 0) {
+            query = query.in('property_id', propertyIds);
+          } else {
+            console.log("No properties found for tenant, returning empty array");
+            setReadings([]);
+            return;
+          }
         }
 
         const { data, error } = await query;
