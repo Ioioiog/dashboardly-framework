@@ -67,6 +67,7 @@ export default function ServiceProviderProfile() {
         .single();
 
       if (error) throw error;
+      console.log("Fetched profile:", data);
       setProfile(data);
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -82,20 +83,30 @@ export default function ServiceProviderProfile() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!profile) return;
+    
     setIsLoading(true);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No authenticated user");
 
+      console.log("Updating profile with:", {
+        business_name: profile.business_name,
+        description: profile.description,
+        contact_phone: profile.contact_phone,
+        contact_email: profile.contact_email,
+        website: profile.website
+      });
+
       const { error } = await supabase
         .from("service_provider_profiles")
         .update({
-          business_name: profile?.business_name,
-          description: profile?.description,
-          contact_phone: profile?.contact_phone,
-          contact_email: profile?.contact_email,
-          website: profile?.website
+          business_name: profile.business_name,
+          description: profile.description,
+          contact_phone: profile.contact_phone,
+          contact_email: profile.contact_email,
+          website: profile.website
         })
         .eq("id", user.id);
 
