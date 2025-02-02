@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClipboardEdit } from "lucide-react";
 import { format } from "date-fns";
 import { TenantInteractionHistory } from "./TenantInteractionHistory";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TenantObservationDialogProps {
   tenantId: string;
@@ -96,7 +97,7 @@ export function TenantObservationDialog({ tenantId, tenantName }: TenantObservat
         <ClipboardEdit className="h-4 w-4 text-blue-600" />
         <span className="sr-only">Add observation</span>
       </Button>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Add Tenant Observation</DialogTitle>
           <DialogDescription className="text-gray-600">
@@ -104,59 +105,65 @@ export function TenantObservationDialog({ tenantId, tenantName }: TenantObservat
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Textarea
-                  placeholder="Enter your observation..."
-                  value={observation}
-                  onChange={(e) => setObservation(e.target.value)}
-                  rows={4}
-                  className="resize-none"
-                />
-                <p className="text-xs text-gray-500">
-                  Be specific and objective in your observations.
-                </p>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setOpen(false)}
-                  type="button"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting || !observation.trim()}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {isSubmitting ? "Saving..." : "Save Observation"}
-                </Button>
-              </div>
-            </form>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Textarea
+                    placeholder="Enter your observation..."
+                    value={observation}
+                    onChange={(e) => setObservation(e.target.value)}
+                    rows={4}
+                    className="resize-none focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Be specific and objective in your observations.
+                  </p>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setOpen(false)}
+                    type="button"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting || !observation.trim()}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isSubmitting ? "Saving..." : "Save Observation"}
+                  </Button>
+                </div>
+              </form>
+            </div>
 
             {recentObservations.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Recent Observations</h4>
-                <div className="space-y-2">
-                  {recentObservations.map((obs) => (
-                    <div key={obs.id} className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-1">
-                        {format(new Date(obs.created_at), "PPp")}
-                      </p>
-                      <p className="text-sm">{obs.observation}</p>
-                    </div>
-                  ))}
-                </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Recent Observations</h4>
+                <ScrollArea className="h-[200px] pr-4">
+                  <div className="space-y-3">
+                    {recentObservations.map((obs) => (
+                      <div key={obs.id} className="bg-white p-3 rounded-lg border border-gray-100">
+                        <p className="text-sm text-gray-600 mb-1">
+                          {format(new Date(obs.created_at), "PPp")}
+                        </p>
+                        <p className="text-sm">{obs.observation}</p>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
               </div>
             )}
           </div>
 
-          <div className="border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
-            <h4 className="text-sm font-medium text-gray-700 mb-4">Observation History</h4>
-            <TenantInteractionHistory tenantId={tenantId} />
+          <div className="border-t lg:border-t-0 lg:border-l border-gray-200 pt-6 lg:pt-0 lg:pl-8">
+            <div className="bg-gray-50 rounded-lg p-4 h-full">
+              <h4 className="text-sm font-medium text-gray-700 mb-4">Full Observation History</h4>
+              <TenantInteractionHistory tenantId={tenantId} />
+            </div>
           </div>
         </div>
       </DialogContent>
