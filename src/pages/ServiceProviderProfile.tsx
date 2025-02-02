@@ -207,7 +207,7 @@ export default function ServiceProviderProfile() {
                     id="business_name"
                     value={profile?.business_name || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, business_name: e.target.value }))}
-                    disabled={!isEditing}
+                    disabled={!isEditing || isLoading}
                     placeholder="Enter your business name"
                   />
                 </div>
@@ -217,7 +217,7 @@ export default function ServiceProviderProfile() {
                     id="description"
                     value={profile?.description || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, description: e.target.value }))}
-                    disabled={!isEditing}
+                    disabled={!isEditing || isLoading}
                     placeholder="Describe your business and services"
                   />
                 </div>
@@ -227,7 +227,7 @@ export default function ServiceProviderProfile() {
                     id="contact_phone"
                     value={profile?.contact_phone || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, contact_phone: e.target.value }))}
-                    disabled={!isEditing}
+                    disabled={!isEditing || isLoading}
                     placeholder="Enter your contact phone number"
                   />
                 </div>
@@ -237,7 +237,7 @@ export default function ServiceProviderProfile() {
                     id="contact_email"
                     value={profile?.contact_email || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, contact_email: e.target.value }))}
-                    disabled={!isEditing}
+                    disabled={!isEditing || isLoading}
                     placeholder="Enter your contact email"
                   />
                 </div>
@@ -247,7 +247,7 @@ export default function ServiceProviderProfile() {
                     id="website"
                     value={profile?.website || ""}
                     onChange={(e) => setProfile(prev => ({ ...prev!, website: e.target.value }))}
-                    disabled={!isEditing}
+                    disabled={!isEditing || isLoading}
                     placeholder="Enter your website URL"
                   />
                 </div>
@@ -266,6 +266,7 @@ export default function ServiceProviderProfile() {
                         type="button"
                         variant="outline"
                         onClick={handleCancel}
+                        disabled={isLoading}
                         className="flex items-center gap-2"
                       >
                         <X className="h-4 w-4" />
