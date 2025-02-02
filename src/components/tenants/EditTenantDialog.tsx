@@ -63,7 +63,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
         .eq("tenant_id", tenant.id)
         .eq("property_id", formData.propertyId)
         .eq("status", "active")
-        .single();
+        .maybeSingle();
 
       if (tenancyFetchError) {
         console.error("Error fetching tenancy:", tenancyFetchError);
@@ -71,7 +71,12 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
       }
 
       if (!tenancyData) {
-        throw new Error("No active tenancy found for this property");
+        toast({
+          title: "Error",
+          description: "No active tenancy found for this property. Please check the property selection.",
+          variant: "destructive",
+        });
+        return;
       }
 
       // Update tenancy details for the specific property using the tenancy ID
