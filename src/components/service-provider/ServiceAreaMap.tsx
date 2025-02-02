@@ -35,7 +35,7 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
                 `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(area)}`
               );
               const data = await response.json();
-              if (data && data[0]) {
+              if (data && data.length > 0) {
                 return {
                   name: area,
                   lat: parseFloat(data[0].lat),
@@ -50,7 +50,8 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
           })
         );
 
-        setCoordinates(results.filter((result): result is AreaCoordinate => result !== null));
+        // Filter out null values
+        setCoordinates(results.filter((res): res is AreaCoordinate => res !== null));
       } catch (error) {
         console.error('Error fetching coordinates:', error);
       } finally {
@@ -60,52 +61,32 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
 
     if (areas.length > 0) {
       fetchCoordinates();
-    } else {
-      setIsLoading(false);
     }
   }, [areas]);
 
-  if (isLoading) {
-    return <div className="h-[400px] w-full flex items-center justify-center bg-gray-50">Loading map...</div>;
-  }
+  if (isLoading) return <p>Loading map...</p>;
 
-  if (coordinates.length === 0) {
-    return (
-      <div className="h-[400px] w-full flex items-center justify-center bg-gray-50">
-        No service areas defined or could not load coordinates.
-      </div>
-    );
-  }
+  if (coordinates.length === 0) return <p>No service areas found.</p>;
 
   const defaultPosition: L.LatLngExpression = [coordinates[0].lat, coordinates[0].lng];
 
   return (
-    <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
-      <MapContainer
-        style={{ height: '100%', width: '100%' }}
-        zoom={12}
-      >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        {coordinates.map((coord) => {
-          const position: L.LatLngExpression = [coord.lat, coord.lng];
-          return (
-            <Marker 
-              key={coord.name} 
-              position={position}
-            >
-              <Popup>{coord.name}</Popup>
-            </Marker>
-          );
-        })}
-      </MapContainer>
-    </div>
+    <MapContainer 
+      center={defaultPosition} 
+      style={{ height: '400px', width: '100%' }}
+      scrollWheelZoom={false}
+    >
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      {coordinates.map((area, index) => (
+        <Marker 
+          key={index} 
+          position={[area.lat, area.lng] as L.LatLngExpression}
+        >
+          <Popup>{area.name}</Popup>
+        </Marker>
+      ))}
+    </MapContainer>
   );
 }
 
-// Create a wrapper component that handles the dynamic import
-const MapWrapper = ({ areas }: ServiceAreaMapProps) => {
-  if (typeof window === 'undefined') return null;
-  return <ServiceAreaMapComponent areas={areas} />;
-};
-
-export const ServiceAreaMap = MapWrapper;
+export default ServiceAreaMapComponent;
