@@ -117,7 +117,7 @@ export default function ServiceProviderProfile() {
           website: profile.website,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", user.id); // Use user.id instead of profile.id
+        .eq("id", user.id);
 
       if (error) {
         console.error("Update error:", error);
@@ -133,7 +133,7 @@ export default function ServiceProviderProfile() {
       console.error("Error updating profile:", error);
       toast({
         title: "Error",
-        description: "Failed to update profile. Please make sure you have permission to edit.",
+        description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -204,6 +204,11 @@ export default function ServiceProviderProfile() {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setProfile(prev => prev ? { ...prev, [name]: value } : null);
+  };
+
   const renderSection = () => {
     switch (activeSection) {
       case 'profile':
@@ -218,8 +223,9 @@ export default function ServiceProviderProfile() {
                   <Label htmlFor="business_name">Business Name</Label>
                   <Input
                     id="business_name"
+                    name="business_name"
                     value={profile?.business_name || ""}
-                    onChange={(e) => setProfile(prev => ({ ...prev!, business_name: e.target.value }))}
+                    onChange={handleInputChange}
                     disabled={!isEditing || isSaving}
                     placeholder="Enter your business name"
                   />
@@ -228,8 +234,9 @@ export default function ServiceProviderProfile() {
                   <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
+                    name="description"
                     value={profile?.description || ""}
-                    onChange={(e) => setProfile(prev => ({ ...prev!, description: e.target.value }))}
+                    onChange={handleInputChange}
                     disabled={!isEditing || isSaving}
                     placeholder="Describe your business and services"
                   />
@@ -238,8 +245,9 @@ export default function ServiceProviderProfile() {
                   <Label htmlFor="contact_phone">Contact Phone</Label>
                   <Input
                     id="contact_phone"
+                    name="contact_phone"
                     value={profile?.contact_phone || ""}
-                    onChange={(e) => setProfile(prev => ({ ...prev!, contact_phone: e.target.value }))}
+                    onChange={handleInputChange}
                     disabled={!isEditing || isSaving}
                     placeholder="Enter your contact phone number"
                   />
@@ -248,8 +256,9 @@ export default function ServiceProviderProfile() {
                   <Label htmlFor="contact_email">Contact Email</Label>
                   <Input
                     id="contact_email"
+                    name="contact_email"
                     value={profile?.contact_email || ""}
-                    onChange={(e) => setProfile(prev => ({ ...prev!, contact_email: e.target.value }))}
+                    onChange={handleInputChange}
                     disabled={!isEditing || isSaving}
                     placeholder="Enter your contact email"
                   />
@@ -258,8 +267,9 @@ export default function ServiceProviderProfile() {
                   <Label htmlFor="website">Website</Label>
                   <Input
                     id="website"
+                    name="website"
                     value={profile?.website || ""}
-                    onChange={(e) => setProfile(prev => ({ ...prev!, website: e.target.value }))}
+                    onChange={handleInputChange}
                     disabled={!isEditing || isSaving}
                     placeholder="Enter your website URL"
                   />
