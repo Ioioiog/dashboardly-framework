@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,7 +11,6 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,7 +56,7 @@ interface MeterReadingListProps {
 }
 
 export function MeterReadingList({
-  readings,
+  readings: initialReadings,
   userRole,
   onUpdate,
 }: MeterReadingListProps) {
@@ -65,9 +65,74 @@ export function MeterReadingList({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedReading, setSelectedReading] = useState<MeterReading | null>(null);
+  const [readings, setReadings] = useState<MeterReading[]>(initialReadings);
 
-  console.log("MeterReadingList - Current readings:", readings);
-  console.log("MeterReadingList - User role:", userRole);
+  useEffect(() => {
+    const fetchReadings = async () => {
+      try {
+        console.log("Fetching meter readings for user role:", userRole);
+        console.log("Current user ID:", currentUserId);
+
+        let query = supabase
+          .from('meter_readings')
+          .select(`
+            *,
+            property:properties (
+              name,
+              address,
+              type,
+              monthly_rent,
+              created_at,
+              updated_at
+            )
+          `);
+
+        if (userRole === 'tenant') {
+          query = query.eq('tenant_id', currentUserId);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error("Error fetching meter readings:", error);
+          throw error;
+        }
+
+        console.log("Fetched meter readings:", data);
+        setReadings(data || []);
+      } catch (error: any) {
+        console.error("Error in fetchReadings:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch meter readings",
+        });
+      }
+    };
+
+    fetchReadings();
+
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('meter_readings_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'meter_readings'
+        },
+        (payload) => {
+          console.log('Realtime update received:', payload);
+          fetchReadings();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUserId, userRole, toast]);
 
   const handleDelete = async () => {
     if (!selectedReading) return;
