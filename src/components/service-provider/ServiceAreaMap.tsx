@@ -22,13 +22,15 @@ interface AreaCoordinate {
 }
 
 // Component to handle map center updates
-const ChangeCenter = ({ center }: { center: L.LatLngExpression }) => {
+function ChangeCenter({ center }: { center: L.LatLngExpression }) {
   const map = useMap();
+  
   useEffect(() => {
     map.setView(center);
   }, [center, map]);
+  
   return null;
-};
+}
 
 function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
   const [coordinates, setCoordinates] = useState<AreaCoordinate[]>([]);
@@ -91,10 +93,10 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        zoom={7}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
         center={defaultPosition}
+        zoom={7}
       >
         <ChangeCenter center={defaultPosition} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
