@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 type Section = 'profile' | 'services' | 'availability';
 
 interface ServiceProviderProfile {
+  id: string;
   business_name: string | null;
   description: string | null;
   contact_phone: string | null;
@@ -44,8 +45,8 @@ const navigationItems = [
 
 export default function ServiceProviderProfile() {
   const [profile, setProfile] = useState<ServiceProviderProfile | null>(null);
-  const [originalProfile, setOriginalProfile] = useState<ServiceProviderProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [activeSection, setActiveSection] = useState<Section>('profile');
@@ -58,8 +59,13 @@ export default function ServiceProviderProfile() {
 
   const fetchProfile = async () => {
     try {
+      console.log("Fetching service provider profile...");
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No authenticated user");
+      
+      if (!user) {
+        console.error("No authenticated user found");
+        throw new Error("No user found");
+      }
 
       const { data, error } = await supabase
         .from("service_provider_profiles")
@@ -70,8 +76,6 @@ export default function ServiceProviderProfile() {
       if (error) throw error;
       console.log("Fetched profile:", data);
       setProfile(data);
-      setOriginalProfile(data);
-      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching profile:", error);
       toast({
@@ -79,6 +83,7 @@ export default function ServiceProviderProfile() {
         description: "Failed to load profile",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -87,13 +92,16 @@ export default function ServiceProviderProfile() {
     e.preventDefault();
     if (!profile) return;
     
-    setIsLoading(true);
+    setIsSaving(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No authenticated user");
-
       console.log("Updating profile with:", profile);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.error("No authenticated user found");
+        throw new Error("No user found");
+      }
 
       const { error } = await supabase
         .from("service_provider_profiles")
@@ -102,7 +110,8 @@ export default function ServiceProviderProfile() {
           description: profile.description,
           contact_phone: profile.contact_phone,
           contact_email: profile.contact_email,
-          website: profile.website
+          website: profile.website,
+          updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
 
@@ -113,7 +122,6 @@ export default function ServiceProviderProfile() {
         description: "Profile updated successfully",
       });
       setIsEditing(false);
-      setOriginalProfile(profile);
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
@@ -122,13 +130,8 @@ export default function ServiceProviderProfile() {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
-  };
-
-  const handleCancel = () => {
-    setProfile(originalProfile);
-    setIsEditing(false);
   };
 
   const handleAddArea = async () => {
@@ -257,19 +260,19 @@ export default function ServiceProviderProfile() {
                 <div className="flex justify-end space-x-2">
                   {isEditing ? (
                     <>
-                      <Button 
-                        type="submit" 
-                        disabled={isLoading}
+                      <Button
+                        type="submit"
+                        disabled={isSaving}
                         className="flex items-center gap-2"
                       >
                         <Check className="h-4 w-4" />
-                        Save Changes
+                        {isSaving ? "Saving..." : "Save Changes"}
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={handleCancel}
-                        disabled={isLoading}
+                        onClick={() => setIsEditing(false)}
+                        disabled={isSaving}
                         className="flex items-center gap-2"
                       >
                         <X className="h-4 w-4" />
@@ -277,8 +280,8 @@ export default function ServiceProviderProfile() {
                       </Button>
                     </>
                   ) : (
-                    <Button 
-                      type="button" 
+                    <Button
+                      type="button"
                       onClick={() => setIsEditing(true)}
                       className="flex items-center gap-2"
                     >
