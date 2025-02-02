@@ -67,20 +67,25 @@ export default function ServiceProviderProfile() {
         throw new Error("No user found");
       }
 
+      // First get the service provider profile
       const { data, error } = await supabase
         .from("service_provider_profiles")
         .select("*")
         .eq("id", user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        throw error;
+      }
+
       console.log("Fetched profile:", data);
       setProfile(data);
     } catch (error) {
       console.error("Error fetching profile:", error);
       toast({
         title: "Error",
-        description: "Failed to load profile",
+        description: "Failed to load profile. Please make sure you are logged in as a service provider.",
         variant: "destructive",
       });
     } finally {
@@ -103,6 +108,7 @@ export default function ServiceProviderProfile() {
         throw new Error("No user found");
       }
 
+      // Update using the profile's ID which should match the auth user ID
       const { error } = await supabase
         .from("service_provider_profiles")
         .update({
@@ -113,9 +119,12 @@ export default function ServiceProviderProfile() {
           website: profile.website,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", user.id);
+        .eq("id", profile.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Update error:", error);
+        throw error;
+      }
 
       toast({
         title: "Success",
@@ -126,7 +135,7 @@ export default function ServiceProviderProfile() {
       console.error("Error updating profile:", error);
       toast({
         title: "Error",
-        description: "Failed to update profile",
+        description: "Failed to update profile. Please make sure you have permission to edit.",
         variant: "destructive",
       });
     } finally {
