@@ -50,8 +50,8 @@ export default function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
           })
         );
 
-        // Filter out null values
-        setCoordinates(results.filter((res): res is AreaCoordinate => res !== null));
+        const validCoordinates = results.filter((res): res is AreaCoordinate => res !== null);
+        setCoordinates(validCoordinates);
       } catch (error) {
         console.error('Error fetching coordinates:', error);
       } finally {
@@ -65,11 +65,17 @@ export default function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
   }, [areas]);
 
   if (isLoading) return <p>Loading map...</p>;
-
   if (coordinates.length === 0) return <p>No service areas found.</p>;
+
+  // Calculate the center point from the first coordinate
+  const defaultCenter: L.LatLngExpression = coordinates.length > 0 
+    ? [coordinates[0].lat, coordinates[0].lng]
+    : [0, 0];
 
   return (
     <MapContainer 
+      center={defaultCenter}
+      zoom={12}
       style={{ height: '400px', width: '100%' }}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
