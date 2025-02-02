@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useState } from 'react';
 import L from 'leaflet';
@@ -19,6 +19,21 @@ interface AreaCoordinate {
   name: string;
   lat: number;
   lng: number;
+}
+
+// New component to handle map center updates
+function MapCenter({ coordinates }: { coordinates: AreaCoordinate[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (coordinates.length > 0) {
+      const centerLat = coordinates.reduce((sum, coord) => sum + coord.lat, 0) / coordinates.length;
+      const centerLng = coordinates.reduce((sum, coord) => sum + coord.lng, 0) / coordinates.length;
+      map.setView([centerLat, centerLng], map.getZoom());
+    }
+  }, [coordinates, map]);
+
+  return null;
 }
 
 function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
@@ -77,17 +92,14 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
     );
   }
 
-  // Calculate the center as the average of all coordinates
-  const centerLat = coordinates.reduce((sum, coord) => sum + coord.lat, 0) / coordinates.length;
-  const centerLng = coordinates.reduce((sum, coord) => sum + coord.lng, 0) / coordinates.length;
-
-  const center: L.LatLngExpression = [centerLat, centerLng];
+  // Set initial center and zoom
+  const initialCenter: L.LatLngExpression = [51.505, -0.09]; // Default center (London)
 
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        center={center}
-        zoom={7}
+        defaultCenter={initialCenter}
+        defaultZoom={7}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={false}
       >
@@ -95,6 +107,7 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
+        <MapCenter coordinates={coordinates} />
         {coordinates.map((coord) => {
           const position: L.LatLngExpression = [coord.lat, coord.lng];
           return (
