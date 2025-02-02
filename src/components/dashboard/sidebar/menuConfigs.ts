@@ -29,18 +29,6 @@ export const serviceProviderMenuItems = [
     roles: ["service_provider"],
   },
   {
-    title: "Service Areas",
-    icon: Building2,
-    href: "/service-areas",
-    roles: ["service_provider"],
-  },
-  {
-    title: "Services",
-    icon: Wrench,
-    href: "/services",
-    roles: ["service_provider"],
-  },
-  {
     title: "Job Requests",
     icon: Clipboard,
     href: "/maintenance",
