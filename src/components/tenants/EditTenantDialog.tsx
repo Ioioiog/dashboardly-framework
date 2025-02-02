@@ -32,8 +32,9 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
     setIsSubmitting(true);
 
     try {
-      console.log("Updating tenant profile...", {
+      console.log("Updating tenant profile and tenancy...", {
         tenantId: tenant.id,
+        propertyId: formData.propertyId,
         formData
       });
 
@@ -55,7 +56,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
 
       console.log("Profile updated successfully, updating tenancy...");
 
-      // Update tenancy details
+      // Update tenancy details for the specific property
       const { error: tenancyError } = await supabase
         .from("tenancies")
         .update({
@@ -65,6 +66,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
           monthly_pay_day: parseInt(formData.monthlyPayDay),
         })
         .eq("tenant_id", tenant.id)
+        .eq("property_id", formData.propertyId)
         .eq("status", "active");
 
       if (tenancyError) {
@@ -76,7 +78,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
 
       toast({
         title: "Success",
-        description: "Tenant information updated successfully.",
+        description: "Tenant information updated successfully for the selected property.",
       });
       
       setOpen(false);
@@ -117,7 +119,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
         <DialogHeader>
           <DialogTitle>Edit Tenant Information</DialogTitle>
           <DialogDescription>
-            Update the tenant's personal information and tenancy details.
+            Update the tenant's information for the selected property.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
