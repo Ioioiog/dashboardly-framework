@@ -29,6 +29,9 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
   const { toast } = useToast();
   const { formatAmount } = useCurrency();
 
+  console.log('UtilityList - Received utilities:', utilities);
+  console.log('UtilityList - User role:', userRole);
+
   const handleStatusUpdate = async (utilityId: string, newStatus: string) => {
     try {
       console.log('Updating utility status:', { utilityId, newStatus });
@@ -164,6 +167,8 @@ export function UtilityList({ utilities, userRole, onStatusUpdate }: UtilityList
           console.error("Invalid utility object:", utility);
           return null;
         }
+
+        console.log('Rendering utility:', utility);
 
         return (
           <Card key={utility.id}>
