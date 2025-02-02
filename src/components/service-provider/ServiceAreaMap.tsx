@@ -23,44 +23,61 @@ interface AreaCoordinate {
 
 function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
   const [coordinates, setCoordinates] = useState<AreaCoordinate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchCoordinates = async () => {
-      const results = await Promise.all(
-        areas.map(async (area) => {
-          try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(area)}`
-            );
-            const data = await response.json();
-            if (data && data[0]) {
-              return {
-                name: area,
-                lat: parseFloat(data[0].lat),
-                lng: parseFloat(data[0].lon),
-              };
+      try {
+        const results = await Promise.all(
+          areas.map(async (area) => {
+            try {
+              const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(area)}`
+              );
+              const data = await response.json();
+              if (data && data[0]) {
+                return {
+                  name: area,
+                  lat: parseFloat(data[0].lat),
+                  lng: parseFloat(data[0].lon),
+                };
+              }
+              return null;
+            } catch (error) {
+              console.error(`Error fetching coordinates for ${area}:`, error);
+              return null;
             }
-            return null;
-          } catch (error) {
-            console.error(`Error fetching coordinates for ${area}:`, error);
-            return null;
-          }
-        })
-      );
+          })
+        );
 
-      setCoordinates(results.filter((result): result is AreaCoordinate => result !== null));
+        setCoordinates(results.filter((result): result is AreaCoordinate => result !== null));
+      } catch (error) {
+        console.error('Error fetching coordinates:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     if (areas.length > 0) {
       fetchCoordinates();
+    } else {
+      setIsLoading(false);
     }
   }, [areas]);
 
-  if (coordinates.length === 0) {
-    return null;
+  if (isLoading) {
+    return <div className="h-[400px] w-full flex items-center justify-center bg-gray-50">Loading map...</div>;
   }
 
-  // Default center location (Bucharest)
+  if (coordinates.length === 0) {
+    return (
+      <div className="h-[400px] w-full flex items-center justify-center bg-gray-50">
+        No service areas defined or could not load coordinates.
+      </div>
+    );
+  }
+
+  // Default center location (first area or Bucharest if no areas)
   const defaultPosition: L.LatLngTuple = coordinates.length > 0
     ? [coordinates[0].lat, coordinates[0].lng]
     : [44.4268, 26.1025];
@@ -68,7 +85,7 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        center={defaultPosition}
+        defaultCenter={defaultPosition}
         zoom={7}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
