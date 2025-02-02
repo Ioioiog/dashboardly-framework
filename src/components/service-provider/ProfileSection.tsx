@@ -30,6 +30,7 @@ export function ProfileSection({ profile, isLoading, onProfileUpdate }: ProfileS
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    console.log("Input changed:", name, value);
     setFormData(prev => prev ? { ...prev, [name]: value } : null);
   };
 
@@ -38,7 +39,7 @@ export function ProfileSection({ profile, isLoading, onProfileUpdate }: ProfileS
     if (!formData) return;
     
     setIsSaving(true);
-    console.log("Submitting profile update...");
+    console.log("Submitting profile update:", formData);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
