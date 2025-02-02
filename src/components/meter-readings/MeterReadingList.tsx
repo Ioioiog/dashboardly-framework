@@ -66,10 +66,14 @@ export function MeterReadingList({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedReading, setSelectedReading] = useState<MeterReading | null>(null);
 
+  console.log("MeterReadingList - Current readings:", readings);
+  console.log("MeterReadingList - User role:", userRole);
+
   const handleDelete = async () => {
     if (!selectedReading) return;
 
     try {
+      console.log("Attempting to delete meter reading:", selectedReading.id);
       const { error } = await supabase
         .from('meter_readings')
         .delete()
@@ -95,6 +99,14 @@ export function MeterReadingList({
       setSelectedReading(null);
     }
   };
+
+  if (!readings || readings.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        No meter readings found.
+      </div>
+    );
+  }
 
   return (
     <>
