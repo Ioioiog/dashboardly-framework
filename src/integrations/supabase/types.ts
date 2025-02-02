@@ -883,6 +883,7 @@ export type Database = {
           base_price: number | null
           category: Database["public"]["Enums"]["service_category"]
           created_at: string
+          currency: string
           description: string | null
           id: string
           name: string
@@ -894,6 +895,7 @@ export type Database = {
           base_price?: number | null
           category: Database["public"]["Enums"]["service_category"]
           created_at?: string
+          currency?: string
           description?: string | null
           id?: string
           name: string
@@ -905,6 +907,7 @@ export type Database = {
           base_price?: number | null
           category?: Database["public"]["Enums"]["service_category"]
           created_at?: string
+          currency?: string
           description?: string | null
           id?: string
           name?: string
