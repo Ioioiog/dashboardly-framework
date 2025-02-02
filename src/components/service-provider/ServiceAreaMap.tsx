@@ -91,11 +91,12 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        center={defaultPosition}
         zoom={7}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={true}
+        center={defaultPosition}
       >
+        <ChangeCenter center={defaultPosition} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {coordinates.map((coord) => {
           const position: L.LatLngExpression = [coord.lat, coord.lng];
