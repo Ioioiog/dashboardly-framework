@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useState } from 'react';
 import L from 'leaflet';
@@ -19,6 +19,19 @@ interface AreaCoordinate {
   name: string;
   lat: number;
   lng: number;
+}
+
+function MapController({ coordinates }: { coordinates: AreaCoordinate[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (coordinates.length > 0) {
+      const bounds = new L.LatLngBounds(coordinates.map(coord => [coord.lat, coord.lng]));
+      map.fitBounds(bounds);
+    }
+  }, [coordinates, map]);
+
+  return null;
 }
 
 export default function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
@@ -69,9 +82,11 @@ export default function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
 
   return (
     <MapContainer 
-      zoom={12}
       style={{ height: '400px', width: '100%' }}
+      zoom={12}
+      center={[0, 0]}
     >
+      <MapController coordinates={coordinates} />
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {coordinates.map((area, index) => (
         <Marker 
