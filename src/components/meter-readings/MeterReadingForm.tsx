@@ -61,17 +61,27 @@ export function MeterReadingForm({
 }: MeterReadingFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Session check error:", error);
-        setIsAuthenticated(false);
-        return;
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Session check error:", error);
+          return;
+        }
+
+        if (session?.user) {
+          console.log("Session found, user ID:", session.user.id);
+          setCurrentUserId(session.user.id);
+        } else {
+          console.log("No active session found");
+          setCurrentUserId(null);
+        }
+      } catch (err) {
+        console.error("Error checking session:", err);
       }
-      setIsAuthenticated(!!session);
     };
 
     checkSession();
@@ -89,20 +99,11 @@ export function MeterReadingForm({
   });
 
   const onSubmit = async (data: FormData) => {
-    if (!isAuthenticated) {
+    if (!currentUserId) {
       toast({
         variant: "destructive",
         title: "Authentication Error",
-        description: "You must be logged in to submit meter readings",
-      });
-      return;
-    }
-
-    if (!userId) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "User ID not found. Please try logging in again.",
+        description: "Please log in to submit meter readings",
       });
       return;
     }
@@ -110,9 +111,11 @@ export function MeterReadingForm({
     try {
       setIsSubmitting(true);
       console.log("Submitting meter reading form data:", data);
+      console.log("Current user ID:", currentUserId);
+      console.log("User role:", userRole);
 
       // For tenants, use their own ID. For landlords, get the tenant ID from active tenancy
-      let tenant_id = userId;
+      let tenant_id = currentUserId;
       if (userRole === 'landlord') {
         const { data: tenancy, error: tenancyError } = await supabase
           .from('tenancies')
@@ -135,8 +138,8 @@ export function MeterReadingForm({
         reading_value: Number(data.reading_value),
         reading_date: data.reading_date,
         tenant_id,
-        created_by: userId,
-        updated_by: userId,
+        created_by: currentUserId,
+        updated_by: currentUserId,
         notes: data.notes || null
       };
 
