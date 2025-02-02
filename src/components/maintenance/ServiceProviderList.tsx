@@ -51,6 +51,11 @@ export function ServiceProviderList() {
     phone: "",
   });
 
+  // If user is a service provider, don't render anything
+  if (userRole === "service_provider") {
+    return null;
+  }
+
   const { data: serviceProviders, isLoading } = useQuery({
     queryKey: ["service-providers-details"],
     queryFn: async () => {

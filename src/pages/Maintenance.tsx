@@ -117,7 +117,13 @@ export default function Maintenance() {
     (request) => request.status === "completed"
   ) || [];
 
-  const navigationItems = [
+  const navigationItems = userRole === "service_provider" ? [
+    {
+      id: 'requests' as MaintenanceSection,
+      label: t("maintenance.requests"),
+      icon: List,
+    }
+  ] : [
     {
       id: 'requests' as MaintenanceSection,
       label: t("maintenance.requests"),
