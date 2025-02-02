@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ServiceList } from "@/components/service-provider/ServiceList";
 import { ServiceForm } from "@/components/service-provider/ServiceForm";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
-import { Building2, Check, ClipboardList, MapPin, UserCircle, X } from "lucide-react";
+import { Building2, ClipboardList, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ProfileSection } from "@/components/service-provider/ProfileSection";
+import { ServiceAreaSection } from "@/components/service-provider/ServiceAreaSection";
 
 type Section = 'profile' | 'services' | 'availability';
 
@@ -46,11 +44,8 @@ const navigationItems = [
 export default function ServiceProviderProfile() {
   const [profile, setProfile] = useState<ServiceProviderProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [activeSection, setActiveSection] = useState<Section>('profile');
-  const [newArea, setNewArea] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -92,224 +87,19 @@ export default function ServiceProviderProfile() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!profile) return;
-    
-    setIsSaving(true);
-    console.log("Submitting profile update...");
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        console.error("No authenticated user found");
-        throw new Error("No user found");
-      }
-
-      console.log("Updating profile for user:", user.id);
-      const { error } = await supabase
-        .from("service_provider_profiles")
-        .update({
-          business_name: profile.business_name,
-          description: profile.description,
-          contact_phone: profile.contact_phone,
-          contact_email: profile.contact_email,
-          website: profile.website,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-
-      if (error) {
-        console.error("Update error:", error);
-        throw error;
-      }
-
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleAddArea = async () => {
-    if (!newArea.trim() || !profile) return;
-
-    try {
-      const updatedAreas = [...(profile.service_area || []), newArea.trim()];
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No authenticated user");
-
-      const { error } = await supabase
-        .from("service_provider_profiles")
-        .update({ service_area: updatedAreas })
-        .eq("id", user.id);
-
-      if (error) throw error;
-
-      setProfile({ ...profile, service_area: updatedAreas });
-      setNewArea("");
-      toast({
-        title: "Success",
-        description: "Service area added successfully",
-      });
-    } catch (error) {
-      console.error("Error adding service area:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add service area",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRemoveArea = async (areaToRemove: string) => {
-    if (!profile) return;
-
-    try {
-      const updatedAreas = profile.service_area?.filter(area => area !== areaToRemove) || [];
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No authenticated user");
-
-      const { error } = await supabase
-        .from("service_provider_profiles")
-        .update({ service_area: updatedAreas })
-        .eq("id", user.id);
-
-      if (error) throw error;
-
-      setProfile({ ...profile, service_area: updatedAreas });
-      toast({
-        title: "Success",
-        description: "Service area removed successfully",
-      });
-    } catch (error) {
-      console.error("Error removing service area:", error);
-      toast({
-        title: "Error",
-        description: "Failed to remove service area",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setProfile(prev => prev ? { ...prev, [name]: value } : null);
+  const handleProfileUpdate = (updatedProfile: Partial<ServiceProviderProfile>) => {
+    setProfile(prev => prev ? { ...prev, ...updatedProfile } : null);
   };
 
   const renderSection = () => {
     switch (activeSection) {
       case 'profile':
         return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Service Provider Profile</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="business_name">Business Name</Label>
-                  <Input
-                    id="business_name"
-                    name="business_name"
-                    value={profile?.business_name || ""}
-                    onChange={handleInputChange}
-                    disabled={!isEditing || isSaving}
-                    placeholder="Enter your business name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    value={profile?.description || ""}
-                    onChange={handleInputChange}
-                    disabled={!isEditing || isSaving}
-                    placeholder="Describe your business and services"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contact_phone">Contact Phone</Label>
-                  <Input
-                    id="contact_phone"
-                    name="contact_phone"
-                    value={profile?.contact_phone || ""}
-                    onChange={handleInputChange}
-                    disabled={!isEditing || isSaving}
-                    placeholder="Enter your contact phone number"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contact_email">Contact Email</Label>
-                  <Input
-                    id="contact_email"
-                    name="contact_email"
-                    value={profile?.contact_email || ""}
-                    onChange={handleInputChange}
-                    disabled={!isEditing || isSaving}
-                    placeholder="Enter your contact email"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
-                  <Input
-                    id="website"
-                    name="website"
-                    value={profile?.website || ""}
-                    onChange={handleInputChange}
-                    disabled={!isEditing || isSaving}
-                    placeholder="Enter your website URL"
-                  />
-                </div>
-                <div className="flex justify-end space-x-2">
-                  {isEditing ? (
-                    <>
-                      <Button
-                        type="submit"
-                        disabled={isSaving}
-                        className="flex items-center gap-2"
-                      >
-                        <Check className="h-4 w-4" />
-                        {isSaving ? "Saving..." : "Save Changes"}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setIsEditing(false)}
-                        disabled={isSaving}
-                        className="flex items-center gap-2"
-                      >
-                        <X className="h-4 w-4" />
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      type="button"
-                      onClick={() => setIsEditing(true)}
-                      className="flex items-center gap-2"
-                    >
-                      Edit Profile
-                    </Button>
-                  )}
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+          <ProfileSection
+            profile={profile}
+            isLoading={isLoading}
+            onProfileUpdate={handleProfileUpdate}
+          />
         );
       case 'services':
         return (
@@ -325,54 +115,10 @@ export default function ServiceProviderProfile() {
         );
       case 'availability':
         return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Service Areas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      className="pl-9"
-                      placeholder="Add new service area (e.g., New York City)"
-                      value={newArea}
-                      onChange={(e) => setNewArea(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddArea();
-                        }
-                      }}
-                    />
-                  </div>
-                  <Button onClick={handleAddArea}>Add Area</Button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {profile?.service_area?.map((area, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 bg-muted rounded-md"
-                    >
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>{area}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveArea(area)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ServiceAreaSection
+            serviceAreas={profile?.service_area}
+            onAreasUpdate={(areas) => handleProfileUpdate({ service_area: areas })}
+          />
         );
     }
   };
