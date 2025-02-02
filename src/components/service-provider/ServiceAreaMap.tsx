@@ -60,22 +60,18 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
     return null;
   }
 
-  // Calculate center point from all coordinates
-  const center = coordinates.reduce(
-    (acc, curr) => ({
-      lat: acc.lat + curr.lat / coordinates.length,
-      lng: acc.lng + curr.lng / coordinates.length,
-    }),
-    { lat: 0, lng: 0 }
-  );
+  // Default center location (Bucharest)
+  const defaultPosition: L.LatLngTuple = coordinates.length > 0
+    ? [coordinates[0].lat, coordinates[0].lng]
+    : [44.4268, 26.1025];
 
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        defaultCenter={[center.lat, center.lng] as L.LatLngTuple}
-        zoom={5}
+        center={defaultPosition}
+        zoom={7}
         style={{ height: '100%', width: '100%' }}
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
