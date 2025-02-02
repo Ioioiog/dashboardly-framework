@@ -22,6 +22,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Property } from "@/utils/propertyUtils";
 import { format } from "date-fns";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const formSchema = z.object({
+  property_id: z.string().min(1, "Property is required"),
+  reading_type: z.enum(["electricity", "water", "gas"], {
+    required_error: "Meter type is required",
+  }),
+  reading_value: z.number().min(0, "Reading value must be positive"),
+  reading_date: z.string().min(1, "Reading date is required"),
+  notes: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 interface MeterReadingFormProps {
   properties: Property[];
@@ -38,14 +52,6 @@ interface MeterReadingFormProps {
   };
 }
 
-interface FormData {
-  property_id: string;
-  reading_type: 'electricity' | 'water' | 'gas';
-  reading_value: number;
-  reading_date: string;
-  notes?: string;
-}
-
 export function MeterReadingForm({
   properties,
   onSuccess,
@@ -57,8 +63,13 @@ export function MeterReadingForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: initialData || {
+      property_id: properties[0]?.id || "",
+      reading_type: "water",
+      reading_value: 0,
       reading_date: format(new Date(), 'yyyy-MM-dd'),
+      notes: "",
     },
   });
 
