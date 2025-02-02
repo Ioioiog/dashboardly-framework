@@ -73,6 +73,11 @@ export function MeterReadingList({
         console.log("Fetching meter readings for user role:", userRole);
         console.log("Current user ID:", currentUserId);
 
+        if (!currentUserId) {
+          console.log("No user ID found, skipping fetch");
+          return;
+        }
+
         let query = supabase
           .from('meter_readings')
           .select(`
@@ -110,28 +115,30 @@ export function MeterReadingList({
       }
     };
 
-    fetchReadings();
+    if (currentUserId) {
+      fetchReadings();
 
-    // Set up realtime subscription
-    const channel = supabase
-      .channel('meter_readings_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'meter_readings'
-        },
-        (payload) => {
-          console.log('Realtime update received:', payload);
-          fetchReadings();
-        }
-      )
-      .subscribe();
+      // Set up realtime subscription
+      const channel = supabase
+        .channel('meter_readings_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'meter_readings'
+          },
+          (payload) => {
+            console.log('Realtime update received:', payload);
+            fetchReadings();
+          }
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [currentUserId, userRole, toast]);
 
   const handleDelete = async () => {
