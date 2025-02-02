@@ -85,9 +85,9 @@ export function MeterReadingForm({
 
     try {
       setIsSubmitting(true);
-      console.log("Submitting meter reading:", data);
+      console.log("Submitting meter reading form data:", data);
 
-      // Get tenant ID for the selected property if landlord is submitting
+      // For tenants, use their own ID. For landlords, get the tenant ID from active tenancy
       let tenant_id = userId;
       if (userRole === 'landlord') {
         const { data: tenancy, error: tenancyError } = await supabase
@@ -108,7 +108,7 @@ export function MeterReadingForm({
       const meterReadingData = {
         property_id: data.property_id,
         reading_type: data.reading_type,
-        reading_value: data.reading_value,
+        reading_value: Number(data.reading_value),
         reading_date: data.reading_date,
         tenant_id,
         created_by: userId,
@@ -125,7 +125,10 @@ export function MeterReadingForm({
           .update(meterReadingData)
           .eq('id', initialData.id);
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error("Error updating meter reading:", updateError);
+          throw updateError;
+        }
 
         toast({
           title: "Success",
@@ -137,7 +140,10 @@ export function MeterReadingForm({
           .from('meter_readings')
           .insert(meterReadingData);
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error("Error inserting meter reading:", insertError);
+          throw insertError;
+        }
 
         toast({
           title: "Success",
