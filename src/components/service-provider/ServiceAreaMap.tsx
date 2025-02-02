@@ -22,19 +22,11 @@ interface AreaCoordinate {
 }
 
 // Component to handle map center updates
-function MapCenter({ coordinates }: { coordinates: AreaCoordinate[] }) {
+const ChangeCenter = ({ center }: { center: L.LatLngExpression }) => {
   const map = useMap();
-
-  useEffect(() => {
-    if (coordinates.length > 0) {
-      const centerLat = coordinates.reduce((sum, coord) => sum + coord.lat, 0) / coordinates.length;
-      const centerLng = coordinates.reduce((sum, coord) => sum + coord.lng, 0) / coordinates.length;
-      map.setView([centerLat, centerLng], map.getZoom());
-    }
-  }, [coordinates, map]);
-
+  map.setView(center);
   return null;
-}
+};
 
 function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
   const [coordinates, setCoordinates] = useState<AreaCoordinate[]>([]);
@@ -92,18 +84,17 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
     );
   }
 
-  const defaultPosition: L.LatLngExpression = [51.505, -0.09];
+  const defaultPosition: L.LatLngExpression = [coordinates[0].lat, coordinates[0].lng];
 
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        center={defaultPosition}
         zoom={7}
         style={{ height: '100%', width: '100%' }}
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
       >
+        <ChangeCenter center={defaultPosition} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <MapCenter coordinates={coordinates} />
         {coordinates.map((coord) => {
           const position: L.LatLngExpression = [coord.lat, coord.lng];
           return (
