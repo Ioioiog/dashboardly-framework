@@ -10,6 +10,8 @@ import { UtilityList } from "@/components/utilities/UtilityList";
 import { MeterReadingDialog } from "@/components/meter-readings/MeterReadingDialog";
 import { MeterReadingList } from "@/components/meter-readings/MeterReadingList";
 import { useProperties } from "@/hooks/useProperties";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 type UtilitiesSection = 'bills' | 'readings';
 
@@ -18,6 +20,32 @@ const Utilities = () => {
   const { userRole } = useUserRole();
   const { properties, isLoading: propertiesLoading } = useProperties({ 
     userRole: userRole === "landlord" || userRole === "tenant" ? userRole : "tenant"
+  });
+
+  // Fetch utilities data
+  const { data: utilities = [], isLoading: utilitiesLoading } = useQuery({
+    queryKey: ['utilities'],
+    queryFn: async () => {
+      console.log('Fetching utilities...');
+      const { data, error } = await supabase
+        .from('utilities')
+        .select(`
+          *,
+          property:properties (
+            name,
+            address
+          )
+        `);
+
+      if (error) {
+        console.error('Error fetching utilities:', error);
+        throw error;
+      }
+
+      console.log('Fetched utilities:', data);
+      return data || [];
+    },
+    enabled: !!userRole
   });
 
   // Only allow landlord or tenant roles to access this page
@@ -72,11 +100,17 @@ const Utilities = () => {
                 />
               )}
             </div>
-            <UtilityList
-              utilities={[]} // Add your utilities data here
-              userRole={userRole}
-              onStatusUpdate={() => {}} // Add your refresh logic here
-            />
+            {utilitiesLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+              </div>
+            ) : (
+              <UtilityList
+                utilities={utilities}
+                userRole={userRole}
+                onStatusUpdate={() => {}} // Add your refresh logic here
+              />
+            )}
           </div>
         );
       case 'readings':
