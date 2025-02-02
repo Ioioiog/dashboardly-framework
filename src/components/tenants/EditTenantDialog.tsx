@@ -56,18 +56,33 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
 
       console.log("Profile updated successfully, updating tenancy...");
 
-      // Update tenancy details for the specific property
+      // Get the specific tenancy ID for the selected property
+      const { data: tenancyData, error: tenancyFetchError } = await supabase
+        .from("tenancies")
+        .select("id")
+        .eq("tenant_id", tenant.id)
+        .eq("property_id", formData.propertyId)
+        .eq("status", "active")
+        .single();
+
+      if (tenancyFetchError) {
+        console.error("Error fetching tenancy:", tenancyFetchError);
+        throw tenancyFetchError;
+      }
+
+      if (!tenancyData) {
+        throw new Error("No active tenancy found for this property");
+      }
+
+      // Update tenancy details for the specific property using the tenancy ID
       const { error: tenancyError } = await supabase
         .from("tenancies")
         .update({
-          property_id: formData.propertyId,
           start_date: formData.startDate ? format(formData.startDate, 'yyyy-MM-dd') : null,
           end_date: formData.endDate ? format(formData.endDate, 'yyyy-MM-dd') : null,
           monthly_pay_day: parseInt(formData.monthlyPayDay),
         })
-        .eq("tenant_id", tenant.id)
-        .eq("property_id", formData.propertyId)
-        .eq("status", "active");
+        .eq("id", tenancyData.id);
 
       if (tenancyError) {
         console.error("Error updating tenancy:", tenancyError);
