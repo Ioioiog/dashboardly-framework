@@ -10,7 +10,7 @@ import { ServiceList } from "@/components/service-provider/ServiceList";
 import { ServiceForm } from "@/components/service-provider/ServiceForm";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
-import { Building2, ClipboardList, MapPin, UserCircle, X } from "lucide-react";
+import { Building2, Check, ClipboardList, MapPin, UserCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Section = 'profile' | 'services' | 'availability';
@@ -36,24 +36,6 @@ export default function ServiceProviderProfile() {
   useEffect(() => {
     fetchProfile();
   }, []);
-
-  const navigationItems = [
-    {
-      id: 'profile' as Section,
-      label: 'Profile Information',
-      icon: UserCircle,
-    },
-    {
-      id: 'services' as Section,
-      label: 'Services',
-      icon: ClipboardList,
-    },
-    {
-      id: 'availability' as Section,
-      label: 'Service Areas',
-      icon: Building2,
-    },
-  ];
 
   const fetchProfile = async () => {
     try {
@@ -91,13 +73,7 @@ export default function ServiceProviderProfile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No authenticated user");
 
-      console.log("Updating profile with:", {
-        business_name: profile.business_name,
-        description: profile.description,
-        contact_phone: profile.contact_phone,
-        contact_email: profile.contact_email,
-        website: profile.website
-      });
+      console.log("Updating profile with:", profile);
 
       const { error } = await supabase
         .from("service_provider_profiles")
@@ -127,6 +103,11 @@ export default function ServiceProviderProfile() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    fetchProfile();
+    setIsEditing(false);
   };
 
   const handleAddArea = async () => {
@@ -255,19 +236,30 @@ export default function ServiceProviderProfile() {
                 <div className="flex justify-end space-x-2">
                   {isEditing ? (
                     <>
-                      <Button type="submit" disabled={isLoading}>
+                      <Button 
+                        type="submit" 
+                        disabled={isLoading}
+                        className="flex items-center gap-2"
+                      >
+                        <Check className="h-4 w-4" />
                         Save Changes
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setIsEditing(false)}
+                        onClick={handleCancel}
+                        className="flex items-center gap-2"
                       >
+                        <X className="h-4 w-4" />
                         Cancel
                       </Button>
                     </>
                   ) : (
-                    <Button type="button" onClick={() => setIsEditing(true)}>
+                    <Button 
+                      type="button" 
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center gap-2"
+                    >
                       Edit Profile
                     </Button>
                   )}
