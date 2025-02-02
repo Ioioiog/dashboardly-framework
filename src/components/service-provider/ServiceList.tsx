@@ -3,14 +3,18 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Edit, Trash } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
+
+type ServiceCategory = Database["public"]["Enums"]["service_category"];
 
 interface Service {
   id: string;
   name: string;
-  category: string;
+  category: ServiceCategory;
   description: string | null;
   base_price: number | null;
   price_unit: string | null;
+  currency: string;
 }
 
 interface ServiceListProps {
@@ -31,12 +35,15 @@ export function ServiceList({ onEdit }: ServiceListProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No authenticated user");
 
+      console.log("Fetching services for provider:", user.id);
+
       const { data, error } = await supabase
         .from("service_provider_services")
         .select("*")
         .eq("provider_id", user.id);
 
       if (error) throw error;
+      console.log("Fetched services:", data);
       setServices(data);
     } catch (error) {
       console.error("Error fetching services:", error);
@@ -93,7 +100,7 @@ export function ServiceList({ onEdit }: ServiceListProps) {
             )}
             {service.base_price && (
               <p className="text-sm">
-                Price: ${service.base_price} {service.price_unit}
+                Price: {service.base_price} {service.currency} {service.price_unit}
               </p>
             )}
           </div>

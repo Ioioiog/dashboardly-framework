@@ -7,9 +7,23 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Wrench } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
+
+type ServiceCategory = Database["public"]["Enums"]["service_category"];
+
+interface Service {
+  id: string;
+  name: string;
+  category: ServiceCategory;
+  description: string | null;
+  base_price: number | null;
+  price_unit: string | null;
+  currency: string;
+}
 
 const Services = () => {
   const [showServiceForm, setShowServiceForm] = useState(false);
+  const [selectedService, setSelectedService] = useState<Service | undefined>();
   const { userRole } = useUserRole();
   const navigate = useNavigate();
 
@@ -19,6 +33,17 @@ const Services = () => {
       navigate("/dashboard");
     }
   }, [userRole, navigate]);
+
+  const handleEdit = (service: Service) => {
+    console.log("Editing service:", service);
+    setSelectedService(service);
+    setShowServiceForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowServiceForm(false);
+    setSelectedService(undefined);
+  };
 
   if (!userRole || userRole !== "service_provider") {
     return null;
@@ -43,14 +68,17 @@ const Services = () => {
           </Button>
         </div>
 
-        <ServiceList onEdit={() => setShowServiceForm(true)} />
+        <ServiceList onEdit={handleEdit} />
 
-        <Dialog open={showServiceForm} onOpenChange={setShowServiceForm}>
+        <Dialog open={showServiceForm} onOpenChange={handleCloseForm}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Service</DialogTitle>
+              <DialogTitle>{selectedService ? "Edit Service" : "Add Service"}</DialogTitle>
             </DialogHeader>
-            <ServiceForm onSuccess={() => setShowServiceForm(false)} />
+            <ServiceForm 
+              onSuccess={handleCloseForm} 
+              service={selectedService}
+            />
           </DialogContent>
         </Dialog>
       </div>
