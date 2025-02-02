@@ -21,7 +21,7 @@ interface AreaCoordinate {
   lng: number;
 }
 
-// New component to handle map center updates
+// Component to handle map center updates
 function MapCenter({ coordinates }: { coordinates: AreaCoordinate[] }) {
   const map = useMap();
 
@@ -92,18 +92,17 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
     );
   }
 
+  const defaultPosition: L.LatLngExpression = [51.505, -0.09];
+
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        center={[51.505, -0.09]}
+        center={defaultPosition}
         zoom={7}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={false}
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <MapCenter coordinates={coordinates} />
         {coordinates.map((coord) => {
           const position: L.LatLngExpression = [coord.lat, coord.lng];
