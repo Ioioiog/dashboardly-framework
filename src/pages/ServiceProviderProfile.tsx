@@ -10,6 +10,7 @@ import { Building2, ClipboardList, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProfileSection } from "@/components/service-provider/ProfileSection";
 import { ServiceAreaSection } from "@/components/service-provider/ServiceAreaSection";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Section = 'profile' | 'services' | 'availability';
 
