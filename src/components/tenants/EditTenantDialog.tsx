@@ -24,6 +24,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
     startDate: tenant.tenancy?.start_date ? new Date(tenant.tenancy.start_date) : null,
     endDate: tenant.tenancy?.end_date ? new Date(tenant.tenancy.end_date) : null,
     monthlyPayDay: tenant.tenancy?.monthly_pay_day?.toString() || "1",
+    propertyId: tenant.property?.id || "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,6 +59,7 @@ export function EditTenantDialog({ tenant, onUpdate }: EditTenantDialogProps) {
       const { error: tenancyError } = await supabase
         .from("tenancies")
         .update({
+          property_id: formData.propertyId,
           start_date: formData.startDate ? format(formData.startDate, 'yyyy-MM-dd') : null,
           end_date: formData.endDate ? format(formData.endDate, 'yyyy-MM-dd') : null,
           monthly_pay_day: parseInt(formData.monthlyPayDay),

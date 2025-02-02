@@ -1,6 +1,10 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TenantDatePicker } from "./TenantDatePicker";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Property } from "@/types/tenant";
 
 interface TenantFormFieldsProps {
   formData: {
@@ -11,11 +15,31 @@ interface TenantFormFieldsProps {
     startDate: Date | null;
     endDate: Date | null;
     monthlyPayDay: string;
+    propertyId?: string;
   };
   setFormData: (data: any) => void;
 }
 
 export function TenantFormFields({ formData, setFormData }: TenantFormFieldsProps) {
+  const [properties, setProperties] = useState<Property[]>([]);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      const { data: propertiesData, error } = await supabase
+        .from('properties')
+        .select('*');
+
+      if (error) {
+        console.error('Error fetching properties:', error);
+        return;
+      }
+
+      setProperties(propertiesData || []);
+    };
+
+    fetchProperties();
+  }, []);
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -59,6 +83,26 @@ export function TenantFormFields({ formData, setFormData }: TenantFormFieldsProp
             setFormData((prev: any) => ({ ...prev, phone: e.target.value }))
           }
         />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="property">Property</Label>
+        <Select
+          value={formData.propertyId}
+          onValueChange={(value) =>
+            setFormData((prev: any) => ({ ...prev, propertyId: value }))
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a property" />
+          </SelectTrigger>
+          <SelectContent>
+            {properties.map((property) => (
+              <SelectItem key={property.id} value={property.id}>
+                {property.name} ({property.address})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <TenantDatePicker
         label="Start Date"
