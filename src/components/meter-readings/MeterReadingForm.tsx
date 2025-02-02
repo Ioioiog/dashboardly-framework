@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,6 +61,21 @@ export function MeterReadingForm({
 }: MeterReadingFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Session check error:", error);
+        setIsAuthenticated(false);
+        return;
+      }
+      setIsAuthenticated(!!session);
+    };
+
+    checkSession();
+  }, []);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -74,11 +89,20 @@ export function MeterReadingForm({
   });
 
   const onSubmit = async (data: FormData) => {
+    if (!isAuthenticated) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "You must be logged in to submit meter readings",
+      });
+      return;
+    }
+
     if (!userId) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "You must be logged in to submit meter readings",
+        description: "User ID not found. Please try logging in again.",
       });
       return;
     }
