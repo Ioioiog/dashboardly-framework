@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Database } from "@/integrations/supabase/types";
+import { useCurrency } from "@/hooks/useCurrency";
 
 type ServiceCategory = Database["public"]["Enums"]["service_category"];
 
@@ -19,6 +20,7 @@ interface ServiceFormProps {
     description: string | null;
     base_price: number | null;
     price_unit: string | null;
+    currency?: string;
   };
 }
 
@@ -29,9 +31,11 @@ export function ServiceForm({ onSuccess, service }: ServiceFormProps) {
     description: service?.description || "",
     base_price: service?.base_price?.toString() || "",
     price_unit: service?.price_unit || "per hour",
+    currency: service?.currency || "USD",
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { availableCurrencies } = useCurrency();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +124,7 @@ export function ServiceForm({ onSuccess, service }: ServiceFormProps) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="base_price">Base Price</Label>
           <Input
@@ -130,6 +134,25 @@ export function ServiceForm({ onSuccess, service }: ServiceFormProps) {
             value={formData.base_price}
             onChange={(e) => setFormData({ ...formData, base_price: e.target.value })}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="currency">Currency</Label>
+          <Select
+            value={formData.currency}
+            onValueChange={(value) => setFormData({ ...formData, currency: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableCurrencies.map((currency) => (
+                <SelectItem key={currency.code} value={currency.code}>
+                  {currency.name} ({currency.code})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
