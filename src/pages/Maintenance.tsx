@@ -155,13 +155,15 @@ export default function Maintenance() {
                 {t("maintenance.description")}
               </p>
             </div>
-            <Button 
-              onClick={() => setIsDialogOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              {t("maintenance.newRequest")}
-            </Button>
+            {userRole !== "service_provider" && (
+              <Button 
+                onClick={() => setIsDialogOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                {t("maintenance.newRequest")}
+              </Button>
+            )}
           </div>
 
           <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto">
@@ -241,7 +243,7 @@ export default function Maintenance() {
                 )}
               </div>
             </>
-          ) : (
+          ) : userRole !== "service_provider" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">
