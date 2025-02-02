@@ -84,7 +84,7 @@ export default function ServiceProviderProfile() {
       console.error("Error fetching profile:", error);
       toast({
         title: "Error",
-        description: "Failed to load profile. Please make sure you are logged in as a service provider.",
+        description: "Failed to load profile",
         variant: "destructive",
       });
     } finally {
@@ -97,9 +97,9 @@ export default function ServiceProviderProfile() {
     if (!profile) return;
     
     setIsSaving(true);
+    console.log("Submitting profile update...");
 
     try {
-      console.log("Updating profile with:", profile);
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -107,6 +107,7 @@ export default function ServiceProviderProfile() {
         throw new Error("No user found");
       }
 
+      console.log("Updating profile for user:", user.id);
       const { error } = await supabase
         .from("service_provider_profiles")
         .update({
