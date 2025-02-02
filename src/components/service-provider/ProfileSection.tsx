@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,19 +25,38 @@ interface ProfileSectionProps {
 export function ProfileSection({ profile, isLoading, onProfileUpdate }: ProfileSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState<ProfileData | null>(profile);
+  const [formData, setFormData] = useState<ProfileData>({
+    business_name: "",
+    description: "",
+    contact_phone: "",
+    contact_email: "",
+    website: "",
+  });
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        business_name: profile.business_name || "",
+        description: profile.description || "",
+        contact_phone: profile.contact_phone || "",
+        contact_email: profile.contact_email || "",
+        website: profile.website || "",
+      });
+    }
+  }, [profile]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     console.log("Input changed:", name, value);
-    setFormData(prev => prev ? { ...prev, [name]: value } : null);
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData) return;
-    
     setIsSaving(true);
     console.log("Submitting profile update:", formData);
 
@@ -97,7 +116,7 @@ export function ProfileSection({ profile, isLoading, onProfileUpdate }: ProfileS
             <Input
               id="business_name"
               name="business_name"
-              value={formData?.business_name || ""}
+              value={formData.business_name || ""}
               onChange={handleInputChange}
               disabled={!isEditing || isSaving}
               placeholder="Enter your business name"
@@ -108,7 +127,7 @@ export function ProfileSection({ profile, isLoading, onProfileUpdate }: ProfileS
             <Textarea
               id="description"
               name="description"
-              value={formData?.description || ""}
+              value={formData.description || ""}
               onChange={handleInputChange}
               disabled={!isEditing || isSaving}
               placeholder="Describe your business and services"
@@ -119,7 +138,7 @@ export function ProfileSection({ profile, isLoading, onProfileUpdate }: ProfileS
             <Input
               id="contact_phone"
               name="contact_phone"
-              value={formData?.contact_phone || ""}
+              value={formData.contact_phone || ""}
               onChange={handleInputChange}
               disabled={!isEditing || isSaving}
               placeholder="Enter your contact phone number"
@@ -130,7 +149,7 @@ export function ProfileSection({ profile, isLoading, onProfileUpdate }: ProfileS
             <Input
               id="contact_email"
               name="contact_email"
-              value={formData?.contact_email || ""}
+              value={formData.contact_email || ""}
               onChange={handleInputChange}
               disabled={!isEditing || isSaving}
               placeholder="Enter your contact email"
@@ -141,7 +160,7 @@ export function ProfileSection({ profile, isLoading, onProfileUpdate }: ProfileS
             <Input
               id="website"
               name="website"
-              value={formData?.website || ""}
+              value={formData.website || ""}
               onChange={handleInputChange}
               disabled={!isEditing || isSaving}
               placeholder="Enter your website URL"
@@ -161,7 +180,16 @@ export function ProfileSection({ profile, isLoading, onProfileUpdate }: ProfileS
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setIsEditing(false);
+                    setFormData({
+                      business_name: profile?.business_name || "",
+                      description: profile?.description || "",
+                      contact_phone: profile?.contact_phone || "",
+                      contact_email: profile?.contact_email || "",
+                      website: profile?.website || "",
+                    });
+                  }}
                   disabled={isSaving}
                   className="flex items-center gap-2"
                 >
