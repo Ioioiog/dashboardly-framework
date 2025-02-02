@@ -94,7 +94,6 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
         style={{ height: '100%', width: '100%' }}
-        zoom={7}
       >
         <ChangeCenter center={defaultPosition} />
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
