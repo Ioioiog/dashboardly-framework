@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { MapPin, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ServiceAreaMap } from "./ServiceAreaMap";
+import ServiceAreaMap from "./ServiceAreaMap";
 
 interface ServiceAreaSectionProps {
   serviceAreas: string[] | null;

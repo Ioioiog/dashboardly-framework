@@ -21,7 +21,7 @@ interface AreaCoordinate {
   lng: number;
 }
 
-function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
+export default function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
   const [coordinates, setCoordinates] = useState<AreaCoordinate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -68,13 +68,11 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
 
   if (coordinates.length === 0) return <p>No service areas found.</p>;
 
-  const defaultPosition: L.LatLngExpression = [coordinates[0].lat, coordinates[0].lng];
-
   return (
     <MapContainer 
-      center={defaultPosition} 
       style={{ height: '400px', width: '100%' }}
       scrollWheelZoom={false}
+      zoom={6}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {coordinates.map((area, index) => (
@@ -88,5 +86,3 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
     </MapContainer>
   );
 }
-
-export default ServiceAreaMapComponent;
