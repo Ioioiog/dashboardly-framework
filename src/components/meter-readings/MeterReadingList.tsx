@@ -30,6 +30,7 @@ import {
 import { MeterReadingForm } from "./MeterReadingForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthState } from "@/hooks/useAuthState";
 
 interface MeterReading {
   id: string;
@@ -60,6 +61,7 @@ export function MeterReadingList({
   onUpdate,
 }: MeterReadingListProps) {
   const { toast } = useToast();
+  const { currentUserId } = useAuthState();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedReading, setSelectedReading] = useState<MeterReading | null>(null);
@@ -186,7 +188,7 @@ export function MeterReadingList({
                 onUpdate();
               }}
               userRole={userRole}
-              userId={null}
+              userId={currentUserId}
               initialData={{
                 id: selectedReading.id,
                 property_id: selectedReading.property_id,

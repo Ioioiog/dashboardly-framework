@@ -113,7 +113,7 @@ export function MeterReadingForm({
         tenant_id,
         created_by: userId,
         updated_by: userId,
-        notes: data.notes || null // Ensure notes is null if undefined
+        notes: data.notes || null
       };
 
       console.log("Submitting meter reading data:", meterReadingData);
