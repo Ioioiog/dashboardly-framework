@@ -77,26 +77,26 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
     );
   }
 
-  // Default center location (first area or Bucharest if no areas)
-  const defaultPosition: L.LatLngTuple = coordinates.length > 0
-    ? [coordinates[0].lat, coordinates[0].lng]
-    : [44.4268, 26.1025];
+  // Calculate the center as the average of all coordinates
+  const centerLat = coordinates.reduce((sum, coord) => sum + coord.lat, 0) / coordinates.length;
+  const centerLng = coordinates.reduce((sum, coord) => sum + coord.lng, 0) / coordinates.length;
 
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        center={defaultPosition}
+        center={[centerLat, centerLng]}
         zoom={7}
         style={{ height: '100%', width: '100%' }}
-        scrollWheelZoom={true}
+        scrollWheelZoom={false}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         {coordinates.map((coord) => (
           <Marker 
             key={coord.name} 
-            position={[coord.lat, coord.lng] as L.LatLngTuple}
+            position={[coord.lat, coord.lng]}
           >
             <Popup>{coord.name}</Popup>
           </Marker>
