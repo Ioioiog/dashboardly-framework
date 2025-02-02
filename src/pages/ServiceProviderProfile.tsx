@@ -33,6 +33,24 @@ export default function ServiceProviderProfile() {
   const [newArea, setNewArea] = useState("");
   const { toast } = useToast();
 
+  const navigationItems = [
+    {
+      id: 'profile' as Section,
+      label: 'Profile Information',
+      icon: UserCircle,
+    },
+    {
+      id: 'services' as Section,
+      label: 'Services',
+      icon: ClipboardList,
+    },
+    {
+      id: 'availability' as Section,
+      label: 'Service Areas',
+      icon: Building2,
+    },
+  ];
+
   useEffect(() => {
     fetchProfile();
   }, []);
