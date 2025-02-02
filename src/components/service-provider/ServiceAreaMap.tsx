@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import L from 'leaflet';
 
 // Fix for default marker icons in Leaflet
@@ -72,7 +72,7 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        center={[center.lat, center.lng] as [number, number]}
+        center={[center.lat, center.lng] as L.LatLngTuple}
         zoom={5}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={false}
@@ -84,7 +84,7 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
         {coordinates.map((coord) => (
           <Marker 
             key={coord.name} 
-            position={[coord.lat, coord.lng] as [number, number]}
+            position={[coord.lat, coord.lng] as L.LatLngTuple}
           >
             <Popup>{coord.name}</Popup>
           </Marker>
