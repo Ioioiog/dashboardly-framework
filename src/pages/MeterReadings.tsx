@@ -22,7 +22,10 @@ const MeterReadings = () => {
 
   const fetchReadings = async () => {
     try {
-      console.log("Fetching readings for user:", userId, "with role:", userRole);
+      console.log("Starting fetchReadings...");
+      console.log("Current userRole:", userRole);
+      console.log("Current userId:", userId);
+      console.log("Available properties:", properties);
       
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) {
@@ -52,9 +55,12 @@ const MeterReadings = () => {
         .order('reading_date', { ascending: false });
 
       if (userRole === 'tenant') {
+        console.log("Filtering for tenant:", userId);
         query = query.eq('tenant_id', userId);
       } else if (userRole === 'landlord') {
-        query = query.in('property_id', properties.map(p => p.id));
+        const propertyIds = properties.map(p => p.id);
+        console.log("Filtering for landlord properties:", propertyIds);
+        query = query.in('property_id', propertyIds);
       }
 
       const { data: readingsData, error: readingsError } = await query;
@@ -81,6 +87,7 @@ const MeterReadings = () => {
   useEffect(() => {
     const checkUser = async () => {
       try {
+        console.log("Starting checkUser...");
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -94,6 +101,7 @@ const MeterReadings = () => {
           return;
         }
 
+        console.log("Session found for user:", session.user.id);
         setUserId(session.user.id);
 
         const { data: profile, error: profileError } = await supabase
@@ -107,14 +115,12 @@ const MeterReadings = () => {
           throw profileError;
         }
 
+        console.log("User profile found:", profile);
         console.log("Setting user role to:", profile.role);
         setUserRole(profile.role as "landlord" | "tenant");
-        
-        // Only fetch readings after we have the user role
-        await fetchReadings();
 
       } catch (error: any) {
-        console.error("Error in meter readings page:", error);
+        console.error("Error in checkUser:", error);
         toast({
           variant: "destructive",
           title: "Error",
@@ -126,6 +132,14 @@ const MeterReadings = () => {
 
     checkUser();
   }, [navigate, toast]);
+
+  // Add a separate useEffect for fetching readings after user role is set
+  useEffect(() => {
+    if (userRole && userId) {
+      console.log("User role and ID set, fetching readings...");
+      fetchReadings();
+    }
+  }, [userRole, userId, properties]);
 
   if (isLoading || !userRole) {
     return (
