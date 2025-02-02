@@ -104,8 +104,12 @@ export function MeterReadingForm({
         tenant_id = tenancy.tenant_id;
       }
 
+      // Prepare the data object with all required fields
       const meterReadingData = {
-        ...data,
+        property_id: data.property_id,
+        reading_type: data.reading_type,
+        reading_value: data.reading_value,
+        reading_date: data.reading_date,
         tenant_id,
         created_by: userId,
         updated_by: userId,
