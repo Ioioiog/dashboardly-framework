@@ -2,6 +2,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useState } from 'react';
 import L from 'leaflet';
+import dynamic from 'next/dynamic';
 
 // Fix for default marker icons in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -21,7 +22,7 @@ interface AreaCoordinate {
   lng: number;
 }
 
-export function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
+function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
   const [coordinates, setCoordinates] = useState<AreaCoordinate[]>([]);
 
   useEffect(() => {
@@ -72,16 +73,20 @@ export function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        center={[center.lat, center.lng]}
+        center={[center.lat, center.lng] as L.LatLngExpression}
         zoom={5}
         style={{ height: '100%', width: '100%' }}
+        scrollWheelZoom={false}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {coordinates.map((coord) => (
-          <Marker key={coord.name} position={[coord.lat, coord.lng]}>
+          <Marker 
+            key={coord.name} 
+            position={[coord.lat, coord.lng] as L.LatLngExpression}
+          >
             <Popup>{coord.name}</Popup>
           </Marker>
         ))}
@@ -89,3 +94,8 @@ export function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
     </div>
   );
 }
+
+// Dynamically import the map component with SSR disabled
+export const ServiceAreaMap = dynamic(() => Promise.resolve(ServiceAreaMapComponent), {
+  ssr: false
+});
