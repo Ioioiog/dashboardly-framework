@@ -1,8 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import L from 'leaflet';
-import dynamic from 'next/dynamic';
 
 // Fix for default marker icons in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -73,7 +72,7 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        center={[center.lat, center.lng] as L.LatLngExpression}
+        center={[center.lat, center.lng]}
         zoom={5}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={false}
@@ -85,7 +84,7 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
         {coordinates.map((coord) => (
           <Marker 
             key={coord.name} 
-            position={[coord.lat, coord.lng] as L.LatLngExpression}
+            position={[coord.lat, coord.lng]}
           >
             <Popup>{coord.name}</Popup>
           </Marker>
@@ -95,7 +94,10 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
   );
 }
 
-// Dynamically import the map component with SSR disabled
-export const ServiceAreaMap = dynamic(() => Promise.resolve(ServiceAreaMapComponent), {
-  ssr: false
-});
+// Create a wrapper component that handles the dynamic import
+const MapWrapper = ({ areas }: ServiceAreaMapProps) => {
+  if (typeof window === 'undefined') return null;
+  return <ServiceAreaMapComponent areas={areas} />;
+};
+
+export const ServiceAreaMap = MapWrapper;
