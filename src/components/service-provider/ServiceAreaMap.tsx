@@ -67,14 +67,8 @@ export default function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
   if (isLoading) return <p>Loading map...</p>;
   if (coordinates.length === 0) return <p>No service areas found.</p>;
 
-  // Calculate the center point from the first coordinate
-  const defaultCenter: L.LatLngExpression = coordinates.length > 0 
-    ? [coordinates[0].lat, coordinates[0].lng]
-    : [0, 0];
-
   return (
     <MapContainer 
-      center={defaultCenter}
       zoom={12}
       style={{ height: '400px', width: '100%' }}
     >
