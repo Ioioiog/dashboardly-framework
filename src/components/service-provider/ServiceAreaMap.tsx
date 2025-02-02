@@ -81,10 +81,12 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
   const centerLat = coordinates.reduce((sum, coord) => sum + coord.lat, 0) / coordinates.length;
   const centerLng = coordinates.reduce((sum, coord) => sum + coord.lng, 0) / coordinates.length;
 
+  const center: L.LatLngExpression = [centerLat, centerLng];
+
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden mt-4">
       <MapContainer
-        center={[centerLat, centerLng] as [number, number]}
+        center={center}
         zoom={7}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={false}
@@ -93,14 +95,17 @@ function ServiceAreaMapComponent({ areas }: ServiceAreaMapProps) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {coordinates.map((coord) => (
-          <Marker 
-            key={coord.name} 
-            position={[coord.lat, coord.lng] as [number, number]}
-          >
-            <Popup>{coord.name}</Popup>
-          </Marker>
-        ))}
+        {coordinates.map((coord) => {
+          const position: L.LatLngExpression = [coord.lat, coord.lng];
+          return (
+            <Marker 
+              key={coord.name} 
+              position={position}
+            >
+              <Popup>{coord.name}</Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );
