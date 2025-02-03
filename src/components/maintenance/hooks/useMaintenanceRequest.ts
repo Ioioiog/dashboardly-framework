@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCallback } from "react";
-import { MaintenanceRequestFormData, MaintenanceStatus } from "../utils/validation";
+import { MaintenanceRequestFormData, MaintenanceStatus, validateMaintenanceRequest } from "../utils/validation";
 
 export function useMaintenanceRequest(requestId?: string) {
   const { toast } = useToast();
@@ -83,8 +83,10 @@ export function useMaintenanceRequest(requestId?: string) {
         ...values,
         images: imageUrls,
         scheduled_date: values.scheduled_date?.toISOString(),
-        description: values.description || '', // Ensure description is never undefined
-        status: (values.status || 'pending') as MaintenanceStatus
+        property_id: values.property_id,
+        description: values.description,
+        status: values.status || 'pending' as MaintenanceStatus,
+        priority: values.priority || 'low'
       };
 
       const { data, error } = await supabase
@@ -142,8 +144,10 @@ export function useMaintenanceRequest(requestId?: string) {
         ...values,
         images: imageUrls,
         scheduled_date: values.scheduled_date?.toISOString(),
-        description: values.description || '', // Ensure description is never undefined
-        status: (values.status || 'pending') as MaintenanceStatus
+        property_id: values.property_id,
+        description: values.description,
+        status: values.status || 'pending' as MaintenanceStatus,
+        priority: values.priority || 'low'
       };
 
       const { data, error } = await supabase
