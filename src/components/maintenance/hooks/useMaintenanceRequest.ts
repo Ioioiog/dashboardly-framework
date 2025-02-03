@@ -64,7 +64,6 @@ export function useMaintenanceRequest(requestId?: string) {
     mutationFn: async (values: MaintenanceRequestFormData) => {
       console.log("Creating maintenance request with data:", values);
 
-      // Handle image uploads if there are any new files
       let imageUrls: string[] = [];
       if (values.images?.length > 0) {
         const filesToUpload = values.images.filter((img): img is File => img instanceof File);
@@ -78,16 +77,21 @@ export function useMaintenanceRequest(requestId?: string) {
         }
       }
 
-      // Transform the data for Supabase
       const transformedData = {
-        ...values,
         images: imageUrls,
         scheduled_date: values.scheduled_date?.toISOString(),
         property_id: values.property_id,
         tenant_id: values.tenant_id,
+        title: values.title,
         description: values.description,
         status: values.status || 'pending' as MaintenanceStatus,
-        priority: values.priority || 'low'
+        priority: values.priority || 'low',
+        notes: values.notes,
+        assigned_to: values.assigned_to,
+        service_provider_notes: values.service_provider_notes,
+        service_provider_fee: values.service_provider_fee,
+        service_provider_status: values.service_provider_status,
+        completion_report: values.completion_report
       };
 
       const { data, error } = await supabase
@@ -126,7 +130,6 @@ export function useMaintenanceRequest(requestId?: string) {
 
       console.log("Updating maintenance request with data:", values);
 
-      // Handle image uploads if there are any new files
       let imageUrls: string[] = [];
       if (values.images?.length > 0) {
         const filesToUpload = values.images.filter((img): img is File => img instanceof File);
@@ -140,16 +143,21 @@ export function useMaintenanceRequest(requestId?: string) {
         }
       }
 
-      // Transform the data for Supabase
       const transformedData = {
-        ...values,
         images: imageUrls,
         scheduled_date: values.scheduled_date?.toISOString(),
         property_id: values.property_id,
         tenant_id: values.tenant_id,
+        title: values.title,
         description: values.description,
         status: values.status || 'pending' as MaintenanceStatus,
-        priority: values.priority || 'low'
+        priority: values.priority || 'low',
+        notes: values.notes,
+        assigned_to: values.assigned_to,
+        service_provider_notes: values.service_provider_notes,
+        service_provider_fee: values.service_provider_fee,
+        service_provider_status: values.service_provider_status,
+        completion_report: values.completion_report
       };
 
       const { data, error } = await supabase
