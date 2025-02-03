@@ -211,7 +211,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
       <FormItem>
         <FormLabel>Images (Max {MAX_IMAGES})</FormLabel>
         <FormControl>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="relative">
               <Input
                 type="file"
@@ -226,7 +226,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
               </div>
             </div>
             {imageUrls.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                 {imageUrls.map((imageUrl, index) => (
                   <div 
                     key={index} 
