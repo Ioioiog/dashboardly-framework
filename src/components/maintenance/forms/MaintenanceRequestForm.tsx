@@ -59,11 +59,11 @@ export function MaintenanceRequestForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Tenant Column */}
           <div className={cn(
-            "space-y-4 p-4 rounded-lg border bg-white",
+            "space-y-4 p-6 rounded-lg border bg-white",
             userRole !== "tenant" && "opacity-75"
           )}>
             <h3 className="text-lg font-semibold mb-4">Tenant Information</h3>
@@ -82,7 +82,7 @@ export function MaintenanceRequestForm({
 
           {/* Landlord Column */}
           <div className={cn(
-            "space-y-4 p-4 rounded-lg border bg-white",
+            "space-y-4 p-6 rounded-lg border bg-white",
             userRole !== "landlord" && "opacity-75"
           )}>
             <h3 className="text-lg font-semibold mb-4">Landlord Management</h3>
@@ -98,30 +98,6 @@ export function MaintenanceRequestForm({
               userRole={userRole}
               isExistingRequest={!!existingRequest}
             />
-          </div>
-
-          {/* Service Provider Column */}
-          <div className={cn(
-            "space-y-4 p-4 rounded-lg border bg-white",
-            userRole !== "service_provider" && "opacity-75"
-          )}>
-            <h3 className="text-lg font-semibold mb-4">Service Provider Details</h3>
-            <div className="space-y-4">
-              {/* We'll show service provider specific information here */}
-              <div className="p-4 bg-gray-50 rounded-md">
-                <p className="text-sm text-gray-600">
-                  {form.watch("assigned_to") 
-                    ? "You have been assigned to this maintenance request"
-                    : "No service provider assigned yet"}
-                </p>
-                {form.watch("service_provider_notes") && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-medium mb-2">Instructions</h4>
-                    <p className="text-sm">{form.watch("service_provider_notes")}</p>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 
