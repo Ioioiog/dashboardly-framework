@@ -87,7 +87,10 @@ export function LandlordFields({
       {isLandlord ? (
         <Select
           value={formData.assigned_to || "unassigned"}
-          onValueChange={(value) => onChange("assigned_to", value === "unassigned" ? null : value)}
+          onValueChange={(value) => {
+            console.log("Selected service provider:", value);
+            onChange("assigned_to", value === "unassigned" ? null : value);
+          }}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select a service provider" />
@@ -96,7 +99,7 @@ export function LandlordFields({
             <SelectItem value="unassigned">Not assigned</SelectItem>
             {serviceProviders?.map((provider) => (
               <SelectItem key={provider.id} value={provider.id}>
-                {provider.first_name} {provider.last_name}
+                {`${provider.first_name || ''} ${provider.last_name || ''}`.trim()}
               </SelectItem>
             ))}
           </SelectContent>
