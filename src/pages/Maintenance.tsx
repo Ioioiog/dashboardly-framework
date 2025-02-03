@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Card } from "@/components/ui/card";
 import { NoDataCard } from "@/components/dashboard/charts/NoDataCard";
+import { useAuthState } from "@/hooks/useAuthState";
 
 type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
 
@@ -29,6 +30,7 @@ export default function Maintenance() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { userRole } = useUserRole();
+  const { currentUserId } = useAuthState();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
   const [activeSection, setActiveSection] = React.useState<MaintenanceSection>("requests");
@@ -76,6 +78,11 @@ export default function Maintenance() {
             last_name
           )
         `);
+
+      // Filter based on user role
+      if (userRole === "service_provider") {
+        query = query.eq("assigned_to", currentUserId);
+      }
 
       if (filters.status !== "all") {
         query = query.eq("status", filters.status);
