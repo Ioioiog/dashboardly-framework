@@ -86,13 +86,15 @@ export function useMaintenanceRequest(requestId?: string) {
         description: values.description,
         status: values.status || 'pending' as MaintenanceStatus,
         priority: values.priority || 'low',
-        notes: values.notes,
-        assigned_to: values.assigned_to,
-        service_provider_notes: values.service_provider_notes,
-        service_provider_fee: values.service_provider_fee,
-        service_provider_status: values.service_provider_status,
-        completion_report: values.completion_report
+        notes: values.notes || '',
+        assigned_to: values.assigned_to || null,
+        service_provider_notes: values.service_provider_notes || '',
+        service_provider_fee: values.service_provider_fee || 0,
+        service_provider_status: values.service_provider_status || null,
+        completion_report: values.completion_report || ''
       };
+
+      console.log("Transformed data for creation:", transformedData);
 
       const { data, error } = await supabase
         .from("maintenance_requests")
@@ -152,13 +154,15 @@ export function useMaintenanceRequest(requestId?: string) {
         description: values.description,
         status: values.status || 'pending' as MaintenanceStatus,
         priority: values.priority || 'low',
-        notes: values.notes,
-        assigned_to: values.assigned_to,
-        service_provider_notes: values.service_provider_notes,
-        service_provider_fee: values.service_provider_fee,
-        service_provider_status: values.service_provider_status,
-        completion_report: values.completion_report
+        notes: values.notes || '',
+        assigned_to: values.assigned_to || null,
+        service_provider_notes: values.service_provider_notes || '',
+        service_provider_fee: values.service_provider_fee || 0,
+        service_provider_status: values.service_provider_status || null,
+        completion_report: values.completion_report || ''
       };
+
+      console.log("Transformed data for update:", transformedData);
 
       const { data, error } = await supabase
         .from("maintenance_requests")
