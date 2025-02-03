@@ -1,36 +1,17 @@
 import React from 'react';
-import { MapContainer, TileLayer, Circle } from 'react-leaflet';
-import { LatLngTuple } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 
 interface ServiceAreaMapProps {
-  center: LatLngTuple;
+  center: [number, number];
   radius: number; // radius in meters
 }
 
 export const ServiceAreaMap: React.FC<ServiceAreaMapProps> = ({ center, radius }) => {
   return (
-    <div className="h-[400px] w-full rounded-lg overflow-hidden">
-      <MapContainer
-        center={center}
-        zoom={13}
-        scrollWheelZoom={false}
-        style={{ height: '100%', width: '100%' }}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        <Circle
-          center={center}
-          pathOptions={{
-            color: 'blue',
-            fillColor: 'blue',
-            fillOpacity: 0.2,
-          }}
-          radius={radius}
-        />
-      </MapContainer>
+    <div className="h-[400px] w-full rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+      <p className="text-gray-500 text-center">
+        Service area centered at coordinates: {center[0]}, {center[1]}<br />
+        with a radius of {(radius / 1000).toFixed(1)} km
+      </p>
     </div>
   );
 };
