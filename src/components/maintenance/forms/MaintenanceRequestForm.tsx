@@ -117,7 +117,7 @@ export function MaintenanceRequestForm({
           {/* Service Provider Column */}
           <div className={cn(
             "space-y-4 p-6 rounded-lg border bg-white",
-            userRole !== "service_provider" && "opacity-75"
+            userRole !== "service_provider" && existingRequest?.assigned_to !== form.watch("assigned_to") && "opacity-75"
           )}>
             <h3 className="text-lg font-semibold mb-4">Service Provider Details</h3>
             <div className="space-y-4">
