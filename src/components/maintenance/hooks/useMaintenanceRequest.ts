@@ -79,7 +79,7 @@ export function useMaintenanceRequest(requestId?: string) {
 
       const transformedData = {
         images: imageUrls,
-        scheduled_date: values.scheduled_date?.toISOString(),
+        scheduled_date: values.scheduled_date?.toISOString() || null,
         property_id: values.property_id,
         tenant_id: values.tenant_id,
         title: values.title,
@@ -91,7 +91,7 @@ export function useMaintenanceRequest(requestId?: string) {
         service_provider_notes: values.service_provider_notes || '',
         service_provider_fee: values.service_provider_fee || 0,
         service_provider_status: values.service_provider_status || null,
-        completion_report: values.completion_report || ''
+        completion_report: values.completion_report || null
       };
 
       console.log("Transformed data for creation:", transformedData);
@@ -147,7 +147,7 @@ export function useMaintenanceRequest(requestId?: string) {
 
       const transformedData = {
         images: imageUrls,
-        scheduled_date: values.scheduled_date?.toISOString(),
+        scheduled_date: values.scheduled_date?.toISOString() || null,
         property_id: values.property_id,
         tenant_id: values.tenant_id,
         title: values.title,
@@ -159,7 +159,7 @@ export function useMaintenanceRequest(requestId?: string) {
         service_provider_notes: values.service_provider_notes || '',
         service_provider_fee: values.service_provider_fee || 0,
         service_provider_status: values.service_provider_status || null,
-        completion_report: values.completion_report || ''
+        completion_report: values.completion_report || null
       };
 
       console.log("Transformed data for update:", transformedData);
