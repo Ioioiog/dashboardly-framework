@@ -145,13 +145,12 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
   }, [selectedImage, imageUrls]);
 
   const handleImageClick = (e: React.MouseEvent, imageUrl: string, index: number) => {
-    e.stopPropagation(); // Prevent event bubbling
     setSelectedImage(imageUrl);
     setCurrentImageIndex(index);
   };
 
   const handleDeleteClick = (e: React.MouseEvent, index: number) => {
-    e.stopPropagation(); // Prevent event bubbling
+    e.stopPropagation();
     handleDeleteImage(index);
   };
 
@@ -217,19 +216,21 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                 {imageUrls.map((imageUrl, index) => (
                   <div 
                     key={index} 
-                    className="relative aspect-square group cursor-pointer"
+                    className="relative aspect-square group"
                     onClick={(e) => handleImageClick(e, imageUrl, index)}
                   >
-                    <img
-                      src={imageUrl}
-                      alt={`Uploaded image ${index + 1}`}
-                      className="rounded-lg object-cover w-full h-full hover:opacity-90 transition-opacity"
-                    />
+                    <div className="w-full h-full cursor-pointer">
+                      <img
+                        src={imageUrl}
+                        alt={`Uploaded image ${index + 1}`}
+                        className="rounded-lg object-cover w-full h-full hover:opacity-90 transition-opacity"
+                      />
+                    </div>
                     {!disabled && (
                       <button
                         type="button"
                         onClick={(e) => handleDeleteClick(e, index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20"
                       >
                         <X className="h-4 w-4" />
                       </button>
