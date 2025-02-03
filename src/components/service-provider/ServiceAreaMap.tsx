@@ -1,23 +1,34 @@
-import { MapPin } from 'lucide-react';
+import React from 'react';
+import { MapContainer, TileLayer, Circle } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface ServiceAreaMapProps {
-  areas: string[];
+  center: [number, number];
+  radius: number; // radius in meters
 }
 
-export default function ServiceAreaMap({ areas }: ServiceAreaMapProps) {
-  if (areas.length === 0) return <p>No service areas found.</p>;
-
+export const ServiceAreaMap: React.FC<ServiceAreaMapProps> = ({ center, radius }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-      {areas.map((area, index) => (
-        <div 
-          key={index}
-          className="flex items-center gap-2 p-3 bg-muted rounded-lg"
-        >
-          <MapPin className="h-4 w-4 text-muted-foreground" />
-          <span>{area}</span>
-        </div>
-      ))}
+    <div className="h-[400px] w-full rounded-lg overflow-hidden">
+      <MapContainer
+        center={center}
+        zoom={13}
+        style={{ height: '100%', width: '100%' }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        <Circle
+          center={center}
+          radius={radius}
+          pathOptions={{
+            color: 'blue',
+            fillColor: 'blue',
+            fillOpacity: 0.2,
+          }}
+        />
+      </MapContainer>
     </div>
   );
-}
+};
