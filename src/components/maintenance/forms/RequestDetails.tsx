@@ -32,13 +32,6 @@ export function RequestDetails({
 }: RequestDetailsProps) {
   const { t } = useTranslation();
 
-  const statusOptions = [
-    { value: "pending", label: t("maintenance.status.pending") },
-    { value: "in_progress", label: t("maintenance.status.in_progress") },
-    { value: "completed", label: t("maintenance.status.completed") },
-    { value: "cancelled", label: t("maintenance.status.cancelled") }
-  ];
-
   const priorityOptions = [
     { value: "low", label: t("maintenance.priority.low") },
     { value: "medium", label: t("maintenance.priority.medium") },
@@ -138,37 +131,6 @@ export function RequestDetails({
           </FormItem>
         )}
       />
-
-      {isExistingRequest && (
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("maintenance.form.status")}</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                disabled={userRole !== "landlord"}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("maintenance.form.selectStatus")} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {statusOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
     </div>
   );
 }

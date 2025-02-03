@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 interface ServiceProvider {
   id: string;
@@ -15,13 +16,29 @@ export interface LandlordFieldsProps {
     assigned_to: string | null;
     service_provider_notes: string | null;
     notes: string | null;
+    status?: string;
   };
   onChange: (field: string, value: string | null) => void;
   userRole?: string;
+  isExistingRequest?: boolean;
 }
 
-export function LandlordFields({ serviceProviders, formData, onChange, userRole = "tenant" }: LandlordFieldsProps) {
+export function LandlordFields({ 
+  serviceProviders, 
+  formData, 
+  onChange, 
+  userRole = "tenant",
+  isExistingRequest
+}: LandlordFieldsProps) {
+  const { t } = useTranslation();
   const isLandlord = userRole === "landlord";
+
+  const statusOptions = [
+    { value: "pending", label: t("maintenance.status.pending") },
+    { value: "in_progress", label: t("maintenance.status.in_progress") },
+    { value: "completed", label: t("maintenance.status.completed") },
+    { value: "cancelled", label: t("maintenance.status.cancelled") }
+  ];
 
   const getServiceProviderName = (id: string | null) => {
     if (!id) return "Not assigned";
@@ -31,6 +48,33 @@ export function LandlordFields({ serviceProviders, formData, onChange, userRole 
 
   return (
     <div className="space-y-4">
+      {isExistingRequest && (
+        <div className="space-y-2">
+          <Label>{t("maintenance.form.status")}</Label>
+          {isLandlord ? (
+            <Select
+              value={formData.status || "pending"}
+              onValueChange={(value) => onChange("status", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("maintenance.form.selectStatus")} />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <div className="p-3 bg-gray-50 rounded-md border">
+              {formData.status || "pending"}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <Label>Service Provider</Label>
       </div>
