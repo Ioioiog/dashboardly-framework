@@ -60,36 +60,35 @@ export function MaintenanceRequestForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column - Tenant Information and Images */}
-          <div className="space-y-8">
-            <div className={cn(
-              "p-6 rounded-lg border bg-white shadow-sm",
-              userRole !== "tenant" && "opacity-75"
-            )}>
-              <h3 className="text-lg font-semibold mb-6">Request Details</h3>
-              <RequestDetails
-                form={form}
-                properties={properties}
-                userRole={userRole}
-                isExistingRequest={!!existingRequest}
-              />
-            </div>
-
-            <div className={cn(
-              "p-6 rounded-lg border bg-white shadow-sm",
-              userRole !== "tenant" && "opacity-75"
-            )}>
-              <h3 className="text-lg font-semibold mb-6">Supporting Images</h3>
-              <ImageUpload
-                images={form.watch("images")}
-                onChange={(images) => form.setValue("images", images)}
-                disabled={userRole === "landlord"}
-              />
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Request Details Column */}
+          <div className={cn(
+            "p-6 rounded-lg border bg-white shadow-sm",
+            userRole !== "tenant" && "opacity-75"
+          )}>
+            <h3 className="text-lg font-semibold mb-6">Request Details</h3>
+            <RequestDetails
+              form={form}
+              properties={properties}
+              userRole={userRole}
+              isExistingRequest={!!existingRequest}
+            />
           </div>
 
-          {/* Right Column - Landlord and Service Provider Management */}
+          {/* Supporting Images Column */}
+          <div className={cn(
+            "p-6 rounded-lg border bg-white shadow-sm",
+            userRole !== "tenant" && "opacity-75"
+          )}>
+            <h3 className="text-lg font-semibold mb-6">Supporting Images</h3>
+            <ImageUpload
+              images={form.watch("images")}
+              onChange={(images) => form.setValue("images", images)}
+              disabled={userRole === "landlord"}
+            />
+          </div>
+
+          {/* Management Details Column */}
           <div className="space-y-8">
             <div className={cn(
               "p-6 rounded-lg border bg-white shadow-sm",
