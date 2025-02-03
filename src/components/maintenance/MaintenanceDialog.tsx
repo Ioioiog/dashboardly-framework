@@ -54,6 +54,16 @@ export default function MaintenanceDialog({
     }
   }, [open, userRole, queryClient]);
 
+  // Transform the existing request data to match the form values type
+  const transformedRequest = existingRequest
+    ? {
+        ...existingRequest,
+        scheduled_date: existingRequest.scheduled_date
+          ? new Date(existingRequest.scheduled_date)
+          : undefined,
+      }
+    : undefined;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] w-[1400px] max-h-[90vh] overflow-y-auto">
@@ -65,7 +75,7 @@ export default function MaintenanceDialog({
         <MaintenanceRequestForm
           properties={properties || []}
           serviceProviders={serviceProviders || []}
-          existingRequest={existingRequest}
+          existingRequest={transformedRequest}
           onSubmit={async (data) => {
             // Add tenant_id to the form data
             const formDataWithTenant = {
