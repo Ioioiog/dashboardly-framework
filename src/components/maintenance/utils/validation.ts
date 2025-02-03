@@ -7,14 +7,14 @@ export const MaintenanceRequestSchema = z.object({
   tenant_id: z.string().min(1, "Tenant ID is required"),
   priority: z.enum(["low", "medium", "high"]).default("low"),
   status: z.enum(["pending", "in_progress", "completed", "cancelled"]).default("pending"),
-  notes: z.string().optional(),
-  assigned_to: z.string().optional(),
-  service_provider_notes: z.string().optional(),
+  notes: z.string().nullable().optional(),
+  assigned_to: z.string().nullable().optional(),
+  service_provider_notes: z.string().nullable().optional(),
   images: z.array(z.union([z.string(), z.instanceof(File)])).default([]),
-  scheduled_date: z.date().optional(),
-  service_provider_fee: z.number().optional(),
-  service_provider_status: z.string().optional(),
-  completion_report: z.string().optional()
+  scheduled_date: z.date().nullable().optional(),
+  service_provider_fee: z.number().nullable().optional(),
+  service_provider_status: z.string().nullable().optional(),
+  completion_report: z.string().nullable().optional()
 });
 
 export type MaintenanceRequestFormData = z.infer<typeof MaintenanceRequestSchema>;
