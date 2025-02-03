@@ -2,21 +2,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCallback } from "react";
+import { MaintenanceRequestFormData } from "../utils/validation";
 
 export type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
-
-interface MaintenanceRequest {
-  title: string;
-  description: string;
-  property_id: string;
-  priority: string;
-  status: MaintenanceStatus;
-  notes: string;
-  assigned_to: string | null;
-  service_provider_notes: string;
-  images: string[];
-  tenant_id: string;
-}
 
 export function useMaintenanceRequest(requestId?: string) {
   const { toast } = useToast();
@@ -75,12 +63,8 @@ export function useMaintenanceRequest(requestId?: string) {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (values: any) => {
-      // Validate required fields
-      if (!values.property_id || !values.tenant_id || !values.title || !values.description) {
-        console.error('Missing required fields:', { values });
-        throw new Error("Required fields are missing");
-      }
+    mutationFn: async (values: MaintenanceRequestFormData) => {
+      console.log("Creating maintenance request with data:", values);
 
       let imageUrls: string[] = [];
       if (values.images?.length > 0 && values.images[0] instanceof File) {
@@ -88,26 +72,18 @@ export function useMaintenanceRequest(requestId?: string) {
         imageUrls = await handleImageUpload(values.images as File[]);
       }
 
-      const newRequest: MaintenanceRequest = {
-        title: values.title,
-        description: values.description,
-        property_id: values.property_id,
-        priority: values.priority,
-        status: values.status,
-        notes: values.notes || "",
-        assigned_to: values.assigned_to || null,
-        service_provider_notes: values.service_provider_notes || "",
-        images: imageUrls,
-        tenant_id: values.tenant_id,
-      };
-
-      console.log("Creating maintenance request with data:", newRequest);
-
       const { data, error } = await supabase
         .from("maintenance_requests")
-        .insert(newRequest)
+        .insert({
+          ...values,
+          images: imageUrls.length > 0 ? imageUrls : values.images,
+        })
         .select();
-      if (error) throw error;
+
+      if (error) {
+        console.error("Error creating maintenance request:", error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
@@ -128,17 +104,12 @@ export function useMaintenanceRequest(requestId?: string) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (values: any) => {
+    mutationFn: async (values: MaintenanceRequestFormData) => {
       if (!requestId) {
-        console.error('No request ID provided for update');
         throw new Error("Request ID is required for updates");
       }
 
-      // Validate required fields
-      if (!values.property_id || !values.tenant_id || !values.title || !values.description) {
-        console.error('Missing required fields:', { values });
-        throw new Error("Required fields are missing");
-      }
+      console.log("Updating maintenance request with data:", values);
 
       let imageUrls: string[] = values.images as string[];
       if (values.images?.length > 0 && values.images[0] instanceof File) {
@@ -146,27 +117,19 @@ export function useMaintenanceRequest(requestId?: string) {
         imageUrls = await handleImageUpload(values.images as File[]);
       }
 
-      const updatedRequest: MaintenanceRequest = {
-        title: values.title,
-        description: values.description,
-        property_id: values.property_id,
-        priority: values.priority,
-        status: values.status,
-        notes: values.notes || "",
-        assigned_to: values.assigned_to || null,
-        service_provider_notes: values.service_provider_notes || "",
-        images: imageUrls,
-        tenant_id: values.tenant_id,
-      };
-
-      console.log("Updating maintenance request with data:", updatedRequest);
-
       const { data, error } = await supabase
         .from("maintenance_requests")
-        .update(updatedRequest)
+        .update({
+          ...values,
+          images: imageUrls,
+        })
         .eq("id", requestId)
         .select();
-      if (error) throw error;
+
+      if (error) {
+        console.error("Error updating maintenance request:", error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {

@@ -8,6 +8,7 @@ import { useAuthState } from "@/hooks/useAuthState";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { validateMaintenanceRequest } from "./utils/validation";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -28,7 +29,6 @@ export default function MaintenanceDialog({
   const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
   const { existingRequest, createMutation, updateMutation } = useMaintenanceRequest(requestId);
 
-  // Add service providers query with automatic refresh after creation
   const { data: serviceProviders } = useQuery({
     queryKey: ["service-providers"],
     enabled: userRole === "landlord",
@@ -49,14 +49,12 @@ export default function MaintenanceDialog({
     },
   });
 
-  // Refresh service providers list when dialog opens
   useEffect(() => {
     if (open && userRole === "landlord") {
       queryClient.invalidateQueries({ queryKey: ["service-providers"] });
     }
   }, [open, userRole, queryClient]);
 
-  // Transform the existing request data to match the form values type
   const transformedRequest = existingRequest
     ? {
         ...existingRequest,
@@ -66,20 +64,49 @@ export default function MaintenanceDialog({
       }
     : undefined;
 
-  const validateFormData = (formData: any) => {
-    const requiredFields = ['property_id', 'title', 'description'];
-    const missingFields = requiredFields.filter(field => !formData[field]);
+  const handleSubmit = async (formData: any) => {
+    console.log("Form submitted with data:", formData);
     
-    if (missingFields.length > 0) {
-      console.error('Missing required fields:', missingFields);
+    try {
+      const processedData = {
+        ...existingRequest,
+        ...formData,
+        tenant_id: currentUserId,
+        scheduled_date: formData.scheduled_date?.toISOString(),
+        property_id: formData.property_id || existingRequest?.property_id,
+        title: formData.title || existingRequest?.title,
+        description: formData.description || existingRequest?.description,
+        status: formData.status || existingRequest?.status || "pending",
+        priority: formData.priority || existingRequest?.priority || "low",
+      };
+      
+      console.log("Processing form data:", processedData);
+
+      // Validate the processed data
+      const validatedData = validateMaintenanceRequest(processedData);
+      console.log("Validated data:", validatedData);
+
+      if (requestId) {
+        console.log("Updating maintenance request:", validatedData);
+        await updateMutation.mutateAsync(validatedData);
+      } else {
+        console.log("Creating maintenance request:", validatedData);
+        await createMutation.mutateAsync(validatedData);
+      }
+
       toast({
-        title: "Validation Error",
-        description: `Please fill in all required fields: ${missingFields.join(', ')}`,
+        title: "Success",
+        description: requestId ? "Maintenance request updated" : "Maintenance request created",
+      });
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save maintenance request",
         variant: "destructive"
       });
-      return false;
     }
-    return true;
   };
 
   return (
@@ -94,49 +121,7 @@ export default function MaintenanceDialog({
           properties={properties || []}
           serviceProviders={serviceProviders || []}
           existingRequest={transformedRequest}
-          onSubmit={async (data) => {
-            console.log("Form submitted with data:", data);
-            
-            const formDataWithTenant = {
-              ...existingRequest, // Preserve existing data
-              ...data, // Override with new form data
-              tenant_id: currentUserId,
-              scheduled_date: data.scheduled_date?.toISOString(),
-              property_id: data.property_id || existingRequest?.property_id,
-              title: data.title || existingRequest?.title,
-              description: data.description || existingRequest?.description,
-              status: data.status || existingRequest?.status || "pending",
-              priority: data.priority || existingRequest?.priority || "low",
-            };
-            
-            console.log("Processing form data:", formDataWithTenant);
-
-            if (!validateFormData(formDataWithTenant)) {
-              return;
-            }
-            
-            try {
-              if (requestId) {
-                console.log("Updating maintenance request:", formDataWithTenant);
-                await updateMutation.mutateAsync(formDataWithTenant);
-              } else {
-                console.log("Creating maintenance request:", formDataWithTenant);
-                await createMutation.mutateAsync(formDataWithTenant);
-              }
-              toast({
-                title: "Success",
-                description: requestId ? "Maintenance request updated" : "Maintenance request created",
-              });
-              onOpenChange(false);
-            } catch (error) {
-              console.error("Error submitting form:", error);
-              toast({
-                title: "Error",
-                description: "Failed to save maintenance request. Please try again.",
-                variant: "destructive"
-              });
-            }
-          }}
+          onSubmit={handleSubmit}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
           userRole={userRole!}
         />
