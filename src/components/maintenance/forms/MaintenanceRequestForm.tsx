@@ -90,11 +90,13 @@ export function MaintenanceRequestForm({
               formData={{
                 assigned_to: form.watch("assigned_to"),
                 service_provider_notes: form.watch("service_provider_notes"),
-                notes: form.watch("notes")
+                notes: form.watch("notes"),
+                status: form.watch("status")
               }}
               onChange={(field, value) => form.setValue(field as any, value)}
               serviceProviders={serviceProviders || []}
               userRole={userRole}
+              isExistingRequest={!!existingRequest}
             />
           </div>
 
