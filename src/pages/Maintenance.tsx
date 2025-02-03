@@ -155,7 +155,7 @@ export default function Maintenance() {
                 {t("maintenance.description")}
               </p>
             </div>
-            {userRole !== "service_provider" && (
+            {userRole === "tenant" && (
               <Button 
                 onClick={() => setIsDialogOpen(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-2"
@@ -166,28 +166,32 @@ export default function Maintenance() {
             )}
           </div>
 
-          <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto">
-            {navigationItems.map((item) => (
-              <Button
-                key={item.id}
-                variant={activeSection === item.id ? 'default' : 'ghost'}
-                className={cn(
-                  "flex-shrink-0 gap-2",
-                  activeSection === item.id && "bg-primary text-primary-foreground"
-                )}
-                onClick={() => setActiveSection(item.id)}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </Button>
-            ))}
-          </div>
+          {userRole !== "tenant" && (
+            <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto">
+              {navigationItems.map((item) => (
+                <Button
+                  key={item.id}
+                  variant={activeSection === item.id ? 'default' : 'ghost'}
+                  className={cn(
+                    "flex-shrink-0 gap-2",
+                    activeSection === item.id && "bg-primary text-primary-foreground"
+                  )}
+                  onClick={() => setActiveSection(item.id)}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Button>
+              ))}
+            </div>
+          )}
 
           {activeSection === "requests" ? (
             <>
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
-              </div>
+              {userRole !== "tenant" && (
+                <div className="bg-white rounded-lg p-6 shadow-sm">
+                  <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
+                </div>
+              )}
 
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold">
@@ -243,7 +247,7 @@ export default function Maintenance() {
                 )}
               </div>
             </>
-          ) : userRole !== "service_provider" && (
+          ) : userRole !== "tenant" && userRole !== "service_provider" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">
