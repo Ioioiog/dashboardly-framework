@@ -7,6 +7,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { useAuthState } from "@/hooks/useAuthState";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -22,6 +23,7 @@ export default function MaintenanceDialog({
   const { userRole } = useUserRole();
   const { currentUserId } = useAuthState();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
   const { existingRequest, createMutation, updateMutation } = useMaintenanceRequest(requestId);
@@ -64,6 +66,22 @@ export default function MaintenanceDialog({
       }
     : undefined;
 
+  const validateFormData = (formData: any) => {
+    const requiredFields = ['property_id', 'title', 'description'];
+    const missingFields = requiredFields.filter(field => !formData[field]);
+    
+    if (missingFields.length > 0) {
+      console.error('Missing required fields:', missingFields);
+      toast({
+        title: "Validation Error",
+        description: `Please fill in all required fields: ${missingFields.join(', ')}`,
+        variant: "destructive"
+      });
+      return false;
+    }
+    return true;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] w-[1400px] max-h-[90vh] overflow-y-auto">
@@ -77,28 +95,47 @@ export default function MaintenanceDialog({
           serviceProviders={serviceProviders || []}
           existingRequest={transformedRequest}
           onSubmit={async (data) => {
-            // Add tenant_id and preserve existing fields for update
+            console.log("Form submitted with data:", data);
+            
             const formDataWithTenant = {
               ...existingRequest, // Preserve existing data
               ...data, // Override with new form data
               tenant_id: currentUserId,
-              // Convert Date object back to ISO string for the database
               scheduled_date: data.scheduled_date?.toISOString(),
-              // Ensure required fields are present
               property_id: data.property_id || existingRequest?.property_id,
               title: data.title || existingRequest?.title,
               description: data.description || existingRequest?.description,
               status: data.status || existingRequest?.status || "pending",
+              priority: data.priority || existingRequest?.priority || "low",
             };
             
-            console.log("Submitting form data:", formDataWithTenant);
-            
-            if (requestId) {
-              await updateMutation.mutateAsync(formDataWithTenant);
-            } else {
-              await createMutation.mutateAsync(formDataWithTenant);
+            console.log("Processing form data:", formDataWithTenant);
+
+            if (!validateFormData(formDataWithTenant)) {
+              return;
             }
-            onOpenChange(false);
+            
+            try {
+              if (requestId) {
+                console.log("Updating maintenance request:", formDataWithTenant);
+                await updateMutation.mutateAsync(formDataWithTenant);
+              } else {
+                console.log("Creating maintenance request:", formDataWithTenant);
+                await createMutation.mutateAsync(formDataWithTenant);
+              }
+              toast({
+                title: "Success",
+                description: requestId ? "Maintenance request updated" : "Maintenance request created",
+              });
+              onOpenChange(false);
+            } catch (error) {
+              console.error("Error submitting form:", error);
+              toast({
+                title: "Error",
+                description: "Failed to save maintenance request. Please try again.",
+                variant: "destructive"
+              });
+            }
           }}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
           userRole={userRole!}
