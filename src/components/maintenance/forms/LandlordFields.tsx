@@ -43,8 +43,13 @@ export function LandlordFields({
   const getServiceProviderName = (id: string | null) => {
     if (!id) return "Not assigned";
     const provider = serviceProviders.find(p => p.id === id);
-    return provider ? `${provider.first_name} ${provider.last_name}` : "Not assigned";
+    if (!provider) return "Not assigned";
+    return `${provider.first_name || ''} ${provider.last_name || ''}`.trim() || "Not assigned";
   };
+
+  console.log("Service Providers:", serviceProviders);
+  console.log("Assigned To:", formData.assigned_to);
+  console.log("Found Provider:", serviceProviders.find(p => p.id === formData.assigned_to));
 
   return (
     <div className="space-y-4">
@@ -88,6 +93,7 @@ export function LandlordFields({
             <SelectValue placeholder="Select a service provider" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="">Not assigned</SelectItem>
             {serviceProviders?.map((provider) => (
               <SelectItem key={provider.id} value={provider.id}>
                 {provider.first_name} {provider.last_name}
