@@ -34,6 +34,10 @@ export default function MaintenanceList({
 }: MaintenanceListProps) {
   const { t } = useTranslation();
 
+  // Add detailed logging
+  console.log('MaintenanceList - Received requests:', requests);
+  console.log('MaintenanceList - Loading state:', isLoading);
+
   if (isLoading) {
     return <div>Loading...</div>;
   }

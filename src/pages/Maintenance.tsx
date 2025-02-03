@@ -94,7 +94,7 @@ export default function Maintenance() {
         throw error;
       }
       
-      console.log("Fetched maintenance requests:", data);
+      console.log("Raw maintenance requests data:", data);
       return data;
     },
   });
