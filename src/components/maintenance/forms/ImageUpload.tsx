@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { X } from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 const MAX_IMAGES = 3;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -17,6 +18,7 @@ interface ImageUploadProps {
 
 export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   const validateImage = (file: File): string | null => {
@@ -117,18 +119,74 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     onChange(newImages);
   };
 
+  const handlePreviousImage = () => {
+    setCurrentImageIndex((prev) => {
+      const newIndex = prev - 1;
+      if (newIndex < 0) return imageUrls.length - 1;
+      return newIndex;
+    });
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => {
+      const newIndex = prev + 1;
+      if (newIndex >= imageUrls.length) return 0;
+      return newIndex;
+    });
+  };
+
+  useEffect(() => {
+    if (selectedImage) {
+      const index = imageUrls.findIndex(url => url === selectedImage);
+      if (index !== -1) {
+        setCurrentImageIndex(index);
+      }
+    }
+  }, [selectedImage, imageUrls]);
+
   return (
     <>
-      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogTitle>Image Preview</DialogTitle>
-          {selectedImage && (
-            <img
-              src={selectedImage}
-              alt="Maintenance request"
-              className="w-full h-auto rounded-lg"
-            />
-          )}
+      <Dialog 
+        open={!!selectedImage} 
+        onOpenChange={(open) => {
+          if (!open) setSelectedImage(null);
+        }}
+      >
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/90">
+          <DialogTitle className="p-4 text-white">
+            Image Preview ({currentImageIndex + 1} of {imageUrls.length})
+          </DialogTitle>
+          <div className="relative flex items-center justify-center min-h-[300px] md:min-h-[500px]">
+            {selectedImage && (
+              <>
+                <img
+                  src={selectedImage}
+                  alt="Maintenance request"
+                  className="max-h-[70vh] object-contain"
+                />
+                {imageUrls.length > 1 && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute left-2 text-white hover:bg-white/20"
+                      onClick={handlePreviousImage}
+                    >
+                      <ChevronLeft className="h-8 w-8" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 text-white hover:bg-white/20"
+                      onClick={handleNextImage}
+                    >
+                      <ChevronRight className="h-8 w-8" />
+                    </Button>
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -154,7 +212,10 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                       src={imageUrl}
                       alt={`Uploaded image ${index + 1}`}
                       className="rounded-lg object-cover w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => setSelectedImage(imageUrl)}
+                      onClick={() => {
+                        setSelectedImage(imageUrl);
+                        setCurrentImageIndex(index);
+                      }}
                     />
                     {!disabled && (
                       <button
