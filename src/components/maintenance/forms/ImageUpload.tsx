@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
@@ -144,7 +144,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     }
   }, [selectedImage, imageUrls]);
 
-  const handleImageClick = (e: React.MouseEvent, imageUrl: string, index: number) => {
+  const handleImageClick = (imageUrl: string, index: number) => {
     setSelectedImage(imageUrl);
     setCurrentImageIndex(index);
   };
@@ -217,14 +217,25 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                   <div 
                     key={index} 
                     className="relative aspect-square group"
-                    onClick={(e) => handleImageClick(e, imageUrl, index)}
                   >
-                    <div className="w-full h-full cursor-pointer">
+                    <div className="w-full h-full">
                       <img
                         src={imageUrl}
                         alt={`Uploaded image ${index + 1}`}
-                        className="rounded-lg object-cover w-full h-full hover:opacity-90 transition-opacity"
+                        className="rounded-lg object-cover w-full h-full"
                       />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          className="mr-2"
+                          onClick={() => handleImageClick(imageUrl, index)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                      </div>
                     </div>
                     {!disabled && (
                       <button
