@@ -77,13 +77,21 @@ export default function MaintenanceDialog({
           serviceProviders={serviceProviders || []}
           existingRequest={transformedRequest}
           onSubmit={async (data) => {
-            // Add tenant_id to the form data
+            // Add tenant_id and preserve existing fields for update
             const formDataWithTenant = {
-              ...data,
+              ...existingRequest, // Preserve existing data
+              ...data, // Override with new form data
               tenant_id: currentUserId,
               // Convert Date object back to ISO string for the database
               scheduled_date: data.scheduled_date?.toISOString(),
+              // Ensure required fields are present
+              property_id: data.property_id || existingRequest?.property_id,
+              title: data.title || existingRequest?.title,
+              description: data.description || existingRequest?.description,
+              status: data.status || existingRequest?.status || "pending",
             };
+            
+            console.log("Submitting form data:", formDataWithTenant);
             
             if (requestId) {
               await updateMutation.mutateAsync(formDataWithTenant);
