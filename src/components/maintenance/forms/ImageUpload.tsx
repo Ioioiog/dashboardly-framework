@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { X, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Eye, Upload } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
@@ -163,8 +163,16 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
         }}
       >
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/90">
-          <DialogTitle className="p-4 text-white">
-            Image Preview ({currentImageIndex + 1} of {imageUrls.length})
+          <DialogTitle className="p-4 text-white flex items-center justify-between">
+            <span>Image Preview ({currentImageIndex + 1} of {imageUrls.length})</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20"
+              onClick={() => setSelectedImage(null)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </DialogTitle>
           <div className="relative flex items-center justify-center min-h-[300px] md:min-h-[500px]">
             {selectedImage && (
@@ -204,27 +212,33 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
         <FormLabel>Images (Max {MAX_IMAGES})</FormLabel>
         <FormControl>
           <div className="space-y-4">
-            <Input
-              type="file"
-              accept={ALLOWED_IMAGE_TYPES.join(',')}
-              multiple
-              disabled={disabled || imageUrls.length >= MAX_IMAGES}
-              onChange={handleImageUpload}
-            />
+            <div className="relative">
+              <Input
+                type="file"
+                accept={ALLOWED_IMAGE_TYPES.join(',')}
+                multiple
+                disabled={disabled || imageUrls.length >= MAX_IMAGES}
+                onChange={handleImageUpload}
+                className="cursor-pointer file:cursor-pointer file:border-0 file:bg-blue-500 file:text-white file:px-4 file:py-2 file:mr-4 file:rounded-md hover:file:bg-blue-600 transition-colors"
+              />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                <Upload className="h-4 w-4" />
+              </div>
+            </div>
             {imageUrls.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                 {imageUrls.map((imageUrl, index) => (
                   <div 
                     key={index} 
-                    className="relative aspect-square group"
+                    className="relative aspect-square group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div className="w-full h-full">
                       <img
                         src={imageUrl}
                         alt={`Uploaded image ${index + 1}`}
-                        className="rounded-lg object-cover w-full h-full"
+                        className="rounded-lg object-cover w-full h-full transition-transform group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Button
                           type="button"
                           variant="secondary"
