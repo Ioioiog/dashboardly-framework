@@ -67,6 +67,7 @@ export default function Maintenance() {
     queryFn: async () => {
       console.log("Fetching maintenance requests with filters:", filters);
       console.log("Current user role:", userRole);
+      console.log("Current user ID:", currentUserId);
       
       let query = supabase
         .from("maintenance_requests")
@@ -79,8 +80,10 @@ export default function Maintenance() {
           )
         `);
 
-      // Filter based on user role
-      if (userRole === "service_provider") {
+      // Filter based on user role and ID
+      if (userRole === "tenant") {
+        query = query.eq("tenant_id", currentUserId);
+      } else if (userRole === "service_provider") {
         query = query.eq("assigned_to", currentUserId);
       }
 

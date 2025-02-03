@@ -42,6 +42,14 @@ export default function MaintenanceList({
     return <div>Loading...</div>;
   }
 
+  if (!requests || requests.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        {t("maintenance.noRequests")}
+      </div>
+    );
+  }
+
   const getStatusVariant = (status: MaintenanceRequest['status']) => {
     switch (status) {
       case 'completed':
