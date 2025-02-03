@@ -66,18 +66,30 @@ export function useMaintenanceRequest(requestId?: string) {
     mutationFn: async (values: MaintenanceRequestFormData) => {
       console.log("Creating maintenance request with data:", values);
 
+      // Handle image uploads if there are any new files
       let imageUrls: string[] = [];
-      if (values.images?.length > 0 && values.images[0] instanceof File) {
-        console.log('Processing images:', values.images);
-        imageUrls = await handleImageUpload(values.images as File[]);
+      if (values.images?.length > 0) {
+        const filesToUpload = values.images.filter((img): img is File => img instanceof File);
+        const existingUrls = values.images.filter((img): img is string => typeof img === 'string');
+        
+        if (filesToUpload.length > 0) {
+          const uploadedUrls = await handleImageUpload(filesToUpload);
+          imageUrls = [...existingUrls, ...uploadedUrls];
+        } else {
+          imageUrls = existingUrls;
+        }
       }
+
+      // Transform the data for Supabase
+      const transformedData = {
+        ...values,
+        images: imageUrls,
+        scheduled_date: values.scheduled_date?.toISOString(),
+      };
 
       const { data, error } = await supabase
         .from("maintenance_requests")
-        .insert({
-          ...values,
-          images: imageUrls.length > 0 ? imageUrls : values.images,
-        })
+        .insert(transformedData)
         .select();
 
       if (error) {
@@ -111,18 +123,30 @@ export function useMaintenanceRequest(requestId?: string) {
 
       console.log("Updating maintenance request with data:", values);
 
-      let imageUrls: string[] = values.images as string[];
-      if (values.images?.length > 0 && values.images[0] instanceof File) {
-        console.log('Processing new images for update:', values.images);
-        imageUrls = await handleImageUpload(values.images as File[]);
+      // Handle image uploads if there are any new files
+      let imageUrls: string[] = [];
+      if (values.images?.length > 0) {
+        const filesToUpload = values.images.filter((img): img is File => img instanceof File);
+        const existingUrls = values.images.filter((img): img is string => typeof img === 'string');
+        
+        if (filesToUpload.length > 0) {
+          const uploadedUrls = await handleImageUpload(filesToUpload);
+          imageUrls = [...existingUrls, ...uploadedUrls];
+        } else {
+          imageUrls = existingUrls;
+        }
       }
+
+      // Transform the data for Supabase
+      const transformedData = {
+        ...values,
+        images: imageUrls,
+        scheduled_date: values.scheduled_date?.toISOString(),
+      };
 
       const { data, error } = await supabase
         .from("maintenance_requests")
-        .update({
-          ...values,
-          images: imageUrls,
-        })
+        .update(transformedData)
         .eq("id", requestId)
         .select();
 
