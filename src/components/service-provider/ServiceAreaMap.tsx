@@ -1,9 +1,10 @@
 import React from 'react';
 import { MapContainer, TileLayer, Circle } from 'react-leaflet';
+import { LatLngTuple } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 interface ServiceAreaMapProps {
-  center: [number, number];
+  center: LatLngTuple;
   radius: number; // radius in meters
 }
 
@@ -13,6 +14,7 @@ export const ServiceAreaMap: React.FC<ServiceAreaMapProps> = ({ center, radius }
       <MapContainer
         center={center}
         zoom={13}
+        scrollWheelZoom={false}
         style={{ height: '100%', width: '100%' }}
       >
         <TileLayer
@@ -21,12 +23,12 @@ export const ServiceAreaMap: React.FC<ServiceAreaMapProps> = ({ center, radius }
         />
         <Circle
           center={center}
-          radius={radius}
           pathOptions={{
             color: 'blue',
             fillColor: 'blue',
             fillOpacity: 0.2,
           }}
+          radius={radius}
         />
       </MapContainer>
     </div>
