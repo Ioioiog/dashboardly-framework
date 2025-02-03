@@ -242,11 +242,11 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                         <Button
                           type="button"
                           variant="secondary"
-                          size="sm"
-                          className="mr-2"
+                          size="lg"
+                          className="mr-2 px-6"
                           onClick={() => handleImageClick(imageUrl, index)}
                         >
-                          <Eye className="h-4 w-4 mr-1" />
+                          <Eye className="h-5 w-5 mr-2" />
                           View
                         </Button>
                       </div>
