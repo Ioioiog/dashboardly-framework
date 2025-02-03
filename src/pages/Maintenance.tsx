@@ -63,7 +63,7 @@ export default function Maintenance() {
   }, [queryClient]);
 
   const { data: maintenanceRequests, isLoading } = useQuery({
-    queryKey: ["maintenance-requests", filters],
+    queryKey: ["maintenance-requests", filters, currentUserId],
     queryFn: async () => {
       console.log("Fetching maintenance requests with filters:", filters);
       console.log("Current user role:", userRole);
@@ -82,6 +82,7 @@ export default function Maintenance() {
 
       // Filter based on user role and ID
       if (userRole === "tenant") {
+        console.log("Adding tenant filter for ID:", currentUserId);
         query = query.eq("tenant_id", currentUserId);
       } else if (userRole === "service_provider") {
         query = query.eq("assigned_to", currentUserId);
@@ -214,10 +215,10 @@ export default function Maintenance() {
                       <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                     </div>
                   </Card>
-                ) : activeRequests.length > 0 ? (
+                ) : maintenanceRequests?.filter(request => request.status !== "completed").length > 0 ? (
                   <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                     <MaintenanceList
-                      requests={activeRequests}
+                      requests={maintenanceRequests.filter(request => request.status !== "completed")}
                       isLoading={false}
                       onRequestClick={handleRequestClick}
                     />
@@ -241,10 +242,10 @@ export default function Maintenance() {
                       <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                     </div>
                   </Card>
-                ) : completedRequests.length > 0 ? (
+                ) : maintenanceRequests?.filter(request => request.status === "completed").length > 0 ? (
                   <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                     <MaintenanceList
-                      requests={completedRequests}
+                      requests={maintenanceRequests.filter(request => request.status === "completed")}
                       isLoading={false}
                       onRequestClick={handleRequestClick}
                     />
