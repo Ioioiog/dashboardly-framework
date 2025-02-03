@@ -12,6 +12,8 @@ import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { RequestStatusTimeline } from "./sections/RequestStatusTimeline";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Edit } from "lucide-react";
 
 interface MaintenanceRequest {
   id: string;
@@ -86,8 +88,7 @@ export default function MaintenanceList({
       {requests.map((request) => (
         <Card 
           key={request.id}
-          className={`p-6 ${onRequestClick ? "cursor-pointer hover:bg-gray-50" : ""}`}
-          onClick={() => onRequestClick?.(request.id)}
+          className="p-6"
         >
           <div className="space-y-4">
             <div className="flex justify-between items-start">
@@ -95,13 +96,25 @@ export default function MaintenanceList({
                 <h3 className="text-lg font-semibold">{request.title}</h3>
                 <p className="text-sm text-gray-500">#{request.id.slice(0, 8)}</p>
               </div>
-              <div className="flex space-x-2">
-                <Badge variant={getStatusVariant(request.status)}>
-                  {t(`maintenance.status.${request.status}`)}
-                </Badge>
-                <Badge variant={getPriorityVariant(request.priority)}>
-                  {t(`maintenance.priority.${request.priority}`)}
-                </Badge>
+              <div className="flex items-center space-x-4">
+                <div className="flex space-x-2">
+                  <Badge variant={getStatusVariant(request.status)}>
+                    {t(`maintenance.status.${request.status}`)}
+                  </Badge>
+                  <Badge variant={getPriorityVariant(request.priority)}>
+                    {t(`maintenance.priority.${request.priority}`)}
+                  </Badge>
+                </div>
+                {onRequestClick && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onRequestClick(request.id)}
+                    className="ml-2"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
 
