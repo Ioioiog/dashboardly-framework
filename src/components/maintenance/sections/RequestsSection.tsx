@@ -10,8 +10,10 @@ interface MaintenanceRequest {
   status: "pending" | "in_progress" | "completed" | "cancelled";
   priority: string;
   created_at: string;
+  updated_at: string;
   property: { name: string };
   tenant: { first_name: string; last_name: string };
+  description: string;
 }
 
 interface RequestsSectionProps {
@@ -44,7 +46,7 @@ export function RequestsSection({
           </div>
         </Card>
       ) : requests.length > 0 ? (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="space-y-4">
           <MaintenanceList
             requests={requests}
             isLoading={false}

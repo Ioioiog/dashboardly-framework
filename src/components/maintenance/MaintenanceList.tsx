@@ -10,6 +10,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import { RequestStatusTimeline } from "./sections/RequestStatusTimeline";
+import { Card } from "@/components/ui/card";
 
 interface MaintenanceRequest {
   id: string;
@@ -17,8 +19,10 @@ interface MaintenanceRequest {
   status: "pending" | "in_progress" | "completed" | "cancelled";
   priority: string;
   created_at: string;
+  updated_at: string;
   property: { name: string };
   tenant: { first_name: string; last_name: string };
+  description: string;
 }
 
 interface MaintenanceListProps {
@@ -34,7 +38,6 @@ export default function MaintenanceList({
 }: MaintenanceListProps) {
   const { t } = useTranslation();
 
-  // Add detailed logging
   console.log('MaintenanceList - Received requests:', requests);
   console.log('MaintenanceList - Loading state:', isLoading);
 
@@ -79,41 +82,43 @@ export default function MaintenanceList({
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t("maintenance.ticket")}</TableHead>
-          <TableHead>{t("maintenance.property")}</TableHead>
-          <TableHead>{t("maintenance.title")}</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Priority</TableHead>
-          <TableHead>{t("maintenance.created")}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {requests.map((request) => (
-          <TableRow 
-            key={request.id}
-            className={onRequestClick ? "cursor-pointer hover:bg-gray-50" : ""}
-            onClick={() => onRequestClick?.(request.id)}
-          >
-            <TableCell className="font-medium">#{request.id.slice(0, 8)}</TableCell>
-            <TableCell>{request.property.name}</TableCell>
-            <TableCell>{request.title}</TableCell>
-            <TableCell>
-              <Badge variant={getStatusVariant(request.status)}>
-                {t(`maintenance.status.${request.status}`)}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant={getPriorityVariant(request.priority)}>
-                {t(`maintenance.priority.${request.priority}`)}
-              </Badge>
-            </TableCell>
-            <TableCell>{format(new Date(request.created_at), "PPP")}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <div className="space-y-4">
+      {requests.map((request) => (
+        <Card 
+          key={request.id}
+          className={`p-6 ${onRequestClick ? "cursor-pointer hover:bg-gray-50" : ""}`}
+          onClick={() => onRequestClick?.(request.id)}
+        >
+          <div className="space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-semibold">{request.title}</h3>
+                <p className="text-sm text-gray-500">#{request.id.slice(0, 8)}</p>
+              </div>
+              <div className="flex space-x-2">
+                <Badge variant={getStatusVariant(request.status)}>
+                  {t(`maintenance.status.${request.status}`)}
+                </Badge>
+                <Badge variant={getPriorityVariant(request.priority)}>
+                  {t(`maintenance.priority.${request.priority}`)}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="text-sm text-gray-600">
+              <p><strong>{t("maintenance.property")}:</strong> {request.property.name}</p>
+              <p><strong>{t("maintenance.tenant")}:</strong> {request.tenant.first_name} {request.tenant.last_name}</p>
+              <p className="mt-2">{request.description}</p>
+            </div>
+
+            <RequestStatusTimeline 
+              status={request.status}
+              createdAt={request.created_at}
+              updatedAt={request.updated_at}
+            />
+          </div>
+        </Card>
+      ))}
+    </div>
   );
 }
