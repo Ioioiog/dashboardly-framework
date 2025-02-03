@@ -293,6 +293,72 @@ export type Database = {
           },
         ]
       }
+      maintenance_request_chats: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean | null
+          receiver_id: string | null
+          request_id: string | null
+          sender_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean | null
+          receiver_id?: string | null
+          request_id?: string | null
+          sender_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean | null
+          receiver_id?: string | null
+          request_id?: string | null
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_request_chats_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_request_chats_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_details"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "maintenance_request_chats_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_request_chats_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_request_chats_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_details"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       maintenance_request_history: {
         Row: {
           description: string
@@ -343,18 +409,24 @@ export type Database = {
       maintenance_requests: {
         Row: {
           assigned_to: string | null
+          completion_date: string | null
+          completion_report: string | null
           created_at: string
           description: string
           id: string
           images: string[] | null
           issue_type: string | null
           notes: string | null
+          payment_amount: number | null
+          payment_status: string | null
           priority: string | null
           property_id: string
           read_by_landlord: boolean | null
           read_by_tenant: boolean | null
+          scheduled_date: string | null
           service_provider_fee: number | null
           service_provider_notes: string | null
+          service_provider_status: string | null
           status: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id: string
           title: string
@@ -362,18 +434,24 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          completion_date?: string | null
+          completion_report?: string | null
           created_at?: string
           description: string
           id?: string
           images?: string[] | null
           issue_type?: string | null
           notes?: string | null
+          payment_amount?: number | null
+          payment_status?: string | null
           priority?: string | null
           property_id: string
           read_by_landlord?: boolean | null
           read_by_tenant?: boolean | null
+          scheduled_date?: string | null
           service_provider_fee?: number | null
           service_provider_notes?: string | null
+          service_provider_status?: string | null
           status?: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id: string
           title: string
@@ -381,18 +459,24 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          completion_date?: string | null
+          completion_report?: string | null
           created_at?: string
           description?: string
           id?: string
           images?: string[] | null
           issue_type?: string | null
           notes?: string | null
+          payment_amount?: number | null
+          payment_status?: string | null
           priority?: string | null
           property_id?: string
           read_by_landlord?: boolean | null
           read_by_tenant?: boolean | null
+          scheduled_date?: string | null
           service_provider_fee?: number | null
           service_provider_notes?: string | null
+          service_provider_status?: string | null
           status?: Database["public"]["Enums"]["maintenance_request_status"]
           tenant_id?: string
           title?: string
@@ -693,6 +777,7 @@ export type Database = {
           id: string
           invoice_info: Json | null
           last_name: string | null
+          notification_preferences: Json | null
           phone: string | null
           role: string
           settings: Json | null
@@ -710,6 +795,7 @@ export type Database = {
           id: string
           invoice_info?: Json | null
           last_name?: string | null
+          notification_preferences?: Json | null
           phone?: string | null
           role?: string
           settings?: Json | null
@@ -727,6 +813,7 @@ export type Database = {
           id?: string
           invoice_info?: Json | null
           last_name?: string | null
+          notification_preferences?: Json | null
           phone?: string | null
           role?: string
           settings?: Json | null
@@ -812,6 +899,51 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "utility_provider_credentials"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_provider_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number | null
+          end_time: string | null
+          id: string
+          provider_id: string | null
+          start_time: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week?: number | null
+          end_time?: string | null
+          id?: string
+          provider_id?: string | null
+          start_time?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number | null
+          end_time?: string | null
+          id?: string
+          provider_id?: string | null
+          start_time?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_provider_availability_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_provider_availability_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_details"
+            referencedColumns: ["tenant_id"]
           },
         ]
       }
