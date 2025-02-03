@@ -80,26 +80,26 @@ export function MaintenanceRequestForm({
           {/* Tenant Column */}
           <div className={cn(
             "space-y-4 p-6 rounded-lg border bg-white",
-            "opacity-75"
+            (userRole === "service_provider" || userRole === "landlord") && "opacity-75"
           )}>
             <h3 className="text-lg font-semibold mb-4">Tenant Information</h3>
             <RequestDetails
               form={form}
               properties={properties}
-              userRole="tenant"
+              userRole={userRole}
               isExistingRequest={!!existingRequest}
             />
             <ImageUpload
               images={form.watch("images")}
               onChange={(images) => form.setValue("images", images)}
-              disabled={true}
+              disabled={userRole !== "tenant"}
             />
           </div>
 
           {/* Landlord Column */}
           <div className={cn(
             "space-y-4 p-6 rounded-lg border bg-white",
-            "opacity-75"
+            userRole !== "landlord" && "opacity-75"
           )}>
             <h3 className="text-lg font-semibold mb-4">Landlord Management</h3>
             <LandlordFields
@@ -111,7 +111,7 @@ export function MaintenanceRequestForm({
               }}
               onChange={(field, value) => form.setValue(field as any, value)}
               serviceProviders={serviceProviders || []}
-              userRole="landlord"
+              userRole={userRole}
               isExistingRequest={!!existingRequest}
             />
           </div>
@@ -119,7 +119,7 @@ export function MaintenanceRequestForm({
           {/* Service Provider Column */}
           <div className={cn(
             "space-y-4 p-6 rounded-lg border bg-white",
-            !isServiceProviderAssigned && "opacity-75"
+            !isServiceProviderAssigned && userRole === "service_provider" && "opacity-75"
           )}>
             <h3 className="text-lg font-semibold mb-4">Service Provider Details</h3>
             <div className="space-y-4">
