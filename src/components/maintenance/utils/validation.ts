@@ -11,7 +11,13 @@ export const MaintenanceRequestSchema = z.object({
   assigned_to: z.string().nullable().optional(),
   service_provider_notes: z.string().nullable().optional(),
   images: z.array(z.union([z.string(), z.instanceof(File)])).default([]),
-  scheduled_date: z.date().nullable().optional(),
+  scheduled_date: z.union([z.date(), z.string(), z.null()]).optional()
+    .transform((val) => {
+      if (!val) return null;
+      if (val instanceof Date) return val;
+      if (typeof val === 'string') return new Date(val);
+      return null;
+    }),
   service_provider_fee: z.number().nullable().optional(),
   service_provider_status: z.string().nullable().optional(),
   completion_report: z.string().nullable().optional()
