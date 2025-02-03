@@ -162,25 +162,25 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
           if (!open) setSelectedImage(null);
         }}
       >
-        <DialogContent className="max-w-[90vw] w-[1200px] p-0 overflow-hidden bg-black/90">
-          <DialogTitle className="p-6 text-white flex items-center justify-between">
-            <span>Image Preview ({currentImageIndex + 1} of {imageUrls.length})</span>
+        <DialogContent className="max-w-[95vw] w-[1400px] h-[90vh] p-0 overflow-hidden bg-black/90">
+          <DialogTitle className="p-8 text-white flex items-center justify-between">
+            <span className="text-xl">Image Preview ({currentImageIndex + 1} of {imageUrls.length})</span>
             <Button
               variant="ghost"
               size="icon"
               className="text-white hover:bg-white/20"
               onClick={() => setSelectedImage(null)}
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </Button>
           </DialogTitle>
-          <div className="relative flex items-center justify-center min-h-[400px] md:min-h-[700px]">
+          <div className="relative flex items-center justify-center h-[calc(90vh-5rem)]">
             {selectedImage && (
               <>
                 <img
                   src={selectedImage}
                   alt="Maintenance request"
-                  className="max-h-[80vh] max-w-[85vw] object-contain"
+                  className="max-h-[85vh] max-w-[90vw] object-contain"
                 />
                 {imageUrls.length > 1 && (
                   <>
@@ -190,7 +190,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                       className="absolute left-4 text-white hover:bg-white/20"
                       onClick={handlePreviousImage}
                     >
-                      <ChevronLeft className="h-10 w-10" />
+                      <ChevronLeft className="h-12 w-12" />
                     </Button>
                     <Button
                       variant="ghost"
@@ -198,7 +198,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                       className="absolute right-4 text-white hover:bg-white/20"
                       onClick={handleNextImage}
                     >
-                      <ChevronRight className="h-10 w-10" />
+                      <ChevronRight className="h-12 w-12" />
                     </Button>
                   </>
                 )}
