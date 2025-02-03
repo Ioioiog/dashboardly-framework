@@ -81,6 +81,8 @@ export default function MaintenanceDialog({
             const formDataWithTenant = {
               ...data,
               tenant_id: currentUserId,
+              // Convert Date object back to ISO string for the database
+              scheduled_date: data.scheduled_date?.toISOString(),
             };
             
             if (requestId) {
