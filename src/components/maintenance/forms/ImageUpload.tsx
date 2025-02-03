@@ -162,8 +162,8 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
           if (!open) setSelectedImage(null);
         }}
       >
-        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/90">
-          <DialogTitle className="p-4 text-white flex items-center justify-between">
+        <DialogContent className="max-w-[90vw] w-[1200px] p-0 overflow-hidden bg-black/90">
+          <DialogTitle className="p-6 text-white flex items-center justify-between">
             <span>Image Preview ({currentImageIndex + 1} of {imageUrls.length})</span>
             <Button
               variant="ghost"
@@ -174,31 +174,31 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
               <X className="h-4 w-4" />
             </Button>
           </DialogTitle>
-          <div className="relative flex items-center justify-center min-h-[300px] md:min-h-[500px]">
+          <div className="relative flex items-center justify-center min-h-[400px] md:min-h-[700px]">
             {selectedImage && (
               <>
                 <img
                   src={selectedImage}
                   alt="Maintenance request"
-                  className="max-h-[70vh] object-contain"
+                  className="max-h-[80vh] max-w-[85vw] object-contain"
                 />
                 {imageUrls.length > 1 && (
                   <>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute left-2 text-white hover:bg-white/20"
+                      className="absolute left-4 text-white hover:bg-white/20"
                       onClick={handlePreviousImage}
                     >
-                      <ChevronLeft className="h-8 w-8" />
+                      <ChevronLeft className="h-10 w-10" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute right-2 text-white hover:bg-white/20"
+                      className="absolute right-4 text-white hover:bg-white/20"
                       onClick={handleNextImage}
                     >
-                      <ChevronRight className="h-8 w-8" />
+                      <ChevronRight className="h-10 w-10" />
                     </Button>
                   </>
                 )}
