@@ -71,6 +71,8 @@ export function MaintenanceRequestForm({
     }
   });
 
+  const isServiceProviderAssigned = userRole === "service_provider" && existingRequest?.assigned_to === form.watch("assigned_to");
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -78,26 +80,26 @@ export function MaintenanceRequestForm({
           {/* Tenant Column */}
           <div className={cn(
             "space-y-4 p-6 rounded-lg border bg-white",
-            userRole !== "tenant" && "opacity-75"
+            "opacity-75"
           )}>
             <h3 className="text-lg font-semibold mb-4">Tenant Information</h3>
             <RequestDetails
               form={form}
               properties={properties}
-              userRole={userRole}
+              userRole="tenant"
               isExistingRequest={!!existingRequest}
             />
             <ImageUpload
               images={form.watch("images")}
               onChange={(images) => form.setValue("images", images)}
-              disabled={userRole === "landlord"}
+              disabled={true}
             />
           </div>
 
           {/* Landlord Column */}
           <div className={cn(
             "space-y-4 p-6 rounded-lg border bg-white",
-            userRole !== "landlord" && "opacity-75"
+            "opacity-75"
           )}>
             <h3 className="text-lg font-semibold mb-4">Landlord Management</h3>
             <LandlordFields
@@ -109,7 +111,7 @@ export function MaintenanceRequestForm({
               }}
               onChange={(field, value) => form.setValue(field as any, value)}
               serviceProviders={serviceProviders || []}
-              userRole={userRole}
+              userRole="landlord"
               isExistingRequest={!!existingRequest}
             />
           </div>
@@ -117,7 +119,7 @@ export function MaintenanceRequestForm({
           {/* Service Provider Column */}
           <div className={cn(
             "space-y-4 p-6 rounded-lg border bg-white",
-            userRole !== "service_provider" && existingRequest?.assigned_to !== form.watch("assigned_to") && "opacity-75"
+            !isServiceProviderAssigned && "opacity-75"
           )}>
             <h3 className="text-lg font-semibold mb-4">Service Provider Details</h3>
             <div className="space-y-4">
@@ -132,7 +134,7 @@ export function MaintenanceRequestForm({
                         "w-full justify-start text-left font-normal",
                         !form.watch("scheduled_date") && "text-muted-foreground"
                       )}
-                      disabled={userRole !== "service_provider"}
+                      disabled={!isServiceProviderAssigned}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {form.watch("scheduled_date") ? (
@@ -162,7 +164,7 @@ export function MaintenanceRequestForm({
                   value={form.watch("service_provider_fee") || ""}
                   onChange={(e) => form.setValue("service_provider_fee", parseFloat(e.target.value))}
                   placeholder="Enter estimated cost"
-                  disabled={userRole !== "service_provider"}
+                  disabled={!isServiceProviderAssigned}
                   min="0"
                   step="0.01"
                 />
@@ -175,7 +177,7 @@ export function MaintenanceRequestForm({
                   className="w-full p-2 border rounded-md"
                   value={form.watch("service_provider_status") || ""}
                   onChange={(e) => form.setValue("service_provider_status", e.target.value)}
-                  disabled={userRole !== "service_provider"}
+                  disabled={!isServiceProviderAssigned}
                 >
                   <option value="">Select status</option>
                   <option value="pending_review">Pending Review</option>
@@ -194,7 +196,7 @@ export function MaintenanceRequestForm({
                   value={form.watch("completion_report") || ""}
                   onChange={(e) => form.setValue("completion_report", e.target.value)}
                   placeholder="Enter completion details, repairs made, and recommendations"
-                  disabled={userRole !== "service_provider"}
+                  disabled={!isServiceProviderAssigned}
                   rows={4}
                 />
               </div>
