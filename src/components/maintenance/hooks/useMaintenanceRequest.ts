@@ -84,6 +84,7 @@ export function useMaintenanceRequest(requestId?: string) {
         images: imageUrls,
         scheduled_date: values.scheduled_date?.toISOString(),
         property_id: values.property_id,
+        tenant_id: values.tenant_id,
         description: values.description,
         status: values.status || 'pending' as MaintenanceStatus,
         priority: values.priority || 'low'
@@ -145,6 +146,7 @@ export function useMaintenanceRequest(requestId?: string) {
         images: imageUrls,
         scheduled_date: values.scheduled_date?.toISOString(),
         property_id: values.property_id,
+        tenant_id: values.tenant_id,
         description: values.description,
         status: values.status || 'pending' as MaintenanceStatus,
         priority: values.priority || 'low'
