@@ -88,7 +88,7 @@ export default function MaintenanceDialog({
         payment_status: null,
         read_by_landlord: false,
         read_by_tenant: false
-      };
+      } as MaintenanceRequest;
       
       console.log("Processing form data:", processedData);
 
@@ -97,10 +97,10 @@ export default function MaintenanceDialog({
 
       if (requestId) {
         console.log("Updating maintenance request:", validatedData);
-        await updateMutation.mutateAsync(validatedData);
+        await updateMutation.mutateAsync(validatedData as MaintenanceRequest);
       } else {
         console.log("Creating maintenance request:", validatedData);
-        await createMutation.mutateAsync(validatedData);
+        await createMutation.mutateAsync(validatedData as MaintenanceRequest);
       }
 
       toast({

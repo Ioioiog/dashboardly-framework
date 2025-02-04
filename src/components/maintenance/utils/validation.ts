@@ -19,12 +19,7 @@ export const MaintenanceRequestSchema = z.object({
   payment_status: z.string().nullable().optional(),
   read_by_landlord: z.boolean().optional(),
   read_by_tenant: z.boolean().optional()
-}).transform(data => ({
-  ...data,
-  status: data.status || 'pending',
-  priority: data.priority || 'low',
-  images: data.images || []
-}));
+});
 
 export type MaintenanceRequestFormData = z.infer<typeof MaintenanceRequestSchema>;
 

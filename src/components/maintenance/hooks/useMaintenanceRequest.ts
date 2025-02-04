@@ -48,15 +48,7 @@ export function useMaintenanceRequest(requestId?: string) {
       console.log("Creating maintenance request with data:", data);
       const { error } = await supabase
         .from('maintenance_requests')
-        .insert([{
-          ...data,
-          status: data.status || 'pending',
-          priority: data.priority || 'low',
-          scheduled_date: data.scheduled_date || null,
-          images: data.images || [],
-          service_provider_fee: data.service_provider_fee || 0,
-          payment_amount: data.payment_amount || 0
-        }]);
+        .insert([data]);
 
       if (error) throw error;
     },
@@ -66,19 +58,13 @@ export function useMaintenanceRequest(requestId?: string) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: Partial<MaintenanceRequest>) => {
+    mutationFn: async (data: MaintenanceRequest) => {
       if (!requestId) throw new Error('No request ID provided for update');
       console.log("Updating maintenance request with data:", data);
 
       const { error } = await supabase
         .from('maintenance_requests')
-        .update({
-          ...data,
-          scheduled_date: data.scheduled_date || null,
-          images: data.images,
-          service_provider_fee: data.service_provider_fee ?? undefined,
-          payment_amount: data.payment_amount ?? undefined
-        })
+        .update(data)
         .eq('id', requestId);
 
       if (error) throw error;
