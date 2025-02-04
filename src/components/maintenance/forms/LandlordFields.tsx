@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ServiceProvider {
   id: string;
@@ -21,6 +21,7 @@ export interface LandlordFieldsProps {
   onChange: (field: string, value: string | null) => void;
   userRole?: string;
   isExistingRequest?: boolean;
+  isLoadingProviders?: boolean;
 }
 
 export function LandlordFields({ 
@@ -28,7 +29,8 @@ export function LandlordFields({
   formData, 
   onChange, 
   userRole = "tenant",
-  isExistingRequest
+  isExistingRequest,
+  isLoadingProviders = false
 }: LandlordFieldsProps) {
   const { t } = useTranslation();
   const isLandlord = userRole === "landlord";
@@ -48,12 +50,9 @@ export function LandlordFields({
     console.log("Available providers:", serviceProviders);
     
     const provider = serviceProviders.find(p => p.id === id);
-    if (!provider) {
-      // If we have an ID but no matching provider in the list,
-      // it means we're probably still loading the providers
-      return "Loading provider details...";
-    }
-    return `${provider.first_name || ''} ${provider.last_name || ''}`.trim() || "Not assigned";
+    return provider 
+      ? `${provider.first_name || ''} ${provider.last_name || ''}`.trim() 
+      : "Not assigned";
   };
 
   return (
@@ -85,35 +84,36 @@ export function LandlordFields({
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="space-y-2">
         <Label>Service Provider</Label>
+        {isLoadingProviders ? (
+          <Skeleton className="h-10 w-full" />
+        ) : isLandlord ? (
+          <Select
+            value={formData.assigned_to || "unassigned"}
+            onValueChange={(value) => {
+              console.log("Selected service provider:", value);
+              onChange("assigned_to", value === "unassigned" ? null : value);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a service provider" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="unassigned">Not assigned</SelectItem>
+              {serviceProviders?.map((provider) => (
+                <SelectItem key={provider.id} value={provider.id}>
+                  {`${provider.first_name || ''} ${provider.last_name || ''}`.trim() || "Unnamed Provider"}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <div className="p-3 bg-gray-50 rounded-md border">
+            {getServiceProviderName(formData.assigned_to)}
+          </div>
+        )}
       </div>
-
-      {isLandlord ? (
-        <Select
-          value={formData.assigned_to || "unassigned"}
-          onValueChange={(value) => {
-            console.log("Selected service provider:", value);
-            onChange("assigned_to", value === "unassigned" ? null : value);
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a service provider" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="unassigned">Not assigned</SelectItem>
-            {serviceProviders?.map((provider) => (
-              <SelectItem key={provider.id} value={provider.id}>
-                {`${provider.first_name || ''} ${provider.last_name || ''}`.trim()}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ) : (
-        <div className="p-3 bg-gray-50 rounded-md border">
-          {getServiceProviderName(formData.assigned_to)}
-        </div>
-      )}
 
       <div className="space-y-2">
         <Label htmlFor="service_provider_notes">Instructions for Service Provider</Label>

@@ -30,23 +30,27 @@ export default function MaintenanceDialog({
   const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
   const { existingRequest, createMutation, updateMutation, isLoading } = useMaintenanceRequest(requestId);
 
-  const { data: serviceProviders } = useQuery({
+  const { data: serviceProviders, isLoading: isLoadingProviders } = useQuery({
     queryKey: ["service-providers"],
-    enabled: userRole === "landlord",
+    enabled: userRole === "landlord" && open,
     queryFn: async () => {
       console.log("Fetching service providers");
-      const { data, error } = await supabase
+      const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("id, first_name, last_name")
         .eq("role", "service_provider");
 
-      if (error) {
-        console.error("Error fetching service providers:", error);
-        throw error;
+      if (profilesError) {
+        console.error("Error fetching service providers:", profilesError);
+        throw profilesError;
       }
 
-      console.log("Fetched service providers:", data);
-      return data;
+      console.log("Fetched service providers:", profiles);
+      
+      // Filter out providers with null names
+      const validProviders = profiles.filter(p => p.first_name || p.last_name);
+      
+      return validProviders;
     },
   });
 
@@ -90,7 +94,6 @@ export default function MaintenanceDialog({
         read_by_tenant: false
       };
       
-      // Ensure required fields are present
       if (!processedData.property_id || !processedData.tenant_id || !processedData.title || !processedData.description) {
         throw new Error("Missing required fields");
       }
@@ -141,6 +144,7 @@ export default function MaintenanceDialog({
           onSubmit={handleSubmit}
           isSubmitting={isLoading}
           userRole={userRole!}
+          isLoadingProviders={isLoadingProviders}
         />
       </DialogContent>
     </Dialog>
