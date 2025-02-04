@@ -92,12 +92,6 @@ export function ServiceProviderCard({ provider, onPreferredToggle }: ServiceProv
           >
             {provider.isPreferred ? '★ Preferred Provider' : 'Add to Preferred'}
           </Button>
-          <Button 
-            variant="default"
-            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            Create Maintenance Request
-          </Button>
         </div>
       </div>
     </Card>
