@@ -2,30 +2,30 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Clipboard, User, MessageSquare } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { LandlordFields } from "../forms/LandlordFields";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ClipboardList, Users, DollarSign, MessageSquare } from "lucide-react";
 
-interface NewRequestModalProps {
+interface MaintenanceRequestModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   request: MaintenanceRequest;
   onUpdateRequest: (request: Partial<MaintenanceRequest>) => void;
 }
 
-export function NewRequestModal({
+export function MaintenanceRequestModal({
   open,
   onOpenChange,
   request,
   onUpdateRequest,
-}: NewRequestModalProps) {
+}: MaintenanceRequestModalProps) {
   const [messages, setMessages] = React.useState<any[]>([]);
   const [newMessage, setNewMessage] = React.useState("");
   const { toast } = useToast();
@@ -34,7 +34,6 @@ export function NewRequestModal({
   React.useEffect(() => {
     if (!request.id) return;
 
-    // Fetch existing chat messages
     const fetchMessages = async () => {
       const { data, error } = await supabase
         .from('maintenance_request_chats')
@@ -59,7 +58,6 @@ export function NewRequestModal({
 
     fetchMessages();
 
-    // Subscribe to new messages
     const channel = supabase
       .channel(`maintenance_chat_${request.id}`)
       .on(
@@ -120,28 +118,30 @@ export function NewRequestModal({
     }
   };
 
-  console.log("Rendering NewRequestModal with request:", request);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[800px]">
         <DialogHeader>
-          <DialogTitle>New Maintenance Request Review</DialogTitle>
+          <DialogTitle>Maintenance Request Management</DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue="review" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="review" className="flex items-center gap-2">
-              <Clipboard className="h-4 w-4" />
+              <ClipboardList className="h-4 w-4" />
               Initial Review
             </TabsTrigger>
-            <TabsTrigger value="assignment" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Provider Assignment
+            <TabsTrigger value="provider" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Provider
+            </TabsTrigger>
+            <TabsTrigger value="costs" className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              Costs
             </TabsTrigger>
             <TabsTrigger value="communication" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
-              Communication
+              Chat
             </TabsTrigger>
           </TabsList>
 
@@ -200,28 +200,6 @@ export function NewRequestModal({
               )}
 
               <div className="space-y-2">
-                <Label>Contact Information</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-sm text-muted-foreground">Property</Label>
-                    <Input 
-                      value={request.property?.name || 'Not specified'} 
-                      readOnly 
-                      className="bg-muted"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-sm text-muted-foreground">Tenant</Label>
-                    <Input 
-                      value={`${request.tenant?.first_name} ${request.tenant?.last_name}`} 
-                      readOnly 
-                      className="bg-muted"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
                 <Label>Status Update</Label>
                 <Select 
                   value={request.status} 
@@ -243,13 +221,47 @@ export function NewRequestModal({
             </div>
           </TabsContent>
 
-          <TabsContent value="assignment" className="space-y-4 mt-4">
+          <TabsContent value="provider" className="space-y-4 mt-4">
             <LandlordFields
               formData={request}
               onFieldChange={(field, value) => onUpdateRequest({ [field]: value })}
               serviceProviders={[]}
               isLoadingProviders={false}
             />
+          </TabsContent>
+
+          <TabsContent value="costs" className="space-y-4 mt-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Service Provider Fee</Label>
+                <Input
+                  type="number"
+                  value={request.service_provider_fee || 0}
+                  onChange={(e) => onUpdateRequest({ service_provider_fee: parseFloat(e.target.value) })}
+                  className="bg-white"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Cost Estimate</Label>
+                <Input
+                  type="number"
+                  value={request.cost_estimate || 0}
+                  onChange={(e) => onUpdateRequest({ cost_estimate: parseFloat(e.target.value) })}
+                  className="bg-white"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Cost Notes</Label>
+                <Textarea
+                  value={request.cost_estimate_notes || ''}
+                  onChange={(e) => onUpdateRequest({ cost_estimate_notes: e.target.value })}
+                  className="bg-white min-h-[100px]"
+                  placeholder="Add any notes about costs here..."
+                />
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="communication" className="space-y-4 mt-4">
