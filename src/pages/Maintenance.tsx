@@ -5,6 +5,8 @@ import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { MaintenanceDialog } from "@/components/maintenance/MaintenanceDialog";
 import { MaintenanceHeader } from "@/components/maintenance/dashboard/MaintenanceHeader";
 import { MaintenanceSection } from "@/components/maintenance/dashboard/MaintenanceSection";
+import { useUserRole } from "@/hooks/use-user-role";
+import { useAuthState } from "@/hooks/useAuthState";
 
 type PriorityFilter = "all" | "low" | "medium" | "high";
 
@@ -13,11 +15,17 @@ export default function Maintenance() {
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
   const [priority, setPriority] = React.useState<PriorityFilter>("all");
   const [searchQuery, setSearchQuery] = React.useState("");
+  const { userRole } = useUserRole();
+  const { currentUserId } = useAuthState();
 
   const { data: maintenanceRequests, isLoading } = useQuery({
     queryKey: ["maintenance-requests", priority],
     queryFn: async () => {
-      console.log("Fetching maintenance requests with filters:", { priority });
+      console.log("Fetching maintenance requests with filters:", { 
+        priority,
+        userRole,
+        currentUserId 
+      });
       
       let query = supabase
         .from("maintenance_requests")
@@ -34,6 +42,14 @@ export default function Maintenance() {
         query = query.eq("priority", priority);
       }
 
+      // Add role-specific filters
+      if (userRole === 'tenant') {
+        query = query.eq('tenant_id', currentUserId);
+      } else if (userRole === 'service_provider') {
+        query = query.eq('assigned_to', currentUserId);
+      }
+      // For landlords, the RLS policy will handle filtering
+
       const { data, error } = await query;
       
       if (error) {
@@ -49,6 +65,8 @@ export default function Maintenance() {
   const filteredRequests = React.useMemo(() => {
     if (!maintenanceRequests) return [];
     
+    console.log("Filtering requests with search query:", searchQuery);
+    
     return maintenanceRequests.filter(request => 
       request.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       request.description.toLowerCase().includes(searchQuery.toLowerCase())
@@ -61,7 +79,14 @@ export default function Maintenance() {
     r.status !== "completed" && r.status !== "cancelled"
   );
 
+  console.log("Filtered requests counts:", {
+    new: newRequests.length,
+    active: activeRequests.length,
+    review: reviewRequests.length
+  });
+
   const handleRequestClick = (requestId: string) => {
+    console.log("Opening maintenance request:", requestId);
     setSelectedRequestId(requestId);
     setIsDialogOpen(true);
   };

@@ -38,8 +38,7 @@ export default function MaintenanceList({
   const { t } = useTranslation();
   const { userRole } = useUserRole();
 
-  console.log('MaintenanceList - Received requests:', requests);
-  console.log('MaintenanceList - Loading state:', isLoading);
+  console.log('MaintenanceList - Detailed request data:', JSON.stringify(requests, null, 2));
   console.log('MaintenanceList - User role:', userRole);
 
   if (isLoading) {
@@ -47,6 +46,7 @@ export default function MaintenanceList({
   }
 
   if (!requests || requests.length === 0) {
+    console.log('MaintenanceList - No requests found');
     return (
       <div className="text-center py-8 text-gray-500">
         {t("maintenance.noRequests")}
@@ -117,58 +117,61 @@ export default function MaintenanceList({
 
   return (
     <div className="space-y-4">
-      {requests.map((request) => (
-        <Card 
-          key={request.id}
-          className="p-6 hover:shadow-md transition-shadow duration-200"
-        >
-          <div className="space-y-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-semibold">{request.title}</h3>
-                <p className="text-sm text-gray-500">#{request.id.slice(0, 8)}</p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex space-x-2">
-                  <Badge variant={getStatusVariant(request.status)}>
-                    {t(`maintenance.status.${request.status}`)}
-                  </Badge>
-                  <Badge variant={getPriorityVariant(request.priority)}>
-                    {t(`maintenance.priority.${request.priority}`)}
-                  </Badge>
+      {requests.map((request) => {
+        console.log('MaintenanceList - Rendering request:', request.id, request.title);
+        return (
+          <Card 
+            key={request.id}
+            className="p-6 hover:shadow-md transition-shadow duration-200"
+          >
+            <div className="space-y-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-lg font-semibold">{request.title}</h3>
+                  <p className="text-sm text-gray-500">#{request.id.slice(0, 8)}</p>
                 </div>
-                {onRequestClick && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onRequestClick(request.id)}
-                    className="ml-2"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                )}
+                <div className="flex items-center space-x-4">
+                  <div className="flex space-x-2">
+                    <Badge variant={getStatusVariant(request.status)}>
+                      {t(`maintenance.status.${request.status}`)}
+                    </Badge>
+                    <Badge variant={getPriorityVariant(request.priority)}>
+                      {t(`maintenance.priority.${request.priority}`)}
+                    </Badge>
+                  </div>
+                  {onRequestClick && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onRequestClick(request.id)}
+                      className="ml-2"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div className="text-sm text-gray-600">
-              <div className="flex items-center gap-2 mb-2">
-                <User className="h-4 w-4 text-gray-500" />
-                <span>{request.tenant.first_name} {request.tenant.last_name}</span>
+              <div className="text-sm text-gray-600">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="h-4 w-4 text-gray-500" />
+                  <span>{request.tenant.first_name} {request.tenant.last_name}</span>
+                </div>
+                <p><strong>{t("maintenance.property")}:</strong> {request.property.name}</p>
+                <p className="mt-2">{request.description}</p>
               </div>
-              <p><strong>{t("maintenance.property")}:</strong> {request.property.name}</p>
-              <p className="mt-2">{request.description}</p>
+
+              {renderServiceProviderInfo(request)}
+
+              <RequestStatusTimeline 
+                status={request.status}
+                createdAt={request.created_at}
+                updatedAt={request.updated_at}
+              />
             </div>
-
-            {renderServiceProviderInfo(request)}
-
-            <RequestStatusTimeline 
-              status={request.status}
-              createdAt={request.created_at}
-              updatedAt={request.updated_at}
-            />
-          </div>
-        </Card>
-      ))}
+          </Card>
+        );
+      })}
     </div>
   );
 }
