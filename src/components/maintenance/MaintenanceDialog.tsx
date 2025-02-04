@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateMaintenanceRequest } from "./utils/validation";
+import type { MaintenanceRequest } from "./hooks/useMaintenanceRequest";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -68,8 +69,8 @@ export default function MaintenanceDialog({
     console.log("Form submitted with data:", formData);
     
     try {
-      const processedData = {
-        tenant_id: currentUserId,
+      const processedData: Partial<MaintenanceRequest> = {
+        tenant_id: currentUserId!,
         property_id: formData.property_id || existingRequest?.property_id,
         title: formData.title || existingRequest?.title,
         description: formData.description || existingRequest?.description,
@@ -79,7 +80,7 @@ export default function MaintenanceDialog({
         assigned_to: formData.assigned_to,
         service_provider_notes: formData.service_provider_notes,
         notes: formData.notes,
-        images: formData.images?.filter((img: string | File) => typeof img === 'string') || [],
+        images: (formData.images?.filter((img: string | File) => typeof img === 'string') || []) as string[],
         service_provider_fee: formData.service_provider_fee || 0,
         service_provider_status: formData.service_provider_status,
         completion_report: formData.completion_report,
@@ -99,7 +100,7 @@ export default function MaintenanceDialog({
         await updateMutation.mutateAsync(validatedData);
       } else {
         console.log("Creating maintenance request:", validatedData);
-        await createMutation.mutateAsync(validatedData);
+        await createMutation.mutateAsync(validatedData as MaintenanceRequest);
       }
 
       toast({

@@ -30,7 +30,6 @@ export interface MaintenanceRequest {
 export function useMaintenanceRequest(requestId?: string) {
   const queryClient = useQueryClient();
 
-  // Query for fetching existing request
   const { data: existingRequest } = useQuery({
     queryKey: ['maintenance-request', requestId],
     enabled: !!requestId,
@@ -47,7 +46,6 @@ export function useMaintenanceRequest(requestId?: string) {
     }
   });
 
-  // Create mutation
   const createMutation = useMutation({
     mutationFn: async (data: MaintenanceRequest) => {
       console.log("Creating maintenance request with data:", data);
@@ -58,7 +56,7 @@ export function useMaintenanceRequest(requestId?: string) {
           status: data.status || 'pending',
           priority: data.priority || 'low',
           scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
-          images: data.images?.filter(img => typeof img === 'string') || [],
+          images: data.images || [],
           service_provider_fee: data.service_provider_fee || 0,
           payment_amount: data.payment_amount || 0
         }]);
@@ -70,7 +68,6 @@ export function useMaintenanceRequest(requestId?: string) {
     }
   });
 
-  // Update mutation
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<MaintenanceRequest>) => {
       if (!requestId) throw new Error('No request ID provided for update');
@@ -81,7 +78,7 @@ export function useMaintenanceRequest(requestId?: string) {
         .update({
           ...data,
           scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
-          images: data.images?.filter(img => typeof img === 'string') || undefined,
+          images: data.images || undefined,
           service_provider_fee: data.service_provider_fee ?? undefined,
           payment_amount: data.payment_amount ?? undefined
         })
