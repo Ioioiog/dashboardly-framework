@@ -24,9 +24,9 @@ export interface MaintenanceFormValues {
   property_id: string;
   priority: string;
   status: string;
-  notes: string;
-  assigned_to: string;
-  service_provider_notes: string;
+  notes?: string;
+  assigned_to?: string;
+  service_provider_notes?: string;
   images: (string | File)[];
   tenant_id: string;
   scheduled_date?: Date;
@@ -42,7 +42,7 @@ interface MaintenanceRequestFormProps {
   existingRequest?: MaintenanceFormValues;
   onSubmit: (values: MaintenanceFormValues) => void;
   isSubmitting?: boolean;
-  isLoadingProviders?: boolean;  // Added this prop
+  isLoadingProviders?: boolean;
 }
 
 export function MaintenanceRequestForm({
@@ -52,7 +52,7 @@ export function MaintenanceRequestForm({
   existingRequest,
   onSubmit,
   isSubmitting,
-  isLoadingProviders = false  // Added with default value
+  isLoadingProviders = false
 }: MaintenanceRequestFormProps) {
   const form = useForm<MaintenanceFormValues>({
     defaultValues: existingRequest || {
@@ -111,7 +111,7 @@ export function MaintenanceRequestForm({
                 notes: form.watch("notes"),
                 status: form.watch("status")
               }}
-              onChange={(field, value) => form.setValue(field as any, value)}
+              onChange={(field, value) => form.setValue(field as keyof MaintenanceFormValues, value)}
               serviceProviders={serviceProviders || []}
               userRole={userRole}
               isExistingRequest={!!existingRequest}
