@@ -43,14 +43,18 @@ export function LandlordFields({
 
   const getServiceProviderName = (id: string | null) => {
     if (!id) return "Not assigned";
+    
+    console.log("Looking for provider with ID:", id);
+    console.log("Available providers:", serviceProviders);
+    
     const provider = serviceProviders.find(p => p.id === id);
-    if (!provider) return "Not assigned";
+    if (!provider) {
+      // If we have an ID but no matching provider in the list,
+      // it means we're probably still loading the providers
+      return "Loading provider details...";
+    }
     return `${provider.first_name || ''} ${provider.last_name || ''}`.trim() || "Not assigned";
   };
-
-  console.log("Service Providers:", serviceProviders);
-  console.log("Assigned To:", formData.assigned_to);
-  console.log("Found Provider:", serviceProviders.find(p => p.id === formData.assigned_to));
 
   return (
     <div className="space-y-4">
