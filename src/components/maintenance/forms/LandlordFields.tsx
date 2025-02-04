@@ -15,6 +15,7 @@ interface FormData {
   status?: string;
   assigned_to?: string | null;
   service_provider_notes?: string | null;
+  notes?: string | null;
 }
 
 interface LandlordFieldsProps {
