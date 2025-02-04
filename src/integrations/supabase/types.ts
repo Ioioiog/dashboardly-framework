@@ -419,7 +419,9 @@ export type Database = {
           notes: string | null
           payment_amount: number | null
           payment_status: string | null
-          priority: string | null
+          priority:
+            | Database["public"]["Enums"]["maintenance_request_priority"]
+            | null
           property_id: string
           read_by_landlord: boolean | null
           read_by_tenant: boolean | null
@@ -444,7 +446,9 @@ export type Database = {
           notes?: string | null
           payment_amount?: number | null
           payment_status?: string | null
-          priority?: string | null
+          priority?:
+            | Database["public"]["Enums"]["maintenance_request_priority"]
+            | null
           property_id: string
           read_by_landlord?: boolean | null
           read_by_tenant?: boolean | null
@@ -469,7 +473,9 @@ export type Database = {
           notes?: string | null
           payment_amount?: number | null
           payment_status?: string | null
-          priority?: string | null
+          priority?:
+            | Database["public"]["Enums"]["maintenance_request_priority"]
+            | null
           property_id?: string
           read_by_landlord?: boolean | null
           read_by_tenant?: boolean | null
@@ -1586,6 +1592,7 @@ export type Database = {
     Enums: {
       document_type: "lease_agreement" | "invoice" | "receipt" | "other"
       invoice_status: "pending" | "paid" | "overdue"
+      maintenance_request_priority: "low" | "medium" | "high"
       maintenance_request_status:
         | "pending"
         | "in_progress"
