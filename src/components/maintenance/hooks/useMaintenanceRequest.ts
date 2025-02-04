@@ -1,209 +1,134 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useCallback } from "react";
-import { MaintenanceRequestFormData, MaintenanceStatus, validateMaintenanceRequest } from "../utils/validation";
 
-export function useMaintenanceRequest(requestId?: string) {
-  const { toast } = useToast();
+interface MaintenanceRequest {
+  id?: string;
+  property_id?: string;
+  tenant_id?: string;
+  title?: string;
+  description?: string;
+  status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  priority?: 'low' | 'medium' | 'high';
+  images?: string[];
+  notes?: string;
+  assigned_to?: string;
+  service_provider_notes?: string;
+  service_provider_fee?: number;
+  service_provider_status?: string;
+  scheduled_date?: string | null;
+  completion_report?: string;
+}
+
+export function useMaintenanceRequest() {
+  const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  const handleImageUpload = useCallback(async (files: File[]) => {
-    const uploadedUrls: string[] = [];
-    
-    for (const file of files) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      
-      console.log(`Attempting to upload file: ${fileName}`);
-      
-      const { error: uploadError } = await supabase.storage
-        .from('maintenance-images')
-        .upload(fileName, file);
-        
-      if (uploadError) {
-        console.error('Error uploading file:', uploadError);
-        continue;
-      }
-      
-      const { data: { publicUrl } } = supabase.storage
-        .from('maintenance-images')
-        .getPublicUrl(fileName);
-        
-      console.log(`Generated public URL: ${publicUrl}`);
-      uploadedUrls.push(publicUrl);
-    }
-    
-    console.log('Generated image URLs:', uploadedUrls);
-    return uploadedUrls;
-  }, []);
+  const createMaintenanceRequest = async (data: MaintenanceRequest) => {
+    setIsLoading(true);
+    try {
+      console.log("Creating maintenance request with data:", data);
 
-  const { data: existingRequest } = useQuery({
-    queryKey: ["maintenance-request", requestId],
-    enabled: !!requestId,
-    queryFn: async () => {
-      if (!requestId) return null;
-      
-      console.log(`Fetching maintenance request with ID: ${requestId}`);
-      
-      const { data, error } = await supabase
-        .from("maintenance_requests")
-        .select("*")
-        .eq("id", requestId)
-        .maybeSingle();
-        
-      if (error) {
-        console.error('Error fetching maintenance request:', error);
-        throw error;
-      }
-
-      // Transform the date string to a Date object if it exists
-      if (data && data.scheduled_date) {
-        data.scheduled_date = new Date(data.scheduled_date);
-      }
-      
-      return data;
-    },
-  });
-
-  const createMutation = useMutation({
-    mutationFn: async (values: MaintenanceRequestFormData) => {
-      console.log("Creating maintenance request with data:", values);
-
-      let imageUrls: string[] = [];
-      if (values.images?.length > 0) {
-        const filesToUpload = values.images.filter((img): img is File => img instanceof File);
-        const existingUrls = values.images.filter((img): img is string => typeof img === 'string');
-        
-        if (filesToUpload.length > 0) {
-          const uploadedUrls = await handleImageUpload(filesToUpload);
-          imageUrls = [...existingUrls, ...uploadedUrls];
-        } else {
-          imageUrls = existingUrls;
-        }
-      }
-
-      // Ensure all required fields are present and handle optional fields
+      // Transform the data to ensure scheduled_date is a string
       const transformedData = {
-        title: values.title,
-        description: values.description,
-        property_id: values.property_id,
-        tenant_id: values.tenant_id,
-        priority: values.priority || 'low',
-        status: values.status || 'pending',
-        notes: values.notes || '',
-        assigned_to: values.assigned_to || null,
-        service_provider_notes: values.service_provider_notes || '',
-        images: imageUrls,
-        scheduled_date: values.scheduled_date ? values.scheduled_date.toISOString() : null,
-        service_provider_fee: values.service_provider_fee || 0,
-        service_provider_status: values.service_provider_status || null,
-        completion_report: values.completion_report || null
+        ...data,
+        scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
       };
 
-      console.log("Transformed data for creation:", transformedData);
-
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("maintenance_requests")
-        .insert(transformedData)
-        .select();
+        .insert([transformedData]);
 
-      if (error) {
-        console.error("Error creating maintenance request:", error);
-        throw error;
-      }
-      return data;
-    },
-    onSuccess: () => {
+      if (error) throw error;
+
       queryClient.invalidateQueries({ queryKey: ["maintenance-requests"] });
       toast({
         title: "Success",
         description: "Maintenance request created successfully",
       });
-    },
-    onError: (error) => {
+    } catch (error: any) {
       console.error("Error creating maintenance request:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create maintenance request",
+        description: error.message || "Failed to create maintenance request",
         variant: "destructive",
       });
-    },
-  });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const updateMutation = useMutation({
-    mutationFn: async (values: MaintenanceRequestFormData) => {
-      if (!requestId) {
-        throw new Error("Request ID is required for updates");
-      }
+  const updateMaintenanceRequest = async (id: string, data: Partial<MaintenanceRequest>) => {
+    setIsLoading(true);
+    try {
+      console.log("Updating maintenance request:", id, data);
 
-      console.log("Updating maintenance request with data:", values);
-
-      let imageUrls: string[] = [];
-      if (values.images?.length > 0) {
-        const filesToUpload = values.images.filter((img): img is File => img instanceof File);
-        const existingUrls = values.images.filter((img): img is string => typeof img === 'string');
-        
-        if (filesToUpload.length > 0) {
-          const uploadedUrls = await handleImageUpload(filesToUpload);
-          imageUrls = [...existingUrls, ...uploadedUrls];
-        } else {
-          imageUrls = existingUrls;
-        }
-      }
-
-      // Ensure all required fields are present and handle optional fields
+      // Transform the data to ensure scheduled_date is a string
       const transformedData = {
-        title: values.title,
-        description: values.description,
-        property_id: values.property_id,
-        tenant_id: values.tenant_id,
-        priority: values.priority || 'low',
-        status: values.status || 'pending',
-        notes: values.notes || '',
-        assigned_to: values.assigned_to || null,
-        service_provider_notes: values.service_provider_notes || '',
-        images: imageUrls,
-        scheduled_date: values.scheduled_date ? values.scheduled_date.toISOString() : null,
-        service_provider_fee: values.service_provider_fee || 0,
-        service_provider_status: values.service_provider_status || null,
-        completion_report: values.completion_report || null
+        ...data,
+        scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
       };
 
-      console.log("Transformed data for update:", transformedData);
-
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("maintenance_requests")
         .update(transformedData)
-        .eq("id", requestId)
-        .select();
+        .eq("id", id);
 
-      if (error) {
-        console.error("Error updating maintenance request:", error);
-        throw error;
-      }
-      return data;
-    },
-    onSuccess: () => {
+      if (error) throw error;
+
       queryClient.invalidateQueries({ queryKey: ["maintenance-requests"] });
       toast({
         title: "Success",
         description: "Maintenance request updated successfully",
       });
-    },
-    onError: (error) => {
+    } catch (error: any) {
       console.error("Error updating maintenance request:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update maintenance request",
+        description: error.message || "Failed to update maintenance request",
         variant: "destructive",
       });
-    },
-  });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteMaintenanceRequest = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from("maintenance_requests")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["maintenance-requests"] });
+      toast({
+        title: "Success",
+        description: "Maintenance request deleted successfully",
+      });
+    } catch (error: any) {
+      console.error("Error deleting maintenance request:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete maintenance request",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
-    existingRequest,
-    createMutation,
-    updateMutation,
+    isLoading,
+    createMaintenanceRequest,
+    updateMaintenanceRequest,
+    deleteMaintenanceRequest,
   };
 }

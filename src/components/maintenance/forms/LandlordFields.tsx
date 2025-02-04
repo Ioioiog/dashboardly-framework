@@ -32,6 +32,7 @@ export function LandlordFields({
 }: LandlordFieldsProps) {
   const { t } = useTranslation();
   const isLandlord = userRole === "landlord";
+  const isServiceProvider = userRole === "service_provider";
 
   const statusOptions = [
     { value: "pending", label: t("maintenance.status.pending") },
@@ -56,7 +57,7 @@ export function LandlordFields({
       {isExistingRequest && (
         <div className="space-y-2">
           <Label>{t("maintenance.form.status")}</Label>
-          {isLandlord ? (
+          {isLandlord || isServiceProvider ? (
             <Select
               value={formData.status || "pending"}
               onValueChange={(value) => onChange("status", value)}
@@ -129,7 +130,7 @@ export function LandlordFields({
 
       <div className="space-y-2">
         <Label htmlFor="internal_notes">Internal Notes</Label>
-        {isLandlord ? (
+        {isLandlord || isServiceProvider ? (
           <Textarea
             id="internal_notes"
             value={formData.notes || ""}
