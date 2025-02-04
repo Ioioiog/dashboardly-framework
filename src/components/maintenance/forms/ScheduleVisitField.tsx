@@ -17,9 +17,12 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelect = (date: Date | undefined) => {
-    console.log("Selected date in ScheduleVisitField:", date);
-    onChange(date);
-    setIsOpen(false);
+    console.log("Date selected in calendar:", date);
+    if (date) {
+      onChange(date);
+      // Only close the popover after successfully setting the date
+      setTimeout(() => setIsOpen(false), 100);
+    }
   };
 
   return (
@@ -29,11 +32,13 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
         <PopoverTrigger asChild>
           <Button
             variant="outline"
+            type="button"
             className={cn(
               "w-full justify-start text-left font-normal",
               !value && "text-muted-foreground"
             )}
             disabled={disabled}
+            onClick={() => setIsOpen(true)}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {value ? format(value, "PPP") : <span>Pick a date</span>}
