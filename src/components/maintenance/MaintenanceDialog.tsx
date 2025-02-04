@@ -80,9 +80,13 @@ export default function MaintenanceDialog({
         service_provider_notes: formData.service_provider_notes,
         notes: formData.notes,
         images: formData.images?.filter((img: string | File) => typeof img === 'string') || [],
-        service_provider_fee: formData.service_provider_fee,
+        service_provider_fee: formData.service_provider_fee || 0,
         service_provider_status: formData.service_provider_status,
-        completion_report: formData.completion_report
+        completion_report: formData.completion_report,
+        payment_amount: 0,
+        payment_status: null,
+        read_by_landlord: false,
+        read_by_tenant: false
       };
       
       console.log("Processing form data:", processedData);
@@ -95,7 +99,7 @@ export default function MaintenanceDialog({
         await updateMutation.mutateAsync(validatedData);
       } else {
         console.log("Creating maintenance request:", validatedData);
-        await createMutation.mutateAsync(validatedData as any);
+        await createMutation.mutateAsync(validatedData);
       }
 
       toast({

@@ -7,16 +7,24 @@ export interface MaintenanceRequest {
   tenant_id: string;
   title: string;
   description: string;
-  status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-  priority?: 'low' | 'medium' | 'high';
-  images?: string[];
-  notes?: string;
-  assigned_to?: string;
-  service_provider_notes?: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  created_at?: string;
+  updated_at?: string;
+  issue_type?: string | null;
+  priority: 'low' | 'medium' | 'high';
+  images: string[];
+  notes?: string | null;
+  assigned_to?: string | null;
+  service_provider_notes?: string | null;
+  read_by_landlord?: boolean;
+  read_by_tenant?: boolean;
   service_provider_fee?: number;
-  service_provider_status?: string;
+  service_provider_status?: string | null;
   scheduled_date?: string | null;
-  completion_report?: string;
+  completion_report?: string | null;
+  completion_date?: string | null;
+  payment_status?: string | null;
+  payment_amount?: number;
 }
 
 export function useMaintenanceRequest(requestId?: string) {
@@ -47,8 +55,12 @@ export function useMaintenanceRequest(requestId?: string) {
         .from('maintenance_requests')
         .insert([{
           ...data,
+          status: data.status || 'pending',
+          priority: data.priority || 'low',
           scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
-          images: data.images?.filter(img => typeof img === 'string')
+          images: data.images?.filter(img => typeof img === 'string') || [],
+          service_provider_fee: data.service_provider_fee || 0,
+          payment_amount: data.payment_amount || 0
         }]);
 
       if (error) throw error;
@@ -69,7 +81,9 @@ export function useMaintenanceRequest(requestId?: string) {
         .update({
           ...data,
           scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
-          images: data.images?.filter(img => typeof img === 'string')
+          images: data.images?.filter(img => typeof img === 'string') || undefined,
+          service_provider_fee: data.service_provider_fee ?? undefined,
+          payment_amount: data.payment_amount ?? undefined
         })
         .eq('id', requestId);
 
