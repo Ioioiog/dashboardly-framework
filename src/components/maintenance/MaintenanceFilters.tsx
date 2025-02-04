@@ -9,11 +9,12 @@ import {
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface MaintenanceFiltersProps {
   filters: {
     status: string;
-    priority: string;
+    priority: "low" | "medium" | "high" | "all";
     propertyId: string;
   };
   onFiltersChange: (filters: any) => void;
@@ -24,14 +25,17 @@ export default function MaintenanceFilters({
   onFiltersChange,
 }: MaintenanceFiltersProps) {
   const { t } = useTranslation();
+  const { userRole } = useUserRole();
 
   const { data: properties } = useQuery({
     queryKey: ["properties"],
     queryFn: async () => {
+      console.log("Fetching properties for filters");
       const { data, error } = await supabase
         .from("properties")
         .select("id, name");
       if (error) throw error;
+      console.log("Fetched properties:", data);
       return data;
     },
   });
@@ -39,7 +43,7 @@ export default function MaintenanceFilters({
   return (
     <div className="flex flex-col sm:flex-row gap-4">
       <div className="flex-1">
-        <label className="text-sm font-medium text-gray-700 mb-1 block">
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-1 block">
           {t("maintenance.filters.status")}
         </label>
         <Select
@@ -61,13 +65,13 @@ export default function MaintenanceFilters({
       </div>
 
       <div className="flex-1">
-        <label className="text-sm font-medium text-gray-700 mb-1 block">
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-1 block">
           {t("maintenance.filters.priority")}
         </label>
         <Select
           value={filters.priority}
           onValueChange={(value) =>
-            onFiltersChange({ ...filters, priority: value })
+            onFiltersChange({ ...filters, priority: value as "low" | "medium" | "high" | "all" })
           }
         >
           <SelectTrigger className="w-full">
@@ -82,29 +86,31 @@ export default function MaintenanceFilters({
         </Select>
       </div>
 
-      <div className="flex-1">
-        <label className="text-sm font-medium text-gray-700 mb-1 block">
-          {t("maintenance.filters.property")}
-        </label>
-        <Select
-          value={filters.propertyId}
-          onValueChange={(value) =>
-            onFiltersChange({ ...filters, propertyId: value })
-          }
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder={t("maintenance.filters.property")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("maintenance.filters.allProperties")}</SelectItem>
-            {properties?.map((property) => (
-              <SelectItem key={property.id} value={property.id}>
-                {property.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {userRole === "landlord" && (
+        <div className="flex-1">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-1 block">
+            {t("maintenance.filters.property")}
+          </label>
+          <Select
+            value={filters.propertyId}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, propertyId: value })
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("maintenance.filters.property")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("maintenance.filters.allProperties")}</SelectItem>
+              {properties?.map((property) => (
+                <SelectItem key={property.id} value={property.id}>
+                  {property.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
     </div>
   );
 }

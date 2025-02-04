@@ -11,14 +11,14 @@ import { useAuthState } from "@/hooks/useAuthState";
 import { MaintenanceHeader } from "@/components/maintenance/sections/MaintenanceHeader";
 import { MaintenanceNavigation } from "@/components/maintenance/sections/MaintenanceNavigation";
 import { RequestsSection } from "@/components/maintenance/sections/RequestsSection";
+import { useToast } from "@/hooks/use-toast";
 
 type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
-type MaintenancePriority = "low" | "medium" | "high";
 type MaintenanceSection = "requests" | "providers";
 
 interface Filters {
   status: MaintenanceStatus | "all";
-  priority: MaintenancePriority | "all";
+  priority: "low" | "medium" | "high" | "all";
   propertyId: string;
 }
 
@@ -27,6 +27,7 @@ export default function Maintenance() {
   const queryClient = useQueryClient();
   const { userRole } = useUserRole();
   const { currentUserId } = useAuthState();
+  const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
   const [activeSection, setActiveSection] = React.useState<MaintenanceSection>("requests");
@@ -49,6 +50,14 @@ export default function Maintenance() {
         (payload) => {
           console.log('Real-time update received:', payload);
           queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
+          
+          // Show notification for updates
+          if (payload.eventType === 'UPDATE') {
+            toast({
+              title: "Maintenance Request Updated",
+              description: "A maintenance request has been updated.",
+            });
+          }
         }
       )
       .subscribe();
@@ -56,7 +65,7 @@ export default function Maintenance() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [queryClient, toast]);
 
   const { data: maintenanceRequests, isLoading } = useQuery({
     queryKey: ["maintenance-requests", filters, currentUserId],
@@ -135,14 +144,14 @@ export default function Maintenance() {
             <MaintenanceNavigation 
               activeSection={activeSection}
               onSectionChange={setActiveSection}
-              showProviders={userRole !== "service_provider"}
+              showProviders={userRole === "landlord"}
             />
           )}
 
           {activeSection === "requests" ? (
             <>
               {userRole !== "tenant" && (
-                <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="bg-white dark:bg-slate-800 rounded-lg p-6 shadow-sm">
                   <MaintenanceFilters filters={filters} onFiltersChange={setFilters} />
                 </div>
               )}
@@ -165,7 +174,7 @@ export default function Maintenance() {
                 onRequestClick={handleRequestClick}
               />
             </>
-          ) : userRole !== "tenant" && userRole !== "service_provider" && (
+          ) : userRole === "landlord" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">

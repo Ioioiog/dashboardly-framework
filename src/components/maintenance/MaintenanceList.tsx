@@ -1,30 +1,27 @@
 import React from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { RequestStatusTimeline } from "./sections/RequestStatusTimeline";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
+import { Edit, Tool, User } from "lucide-react";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface MaintenanceRequest {
   id: string;
   title: string;
   status: "pending" | "in_progress" | "completed" | "cancelled";
-  priority: string;
+  priority: "low" | "medium" | "high";
   created_at: string;
   updated_at: string;
   property: { name: string };
   tenant: { first_name: string; last_name: string };
   description: string;
+  assigned_to?: string | null;
+  service_provider_status?: string | null;
+  scheduled_date?: string | null;
+  service_provider_fee?: number;
 }
 
 interface MaintenanceListProps {
@@ -39,9 +36,11 @@ export default function MaintenanceList({
   onRequestClick 
 }: MaintenanceListProps) {
   const { t } = useTranslation();
+  const { userRole } = useUserRole();
 
   console.log('MaintenanceList - Received requests:', requests);
   console.log('MaintenanceList - Loading state:', isLoading);
+  console.log('MaintenanceList - User role:', userRole);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -83,12 +82,45 @@ export default function MaintenanceList({
     }
   };
 
+  const renderServiceProviderInfo = (request: MaintenanceRequest) => {
+    if (userRole !== 'landlord' && userRole !== 'service_provider') return null;
+
+    return (
+      <div className="mt-4 space-y-2 border-t pt-4">
+        <div className="flex items-center gap-2">
+          <Tool className="h-4 w-4 text-gray-500" />
+          <span className="text-sm text-gray-600">
+            {request.assigned_to ? 
+              <>
+                <span>Assigned • </span>
+                {request.service_provider_status && 
+                  <Badge variant="outline">{request.service_provider_status}</Badge>
+                }
+              </> : 
+              "Unassigned"
+            }
+          </span>
+        </div>
+        {request.scheduled_date && (
+          <p className="text-sm text-gray-600">
+            Scheduled: {format(new Date(request.scheduled_date), 'PPP')}
+          </p>
+        )}
+        {request.service_provider_fee !== undefined && (
+          <p className="text-sm text-gray-600">
+            Estimated Cost: ${request.service_provider_fee}
+          </p>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       {requests.map((request) => (
         <Card 
           key={request.id}
-          className="p-6"
+          className="p-6 hover:shadow-md transition-shadow duration-200"
         >
           <div className="space-y-4">
             <div className="flex justify-between items-start">
@@ -119,10 +151,15 @@ export default function MaintenanceList({
             </div>
 
             <div className="text-sm text-gray-600">
+              <div className="flex items-center gap-2 mb-2">
+                <User className="h-4 w-4 text-gray-500" />
+                <span>{request.tenant.first_name} {request.tenant.last_name}</span>
+              </div>
               <p><strong>{t("maintenance.property")}:</strong> {request.property.name}</p>
-              <p><strong>{t("maintenance.tenant")}:</strong> {request.tenant.first_name} {request.tenant.last_name}</p>
               <p className="mt-2">{request.description}</p>
             </div>
+
+            {renderServiceProviderInfo(request)}
 
             <RequestStatusTimeline 
               status={request.status}

@@ -406,16 +406,74 @@ export type Database = {
           },
         ]
       }
+      maintenance_request_ratings: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string
+          rating: number | null
+          request_id: string | null
+          tenant_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          rating?: number | null
+          request_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          rating?: number | null
+          request_id?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_request_ratings_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_request_ratings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_request_ratings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_details"
+            referencedColumns: ["tenant_id"]
+          },
+        ]
+      }
       maintenance_requests: {
         Row: {
+          approval_notes: string | null
+          approval_status: string | null
           assigned_to: string | null
           completion_date: string | null
           completion_report: string | null
+          cost_estimate: number | null
+          cost_estimate_notes: string | null
+          cost_estimate_status: string | null
           created_at: string
           description: string
           id: string
           images: string[] | null
           issue_type: string | null
+          next_scheduled_date: string | null
           notes: string | null
           payment_amount: number | null
           payment_status: string | null
@@ -423,8 +481,11 @@ export type Database = {
             | Database["public"]["Enums"]["maintenance_request_priority"]
             | null
           property_id: string
+          rating: number | null
+          rating_comment: string | null
           read_by_landlord: boolean | null
           read_by_tenant: boolean | null
+          recurring_schedule: Json | null
           scheduled_date: string | null
           service_provider_fee: number | null
           service_provider_notes: string | null
@@ -435,14 +496,20 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_notes?: string | null
+          approval_status?: string | null
           assigned_to?: string | null
           completion_date?: string | null
           completion_report?: string | null
+          cost_estimate?: number | null
+          cost_estimate_notes?: string | null
+          cost_estimate_status?: string | null
           created_at?: string
           description: string
           id?: string
           images?: string[] | null
           issue_type?: string | null
+          next_scheduled_date?: string | null
           notes?: string | null
           payment_amount?: number | null
           payment_status?: string | null
@@ -450,8 +517,11 @@ export type Database = {
             | Database["public"]["Enums"]["maintenance_request_priority"]
             | null
           property_id: string
+          rating?: number | null
+          rating_comment?: string | null
           read_by_landlord?: boolean | null
           read_by_tenant?: boolean | null
+          recurring_schedule?: Json | null
           scheduled_date?: string | null
           service_provider_fee?: number | null
           service_provider_notes?: string | null
@@ -462,14 +532,20 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_notes?: string | null
+          approval_status?: string | null
           assigned_to?: string | null
           completion_date?: string | null
           completion_report?: string | null
+          cost_estimate?: number | null
+          cost_estimate_notes?: string | null
+          cost_estimate_status?: string | null
           created_at?: string
           description?: string
           id?: string
           images?: string[] | null
           issue_type?: string | null
+          next_scheduled_date?: string | null
           notes?: string | null
           payment_amount?: number | null
           payment_status?: string | null
@@ -477,8 +553,11 @@ export type Database = {
             | Database["public"]["Enums"]["maintenance_request_priority"]
             | null
           property_id?: string
+          rating?: number | null
+          rating_comment?: string | null
           read_by_landlord?: boolean | null
           read_by_tenant?: boolean | null
+          recurring_schedule?: Json | null
           scheduled_date?: string | null
           service_provider_fee?: number | null
           service_provider_notes?: string | null
