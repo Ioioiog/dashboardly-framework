@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -21,44 +21,73 @@ interface MaintenanceRequestModalProps {
   onUpdateRequest: (request: Partial<MaintenanceRequest>) => void;
 }
 
+interface ChatMessage {
+  id: string;
+  sender_id: string;
+  message: string;
+  created_at: string;
+  sender?: {
+    first_name: string | null;
+    last_name: string | null;
+    role: string;
+  };
+}
+
 export function MaintenanceRequestModal({
   open,
   onOpenChange,
   request,
   onUpdateRequest,
 }: MaintenanceRequestModalProps) {
-  const [messages, setMessages] = React.useState<any[]>([]);
-  const [newMessage, setNewMessage] = React.useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
   const { toast } = useToast();
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  React.useEffect(() => {
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
     if (!request.id) return;
 
     const fetchMessages = async () => {
-      const { data, error } = await supabase
-        .from('maintenance_request_chats')
-        .select(`
-          *,
-          sender:profiles!maintenance_request_chats_sender_id_fkey(
-            first_name,
-            last_name,
-            role
-          )
-        `)
-        .eq('request_id', request.id)
-        .order('created_at', { ascending: true });
+      try {
+        console.log("Fetching chat messages for request:", request.id);
+        const { data, error } = await supabase
+          .from('maintenance_request_chats')
+          .select(`
+            *,
+            sender:profiles!maintenance_request_chats_sender_id_fkey(
+              first_name,
+              last_name,
+              role
+            )
+          `)
+          .eq('request_id', request.id)
+          .order('created_at', { ascending: true });
 
-      if (error) {
+        if (error) throw error;
+        console.log("Fetched messages:", data);
+        setMessages(data || []);
+      } catch (error) {
         console.error('Error fetching messages:', error);
-        return;
+        toast({
+          title: "Error",
+          description: "Failed to load chat messages",
+          variant: "destructive",
+        });
       }
-
-      setMessages(data || []);
     };
 
     fetchMessages();
 
+    // Subscribe to new messages
     const channel = supabase
       .channel(`maintenance_chat_${request.id}`)
       .on(
@@ -69,9 +98,28 @@ export function MaintenanceRequestModal({
           table: 'maintenance_request_chats',
           filter: `request_id=eq.${request.id}`
         },
-        (payload) => {
+        async (payload) => {
           console.log('New message received:', payload);
-          setMessages(prev => [...prev, payload.new]);
+          // Fetch the complete message with sender information
+          const { data, error } = await supabase
+            .from('maintenance_request_chats')
+            .select(`
+              *,
+              sender:profiles!maintenance_request_chats_sender_id_fkey(
+                first_name,
+                last_name,
+                role
+              )
+            `)
+            .eq('id', payload.new.id)
+            .single();
+
+          if (error) {
+            console.error('Error fetching new message details:', error);
+            return;
+          }
+
+          setMessages(prev => [...prev, data]);
         }
       )
       .subscribe();
@@ -79,20 +127,13 @@ export function MaintenanceRequestModal({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [request.id]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  React.useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  }, [request.id, toast]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !request.id) return;
 
+    setIsLoading(true);
     try {
       const { error } = await supabase
         .from('maintenance_request_chats')
@@ -116,8 +157,12 @@ export function MaintenanceRequestModal({
         description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // ... keep existing code (review, provider, and costs tabs)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -289,9 +334,9 @@ export function MaintenanceRequestModal({
           <TabsContent value="communication" className="space-y-4 mt-4">
             <ScrollArea className="h-[400px] p-4 border rounded-lg">
               <div className="space-y-4">
-                {messages.map((message, index) => (
+                {messages.map((message) => (
                   <div
-                    key={index}
+                    key={message.id}
                     className={`flex ${
                       message.sender?.role === 'tenant'
                         ? 'justify-start'
@@ -327,7 +372,7 @@ export function MaintenanceRequestModal({
                 placeholder="Type your message..."
                 className="flex-1"
               />
-              <Button type="submit" disabled={!newMessage.trim()}>
+              <Button type="submit" disabled={!newMessage.trim() || isLoading}>
                 Send
               </Button>
             </form>
