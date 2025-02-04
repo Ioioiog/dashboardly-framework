@@ -69,18 +69,18 @@ export default function MaintenanceDialog({
     console.log("Form submitted with data:", formData);
     
     try {
-      const processedData: Partial<MaintenanceRequest> = {
+      const processedData = {
         tenant_id: currentUserId!,
         property_id: formData.property_id || existingRequest?.property_id,
         title: formData.title || existingRequest?.title,
         description: formData.description || existingRequest?.description,
         status: formData.status || existingRequest?.status || "pending",
         priority: formData.priority || existingRequest?.priority || "low",
-        scheduled_date: formData.scheduled_date?.toISOString(),
+        scheduled_date: formData.scheduled_date ? formData.scheduled_date.toISOString() : null,
         assigned_to: formData.assigned_to,
         service_provider_notes: formData.service_provider_notes,
         notes: formData.notes,
-        images: formData.images?.filter((img: string | File) => typeof img === 'string') || [],
+        images: (formData.images?.filter((img: string | File) => typeof img === 'string') || []) as string[],
         service_provider_fee: formData.service_provider_fee || 0,
         service_provider_status: formData.service_provider_status,
         completion_report: formData.completion_report,
