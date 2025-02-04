@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useMaintenanceRequest } from "./hooks/useMaintenanceRequest";
 import { useMaintenanceProperties } from "./hooks/useMaintenanceProperties";
@@ -8,9 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateMaintenanceRequest } from "./utils/validation";
-import { NewRequestModal } from "./modals/NewRequestModal";
-import { ActiveRequestModal } from "./modals/ActiveRequestModal";
-import { ReviewCompleteModal } from "./modals/ReviewCompleteModal";
+import { MaintenanceRequestModal } from "./modals/MaintenanceRequestModal";
 import type { MaintenanceRequest } from "./hooks/useMaintenanceRequest";
 
 interface MaintenanceDialogProps {
@@ -84,42 +81,12 @@ export function MaintenanceDialog({
 
   if (!existingRequest) return null;
 
-  const getModalComponent = () => {
-    if (userRole !== "landlord") return null;
-
-    switch (existingRequest.status) {
-      case "pending":
-        return (
-          <NewRequestModal
-            open={open}
-            onOpenChange={onOpenChange}
-            request={existingRequest}
-            onUpdateRequest={handleUpdateRequest}
-          />
-        );
-      case "in_progress":
-        return (
-          <ActiveRequestModal
-            open={open}
-            onOpenChange={onOpenChange}
-            request={existingRequest}
-            onUpdateRequest={handleUpdateRequest}
-          />
-        );
-      case "completed":
-      case "cancelled":
-        return (
-          <ReviewCompleteModal
-            open={open}
-            onOpenChange={onOpenChange}
-            request={existingRequest}
-            onUpdateRequest={handleUpdateRequest}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  return getModalComponent();
+  return (
+    <MaintenanceRequestModal
+      open={open}
+      onOpenChange={onOpenChange}
+      request={existingRequest}
+      onUpdateRequest={handleUpdateRequest}
+    />
+  );
 }
