@@ -35,6 +35,8 @@ export interface MaintenanceRequest {
   cost_estimate_notes?: string | null;
   rating_comment?: string | null;
   issue_type?: string | null;
+  contact_phone?: string | null;
+  preferred_times?: string[];
   property?: Property;
   tenant?: Tenant;
 }
