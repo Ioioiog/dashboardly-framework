@@ -1,6 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+interface Property {
+  name: string;
+}
+
+interface Tenant {
+  first_name: string;
+  last_name: string;
+}
+
 export interface MaintenanceRequest {
   id?: string;
   property_id: string;
@@ -24,6 +33,9 @@ export interface MaintenanceRequest {
   payment_amount?: number;
   cost_estimate?: number | null;
   rating_comment?: string | null;
+  issue_type?: string | null;
+  property?: Property;
+  tenant?: Tenant;
 }
 
 export function useMaintenanceRequest(requestId?: string) {
@@ -36,7 +48,14 @@ export function useMaintenanceRequest(requestId?: string) {
       console.log("Fetching maintenance request with ID:", requestId);
       const { data, error } = await supabase
         .from('maintenance_requests')
-        .select('*')
+        .select(`
+          *,
+          property:properties(name),
+          tenant:profiles!maintenance_requests_tenant_id_fkey(
+            first_name,
+            last_name
+          )
+        `)
         .eq('id', requestId)
         .single();
 
