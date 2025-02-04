@@ -1,5 +1,4 @@
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,31 +11,28 @@ interface ServiceProvider {
   last_name: string | null;
 }
 
-export interface LandlordFieldsProps {
-  serviceProviders: ServiceProvider[];
-  formData: {
-    assigned_to: string | null;
-    service_provider_notes: string | null;
-    notes: string | null;
-    status?: string;
-  };
-  onChange: (field: string, value: string | null) => void;
-  userRole?: string;
-  isExistingRequest?: boolean;
-  isLoadingProviders?: boolean;
+interface FormData {
+  status?: string;
+  assigned_to?: string | null;
+  service_provider_notes?: string | null;
 }
 
-export function LandlordFields({ 
-  serviceProviders, 
-  formData, 
-  onChange, 
-  userRole = "tenant",
-  isExistingRequest,
-  isLoadingProviders = false
+interface LandlordFieldsProps {
+  formData: FormData;
+  onFieldChange: (field: string, value: any) => void;
+  serviceProviders: ServiceProvider[];
+  isLoadingProviders: boolean;
+  isReadOnly?: boolean;
+}
+
+export function LandlordFields({
+  formData,
+  onFieldChange,
+  serviceProviders,
+  isLoadingProviders,
+  isReadOnly = false
 }: LandlordFieldsProps) {
   const { t } = useTranslation();
-  const isLandlord = userRole === "landlord";
-  const isServiceProvider = userRole === "service_provider";
 
   const statusOptions = [
     { value: "pending", label: t("maintenance.status.pending") },
@@ -47,13 +43,22 @@ export function LandlordFields({
 
   // Query to fetch provider details if assigned
   const { data: assignedProvider } = useQuery({
-    queryKey: ['service-provider', formData.assigned_to],
+    queryKey: ['service-provider-details', formData.assigned_to],
     queryFn: async () => {
       if (!formData.assigned_to) return null;
       
+      console.log("Fetching provider details for ID:", formData.assigned_to);
+      
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          service_provider_profiles!inner (
+            business_name
+          )
+        `)
         .eq('id', formData.assigned_to)
         .single();
 
@@ -62,6 +67,7 @@ export function LandlordFields({
         return null;
       }
 
+      console.log("Fetched provider details:", data);
       return data;
     },
     enabled: !!formData.assigned_to
@@ -84,6 +90,12 @@ export function LandlordFields({
     if (assignedProvider) {
       const firstName = assignedProvider.first_name || '';
       const lastName = assignedProvider.last_name || '';
+      const businessName = assignedProvider.service_provider_profiles?.[0]?.business_name;
+      
+      if (businessName) {
+        return businessName;
+      }
+      
       if (firstName || lastName) {
         return `${firstName} ${lastName}`.trim();
       }
@@ -94,95 +106,58 @@ export function LandlordFields({
 
   return (
     <div className="space-y-4">
-      {isExistingRequest && (
-        <div className="space-y-2">
-          <Label>{t("maintenance.form.status")}</Label>
-          {isLandlord || isServiceProvider ? (
-            <Select
-              value={formData.status || "pending"}
-              onValueChange={(value) => onChange("status", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t("maintenance.form.selectStatus")} />
-              </SelectTrigger>
-              <SelectContent>
-                {statusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <div className="p-3 bg-gray-50 rounded-md border">
-              {formData.status || "pending"}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="space-y-2">
-        <Label>Service Provider</Label>
-        {isLoadingProviders ? (
-          <Skeleton className="h-10 w-full" />
-        ) : isLandlord ? (
+      <div>
+        <label className="text-sm font-medium mb-2 block">
+          {t("maintenance.form.status")}
+        </label>
+        {isReadOnly ? (
+          <div className="p-3 bg-gray-50 rounded-md border">
+            {formData.status ? t(`maintenance.status.${formData.status}`) : "-"}
+          </div>
+        ) : (
           <Select
-            value={formData.assigned_to || "unassigned"}
-            onValueChange={(value) => {
-              console.log("Selected service provider:", value);
-              onChange("assigned_to", value === "unassigned" ? null : value);
-            }}
+            value={formData.status}
+            onValueChange={(value) => onFieldChange("status", value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a service provider" />
+              <SelectValue placeholder={t("maintenance.form.selectStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="unassigned">Not assigned</SelectItem>
-              {serviceProviders?.map((provider) => (
-                <SelectItem key={provider.id} value={provider.id}>
-                  {`${provider.first_name || ''} ${provider.last_name || ''}`.trim() || "Unnamed Provider"}
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        ) : (
+        )}
+      </div>
+
+      <div>
+        <label className="text-sm font-medium mb-2 block">Service Provider</label>
+        {isLoadingProviders ? (
+          <Skeleton className="h-10 w-full" />
+        ) : isReadOnly ? (
           <div className="p-3 bg-gray-50 rounded-md border">
-            {getServiceProviderName(formData.assigned_to)}
+            {getServiceProviderName(formData.assigned_to || null)}
           </div>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="service_provider_notes">Instructions for Service Provider</Label>
-        {isLandlord ? (
-          <Textarea
-            id="service_provider_notes"
-            value={formData.service_provider_notes || ""}
-            onChange={(e) => onChange("service_provider_notes", e.target.value)}
-            placeholder="Add any specific instructions for the service provider..."
-            className="min-h-[100px]"
-          />
         ) : (
-          <div className="p-3 bg-gray-50 rounded-md border min-h-[100px]">
-            {formData.service_provider_notes || "No instructions provided"}
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="internal_notes">Internal Notes</Label>
-        {isLandlord || isServiceProvider ? (
-          <Textarea
-            id="internal_notes"
-            value={formData.notes || ""}
-            onChange={(e) => onChange("notes", e.target.value)}
-            placeholder="Add any internal notes..."
-            className="min-h-[100px]"
-          />
-        ) : (
-          <div className="p-3 bg-gray-50 rounded-md border min-h-[100px]">
-            {formData.notes || "No internal notes"}
-          </div>
+          <Select
+            value={formData.assigned_to || ""}
+            onValueChange={(value) => onFieldChange("assigned_to", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select service provider" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Not assigned</SelectItem>
+              {serviceProviders.map((provider) => (
+                <SelectItem key={provider.id} value={provider.id}>
+                  {provider.first_name} {provider.last_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
       </div>
     </div>
