@@ -3,6 +3,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ServiceProvider {
   id: string;
@@ -43,20 +45,51 @@ export function LandlordFields({
     { value: "cancelled", label: t("maintenance.status.cancelled") }
   ];
 
+  // Query to fetch provider details if assigned
+  const { data: assignedProvider } = useQuery({
+    queryKey: ['service-provider', formData.assigned_to],
+    queryFn: async () => {
+      if (!formData.assigned_to) return null;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .eq('id', formData.assigned_to)
+        .single();
+
+      if (error) {
+        console.error("Error fetching provider details:", error);
+        return null;
+      }
+
+      return data;
+    },
+    enabled: !!formData.assigned_to
+  });
+
   const getServiceProviderName = (id: string | null) => {
     if (!id) return "Not assigned";
-    
-    console.log("Looking for provider with ID:", id);
-    console.log("Available providers:", serviceProviders);
-    
-    const provider = serviceProviders.find(p => p.id === id);
-    if (!provider) return "Not assigned";
-    
-    const firstName = provider.first_name || '';
-    const lastName = provider.last_name || '';
-    
-    if (!firstName && !lastName) return "Not assigned";
-    return `${firstName} ${lastName}`.trim();
+
+    // First check the passed serviceProviders array
+    const providerFromList = serviceProviders.find(p => p.id === id);
+    if (providerFromList) {
+      const firstName = providerFromList.first_name || '';
+      const lastName = providerFromList.last_name || '';
+      if (firstName || lastName) {
+        return `${firstName} ${lastName}`.trim();
+      }
+    }
+
+    // Then check the queried provider data
+    if (assignedProvider) {
+      const firstName = assignedProvider.first_name || '';
+      const lastName = assignedProvider.last_name || '';
+      if (firstName || lastName) {
+        return `${firstName} ${lastName}`.trim();
+      }
+    }
+
+    return "Not assigned";
   };
 
   return (
