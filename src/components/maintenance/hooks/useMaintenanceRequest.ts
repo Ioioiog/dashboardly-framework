@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface MaintenanceRequest {
   id?: string;
-  property_id?: string;
-  tenant_id?: string;
-  title?: string;
-  description?: string;
+  property_id: string;
+  tenant_id: string;
+  title: string;
+  description: string;
   status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   priority?: 'low' | 'medium' | 'high';
   images?: string[];
@@ -21,114 +21,67 @@ interface MaintenanceRequest {
   completion_report?: string;
 }
 
-export function useMaintenanceRequest() {
-  const [isLoading, setIsLoading] = useState(false);
+export function useMaintenanceRequest(requestId?: string) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const createMaintenanceRequest = async (data: MaintenanceRequest) => {
-    setIsLoading(true);
-    try {
-      console.log("Creating maintenance request with data:", data);
-
-      // Transform the data to ensure scheduled_date is a string
-      const transformedData = {
-        ...data,
-        scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
-      };
-
-      const { error } = await supabase
-        .from("maintenance_requests")
-        .insert([transformedData]);
+  // Query for fetching existing request
+  const { data: existingRequest } = useQuery({
+    queryKey: ['maintenance-request', requestId],
+    enabled: !!requestId,
+    queryFn: async () => {
+      console.log("Fetching maintenance request with ID:", requestId);
+      const { data, error } = await supabase
+        .from('maintenance_requests')
+        .select('*')
+        .eq('id', requestId)
+        .single();
 
       if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ["maintenance-requests"] });
-      toast({
-        title: "Success",
-        description: "Maintenance request created successfully",
-      });
-    } catch (error: any) {
-      console.error("Error creating maintenance request:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create maintenance request",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
+      return data;
     }
-  };
+  });
 
-  const updateMaintenanceRequest = async (id: string, data: Partial<MaintenanceRequest>) => {
-    setIsLoading(true);
-    try {
-      console.log("Updating maintenance request:", id, data);
-
-      // Transform the data to ensure scheduled_date is a string
-      const transformedData = {
-        ...data,
-        scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
-      };
-
+  // Create mutation
+  const createMutation = useMutation({
+    mutationFn: async (data: MaintenanceRequest) => {
       const { error } = await supabase
-        .from("maintenance_requests")
-        .update(transformedData)
-        .eq("id", id);
+        .from('maintenance_requests')
+        .insert([{
+          ...data,
+          scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null
+        }]);
 
       if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ["maintenance-requests"] });
-      toast({
-        title: "Success",
-        description: "Maintenance request updated successfully",
-      });
-    } catch (error: any) {
-      console.error("Error updating maintenance request:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update maintenance request",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
     }
-  };
+  });
 
-  const deleteMaintenanceRequest = async (id: string) => {
-    setIsLoading(true);
-    try {
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async (data: Partial<MaintenanceRequest>) => {
+      if (!requestId) throw new Error('No request ID provided for update');
+
       const { error } = await supabase
-        .from("maintenance_requests")
-        .delete()
-        .eq("id", id);
+        .from('maintenance_requests')
+        .update({
+          ...data,
+          scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null
+        })
+        .eq('id', requestId);
 
       if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ["maintenance-requests"] });
-      toast({
-        title: "Success",
-        description: "Maintenance request deleted successfully",
-      });
-    } catch (error: any) {
-      console.error("Error deleting maintenance request:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete maintenance request",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
     }
-  };
+  });
 
   return {
-    isLoading,
-    createMaintenanceRequest,
-    updateMaintenanceRequest,
-    deleteMaintenanceRequest,
+    existingRequest,
+    createMutation,
+    updateMutation
   };
 }

@@ -69,20 +69,24 @@ export default function MaintenanceDialog({
     
     try {
       const processedData = {
-        ...existingRequest,
-        ...formData,
         tenant_id: currentUserId,
-        scheduled_date: formData.scheduled_date?.toISOString(),
         property_id: formData.property_id || existingRequest?.property_id,
         title: formData.title || existingRequest?.title,
         description: formData.description || existingRequest?.description,
         status: formData.status || existingRequest?.status || "pending",
         priority: formData.priority || existingRequest?.priority || "low",
+        scheduled_date: formData.scheduled_date?.toISOString(),
+        assigned_to: formData.assigned_to,
+        service_provider_notes: formData.service_provider_notes,
+        notes: formData.notes,
+        images: formData.images || [],
+        service_provider_fee: formData.service_provider_fee,
+        service_provider_status: formData.service_provider_status,
+        completion_report: formData.completion_report
       };
       
       console.log("Processing form data:", processedData);
 
-      // Validate the processed data
       const validatedData = validateMaintenanceRequest(processedData);
       console.log("Validated data:", validatedData);
 
