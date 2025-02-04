@@ -22,6 +22,8 @@ export interface MaintenanceRequest {
   completion_date?: string | null;
   payment_status?: string | null;
   payment_amount?: number;
+  cost_estimate?: number | null;
+  rating_comment?: string | null;
 }
 
 export function useMaintenanceRequest(requestId?: string) {
