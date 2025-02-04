@@ -77,13 +77,13 @@ export default function MaintenanceDialog({
         status: formData.status || existingRequest?.status || "pending",
         priority: formData.priority || existingRequest?.priority || "low",
         scheduled_date: formData.scheduled_date ? formData.scheduled_date.toISOString() : null,
-        assigned_to: formData.assigned_to,
-        service_provider_notes: formData.service_provider_notes,
-        notes: formData.notes,
+        assigned_to: formData.assigned_to || null,
+        service_provider_notes: formData.service_provider_notes || null,
+        notes: formData.notes || null,
         images: (formData.images?.filter((img: string | File) => typeof img === 'string') || []) as string[],
         service_provider_fee: formData.service_provider_fee || 0,
-        service_provider_status: formData.service_provider_status,
-        completion_report: formData.completion_report,
+        service_provider_status: formData.service_provider_status || null,
+        completion_report: formData.completion_report || null,
         payment_amount: 0,
         payment_status: null,
         read_by_landlord: false,
@@ -97,7 +97,7 @@ export default function MaintenanceDialog({
 
       if (requestId) {
         console.log("Updating maintenance request:", validatedData);
-        await updateMutation.mutateAsync(validatedData);
+        await updateMutation.mutateAsync(validatedData as Partial<MaintenanceRequest>);
       } else {
         console.log("Creating maintenance request:", validatedData);
         await createMutation.mutateAsync(validatedData as MaintenanceRequest);
