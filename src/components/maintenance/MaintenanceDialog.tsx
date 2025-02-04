@@ -18,7 +18,7 @@ interface MaintenanceDialogProps {
   requestId?: string;
 }
 
-export default function MaintenanceDialog({
+export function MaintenanceDialog({
   open,
   onOpenChange,
   requestId,

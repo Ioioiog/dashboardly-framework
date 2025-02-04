@@ -6,10 +6,12 @@ import { MaintenanceDialog } from "@/components/maintenance/MaintenanceDialog";
 import { MaintenanceHeader } from "@/components/maintenance/dashboard/MaintenanceHeader";
 import { MaintenanceSection } from "@/components/maintenance/dashboard/MaintenanceSection";
 
+type PriorityFilter = "all" | "low" | "medium" | "high";
+
 export default function Maintenance() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
-  const [priority, setPriority] = React.useState("all");
+  const [priority, setPriority] = React.useState<PriorityFilter>("all");
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const { data: maintenanceRequests, isLoading } = useQuery({
@@ -71,7 +73,7 @@ export default function Maintenance() {
         <div className="container mx-auto p-8">
           <MaintenanceHeader
             priority={priority}
-            onPriorityChange={setPriority}
+            onPriorityChange={(value) => setPriority(value as PriorityFilter)}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
           />
