@@ -73,11 +73,16 @@ export function MaintenanceRequestForm({
     }
   });
 
+  const handleSubmit = (data: MaintenanceFormValues) => {
+    console.log("Form submitted with date:", data.scheduled_date);
+    onSubmit(data);
+  };
+
   const isServiceProviderAssigned = userRole === "service_provider" && existingRequest?.assigned_to === form.watch("assigned_to");
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Tenant Column */}
           <div className={cn(
@@ -136,6 +141,7 @@ export function MaintenanceRequestForm({
                         !form.watch("scheduled_date") && "text-muted-foreground"
                       )}
                       disabled={!form.watch("assigned_to")}
+                      type="button"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {form.watch("scheduled_date") ? (
@@ -149,7 +155,10 @@ export function MaintenanceRequestForm({
                     <Calendar
                       mode="single"
                       selected={form.watch("scheduled_date")}
-                      onSelect={(date) => form.setValue("scheduled_date", date)}
+                      onSelect={(date) => {
+                        console.log("Selected date:", date);
+                        form.setValue("scheduled_date", date);
+                      }}
                       disabled={(date) => date < new Date()}
                       initialFocus
                     />
