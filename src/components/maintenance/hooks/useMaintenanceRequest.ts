@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
-interface MaintenanceRequest {
+export interface MaintenanceRequest {
   id?: string;
   property_id: string;
   tenant_id: string;
@@ -23,7 +21,6 @@ interface MaintenanceRequest {
 
 export function useMaintenanceRequest(requestId?: string) {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   // Query for fetching existing request
   const { data: existingRequest } = useQuery({
@@ -45,11 +42,13 @@ export function useMaintenanceRequest(requestId?: string) {
   // Create mutation
   const createMutation = useMutation({
     mutationFn: async (data: MaintenanceRequest) => {
+      console.log("Creating maintenance request with data:", data);
       const { error } = await supabase
         .from('maintenance_requests')
         .insert([{
           ...data,
-          scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null
+          scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
+          images: data.images?.filter(img => typeof img === 'string')
         }]);
 
       if (error) throw error;
@@ -63,12 +62,14 @@ export function useMaintenanceRequest(requestId?: string) {
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<MaintenanceRequest>) => {
       if (!requestId) throw new Error('No request ID provided for update');
+      console.log("Updating maintenance request with data:", data);
 
       const { error } = await supabase
         .from('maintenance_requests')
         .update({
           ...data,
-          scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null
+          scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
+          images: data.images?.filter(img => typeof img === 'string')
         })
         .eq('id', requestId);
 
@@ -82,6 +83,7 @@ export function useMaintenanceRequest(requestId?: string) {
   return {
     existingRequest,
     createMutation,
-    updateMutation
+    updateMutation,
+    isLoading: createMutation.isPending || updateMutation.isPending
   };
 }

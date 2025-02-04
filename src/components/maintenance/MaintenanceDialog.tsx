@@ -27,7 +27,7 @@ export default function MaintenanceDialog({
   const { toast } = useToast();
 
   const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
-  const { existingRequest, createMutation, updateMutation } = useMaintenanceRequest(requestId);
+  const { existingRequest, createMutation, updateMutation, isLoading } = useMaintenanceRequest(requestId);
 
   const { data: serviceProviders } = useQuery({
     queryKey: ["service-providers"],
@@ -79,7 +79,7 @@ export default function MaintenanceDialog({
         assigned_to: formData.assigned_to,
         service_provider_notes: formData.service_provider_notes,
         notes: formData.notes,
-        images: formData.images || [],
+        images: formData.images?.filter((img: string | File) => typeof img === 'string') || [],
         service_provider_fee: formData.service_provider_fee,
         service_provider_status: formData.service_provider_status,
         completion_report: formData.completion_report
@@ -95,7 +95,7 @@ export default function MaintenanceDialog({
         await updateMutation.mutateAsync(validatedData);
       } else {
         console.log("Creating maintenance request:", validatedData);
-        await createMutation.mutateAsync(validatedData);
+        await createMutation.mutateAsync(validatedData as any);
       }
 
       toast({
@@ -126,7 +126,7 @@ export default function MaintenanceDialog({
           serviceProviders={serviceProviders || []}
           existingRequest={transformedRequest}
           onSubmit={handleSubmit}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
+          isSubmitting={isLoading}
           userRole={userRole!}
         />
       </DialogContent>
