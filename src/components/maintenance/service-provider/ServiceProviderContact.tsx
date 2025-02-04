@@ -11,11 +11,11 @@ export function ServiceProviderContact({ phone, email, website }: ServiceProvide
   if (!phone && !email && !website) return null;
 
   return (
-    <div className="flex flex-col space-y-2">
+    <div className="space-y-3">
       {phone && (
         <a
           href={`tel:${phone}`}
-          className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+          className="flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors"
         >
           <Phone className="h-4 w-4" />
           {phone}
@@ -24,7 +24,7 @@ export function ServiceProviderContact({ phone, email, website }: ServiceProvide
       {email && (
         <a
           href={`mailto:${email}`}
-          className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+          className="flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors"
         >
           <Mail className="h-4 w-4" />
           {email}
@@ -35,10 +35,10 @@ export function ServiceProviderContact({ phone, email, website }: ServiceProvide
           href={website}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+          className="flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors"
         >
           <Globe className="h-4 w-4" />
-          Website
+          Visit Website
         </a>
       )}
     </div>

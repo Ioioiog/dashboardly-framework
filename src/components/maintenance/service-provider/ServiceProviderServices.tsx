@@ -1,6 +1,5 @@
 import React from "react";
-import { Badge } from "@/components/ui/badge";
-import { Wrench } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ServiceProviderService {
   name: string;
@@ -17,19 +16,20 @@ export function ServiceProviderServices({ services }: ServiceProviderServicesPro
   if (!services || services.length === 0) return null;
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2 text-sm font-medium">
-        <Wrench className="h-4 w-4" />
-        <span>Services Offered:</span>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {services.map((service, index) => (
-          <Badge key={index} variant="outline">
-            {service.name}
-            {service.base_price && ` - ${service.base_price} ${service.price_unit || ''}`}
-          </Badge>
-        ))}
-      </div>
+    <div className="space-y-3">
+      {services.map((service, index) => (
+        <div 
+          key={index}
+          className="flex justify-between items-center py-2 border-b last:border-b-0 border-gray-100"
+        >
+          <span className="text-gray-800">{service.name}</span>
+          {service.base_price && (
+            <span className="text-blue-500 font-medium">
+              ${service.base_price}{service.price_unit ? `/${service.price_unit}` : ''}
+            </span>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
