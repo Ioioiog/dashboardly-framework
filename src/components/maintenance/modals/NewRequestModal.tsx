@@ -3,6 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Clipboard, User, MessageSquare } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { LandlordFields } from "../forms/LandlordFields";
 
@@ -19,6 +23,100 @@ export function NewRequestModal({
   request,
   onUpdateRequest,
 }: NewRequestModalProps) {
+  const [messages, setMessages] = React.useState<any[]>([]);
+  const [newMessage, setNewMessage] = React.useState("");
+  const { toast } = useToast();
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!request.id) return;
+
+    // Fetch existing chat messages
+    const fetchMessages = async () => {
+      const { data, error } = await supabase
+        .from('maintenance_request_chats')
+        .select(`
+          *,
+          sender:profiles!maintenance_request_chats_sender_id_fkey(
+            first_name,
+            last_name,
+            role
+          )
+        `)
+        .eq('request_id', request.id)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching messages:', error);
+        return;
+      }
+
+      setMessages(data || []);
+    };
+
+    fetchMessages();
+
+    // Subscribe to new messages
+    const channel = supabase
+      .channel(`maintenance_chat_${request.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'maintenance_request_chats',
+          filter: `request_id=eq.${request.id}`
+        },
+        (payload) => {
+          console.log('New message received:', payload);
+          setMessages(prev => [...prev, payload.new]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [request.id]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  React.useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    try {
+      const { error } = await supabase
+        .from('maintenance_request_chats')
+        .insert({
+          request_id: request.id,
+          sender_id: (await supabase.auth.getUser()).data.user?.id,
+          message: newMessage.trim()
+        });
+
+      if (error) throw error;
+
+      setNewMessage("");
+      toast({
+        title: "Message sent",
+        description: "Your message has been sent successfully.",
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   console.log("Rendering NewRequestModal with request:", request);
 
   return (
@@ -67,15 +165,50 @@ export function NewRequestModal({
           </TabsContent>
 
           <TabsContent value="communication" className="space-y-4 mt-4">
-            <div className="space-y-4">
-              <textarea
-                className="w-full min-h-[100px] p-3 rounded-md border"
-                placeholder="Add notes or instructions for the service provider..."
-                value={request.service_provider_notes || ""}
-                onChange={(e) => onUpdateRequest({ service_provider_notes: e.target.value })}
+            <ScrollArea className="h-[400px] p-4 border rounded-lg">
+              <div className="space-y-4">
+                {messages.map((message, index) => (
+                  <div
+                    key={index}
+                    className={`flex ${
+                      message.sender?.role === 'tenant'
+                        ? 'justify-start'
+                        : message.sender?.role === 'landlord'
+                        ? 'justify-end'
+                        : 'justify-center'
+                    }`}
+                  >
+                    <div
+                      className={`max-w-[70%] rounded-lg p-3 ${
+                        message.sender?.role === 'tenant'
+                          ? 'bg-blue-100 dark:bg-blue-900'
+                          : message.sender?.role === 'landlord'
+                          ? 'bg-green-100 dark:bg-green-900'
+                          : 'bg-purple-100 dark:bg-purple-900'
+                      }`}
+                    >
+                      <div className="text-xs font-medium mb-1">
+                        {message.sender?.first_name} {message.sender?.last_name} ({message.sender?.role})
+                      </div>
+                      <p className="text-sm">{message.message}</p>
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+            
+            <form onSubmit={handleSendMessage} className="flex gap-2">
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type your message..."
+                className="flex-1"
               />
-              <Button className="w-full">Send Message</Button>
-            </div>
+              <Button type="submit" disabled={!newMessage.trim()}>
+                Send
+              </Button>
+            </form>
           </TabsContent>
         </Tabs>
       </DialogContent>
