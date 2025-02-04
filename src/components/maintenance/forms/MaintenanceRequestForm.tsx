@@ -180,17 +180,9 @@ export function MaintenanceRequestForm({
           </div>
         </div>
 
-        <div className="flex justify-end space-x-2 pt-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => form.reset()}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
+        <div className="flex justify-end pt-4 border-t">
           <Button type="submit" disabled={isSubmitting}>
-            Create Request
+            {existingRequest ? "Update Request" : "Create Request"}
           </Button>
         </div>
       </form>
