@@ -42,6 +42,7 @@ interface MaintenanceRequestFormProps {
   existingRequest?: MaintenanceFormValues;
   onSubmit: (values: MaintenanceFormValues) => void;
   isSubmitting?: boolean;
+  isLoadingProviders?: boolean;  // Added this prop
 }
 
 export function MaintenanceRequestForm({
@@ -50,7 +51,8 @@ export function MaintenanceRequestForm({
   userRole,
   existingRequest,
   onSubmit,
-  isSubmitting
+  isSubmitting,
+  isLoadingProviders = false  // Added with default value
 }: MaintenanceRequestFormProps) {
   const form = useForm<MaintenanceFormValues>({
     defaultValues: existingRequest || {
@@ -113,13 +115,14 @@ export function MaintenanceRequestForm({
               serviceProviders={serviceProviders || []}
               userRole={userRole}
               isExistingRequest={!!existingRequest}
+              isLoadingProviders={isLoadingProviders}
             />
           </div>
 
           {/* Service Provider Column */}
           <div className={cn(
             "space-y-4 p-6 rounded-lg border bg-white",
-            !isServiceProviderAssigned && userRole === "service_provider" && "opacity-75"
+            !form.watch("assigned_to") && userRole === "service_provider" && "opacity-75"
           )}>
             <h3 className="text-lg font-semibold mb-4">Service Provider Details</h3>
             <div className="space-y-4">
@@ -134,7 +137,7 @@ export function MaintenanceRequestForm({
                         "w-full justify-start text-left font-normal",
                         !form.watch("scheduled_date") && "text-muted-foreground"
                       )}
-                      disabled={!isServiceProviderAssigned}
+                      disabled={!form.watch("assigned_to")}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {form.watch("scheduled_date") ? (
@@ -164,7 +167,7 @@ export function MaintenanceRequestForm({
                   value={form.watch("service_provider_fee") || ""}
                   onChange={(e) => form.setValue("service_provider_fee", parseFloat(e.target.value))}
                   placeholder="Enter estimated cost"
-                  disabled={!isServiceProviderAssigned}
+                  disabled={!form.watch("assigned_to")}
                   min="0"
                   step="0.01"
                 />
@@ -177,7 +180,7 @@ export function MaintenanceRequestForm({
                   className="w-full p-2 border rounded-md"
                   value={form.watch("service_provider_status") || ""}
                   onChange={(e) => form.setValue("service_provider_status", e.target.value)}
-                  disabled={!isServiceProviderAssigned}
+                  disabled={!form.watch("assigned_to")}
                 >
                   <option value="">Select status</option>
                   <option value="pending_review">Pending Review</option>
@@ -196,7 +199,7 @@ export function MaintenanceRequestForm({
                   value={form.watch("completion_report") || ""}
                   onChange={(e) => form.setValue("completion_report", e.target.value)}
                   placeholder="Enter completion details, repairs made, and recommendations"
-                  disabled={!isServiceProviderAssigned}
+                  disabled={!form.watch("assigned_to")}
                   rows={4}
                 />
               </div>
