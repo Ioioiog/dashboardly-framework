@@ -83,10 +83,22 @@ export function useMaintenanceRequest(requestId?: string) {
         }
       }
 
+      // Ensure all required fields are present and handle optional fields
       const transformedData = {
-        ...values,
+        title: values.title,
+        description: values.description,
+        property_id: values.property_id,
+        tenant_id: values.tenant_id,
+        priority: values.priority || 'low',
+        status: values.status || 'pending',
+        notes: values.notes || '',
+        assigned_to: values.assigned_to || null,
+        service_provider_notes: values.service_provider_notes || '',
         images: imageUrls,
         scheduled_date: values.scheduled_date ? values.scheduled_date.toISOString() : null,
+        service_provider_fee: values.service_provider_fee || 0,
+        service_provider_status: values.service_provider_status || null,
+        completion_report: values.completion_report || null
       };
 
       console.log("Transformed data for creation:", transformedData);
@@ -140,10 +152,22 @@ export function useMaintenanceRequest(requestId?: string) {
         }
       }
 
+      // Ensure all required fields are present and handle optional fields
       const transformedData = {
-        ...values,
+        title: values.title,
+        description: values.description,
+        property_id: values.property_id,
+        tenant_id: values.tenant_id,
+        priority: values.priority || 'low',
+        status: values.status || 'pending',
+        notes: values.notes || '',
+        assigned_to: values.assigned_to || null,
+        service_provider_notes: values.service_provider_notes || '',
         images: imageUrls,
         scheduled_date: values.scheduled_date ? values.scheduled_date.toISOString() : null,
+        service_provider_fee: values.service_provider_fee || 0,
+        service_provider_status: values.service_provider_status || null,
+        completion_report: values.completion_report || null
       };
 
       console.log("Transformed data for update:", transformedData);
