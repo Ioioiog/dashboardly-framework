@@ -6,8 +6,6 @@ import MaintenanceDialog from "@/components/maintenance/MaintenanceDialog";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useAuthState } from "@/hooks/useAuthState";
-import { MaintenanceHeader } from "@/components/maintenance/sections/MaintenanceHeader";
-import { MaintenanceNavigation } from "@/components/maintenance/sections/MaintenanceNavigation";
 import { MaintenanceBoard } from "@/components/maintenance/sections/MaintenanceBoard";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -32,7 +30,6 @@ export default function Maintenance() {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
-  const [activeSection, setActiveSection] = React.useState("requests");
   const [priority, setPriority] = React.useState<Priority>("all");
   const [searchQuery, setSearchQuery] = React.useState("");
 
