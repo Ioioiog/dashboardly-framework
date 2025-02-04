@@ -225,7 +225,9 @@ export function NewRequestModal({
                 <Label>Status Update</Label>
                 <Select 
                   value={request.status} 
-                  onValueChange={(value) => onUpdateRequest({ status: value })}
+                  onValueChange={(value: "pending" | "in_progress" | "completed" | "cancelled") => 
+                    onUpdateRequest({ status: value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
