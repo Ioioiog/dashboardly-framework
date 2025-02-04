@@ -111,10 +111,8 @@ export function MaintenanceRequestForm({
                 notes: form.watch("notes"),
                 status: form.watch("status")
               }}
-              onChange={(field, value) => form.setValue(field as keyof MaintenanceFormValues, value)}
+              onFieldChange={(field, value) => form.setValue(field as keyof MaintenanceFormValues, value)}
               serviceProviders={serviceProviders || []}
-              userRole={userRole}
-              isExistingRequest={!!existingRequest}
               isLoadingProviders={isLoadingProviders}
             />
           </div>
