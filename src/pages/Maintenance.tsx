@@ -13,11 +13,12 @@ import { MaintenanceNavigation } from "@/components/maintenance/sections/Mainten
 import { RequestsSection } from "@/components/maintenance/sections/RequestsSection";
 
 type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
+type MaintenancePriority = "low" | "medium" | "high";
 type MaintenanceSection = "requests" | "providers";
 
 interface Filters {
   status: MaintenanceStatus | "all";
-  priority: string;
+  priority: MaintenancePriority | "all";
   propertyId: string;
 }
 
