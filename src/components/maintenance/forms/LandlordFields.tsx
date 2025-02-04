@@ -50,9 +50,13 @@ export function LandlordFields({
     console.log("Available providers:", serviceProviders);
     
     const provider = serviceProviders.find(p => p.id === id);
-    return provider 
-      ? `${provider.first_name || ''} ${provider.last_name || ''}`.trim() 
-      : "Not assigned";
+    if (!provider) return "Not assigned";
+    
+    const firstName = provider.first_name || '';
+    const lastName = provider.last_name || '';
+    
+    if (!firstName && !lastName) return "Not assigned";
+    return `${firstName} ${lastName}`.trim();
   };
 
   return (
