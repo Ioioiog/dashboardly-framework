@@ -88,8 +88,13 @@ export default function MaintenanceDialog({
         payment_status: null,
         read_by_landlord: false,
         read_by_tenant: false
-      } as MaintenanceRequest;
+      };
       
+      // Ensure required fields are present
+      if (!processedData.property_id || !processedData.tenant_id || !processedData.title || !processedData.description) {
+        throw new Error("Missing required fields");
+      }
+
       console.log("Processing form data:", processedData);
 
       const validatedData = validateMaintenanceRequest(processedData);
