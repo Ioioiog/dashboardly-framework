@@ -84,8 +84,8 @@ export default function MaintenanceDialog({
         service_provider_fee: formData.service_provider_fee || 0,
         service_provider_status: formData.service_provider_status || null,
         completion_report: formData.completion_report || null,
-        payment_amount: 0,
-        payment_status: null,
+        payment_amount: formData.payment_amount || 0,
+        payment_status: formData.payment_status || null,
         read_by_landlord: false,
         read_by_tenant: false
       };
@@ -102,7 +102,10 @@ export default function MaintenanceDialog({
 
       if (requestId) {
         console.log("Updating maintenance request:", validatedData);
-        await updateMutation.mutateAsync(validatedData as MaintenanceRequest);
+        await updateMutation.mutateAsync({
+          ...validatedData,
+          id: requestId
+        } as MaintenanceRequest);
       } else {
         console.log("Creating maintenance request:", validatedData);
         await createMutation.mutateAsync(validatedData as MaintenanceRequest);
