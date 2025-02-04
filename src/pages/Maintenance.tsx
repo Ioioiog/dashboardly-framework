@@ -44,8 +44,10 @@ export default function Maintenance() {
 
       // Add role-specific filters
       if (userRole === 'tenant') {
+        console.log('Adding tenant filter:', currentUserId);
         query = query.eq('tenant_id', currentUserId);
       } else if (userRole === 'service_provider') {
+        console.log('Adding service provider filter:', currentUserId);
         query = query.eq('assigned_to', currentUserId);
       }
       // For landlords, the RLS policy will handle filtering
@@ -82,7 +84,8 @@ export default function Maintenance() {
   console.log("Filtered requests counts:", {
     new: newRequests.length,
     active: activeRequests.length,
-    review: reviewRequests.length
+    review: reviewRequests.length,
+    total: filteredRequests.length
   });
 
   const handleRequestClick = (requestId: string) => {

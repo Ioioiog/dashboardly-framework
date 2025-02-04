@@ -38,10 +38,12 @@ export default function MaintenanceList({
   const { t } = useTranslation();
   const { userRole } = useUserRole();
 
-  console.log('MaintenanceList - Detailed request data:', JSON.stringify(requests, null, 2));
   console.log('MaintenanceList - User role:', userRole);
+  console.log('MaintenanceList - Number of requests received:', requests?.length);
+  console.log('MaintenanceList - All requests:', requests);
 
   if (isLoading) {
+    console.log('MaintenanceList - Loading state');
     return <div>Loading...</div>;
   }
 
@@ -118,7 +120,13 @@ export default function MaintenanceList({
   return (
     <div className="space-y-4">
       {requests.map((request) => {
-        console.log('MaintenanceList - Rendering request:', request.id, request.title);
+        console.log('MaintenanceList - Rendering request:', {
+          id: request.id,
+          title: request.title,
+          tenant: request.tenant,
+          property: request.property
+        });
+        
         return (
           <Card 
             key={request.id}
