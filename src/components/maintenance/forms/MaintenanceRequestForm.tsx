@@ -78,6 +78,17 @@ export function MaintenanceRequestForm({
     onSubmit(data);
   };
 
+  const handleDateSelect = (date: Date | undefined) => {
+    console.log("Selected date:", date);
+    if (date) {
+      form.setValue("scheduled_date", date, { 
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true 
+      });
+    }
+  };
+
   const isServiceProviderAssigned = userRole === "service_provider" && existingRequest?.assigned_to === form.watch("assigned_to");
 
   return (
@@ -155,10 +166,7 @@ export function MaintenanceRequestForm({
                     <Calendar
                       mode="single"
                       selected={form.watch("scheduled_date")}
-                      onSelect={(date) => {
-                        console.log("Selected date:", date);
-                        form.setValue("scheduled_date", date);
-                      }}
+                      onSelect={handleDateSelect}
                       disabled={(date) => date < new Date()}
                       initialFocus
                     />
