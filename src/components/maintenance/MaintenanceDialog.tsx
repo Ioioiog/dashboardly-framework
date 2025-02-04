@@ -71,8 +71,12 @@ export default function MaintenanceDialog({
     console.log("Form submitted with data:", formData);
     
     try {
+      if (!currentUserId) {
+        throw new Error("No authenticated user");
+      }
+
       const processedData = {
-        tenant_id: currentUserId!,
+        tenant_id: currentUserId,
         property_id: formData.property_id || existingRequest?.property_id,
         title: formData.title || existingRequest?.title,
         description: formData.description || existingRequest?.description,
@@ -94,12 +98,13 @@ export default function MaintenanceDialog({
         preferred_times: formData.preferred_times || []
       };
       
+      console.log("Processing form data:", processedData);
+
       if (!processedData.property_id || !processedData.tenant_id || !processedData.title || !processedData.description) {
         throw new Error("Missing required fields");
       }
 
-      console.log("Processing form data:", processedData);
-
+      console.log("Validating maintenance request data:", processedData);
       const validatedData = validateMaintenanceRequest(processedData);
       console.log("Validated data:", validatedData);
 
