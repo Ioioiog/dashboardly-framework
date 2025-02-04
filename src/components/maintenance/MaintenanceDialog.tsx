@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateMaintenanceRequest } from "./utils/validation";
+import { X } from "lucide-react";
 import type { MaintenanceRequest } from "./hooks/useMaintenanceRequest";
 
 interface MaintenanceDialogProps {
@@ -46,10 +47,7 @@ export default function MaintenanceDialog({
       }
 
       console.log("Fetched service providers:", profiles);
-      
-      // Filter out providers with null names
       const validProviders = profiles.filter(p => p.first_name || p.last_name);
-      
       return validProviders;
     },
   });
@@ -91,7 +89,9 @@ export default function MaintenanceDialog({
         payment_amount: formData.payment_amount || 0,
         payment_status: formData.payment_status || null,
         read_by_landlord: false,
-        read_by_tenant: false
+        read_by_tenant: false,
+        contact_phone: formData.contact_phone || null,
+        preferred_times: formData.preferred_times || []
       };
       
       if (!processedData.property_id || !processedData.tenant_id || !processedData.title || !processedData.description) {
@@ -131,11 +131,17 @@ export default function MaintenanceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] w-[1400px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent className="max-w-[600px] p-6">
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <DialogTitle className="text-2xl font-bold">
             {requestId ? "Edit Maintenance Request" : "New Maintenance Request"}
           </DialogTitle>
+          <button
+            onClick={() => onOpenChange(false)}
+            className="rounded-full p-1 hover:bg-gray-100 transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </DialogHeader>
         <MaintenanceRequestForm
           properties={properties || []}

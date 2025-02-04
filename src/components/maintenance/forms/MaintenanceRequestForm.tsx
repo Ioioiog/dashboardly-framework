@@ -3,12 +3,11 @@ import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "./ImageUpload";
-import { RequestDetails } from "./RequestDetails";
-import { LandlordFields } from "./LandlordFields";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ScheduleVisitField } from "./ScheduleVisitField";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Property {
   id: string;
@@ -26,10 +25,8 @@ export interface MaintenanceFormValues {
   service_provider_notes?: string;
   images: (string | File)[];
   tenant_id: string;
-  scheduled_date?: Date;
-  service_provider_fee?: number;
-  service_provider_status?: string;
-  completion_report?: string;
+  contact_phone?: string;
+  preferred_times?: string[];
 }
 
 interface MaintenanceRequestFormProps {
@@ -44,29 +41,22 @@ interface MaintenanceRequestFormProps {
 
 export function MaintenanceRequestForm({
   properties,
-  serviceProviders,
   userRole,
   existingRequest,
   onSubmit,
-  isSubmitting,
-  isLoadingProviders = false
+  isSubmitting
 }: MaintenanceRequestFormProps) {
   const form = useForm<MaintenanceFormValues>({
     defaultValues: existingRequest || {
       title: "",
       description: "",
       property_id: "",
-      priority: "low",
+      priority: "medium",
       status: "pending",
-      notes: "",
-      assigned_to: "",
-      service_provider_notes: "",
       images: [],
       tenant_id: "",
-      scheduled_date: undefined,
-      service_provider_fee: 0,
-      service_provider_status: "",
-      completion_report: ""
+      contact_phone: "",
+      preferred_times: []
     }
   });
 
@@ -75,128 +65,132 @@ export function MaintenanceRequestForm({
     onSubmit(data);
   };
 
-  const handleDateSelect = (date: Date | undefined) => {
-    console.log("Date selected in form:", date);
-    form.setValue("scheduled_date", date, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true
-    });
-  };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Tenant Column */}
-          <div className={cn(
-            "space-y-4 p-6 rounded-lg border bg-white",
-            (userRole === "service_provider" || userRole === "landlord") && "opacity-75"
-          )}>
-            <h3 className="text-lg font-semibold mb-4">Tenant Information</h3>
-            <RequestDetails
-              form={form}
-              properties={properties}
-              userRole={userRole}
-              isExistingRequest={!!existingRequest}
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="title" className="text-base font-semibold">
+              Issue Title<span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="title"
+              placeholder="Brief description of the issue"
+              {...form.register("title")}
+              className="mt-1"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="property_id" className="text-base font-semibold">
+              Property Address<span className="text-red-500">*</span>
+            </Label>
+            <select
+              id="property_id"
+              {...form.register("property_id")}
+              className="w-full mt-1 p-2 border rounded-md"
+            >
+              <option value="">select property</option>
+              {properties.map((property) => (
+                <option key={property.id} value={property.id}>
+                  {property.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <Label htmlFor="description" className="text-base font-semibold">
+              Detailed Description<span className="text-red-500">*</span>
+            </Label>
+            <Textarea
+              id="description"
+              placeholder="Please provide as much detail as possible about the issue"
+              {...form.register("description")}
+              className="mt-1 min-h-[120px]"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="contact_phone" className="text-base font-semibold">
+              Contact Phone<span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="contact_phone"
+              type="tel"
+              placeholder="Your contact phone number"
+              {...form.register("contact_phone")}
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="priority" className="text-base font-semibold">
+              Priority Level<span className="text-red-500">*</span>
+            </Label>
+            <select
+              id="priority"
+              {...form.register("priority")}
+              className="w-full mt-1 p-2 border rounded-md"
+            >
+              <option value="low">Low - Can be addressed anytime</option>
+              <option value="medium">Medium - Should be addressed within 2-3 days</option>
+              <option value="high">High - Requires immediate attention</option>
+            </select>
+          </div>
+
+          <div>
+            <Label className="text-base font-semibold">
+              Preferred Service Times
+            </Label>
+            <div className="grid grid-cols-3 gap-4 mt-2">
+              <label className="flex items-center space-x-2">
+                <Checkbox
+                  {...form.register("preferred_times")}
+                  value="morning"
+                />
+                <span>Morning</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <Checkbox
+                  {...form.register("preferred_times")}
+                  value="afternoon"
+                />
+                <span>Afternoon</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <Checkbox
+                  {...form.register("preferred_times")}
+                  value="evening"
+                />
+                <span>Evening</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-base font-semibold">
+              Upload Images <span className="text-gray-500 text-sm">(Optional - Max 5MB per image)</span>
+            </Label>
             <ImageUpload
               images={form.watch("images")}
               onChange={(images) => form.setValue("images", images)}
               disabled={userRole !== "tenant"}
             />
           </div>
-
-          {/* Landlord Column */}
-          <div className={cn(
-            "space-y-4 p-6 rounded-lg border bg-white",
-            userRole !== "landlord" && "opacity-75"
-          )}>
-            <h3 className="text-lg font-semibold mb-4">Landlord Management</h3>
-            <LandlordFields
-              formData={{
-                assigned_to: form.watch("assigned_to"),
-                service_provider_notes: form.watch("service_provider_notes"),
-                notes: form.watch("notes"),
-                status: form.watch("status")
-              }}
-              onFieldChange={(field, value) => form.setValue(field as keyof MaintenanceFormValues, value)}
-              serviceProviders={serviceProviders || []}
-              isLoadingProviders={isLoadingProviders}
-            />
-          </div>
-
-          {/* Service Provider Column */}
-          <div className={cn(
-            "space-y-4 p-6 rounded-lg border bg-white",
-            !form.watch("assigned_to") && userRole === "service_provider" && "opacity-75"
-          )}>
-            <h3 className="text-lg font-semibold mb-4">Service Provider Details</h3>
-            <div className="space-y-4">
-              <ScheduleVisitField
-                value={form.watch("scheduled_date")}
-                onChange={handleDateSelect}
-                disabled={!form.watch("assigned_to")}
-              />
-
-              {/* Initial Cost Estimate */}
-              <div className="space-y-2">
-                <Label>Service Fee Estimate ($)</Label>
-                <Input
-                  type="number"
-                  value={form.watch("service_provider_fee") || ""}
-                  onChange={(e) => form.setValue("service_provider_fee", parseFloat(e.target.value))}
-                  placeholder="Enter estimated cost"
-                  disabled={!form.watch("assigned_to")}
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-
-              {/* Service Provider Status */}
-              <div className="space-y-2">
-                <Label>Service Status</Label>
-                <select
-                  className="w-full p-2 border rounded-md"
-                  value={form.watch("service_provider_status") || ""}
-                  onChange={(e) => form.setValue("service_provider_status", e.target.value)}
-                  disabled={!form.watch("assigned_to")}
-                >
-                  <option value="">Select status</option>
-                  <option value="pending_review">Pending Review</option>
-                  <option value="scheduled">Scheduled</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-
-              {/* Completion Report */}
-              <div className="space-y-2">
-                <Label>Completion Report</Label>
-                <textarea
-                  className="w-full p-2 border rounded-md"
-                  value={form.watch("completion_report") || ""}
-                  onChange={(e) => form.setValue("completion_report", e.target.value)}
-                  placeholder="Enter completion details, repairs made, and recommendations"
-                  disabled={!form.watch("assigned_to")}
-                  rows={4}
-                />
-              </div>
-
-              {form.watch("service_provider_notes") && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium mb-2">Instructions from Landlord</h4>
-                  <p className="text-sm">{form.watch("service_provider_notes")}</p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
-        <div className="flex justify-end space-x-2 pt-4">
+        <div className="flex justify-end space-x-2 pt-4 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => form.reset()}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {existingRequest ? "Update Request" : "Create Request"}
+            Create Request
           </Button>
         </div>
       </form>
