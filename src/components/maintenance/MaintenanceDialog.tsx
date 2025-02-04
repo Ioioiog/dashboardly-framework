@@ -1,15 +1,16 @@
 import { useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useMaintenanceRequest } from "../maintenance/hooks/useMaintenanceRequest";
-import { useMaintenanceProperties } from "../maintenance/hooks/useMaintenanceProperties";
-import { MaintenanceRequestForm } from "./forms/MaintenanceRequestForm";
+import { Dialog } from "@/components/ui/dialog";
+import { useMaintenanceRequest } from "./hooks/useMaintenanceRequest";
+import { useMaintenanceProperties } from "./hooks/useMaintenanceProperties";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useAuthState } from "@/hooks/useAuthState";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateMaintenanceRequest } from "./utils/validation";
-import { X } from "lucide-react";
+import { NewRequestModal } from "./modals/NewRequestModal";
+import { ActiveRequestModal } from "./modals/ActiveRequestModal";
+import { ReviewCompleteModal } from "./modals/ReviewCompleteModal";
 import type { MaintenanceRequest } from "./hooks/useMaintenanceRequest";
 
 interface MaintenanceDialogProps {
@@ -25,7 +26,6 @@ export function MaintenanceDialog({
 }: MaintenanceDialogProps) {
   const { userRole } = useUserRole();
   const { currentUserId } = useAuthState();
-  const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
@@ -47,117 +47,79 @@ export function MaintenanceDialog({
       }
 
       console.log("Fetched service providers:", profiles);
-      const validProviders = profiles.filter(p => p.first_name || p.last_name);
-      return validProviders;
+      return profiles.filter(p => p.first_name || p.last_name);
     },
   });
 
-  useEffect(() => {
-    if (open && userRole === "landlord") {
-      queryClient.invalidateQueries({ queryKey: ["service-providers"] });
-    }
-  }, [open, userRole, queryClient]);
+  const handleUpdateRequest = async (updates: Partial<MaintenanceRequest>) => {
+    if (!requestId || !existingRequest) return;
 
-  const transformedRequest = existingRequest
-    ? {
-        ...existingRequest,
-        scheduled_date: existingRequest.scheduled_date
-          ? new Date(existingRequest.scheduled_date)
-          : undefined,
-      }
-    : undefined;
-
-  const handleSubmit = async (formData: any) => {
-    console.log("Form submitted with data:", formData);
-    
     try {
-      if (!currentUserId) {
-        throw new Error("No authenticated user");
-      }
-
-      const processedData = {
-        tenant_id: currentUserId,
-        property_id: formData.property_id || existingRequest?.property_id,
-        title: formData.title || existingRequest?.title,
-        description: formData.description || existingRequest?.description,
-        status: formData.status || existingRequest?.status || "pending",
-        priority: formData.priority || existingRequest?.priority || "low",
-        scheduled_date: formData.scheduled_date ? formData.scheduled_date.toISOString() : null,
-        assigned_to: formData.assigned_to || null,
-        service_provider_notes: formData.service_provider_notes || null,
-        notes: formData.notes || null,
-        images: (formData.images?.filter((img: string | File) => typeof img === 'string') || []) as string[],
-        service_provider_fee: formData.service_provider_fee || 0,
-        service_provider_status: formData.service_provider_status || null,
-        completion_report: formData.completion_report || null,
-        payment_amount: formData.payment_amount || 0,
-        payment_status: formData.payment_status || null,
-        read_by_landlord: false,
-        read_by_tenant: false,
-        contact_phone: formData.contact_phone || null,
-        preferred_times: formData.preferred_times || []
+      const updatedRequest = {
+        ...existingRequest,
+        ...updates
       };
+
+      console.log("Validating updated request:", updatedRequest);
+      const validatedData = validateMaintenanceRequest(updatedRequest);
       
-      console.log("Processing form data:", processedData);
-
-      if (!processedData.property_id || !processedData.tenant_id || !processedData.title || !processedData.description) {
-        throw new Error("Missing required fields");
-      }
-
-      console.log("Validating maintenance request data:", processedData);
-      const validatedData = validateMaintenanceRequest(processedData);
-      console.log("Validated data:", validatedData);
-
-      if (requestId) {
-        console.log("Updating maintenance request:", validatedData);
-        await updateMutation.mutateAsync({
-          ...validatedData,
-          id: requestId
-        } as MaintenanceRequest);
-      } else {
-        console.log("Creating maintenance request:", validatedData);
-        await createMutation.mutateAsync(validatedData as MaintenanceRequest);
-      }
+      await updateMutation.mutateAsync({
+        ...validatedData,
+        id: requestId
+      } as MaintenanceRequest);
 
       toast({
         title: "Success",
-        description: requestId ? "Maintenance request updated" : "Maintenance request created",
+        description: "Maintenance request updated successfully",
       });
-      onOpenChange(false);
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error updating request:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to save maintenance request",
+        description: error instanceof Error ? error.message : "Failed to update request",
         variant: "destructive"
       });
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[600px] p-6">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle className="text-2xl font-bold">
-            {requestId ? "Edit Maintenance Request" : "New Maintenance Request"}
-          </DialogTitle>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="rounded-full p-1 hover:bg-gray-100 transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </DialogHeader>
-        <MaintenanceRequestForm
-          properties={properties || []}
-          serviceProviders={serviceProviders || []}
-          existingRequest={transformedRequest}
-          onSubmit={handleSubmit}
-          isSubmitting={isLoading}
-          userRole={userRole!}
-          isLoadingProviders={isLoadingProviders}
-        />
-      </DialogContent>
-    </Dialog>
-  );
+  if (!existingRequest) return null;
+
+  const getModalComponent = () => {
+    if (userRole !== "landlord") return null;
+
+    switch (existingRequest.status) {
+      case "pending":
+        return (
+          <NewRequestModal
+            open={open}
+            onOpenChange={onOpenChange}
+            request={existingRequest}
+            onUpdateRequest={handleUpdateRequest}
+          />
+        );
+      case "in_progress":
+        return (
+          <ActiveRequestModal
+            open={open}
+            onOpenChange={onOpenChange}
+            request={existingRequest}
+            onUpdateRequest={handleUpdateRequest}
+          />
+        );
+      case "completed":
+      case "cancelled":
+        return (
+          <ReviewCompleteModal
+            open={open}
+            onOpenChange={onOpenChange}
+            request={existingRequest}
+            onUpdateRequest={handleUpdateRequest}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return getModalComponent();
 }
