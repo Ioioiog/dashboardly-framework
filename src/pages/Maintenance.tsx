@@ -65,10 +65,13 @@ export default function Maintenance() {
   const { data: maintenanceRequests, isLoading } = useQuery({
     queryKey: ["maintenance-requests", priority, currentUserId],
     queryFn: async () => {
-      console.log("Fetching maintenance requests with filters:", { priority });
-      console.log("Current user role:", userRole);
-      console.log("Current user ID:", currentUserId);
+      console.log("Fetching maintenance requests with filters:", { priority, userRole, currentUserId });
       
+      if (!currentUserId) {
+        console.log("No currentUserId, returning empty array");
+        return [];
+      }
+
       let query = supabase
         .from("maintenance_requests")
         .select(`
@@ -80,9 +83,15 @@ export default function Maintenance() {
           )
         `);
 
+      // Apply role-specific filters
       if (userRole === "tenant") {
-        console.log("Adding tenant filter for ID:", currentUserId);
+        console.log("Applying tenant filter:", currentUserId);
         query = query.eq("tenant_id", currentUserId);
+      } else if (userRole === "service_provider") {
+        console.log("Applying service provider filter:", currentUserId);
+        query = query.eq("assigned_to", currentUserId);
+      } else if (userRole === "landlord") {
+        console.log("Applying landlord filter - will be handled by RLS");
       }
 
       if (priority !== "all") {
@@ -96,6 +105,7 @@ export default function Maintenance() {
         throw error;
       }
       
+      console.log("Fetched maintenance requests:", data);
       return data;
     },
   });
