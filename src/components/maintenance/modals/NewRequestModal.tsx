@@ -9,6 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { LandlordFields } from "../forms/LandlordFields";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface NewRequestModalProps {
   open: boolean;
@@ -144,13 +147,96 @@ export function NewRequestModal({
 
           <TabsContent value="review" className="space-y-4 mt-4">
             <div className="grid gap-4">
-              <div className="bg-muted p-4 rounded-lg">
-                <h3 className="font-semibold mb-2">Request Details</h3>
-                <p className="text-sm">{request.description}</p>
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input 
+                  value={request.title} 
+                  readOnly 
+                  className="bg-muted"
+                />
               </div>
-              <div className="bg-muted p-4 rounded-lg">
-                <h3 className="font-semibold mb-2">Priority Level</h3>
-                <p className="text-sm capitalize">{request.priority}</p>
+
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea 
+                  value={request.description} 
+                  readOnly 
+                  className="bg-muted min-h-[100px]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Priority Level</Label>
+                <Input 
+                  value={request.priority} 
+                  readOnly 
+                  className="bg-muted capitalize"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Issue Type</Label>
+                <Input 
+                  value={request.issue_type || 'Not specified'} 
+                  readOnly 
+                  className="bg-muted"
+                />
+              </div>
+
+              {request.images && request.images.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Attached Images</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {request.images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={image}
+                        alt={`Maintenance issue ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-md"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Contact Information</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Property</Label>
+                    <Input 
+                      value={request.property?.name || 'Not specified'} 
+                      readOnly 
+                      className="bg-muted"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm text-muted-foreground">Tenant</Label>
+                    <Input 
+                      value={`${request.tenant?.first_name} ${request.tenant?.last_name}`} 
+                      readOnly 
+                      className="bg-muted"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Status Update</Label>
+                <Select 
+                  value={request.status} 
+                  onValueChange={(value) => onUpdateRequest({ status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </TabsContent>
