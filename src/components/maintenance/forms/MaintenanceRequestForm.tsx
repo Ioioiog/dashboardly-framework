@@ -8,10 +8,7 @@ import { LandlordFields } from "./LandlordFields";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { ScheduleVisitField } from "./ScheduleVisitField";
 
 interface Property {
   id: string;
@@ -74,22 +71,18 @@ export function MaintenanceRequestForm({
   });
 
   const handleSubmit = (data: MaintenanceFormValues) => {
-    console.log("Form submitted with date:", data.scheduled_date);
+    console.log("Form submitted with data:", data);
     onSubmit(data);
   };
 
   const handleDateSelect = (date: Date | undefined) => {
-    console.log("Selected date:", date);
-    if (date) {
-      form.setValue("scheduled_date", date, { 
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true 
-      });
-    }
+    console.log("Date selected in form:", date);
+    form.setValue("scheduled_date", date, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true
+    });
   };
-
-  const isServiceProviderAssigned = userRole === "service_provider" && existingRequest?.assigned_to === form.watch("assigned_to");
 
   return (
     <Form {...form}>
@@ -140,39 +133,11 @@ export function MaintenanceRequestForm({
           )}>
             <h3 className="text-lg font-semibold mb-4">Service Provider Details</h3>
             <div className="space-y-4">
-              {/* Schedule Meeting */}
-              <div className="space-y-2">
-                <Label>Schedule Visit</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !form.watch("scheduled_date") && "text-muted-foreground"
-                      )}
-                      disabled={!form.watch("assigned_to")}
-                      type="button"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {form.watch("scheduled_date") ? (
-                        format(form.watch("scheduled_date"), "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={form.watch("scheduled_date")}
-                      onSelect={handleDateSelect}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+              <ScheduleVisitField
+                value={form.watch("scheduled_date")}
+                onChange={handleDateSelect}
+                disabled={!form.watch("assigned_to")}
+              />
 
               {/* Initial Cost Estimate */}
               <div className="space-y-2">
