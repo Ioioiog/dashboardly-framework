@@ -17,12 +17,18 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelect = (date: Date | undefined) => {
-    console.log("Date selected in calendar:", date);
-    if (date) {
-      onChange(date);
-      // Only close the popover after successfully setting the date
-      setTimeout(() => setIsOpen(false), 100);
-    }
+    console.log("Date selection initiated:", date);
+    if (!date) return;
+
+    // Update the form with the selected date
+    onChange(date);
+    console.log("Date set successfully:", date);
+
+    // Close the popover with a slight delay to ensure the date is registered
+    setTimeout(() => {
+      setIsOpen(false);
+      console.log("Popover closed after date selection");
+    }, 150);
   };
 
   return (
@@ -35,10 +41,16 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
             type="button"
             className={cn(
               "w-full justify-start text-left font-normal",
-              !value && "text-muted-foreground"
+              !value && "text-muted-foreground",
+              disabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={disabled}
-            onClick={() => setIsOpen(true)}
+            onClick={(e) => {
+              e.preventDefault();
+              if (!disabled) {
+                setIsOpen(true);
+              }
+            }}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {value ? format(value, "PPP") : <span>Pick a date</span>}
