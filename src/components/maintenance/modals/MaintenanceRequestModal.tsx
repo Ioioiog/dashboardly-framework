@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { LandlordFields } from "../forms/LandlordFields";
 import { ClipboardList, Users, DollarSign, MessageSquare } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface MaintenanceRequestModalProps {
   open: boolean;
@@ -172,6 +173,27 @@ export function MaintenanceRequestModal({
                   readOnly 
                   className="bg-muted capitalize"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Contact Phone</Label>
+                <Input 
+                  value={request.contact_phone || 'Not provided'} 
+                  readOnly 
+                  className="bg-muted"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Preferred Service Times</Label>
+                <div className="grid grid-cols-3 gap-4">
+                  {(request.preferred_times || []).map((time) => (
+                    <div key={time} className="flex items-center space-x-2">
+                      <Checkbox checked disabled />
+                      <span className="capitalize">{time}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2">
