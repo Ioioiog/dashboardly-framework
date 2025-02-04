@@ -100,10 +100,10 @@ export default function MaintenanceDialog({
         await updateMutation.mutateAsync({
           ...validatedData,
           scheduled_date: validatedData.scheduled_date || null
-        } as Partial<MaintenanceRequest>);
+        });
       } else {
         console.log("Creating maintenance request:", validatedData);
-        await createMutation.mutateAsync(validatedData as MaintenanceRequest);
+        await createMutation.mutateAsync(validatedData);
       }
 
       toast({
