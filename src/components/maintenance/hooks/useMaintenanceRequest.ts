@@ -8,9 +8,6 @@ export interface MaintenanceRequest {
   title: string;
   description: string;
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-  created_at?: string;
-  updated_at?: string;
-  issue_type?: string | null;
   priority: 'low' | 'medium' | 'high';
   images: string[];
   notes?: string | null;
@@ -55,7 +52,7 @@ export function useMaintenanceRequest(requestId?: string) {
           ...data,
           status: data.status || 'pending',
           priority: data.priority || 'low',
-          scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
+          scheduled_date: data.scheduled_date || null,
           images: data.images || [],
           service_provider_fee: data.service_provider_fee || 0,
           payment_amount: data.payment_amount || 0
@@ -77,8 +74,8 @@ export function useMaintenanceRequest(requestId?: string) {
         .from('maintenance_requests')
         .update({
           ...data,
-          scheduled_date: data.scheduled_date ? new Date(data.scheduled_date).toISOString() : null,
-          images: data.images || undefined,
+          scheduled_date: data.scheduled_date || null,
+          images: data.images,
           service_provider_fee: data.service_provider_fee ?? undefined,
           payment_amount: data.payment_amount ?? undefined
         })

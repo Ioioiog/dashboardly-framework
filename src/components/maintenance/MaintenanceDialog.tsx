@@ -80,7 +80,7 @@ export default function MaintenanceDialog({
         assigned_to: formData.assigned_to,
         service_provider_notes: formData.service_provider_notes,
         notes: formData.notes,
-        images: (formData.images?.filter((img: string | File) => typeof img === 'string') || []) as string[],
+        images: formData.images?.filter((img: string | File) => typeof img === 'string') || [],
         service_provider_fee: formData.service_provider_fee || 0,
         service_provider_status: formData.service_provider_status,
         completion_report: formData.completion_report,
