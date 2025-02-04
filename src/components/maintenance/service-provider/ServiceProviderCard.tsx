@@ -81,7 +81,7 @@ export function ServiceProviderCard({ provider, onPreferredToggle }: ServiceProv
 
         <div className="flex gap-3">
           <Button
-            variant={provider.isPreferred ? "secondary" : "warning"}
+            variant={provider.isPreferred ? "secondary" : "outline"}
             className={cn(
               "flex-1",
               provider.isPreferred 
