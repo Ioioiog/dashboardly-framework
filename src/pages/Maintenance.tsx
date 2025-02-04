@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
 type MaintenanceStatus = "pending" | "in_progress" | "completed" | "cancelled";
+type Priority = "low" | "medium" | "high" | "all";
 
 export default function Maintenance() {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ export default function Maintenance() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
   const [activeSection, setActiveSection] = React.useState("requests");
-  const [priority, setPriority] = React.useState("all");
+  const [priority, setPriority] = React.useState<Priority>("all");
   const [searchQuery, setSearchQuery] = React.useState("");
 
   useEffect(() => {
@@ -145,7 +146,7 @@ export default function Maintenance() {
                 </span>
                 <Select
                   value={priority}
-                  onValueChange={setPriority}
+                  onValueChange={(value: Priority) => setPriority(value)}
                 >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="All Priorities" />
