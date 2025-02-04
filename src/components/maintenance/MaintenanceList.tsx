@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { RequestStatusTimeline } from "./sections/RequestStatusTimeline";
 import { Button } from "@/components/ui/button";
-import { Edit, Tool, User } from "lucide-react";
+import { Edit, Wrench, User } from "lucide-react";
 import { useUserRole } from "@/hooks/use-user-role";
 
 interface MaintenanceRequest {
@@ -69,7 +69,7 @@ export default function MaintenanceList({
     }
   };
 
-  const getPriorityVariant = (priority: string) => {
+  const getPriorityVariant = (priority: MaintenanceRequest['priority']) => {
     switch (priority) {
       case 'high':
         return 'destructive';
@@ -88,7 +88,7 @@ export default function MaintenanceList({
     return (
       <div className="mt-4 space-y-2 border-t pt-4">
         <div className="flex items-center gap-2">
-          <Tool className="h-4 w-4 text-gray-500" />
+          <Wrench className="h-4 w-4 text-gray-500" />
           <span className="text-sm text-gray-600">
             {request.assigned_to ? 
               <>

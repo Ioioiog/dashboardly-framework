@@ -8,12 +8,16 @@ interface MaintenanceRequest {
   id: string;
   title: string;
   status: "pending" | "in_progress" | "completed" | "cancelled";
-  priority: string;
+  priority: "low" | "medium" | "high";
   created_at: string;
   updated_at: string;
   property: { name: string };
   tenant: { first_name: string; last_name: string };
   description: string;
+  assigned_to?: string | null;
+  service_provider_status?: string | null;
+  scheduled_date?: string | null;
+  service_provider_fee?: number;
 }
 
 interface RequestsSectionProps {
