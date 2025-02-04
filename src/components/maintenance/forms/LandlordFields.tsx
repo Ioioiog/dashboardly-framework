@@ -56,12 +56,12 @@ export function LandlordFields({
           id,
           first_name,
           last_name,
-          service_provider_profiles!inner (
+          service_provider_profiles!left (
             business_name
           )
         `)
         .eq('id', formData.assigned_to)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching provider details:", error);
