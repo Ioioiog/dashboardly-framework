@@ -15,6 +15,7 @@ import { ScheduleVisitField } from "../forms/ScheduleVisitField";
 import { ClipboardList, Users, DollarSign, MessageSquare } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useUserRole } from "@/hooks/use-user-role";
+import { FileUp, Eye } from "lucide-react"; // Add this import
 
 interface MaintenanceRequestModalProps {
   open: boolean;
@@ -419,16 +420,39 @@ export function MaintenanceRequestModal({
 
               <div className="space-y-2">
                 <Label>Upload Invoice</Label>
-                <Input
-                  type="file"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  onChange={handleInvoiceUpload}
-                  disabled={!isServiceProvider}
-                  className="cursor-pointer"
-                />
-                <p className="text-sm text-gray-500">
-                  {request.invoice_document_path ? 'Invoice uploaded' : 'No invoice uploaded yet'}
-                </p>
+                <div className="space-y-2">
+                  <Input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={handleInvoiceUpload}
+                    disabled={!isServiceProvider}
+                    className="cursor-pointer"
+                  />
+                  {request.invoice_document_path ? (
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-green-600">Invoice uploaded</p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        onClick={() => {
+                          const { data: { publicUrl } } = supabase.storage
+                            .from('invoice-documents')
+                            .getPublicUrl(request.invoice_document_path);
+                          window.open(publicUrl, '_blank');
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Invoice
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 flex items-center gap-2">
+                      <FileUp className="h-4 w-4" />
+                      No invoice uploaded yet
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
