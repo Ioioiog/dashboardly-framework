@@ -116,7 +116,7 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
         <div className="space-y-4">
           <div className="flex justify-between text-sm border-b pb-2">
             <span className="text-muted-foreground">Payment Status:</span>
-            <Badge variant={request.payment_status === 'paid' ? 'success' : 'secondary'}>
+            <Badge variant="outline">
               {request.payment_status?.toUpperCase() || 'PENDING'}
             </Badge>
           </div>
@@ -149,7 +149,7 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Status:</span>
-              <Badge variant={request.approval_status === 'approved' ? 'success' : 'secondary'}>
+              <Badge variant="outline">
                 {request.approval_status.toUpperCase()}
               </Badge>
             </div>
