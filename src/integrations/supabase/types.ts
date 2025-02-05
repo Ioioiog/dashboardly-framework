@@ -1041,6 +1041,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_first_login: boolean | null
           profile_id: string | null
           rating: number | null
           review_count: number | null
@@ -1056,6 +1057,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id: string
+          is_first_login?: boolean | null
           profile_id?: string | null
           rating?: number | null
           review_count?: number | null
@@ -1071,6 +1073,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_first_login?: boolean | null
           profile_id?: string | null
           rating?: number | null
           review_count?: number | null
