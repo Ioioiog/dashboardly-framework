@@ -1,11 +1,13 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClipboardList, Users, DollarSign, MessageSquare } from "lucide-react";
+import { ClipboardList, Users, DollarSign, MessageSquare, FileText } from "lucide-react";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { MaintenanceReviewTab } from "../tabs/MaintenanceReviewTab";
 import { MaintenanceProviderTab } from "../tabs/MaintenanceProviderTab";
 import { MaintenanceCostsTab } from "../tabs/MaintenanceCostsTab";
 import { MaintenanceChatTab } from "../tabs/MaintenanceChatTab";
+import { MaintenanceDocumentTab } from "../tabs/MaintenanceDocumentTab";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface MaintenanceRequestModalProps {
   open: boolean;
@@ -20,6 +22,8 @@ export function MaintenanceRequestModal({
   request,
   onUpdateRequest,
 }: MaintenanceRequestModalProps) {
+  const { userRole } = useUserRole();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[800px]">
@@ -28,7 +32,7 @@ export function MaintenanceRequestModal({
         </DialogHeader>
         
         <Tabs defaultValue="review" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="review" className="flex items-center gap-2">
               <ClipboardList className="h-4 w-4" />
               Initial Review
@@ -40,6 +44,10 @@ export function MaintenanceRequestModal({
             <TabsTrigger value="costs" className="flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
               Costs
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Documents
             </TabsTrigger>
             <TabsTrigger value="communication" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
@@ -63,6 +71,13 @@ export function MaintenanceRequestModal({
 
           <TabsContent value="costs">
             <MaintenanceCostsTab
+              request={request}
+              onUpdateRequest={onUpdateRequest}
+            />
+          </TabsContent>
+
+          <TabsContent value="documents">
+            <MaintenanceDocumentTab
               request={request}
               onUpdateRequest={onUpdateRequest}
             />
