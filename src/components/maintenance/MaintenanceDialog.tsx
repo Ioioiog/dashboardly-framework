@@ -75,10 +75,9 @@ export function MaintenanceDialog({
     if (!requestId || !existingRequest) return;
 
     try {
-      // Ensure cost_estimate_status and approval_status are valid enum values
+      // Ensure approval_status is valid enum value
       const validatedUpdates = {
         ...updates,
-        cost_estimate_status: updates.cost_estimate_status as "pending" | "approved" | "rejected" | null,
         approval_status: updates.approval_status as "pending" | "approved" | "rejected" | null
       };
 
