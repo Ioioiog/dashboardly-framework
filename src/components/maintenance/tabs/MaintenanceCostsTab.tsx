@@ -8,6 +8,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FileUp, Eye } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface MaintenanceCostsTabProps {
   request: MaintenanceRequest;
@@ -64,17 +65,22 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
     }
   };
 
-  const handleViewInvoice = () => {
+  const handleViewInvoice = async () => {
     if (!request.invoice_document_path) return;
     
     try {
-      console.log("Getting public URL for invoice:", request.invoice_document_path);
-      const { data: { publicUrl } } = supabase.storage
+      console.log("Getting signed URL for invoice:", request.invoice_document_path);
+      const { data, error } = await supabase.storage
         .from('invoice-documents')
-        .getPublicUrl(request.invoice_document_path);
+        .createSignedUrl(request.invoice_document_path, 300); // 5 minutes validity
 
-      console.log("Generated public URL:", publicUrl);
-      window.open(publicUrl, '_blank');
+      if (error) {
+        console.error("Error getting invoice URL:", error);
+        throw error;
+      }
+
+      console.log("Generated signed URL:", data.signedUrl);
+      window.open(data.signedUrl, '_blank');
     } catch (error) {
       console.error("Error getting invoice URL:", error);
       toast({
@@ -109,18 +115,20 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>Upload Invoice</Label>
+      <Card className="p-4">
         <div className="space-y-2">
-          <Input
-            type="file"
-            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            onChange={handleInvoiceUpload}
-            disabled={!isServiceProvider}
-            className="cursor-pointer"
-          />
+          <Label>Invoice Document</Label>
+          {isServiceProvider && (
+            <Input
+              type="file"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              onChange={handleInvoiceUpload}
+              className="cursor-pointer"
+            />
+          )}
+          
           {request.invoice_document_path ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-2">
               <p className="text-sm text-green-600">Invoice uploaded</p>
               <Button
                 size="sm"
@@ -139,7 +147,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
             </p>
           )}
         </div>
-      </div>
+      </Card>
 
       <div className="space-y-2">
         <Label>Invoice Notes</Label>
