@@ -37,13 +37,9 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
       console.log("File uploaded successfully:", filePath);
 
       // Update maintenance request with document path
-      const updatedRequest = {
-        ...request,
+      await onUpdate({
         document_path: filePath
-      };
-
-      console.log("Validating updated request:", updatedRequest);
-      await onUpdate(updatedRequest);
+      });
 
       toast({
         title: "Invoice uploaded successfully",
@@ -72,6 +68,7 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
     }
 
     try {
+      console.log("Fetching signed URL for document:", request.document_path);
       const { data, error } = await supabase.storage
         .from('invoice-documents')
         .createSignedUrl(request.document_path, 60);
