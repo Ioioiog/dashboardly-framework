@@ -28,18 +28,22 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
       setIsUploading(true);
       console.log("Starting invoice upload for request:", request.id);
 
-      const filePath = `${request.id}/${crypto.randomUUID()}.${file.name.split('.').pop()}`;
+      const filePath = `maintenance-invoices/${request.id}/${crypto.randomUUID()}-${file.name}`;
       console.log("Uploading file to path:", filePath);
 
       const { error: uploadError } = await supabase.storage
         .from('invoice-documents')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) {
+        console.error("Upload error:", uploadError);
         throw uploadError;
       }
 
-      console.log("File uploaded successfully:", filePath);
+      console.log("File uploaded successfully. Updating request with document path");
 
       await onUpdate({
         id: request.id,
@@ -74,6 +78,7 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
 
     try {
       console.log("Fetching signed URL for document:", request.document_path);
+      
       const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from('invoice-documents')
         .createSignedUrl(request.document_path, 3600); // 1 hour expiry
@@ -87,7 +92,7 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
         throw new Error("No signed URL returned");
       }
 
-      console.log("Opening document with signed URL:", signedUrlData.signedUrl);
+      console.log("Opening document with signed URL");
       window.open(signedUrlData.signedUrl, '_blank');
     } catch (error) {
       console.error("Error viewing invoice:", error);
@@ -170,7 +175,7 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
               <Input
                 id="invoice"
                 type="file"
-                accept=".pdf,.doc,.docx"
+                accept=".pdf,.doc,.docx,.xls,.xlsx"
                 onChange={handleFileUpload}
                 className="mt-1"
               />
