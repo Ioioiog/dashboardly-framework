@@ -8,7 +8,6 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { ServiceProviderFilters } from "./service-provider/ServiceProviderFilters";
 import { CreateProviderDialog } from "./service-provider/CreateProviderDialog";
 import { ServiceProviderListContent } from "./service-provider/ServiceProviderListContent";
-import { Edit2 } from "lucide-react";
 
 interface ServiceProvider {
   id: string;
@@ -55,7 +54,6 @@ export function ServiceProviderList() {
     rating: "all"
   });
 
-  // If user is a service provider, don't render anything
   if (userRole === "service_provider") {
     return null;
   }
@@ -158,7 +156,7 @@ export function ServiceProviderList() {
       setIsCreating(true);
       
       console.log("Creating new service provider:", newProvider);
-      const tempPassword = Math.random().toString(36).slice(-8) + "!1A"; // Generate secure temporary password
+      const tempPassword = Math.random().toString(36).slice(-8) + "!1A";
 
       // First check if the user already exists
       const { data: existingUser, error: userCheckError } = await supabase
@@ -220,6 +218,7 @@ export function ServiceProviderList() {
         .from('service_provider_profiles')
         .upsert({
           id: userId,
+          business_name: `${newProvider.first_name} ${newProvider.last_name}`, // Using full name as initial business name
           contact_email: newProvider.email,
           contact_phone: newProvider.phone,
           is_first_login: true
@@ -247,7 +246,7 @@ export function ServiceProviderList() {
         toast({
           title: "Warning",
           description: "Provider created but welcome email could not be sent. Please contact them directly.",
-          variant: "warning",
+          variant: "destructive",
         });
       }
 
