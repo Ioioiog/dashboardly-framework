@@ -14,8 +14,7 @@ import { LandlordFields } from "../forms/LandlordFields";
 import { ScheduleVisitField } from "../forms/ScheduleVisitField";
 import { ClipboardList, Users, DollarSign, MessageSquare } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useUserRole } from "@/hooks/use-user-role";
-import { FileUp, Eye } from "lucide-react"; // Add this import
+import { FileUp, Eye } from "lucide-react";
 
 interface MaintenanceRequestModalProps {
   open: boolean;
@@ -166,9 +165,6 @@ export function MaintenanceRequestModal({
     }
   };
 
-  const { userRole } = useUserRole();
-  const isServiceProvider = userRole === 'service_provider';
-
   const handleInvoiceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -194,15 +190,8 @@ export function MaintenanceRequestModal({
       if (uploadError) throw uploadError;
 
       console.log("File uploaded successfully:", filePath);
-      
-      // Get the public URL for the uploaded file
-      const { data: { publicUrl } } = supabase.storage
-        .from('invoice-documents')
-        .getPublicUrl(filePath);
 
-      console.log("Generated public URL:", publicUrl);
-
-      // Update the maintenance request with the invoice document path and payment status
+      // Update the maintenance request with the invoice document path
       onUpdateRequest({ 
         invoice_document_path: filePath,
         payment_status: 'invoiced'
@@ -221,6 +210,30 @@ export function MaintenanceRequestModal({
       });
     }
   };
+
+  const handleViewInvoice = () => {
+    if (!request.invoice_document_path) return;
+    
+    try {
+      console.log("Getting public URL for invoice:", request.invoice_document_path);
+      const { data: { publicUrl } } = supabase.storage
+        .from('invoice-documents')
+        .getPublicUrl(request.invoice_document_path);
+
+      console.log("Generated public URL:", publicUrl);
+      window.open(publicUrl, '_blank');
+    } catch (error) {
+      console.error("Error getting invoice URL:", error);
+      toast({
+        title: "Error",
+        description: "Failed to retrieve invoice",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const { userRole } = useUserRole();
+  const isServiceProvider = userRole === 'service_provider';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -435,12 +448,7 @@ export function MaintenanceRequestModal({
                         size="sm"
                         variant="outline"
                         className="flex items-center gap-2"
-                        onClick={() => {
-                          const { data: { publicUrl } } = supabase.storage
-                            .from('invoice-documents')
-                            .getPublicUrl(request.invoice_document_path);
-                          window.open(publicUrl, '_blank');
-                        }}
+                        onClick={handleViewInvoice}
                       >
                         <Eye className="h-4 w-4" />
                         View Invoice
@@ -453,24 +461,6 @@ export function MaintenanceRequestModal({
                     </p>
                   )}
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Payment Status</Label>
-                <Select
-                  value={request.payment_status || 'pending'}
-                  onValueChange={(value) => onUpdateRequest({ payment_status: value })}
-                  disabled={!isServiceProvider}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select payment status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="invoiced">Invoiced</SelectItem>
-                    <SelectItem value="paid">Paid</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="space-y-2">
