@@ -1,11 +1,10 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DollarSign, Clock, Calculator, Receipt, AlertCircle } from "lucide-react";
+import { Calculator } from "lucide-react";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { Card } from "@/components/ui/card";
 import { useCurrency } from "@/hooks/useCurrency";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 
 interface MaintenanceCostsTabProps {
   request: MaintenanceRequest;
@@ -15,33 +14,12 @@ interface MaintenanceCostsTabProps {
 export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabProps) {
   const { formatAmount } = useCurrency();
 
-  const getCostStatus = () => {
-    if (!request.cost_estimate) return 'pending';
-    if (request.cost_estimate_status === 'approved') return 'approved';
-    if (request.cost_estimate_status === 'rejected') return 'rejected';
-    return 'pending';
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved': return 'bg-green-500';
-      case 'rejected': return 'bg-red-500';
-      case 'pending': return 'bg-yellow-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
   return (
     <div className="space-y-6">
       <Card className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <Calculator className="h-5 w-5 text-primary" />
           <h3 className="text-lg font-semibold">Cost Breakdown</h3>
-          {getCostStatus() && (
-            <Badge className={`ml-auto ${getStatusColor(getCostStatus())}`}>
-              {getCostStatus().charAt(0).toUpperCase() + getCostStatus().slice(1)}
-            </Badge>
-          )}
         </div>
         
         <div className="space-y-4">
@@ -106,63 +84,6 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
           )}
         </div>
       </Card>
-
-      <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Receipt className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold">Payment Details</h3>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex justify-between text-sm border-b pb-2">
-            <span className="text-muted-foreground">Payment Status:</span>
-            <Badge variant="outline">
-              {request.payment_status?.toUpperCase() || 'PENDING'}
-            </Badge>
-          </div>
-          
-          {request.payment_amount > 0 && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Final Payment Amount:</span>
-              <span className="font-medium">{formatAmount(request.payment_amount)}</span>
-            </div>
-          )}
-
-          {request.completion_date && (
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Completion Date:</span>
-              <span className="font-medium">
-                {new Date(request.completion_date).toLocaleDateString()}
-              </span>
-            </div>
-          )}
-        </div>
-      </Card>
-
-      {request.approval_status && (
-        <Card className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertCircle className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold">Approval Status</h3>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Status:</span>
-              <Badge variant="outline">
-                {request.approval_status.toUpperCase()}
-              </Badge>
-            </div>
-            
-            {request.approval_notes && (
-              <div className="mt-2">
-                <Label>Approval Notes</Label>
-                <p className="text-sm text-muted-foreground mt-1">{request.approval_notes}</p>
-              </div>
-            )}
-          </div>
-        </Card>
-      )}
     </div>
   );
 }
