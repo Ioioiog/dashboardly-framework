@@ -3,11 +3,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { FileUp, Eye, Trash2, Loader2 } from "lucide-react";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { FileObject } from "@supabase/storage-js";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
+import { FileUp, Eye, Trash2, Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface MaintenanceDocumentTabProps {
   request: MaintenanceRequest;
@@ -25,6 +31,8 @@ export function MaintenanceDocumentTab({
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [isDeletingFile, setIsDeletingFile] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,7 +89,8 @@ export function MaintenanceDocumentTab({
         .getPublicUrl(filePath);
 
       console.log("Generated public URL:", publicUrl);
-      window.open(publicUrl, '_blank');
+      setPreviewUrl(publicUrl);
+      setShowPreview(true);
     } catch (error) {
       console.error("Error getting document URL:", error);
       toast({
@@ -187,6 +196,21 @@ export function MaintenanceDocumentTab({
           </ScrollArea>
         </div>
       </Card>
+
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-4xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Document Preview</DialogTitle>
+          </DialogHeader>
+          {previewUrl && (
+            <iframe
+              src={previewUrl}
+              className="w-full h-full rounded-md"
+              title="Document Preview"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
