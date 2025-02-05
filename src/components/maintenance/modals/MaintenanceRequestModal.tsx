@@ -182,15 +182,26 @@ export function MaintenanceRequestModal({
     }
 
     try {
+      console.log("Starting invoice upload for request:", request.id);
       const fileExt = file.name.split('.').pop();
       const filePath = `${request.id}/${crypto.randomUUID()}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { data, error: uploadError } = await supabase.storage
         .from('invoice-documents')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
+      console.log("File uploaded successfully:", filePath);
+      
+      // Get the public URL for the uploaded file
+      const { data: { publicUrl } } = supabase.storage
+        .from('invoice-documents')
+        .getPublicUrl(filePath);
+
+      console.log("Generated public URL:", publicUrl);
+
+      // Update the maintenance request with the invoice document path and payment status
       onUpdateRequest({ 
         invoice_document_path: filePath,
         payment_status: 'invoiced'
