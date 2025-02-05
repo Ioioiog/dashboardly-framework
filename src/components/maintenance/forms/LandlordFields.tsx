@@ -43,43 +43,36 @@ export function LandlordFields({
     { value: "cancelled", label: t("maintenance.status.cancelled") }
   ];
 
-  // Query to fetch preferred service providers for the landlord
-  const { data: preferredProviders, isLoading: isLoadingPreferred } = useQuery({
-    queryKey: ['preferred-service-providers', currentUserId],
+  // Query to fetch all service providers
+  const { data: allServiceProviders, isLoading: isLoadingAllProviders } = useQuery({
+    queryKey: ['service-providers'],
     queryFn: async () => {
-      if (!currentUserId) return [];
-      
-      console.log("Fetching preferred service providers for landlord:", currentUserId);
+      console.log("Fetching all service providers");
       
       const { data, error } = await supabase
-        .from('landlord_service_providers')
+        .from('service_provider_profiles')
         .select(`
-          service_provider_id,
-          service_provider_profiles!inner (
-            id,
-            business_name,
-            profiles!inner (
-              first_name,
-              last_name
-            )
+          id,
+          business_name,
+          profiles!inner (
+            first_name,
+            last_name
           )
-        `)
-        .eq('landlord_id', currentUserId);
+        `);
 
       if (error) {
-        console.error("Error fetching preferred providers:", error);
+        console.error("Error fetching service providers:", error);
         return [];
       }
 
-      console.log("Fetched preferred providers:", data);
-      return data.map(item => ({
-        id: item.service_provider_profiles.id,
-        business_name: item.service_provider_profiles.business_name,
-        first_name: item.service_provider_profiles.profiles.first_name,
-        last_name: item.service_provider_profiles.profiles.last_name
+      console.log("Fetched all service providers:", data);
+      return data.map(provider => ({
+        id: provider.id,
+        business_name: provider.business_name,
+        first_name: provider.profiles.first_name,
+        last_name: provider.profiles.last_name
       }));
-    },
-    enabled: !!currentUserId
+    }
   });
 
   // Query to fetch provider details if assigned
@@ -91,13 +84,13 @@ export function LandlordFields({
       console.log("Fetching provider details for ID:", formData.assigned_to);
       
       const { data, error } = await supabase
-        .from('profiles')
+        .from('service_provider_profiles')
         .select(`
           id,
-          first_name,
-          last_name,
-          service_provider_profiles!left (
-            business_name
+          business_name,
+          profiles!inner (
+            first_name,
+            last_name
           )
         `)
         .eq('id', formData.assigned_to)
@@ -114,25 +107,10 @@ export function LandlordFields({
     enabled: !!formData.assigned_to
   });
 
-  const getServiceProviderName = (id: string | null) => {
-    if (!id) return "Not assigned";
-
-    // First check the preferred providers
-    const preferredProvider = preferredProviders?.find(p => p.id === id);
-    if (preferredProvider) {
-      return preferredProvider.business_name || 
-             `${preferredProvider.first_name || ''} ${preferredProvider.last_name || ''}`.trim();
-    }
-
-    // Then check the assigned provider details
-    if (assignedProvider) {
-      const businessName = assignedProvider.service_provider_profiles?.[0]?.business_name;
-      if (businessName) return businessName;
-      
-      return `${assignedProvider.first_name || ''} ${assignedProvider.last_name || ''}`.trim();
-    }
-
-    return "Not assigned";
+  const getServiceProviderName = (provider: ServiceProvider | null) => {
+    if (!provider) return "Not assigned";
+    return provider.business_name || 
+           `${provider.first_name || ''} ${provider.last_name || ''}`.trim();
   };
 
   return (
@@ -166,11 +144,11 @@ export function LandlordFields({
 
       <div>
         <label className="text-sm font-medium mb-2 block">Service Provider</label>
-        {isLoadingProviders || isLoadingPreferred ? (
+        {isLoadingProviders || isLoadingAllProviders ? (
           <Skeleton className="h-10 w-full" />
         ) : isReadOnly ? (
           <div className="p-3 bg-gray-50 rounded-md border">
-            {getServiceProviderName(formData.assigned_to)}
+            {getServiceProviderName(assignedProvider || null)}
           </div>
         ) : (
           <Select
@@ -182,9 +160,9 @@ export function LandlordFields({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="unassigned">Not assigned</SelectItem>
-              {(preferredProviders || []).map((provider) => (
+              {(allServiceProviders || []).map((provider) => (
                 <SelectItem key={provider.id} value={provider.id}>
-                  {provider.business_name || `${provider.first_name || ''} ${provider.last_name || ''}`}
+                  {getServiceProviderName(provider)}
                 </SelectItem>
               ))}
             </SelectContent>
