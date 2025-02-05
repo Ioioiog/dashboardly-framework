@@ -144,7 +144,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
             />
           )}
           
-          {request.invoice_document_path ? (
+          {request.invoice_document_path && (
             <div className="flex items-center gap-2 mt-2">
               <p className="text-sm text-green-600">Invoice uploaded</p>
               <Button
@@ -157,7 +157,8 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
                 View Invoice
               </Button>
             </div>
-          ) : (
+          )}
+          {!request.invoice_document_path && (
             <p className="text-sm text-gray-500 flex items-center gap-2">
               <FileUp className="h-4 w-4" />
               No invoice uploaded yet
