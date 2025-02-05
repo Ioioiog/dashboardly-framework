@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthState } from "@/hooks/useAuthState";
 
 interface ServiceProvider {
   id: string;
@@ -34,6 +35,7 @@ export function LandlordFields({
   isReadOnly = false
 }: LandlordFieldsProps) {
   const { t } = useTranslation();
+  const { currentUserId } = useAuthState();
 
   const statusOptions = [
     { value: "pending", label: t("maintenance.status.pending") },
@@ -41,6 +43,45 @@ export function LandlordFields({
     { value: "completed", label: t("maintenance.status.completed") },
     { value: "cancelled", label: t("maintenance.status.cancelled") }
   ];
+
+  // Query to fetch preferred service providers for the landlord
+  const { data: preferredProviders } = useQuery({
+    queryKey: ['preferred-service-providers', currentUserId],
+    queryFn: async () => {
+      if (!currentUserId) return [];
+      
+      console.log("Fetching preferred service providers for landlord:", currentUserId);
+      
+      const { data, error } = await supabase
+        .from('landlord_service_providers')
+        .select(`
+          service_provider_id,
+          service_provider_profiles!inner (
+            id,
+            business_name,
+            profiles!inner (
+              first_name,
+              last_name
+            )
+          )
+        `)
+        .eq('landlord_id', currentUserId);
+
+      if (error) {
+        console.error("Error fetching preferred providers:", error);
+        return [];
+      }
+
+      console.log("Fetched preferred providers:", data);
+      return data.map(item => ({
+        id: item.service_provider_profiles.id,
+        business_name: item.service_provider_profiles.business_name,
+        first_name: item.service_provider_profiles.profiles.first_name,
+        last_name: item.service_provider_profiles.profiles.last_name
+      }));
+    },
+    enabled: !!currentUserId
+  });
 
   // Query to fetch provider details if assigned
   const { data: assignedProvider } = useQuery({
@@ -77,29 +118,19 @@ export function LandlordFields({
   const getServiceProviderName = (id: string | null) => {
     if (!id) return "Not assigned";
 
-    // First check the passed serviceProviders array
-    const providerFromList = serviceProviders.find(p => p.id === id);
-    if (providerFromList) {
-      const firstName = providerFromList.first_name || '';
-      const lastName = providerFromList.last_name || '';
-      if (firstName || lastName) {
-        return `${firstName} ${lastName}`.trim();
-      }
+    // First check the preferred providers
+    const preferredProvider = preferredProviders?.find(p => p.id === id);
+    if (preferredProvider) {
+      return preferredProvider.business_name || 
+             `${preferredProvider.first_name || ''} ${preferredProvider.last_name || ''}`.trim();
     }
 
-    // Then check the queried provider data
+    // Then check the assigned provider details
     if (assignedProvider) {
-      const firstName = assignedProvider.first_name || '';
-      const lastName = assignedProvider.last_name || '';
       const businessName = assignedProvider.service_provider_profiles?.[0]?.business_name;
+      if (businessName) return businessName;
       
-      if (businessName) {
-        return businessName;
-      }
-      
-      if (firstName || lastName) {
-        return `${firstName} ${lastName}`.trim();
-      }
+      return `${assignedProvider.first_name || ''} ${assignedProvider.last_name || ''}`.trim();
     }
 
     return "Not assigned";
@@ -140,7 +171,7 @@ export function LandlordFields({
           <Skeleton className="h-10 w-full" />
         ) : isReadOnly ? (
           <div className="p-3 bg-gray-50 rounded-md border">
-            {getServiceProviderName(formData.assigned_to || null)}
+            {getServiceProviderName(formData.assigned_to)}
           </div>
         ) : (
           <Select
@@ -152,9 +183,9 @@ export function LandlordFields({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="unassigned">Not assigned</SelectItem>
-              {serviceProviders.map((provider) => (
+              {preferredProviders?.map((provider) => (
                 <SelectItem key={provider.id} value={provider.id}>
-                  {provider.first_name} {provider.last_name}
+                  {provider.business_name || `${provider.first_name} ${provider.last_name}`}
                 </SelectItem>
               ))}
             </SelectContent>
