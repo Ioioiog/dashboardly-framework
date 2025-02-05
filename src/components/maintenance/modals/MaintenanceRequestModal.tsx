@@ -1,277 +1,78 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useMaintenanceRequest } from "../hooks/useMaintenanceRequest";
+import { MaintenanceRequestForm } from "../forms/MaintenanceRequestForm";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
-import { LandlordFields } from "../forms/LandlordFields";
-import { ClipboardList, Users, DollarSign, MessageSquare } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useUserRole } from "@/hooks/use-user-role";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface MaintenanceRequestModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  request: MaintenanceRequest;
-  onUpdateRequest: (request: Partial<MaintenanceRequest>) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  requestId?: string;
 }
 
-interface ChatMessage {
-  id: string;
-  sender_id: string;
-  message: string;
-  created_at: string;
-  sender?: {
-    first_name: string | null;
-    last_name: string | null;
-    role: string;
-  };
-}
-
-export function MaintenanceRequestModal({
-  open,
-  onOpenChange,
-  request,
-  onUpdateRequest,
-}: MaintenanceRequestModalProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [newMessage, setNewMessage] = useState("");
+export function MaintenanceRequestModal({ isOpen, onClose, requestId }: MaintenanceRequestModalProps) {
+  const { existingRequest, updateMutation } = useMaintenanceRequest(requestId);
   const { toast } = useToast();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { role } = useUserRole();
+  const isServiceProvider = role === "service_provider";
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
-    if (!request.id) return;
-
-    const fetchMessages = async () => {
-      try {
-        console.log("Fetching chat messages for request:", request.id);
-        const { data, error } = await supabase
-          .from('maintenance_request_chats')
-          .select(`
-            *,
-            sender:profiles!maintenance_request_chats_sender_id_fkey(
-              first_name,
-              last_name,
-              role
-            )
-          `)
-          .eq('request_id', request.id)
-          .order('created_at', { ascending: true });
-
-        if (error) throw error;
-        console.log("Fetched messages:", data);
-        setMessages(data || []);
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load chat messages",
-          variant: "destructive",
-        });
-      }
-    };
-
-    fetchMessages();
-
-    // Subscribe to new messages
-    const channel = supabase
-      .channel(`maintenance_chat_${request.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'maintenance_request_chats',
-          filter: `request_id=eq.${request.id}`
-        },
-        async (payload) => {
-          console.log('New message received:', payload);
-          // Fetch the complete message with sender information
-          const { data, error } = await supabase
-            .from('maintenance_request_chats')
-            .select(`
-              *,
-              sender:profiles!maintenance_request_chats_sender_id_fkey(
-                first_name,
-                last_name,
-                role
-              )
-            `)
-            .eq('id', payload.new.id)
-            .single();
-
-          if (error) {
-            console.error('Error fetching new message details:', error);
-            return;
-          }
-
-          setMessages(prev => [...prev, data]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [request.id, toast]);
-
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleProviderUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!newMessage.trim() || !request.id) return;
-
-    setIsLoading(true);
+    const formData = new FormData(e.currentTarget);
+    
     try {
-      const { error } = await supabase
-        .from('maintenance_request_chats')
-        .insert({
-          request_id: request.id,
-          sender_id: (await supabase.auth.getUser()).data.user?.id,
-          message: newMessage.trim()
-        });
-
-      if (error) throw error;
-
-      setNewMessage("");
-      toast({
-        title: "Message sent",
-        description: "Your message has been sent successfully.",
+      await updateMutation.mutateAsync({
+        ...existingRequest,
+        service_provider_notes: formData.get("serviceProviderNotes") as string,
+        service_provider_fee: parseFloat(formData.get("serviceFee") as string) || 0,
+        service_provider_status: formData.get("serviceStatus") as string,
+        cost_estimate: parseFloat(formData.get("costEstimate") as string) || null,
+        cost_estimate_notes: formData.get("costEstimateNotes") as string,
+        scheduled_date: formData.get("scheduledDate") as string || null,
       });
+
+      toast({
+        title: "Success",
+        description: "Maintenance request updated successfully",
+      });
+      onClose();
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error updating maintenance request:", error);
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: "Failed to update maintenance request",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
+  if (!existingRequest && requestId) {
+    return null;
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[800px]">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Maintenance Request Management</DialogTitle>
+          <DialogTitle>
+            {requestId ? "Edit Maintenance Request" : "New Maintenance Request"}
+          </DialogTitle>
         </DialogHeader>
-        
-        <Tabs defaultValue="review" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="review" className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4" />
-              Initial Review
-            </TabsTrigger>
-            <TabsTrigger value="provider" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Provider
-            </TabsTrigger>
-            <TabsTrigger value="costs" className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Costs
-            </TabsTrigger>
-            <TabsTrigger value="communication" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Chat
-            </TabsTrigger>
-          </TabsList>
 
-          <TabsContent value="review" className="space-y-4 mt-4">
-            <div className="grid gap-4">
+        {!requestId ? (
+          <MaintenanceRequestForm onClose={onClose} />
+        ) : isServiceProvider ? (
+          <form onSubmit={handleProviderUpdate} className="space-y-4">
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Title</Label>
-                <Input 
-                  value={request.title} 
-                  readOnly 
-                  className="bg-muted"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea 
-                  value={request.description} 
-                  readOnly 
-                  className="bg-muted min-h-[100px]"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Priority Level</Label>
-                <Input 
-                  value={request.priority} 
-                  readOnly 
-                  className="bg-muted capitalize"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Contact Phone</Label>
-                <Input 
-                  value={request.contact_phone || 'Not provided'} 
-                  readOnly 
-                  className="bg-muted"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Preferred Service Times</Label>
-                <div className="grid grid-cols-3 gap-4">
-                  {(request.preferred_times || []).map((time) => (
-                    <div key={time} className="flex items-center space-x-2">
-                      <Checkbox checked disabled />
-                      <span className="capitalize">{time}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Issue Type</Label>
-                <Input 
-                  value={request.issue_type || 'Not specified'} 
-                  readOnly 
-                  className="bg-muted"
-                />
-              </div>
-
-              {request.images && request.images.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Attached Images</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {request.images.map((image, index) => (
-                      <img
-                        key={index}
-                        src={image}
-                        alt={`Maintenance issue ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-md"
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label>Status Update</Label>
-                <Select 
-                  value={request.status} 
-                  onValueChange={(value: "pending" | "in_progress" | "completed" | "cancelled") => 
-                    onUpdateRequest({ status: value })
-                  }
-                >
+                <Label htmlFor="serviceStatus">Service Status</Label>
+                <Select name="serviceStatus" defaultValue={existingRequest?.service_provider_status || "pending"}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
@@ -283,98 +84,81 @@ export function MaintenanceRequestModal({
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-          </TabsContent>
 
-          <TabsContent value="provider" className="space-y-4 mt-4">
-            <LandlordFields
-              formData={request}
-              onFieldChange={(field, value) => onUpdateRequest({ [field]: value })}
-              isLoadingProviders={false}
-            />
-          </TabsContent>
-
-          <TabsContent value="costs" className="space-y-4 mt-4">
-            <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Service Provider Fee</Label>
+                <Label htmlFor="scheduledDate">Scheduled Date</Label>
                 <Input
-                  type="number"
-                  value={request.service_provider_fee || 0}
-                  onChange={(e) => onUpdateRequest({ service_provider_fee: parseFloat(e.target.value) })}
-                  className="bg-white"
+                  type="datetime-local"
+                  id="scheduledDate"
+                  name="scheduledDate"
+                  defaultValue={existingRequest?.scheduled_date || ""}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Cost Estimate</Label>
-                <Input
-                  type="number"
-                  value={request.cost_estimate || 0}
-                  onChange={(e) => onUpdateRequest({ cost_estimate: parseFloat(e.target.value) })}
-                  className="bg-white"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Cost Notes</Label>
+                <Label htmlFor="serviceProviderNotes">Service Notes</Label>
                 <Textarea
-                  value={request.cost_estimate_notes || ''}
-                  onChange={(e) => onUpdateRequest({ cost_estimate_notes: e.target.value })}
-                  className="bg-white min-h-[100px]"
-                  placeholder="Add any notes about costs here..."
+                  id="serviceProviderNotes"
+                  name="serviceProviderNotes"
+                  defaultValue={existingRequest?.service_provider_notes || ""}
+                  placeholder="Enter your notes about the service"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="serviceFee">Service Fee ($)</Label>
+                <Input
+                  type="number"
+                  id="serviceFee"
+                  name="serviceFee"
+                  defaultValue={existingRequest?.service_provider_fee || ""}
+                  placeholder="Enter the service fee"
+                  step="0.01"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="costEstimate">Cost Estimate ($)</Label>
+                <Input
+                  type="number"
+                  id="costEstimate"
+                  name="costEstimate"
+                  defaultValue={existingRequest?.cost_estimate || ""}
+                  placeholder="Enter the estimated cost"
+                  step="0.01"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="costEstimateNotes">Cost Estimate Notes</Label>
+                <Textarea
+                  id="costEstimateNotes"
+                  name="costEstimateNotes"
+                  defaultValue={existingRequest?.cost_estimate_notes || ""}
+                  placeholder="Enter notes about the cost estimate"
                 />
               </div>
             </div>
-          </TabsContent>
 
-          <TabsContent value="communication" className="space-y-4 mt-4">
-            <ScrollArea className="h-[400px] p-4 border rounded-lg">
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.sender?.role === 'tenant'
-                        ? 'justify-start'
-                        : message.sender?.role === 'landlord'
-                        ? 'justify-end'
-                        : 'justify-center'
-                    }`}
-                  >
-                    <div
-                      className={`max-w-[70%] rounded-lg p-3 ${
-                        message.sender?.role === 'tenant'
-                          ? 'bg-blue-100 dark:bg-blue-900'
-                          : message.sender?.role === 'landlord'
-                          ? 'bg-green-100 dark:bg-green-900'
-                          : 'bg-purple-100 dark:bg-purple-900'
-                      }`}
-                    >
-                      <div className="text-xs font-medium mb-1">
-                        {message.sender?.first_name} {message.sender?.last_name} ({message.sender?.role})
-                      </div>
-                      <p className="text-sm">{message.message}</p>
-                    </div>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
-            
-            <form onSubmit={handleSendMessage} className="flex gap-2">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type your message..."
-                className="flex-1"
-              />
-              <Button type="submit" disabled={!newMessage.trim() || isLoading}>
-                Send
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
               </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
+              <Button type="submit" disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-4">
+            <h2>Request Details</h2>
+            <p><strong>Title:</strong> {existingRequest.title}</p>
+            <p><strong>Description:</strong> {existingRequest.description}</p>
+            <p><strong>Status:</strong> {existingRequest.status}</p>
+            <p><strong>Created At:</strong> {new Date(existingRequest.created_at).toLocaleString()}</p>
+            <p><strong>Updated At:</strong> {new Date(existingRequest.updated_at).toLocaleString()}</p>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
