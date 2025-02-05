@@ -146,27 +146,10 @@ export function LandlordFields({
         <label className="text-sm font-medium mb-2 block">Service Provider</label>
         {isLoadingProviders || isLoadingAllProviders ? (
           <Skeleton className="h-10 w-full" />
-        ) : isReadOnly ? (
+        ) : (
           <div className="p-3 bg-gray-50 rounded-md border">
             {getServiceProviderName(assignedProvider || null)}
           </div>
-        ) : (
-          <Select
-            value={formData.assigned_to || "unassigned"}
-            onValueChange={(value) => onFieldChange("assigned_to", value === "unassigned" ? null : value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select service provider" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="unassigned">Not assigned</SelectItem>
-              {(allServiceProviders || []).map((provider) => (
-                <SelectItem key={provider.id} value={provider.id}>
-                  {getServiceProviderName(provider)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         )}
       </div>
     </div>
