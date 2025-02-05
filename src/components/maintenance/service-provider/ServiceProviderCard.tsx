@@ -38,6 +38,12 @@ interface ServiceProviderCardProps {
 }
 
 export function ServiceProviderCard({ provider, onPreferredToggle, onEdit, userRole }: ServiceProviderCardProps) {
+  // Only show edit button if:
+  // 1. User is a landlord
+  // 2. onEdit function is provided
+  // 3. Provider is in their preferred list (meaning they created it)
+  const showEditButton = userRole === "landlord" && onEdit && provider.isPreferred;
+
   return (
     <Card className={cn("p-6 space-y-6", provider.isPreferred && "border-2 border-primary")}>
       <div className="flex justify-between items-start">
@@ -65,7 +71,7 @@ export function ServiceProviderCard({ provider, onPreferredToggle, onEdit, userR
               </span>
             </div>
           )}
-          {userRole === "landlord" && onEdit && (
+          {showEditButton && (
             <Button
               variant="ghost"
               size="icon"
