@@ -14,6 +14,7 @@ import { LandlordFields } from "../forms/LandlordFields";
 import { ScheduleVisitField } from "../forms/ScheduleVisitField";
 import { ClipboardList, Users, DollarSign, MessageSquare } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface MaintenanceRequestModalProps {
   open: boolean;
@@ -162,6 +163,9 @@ export function MaintenanceRequestModal({
       setIsLoading(false);
     }
   };
+
+  const { userRole } = useUserRole();
+  const isServiceProvider = userRole === 'service_provider';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -344,26 +348,47 @@ export function MaintenanceRequestModal({
                   value={request.service_provider_fee || 0}
                   onChange={(e) => onUpdateRequest({ service_provider_fee: parseFloat(e.target.value) })}
                   className="bg-white"
+                  disabled={!isServiceProvider}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Cost Estimate</Label>
+                <Label>Final Cost</Label>
                 <Input
                   type="number"
-                  value={request.cost_estimate || 0}
-                  onChange={(e) => onUpdateRequest({ cost_estimate: parseFloat(e.target.value) })}
+                  value={request.payment_amount || 0}
+                  onChange={(e) => onUpdateRequest({ payment_amount: parseFloat(e.target.value) })}
                   className="bg-white"
+                  disabled={!isServiceProvider}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Cost Notes</Label>
+                <Label>Payment Status</Label>
+                <Select
+                  value={request.payment_status || 'pending'}
+                  onValueChange={(value) => onUpdateRequest({ payment_status: value })}
+                  disabled={!isServiceProvider}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select payment status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="invoiced">Invoiced</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Invoice Notes</Label>
                 <Textarea
                   value={request.cost_estimate_notes || ''}
                   onChange={(e) => onUpdateRequest({ cost_estimate_notes: e.target.value })}
                   className="bg-white min-h-[100px]"
-                  placeholder="Add any notes about costs here..."
+                  placeholder="Add any notes about costs or invoice details here..."
+                  disabled={!isServiceProvider}
                 />
               </div>
             </div>
