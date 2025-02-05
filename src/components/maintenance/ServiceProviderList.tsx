@@ -54,6 +54,7 @@ export function ServiceProviderList() {
     rating: "all"
   });
 
+  // Return null if the user is a service provider
   if (userRole === "service_provider") {
     return null;
   }
@@ -314,9 +315,11 @@ export function ServiceProviderList() {
   };
 
   const handleEdit = (provider: ServiceProvider) => {
-    if (userRole === 'service_provider') return; // Prevent service providers from editing
-    setSelectedProvider(provider);
-    setIsCreateDialogOpen(true);
+    // Only allow editing for non-service provider users
+    if (userRole !== "service_provider") {
+      setSelectedProvider(provider);
+      setIsCreateDialogOpen(true);
+    }
   };
 
   return (
