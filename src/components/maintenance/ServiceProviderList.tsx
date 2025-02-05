@@ -270,7 +270,7 @@ export function ServiceProviderList() {
   return (
     <div className="space-y-4">
       {userRole === "landlord" && (
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-end items-center mb-6">
           <Button 
             className="bg-blue-600 hover:bg-blue-700 text-white" 
             onClick={() => setIsCreateDialogOpen(true)}
