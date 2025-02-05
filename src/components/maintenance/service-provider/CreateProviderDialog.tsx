@@ -1,9 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+
+interface ServiceProvider {
+  id: string;
+  business_name?: string | null;
+  description?: string | null;
+  contact_phone?: string | null;
+  contact_email?: string | null;
+  website?: string | null;
+  service_area?: string[];
+  rating?: number;
+  review_count?: number;
+  profiles: Array<{
+    first_name: string | null;
+    last_name: string | null;
+  }>;
+}
 
 interface CreateProviderDialogProps {
   isOpen: boolean;
@@ -11,6 +27,7 @@ interface CreateProviderDialogProps {
   onSuccess: () => void;
   isCreating: boolean;
   onCreateProvider: (provider: NewProvider) => Promise<void>;
+  provider?: ServiceProvider | null;
 }
 
 interface NewProvider {
@@ -25,7 +42,8 @@ export function CreateProviderDialog({
   onClose, 
   onSuccess, 
   isCreating,
-  onCreateProvider 
+  onCreateProvider,
+  provider 
 }: CreateProviderDialogProps) {
   const [newProvider, setNewProvider] = useState<NewProvider>({
     first_name: "",
@@ -34,6 +52,24 @@ export function CreateProviderDialog({
     phone: "",
   });
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (provider && isOpen) {
+      setNewProvider({
+        first_name: provider.profiles[0]?.first_name || "",
+        last_name: provider.profiles[0]?.last_name || "",
+        email: provider.contact_email || "",
+        phone: provider.contact_phone || "",
+      });
+    } else if (!isOpen) {
+      setNewProvider({
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+      });
+    }
+  }, [provider, isOpen]);
 
   const handleSubmit = async () => {
     try {
@@ -84,7 +120,7 @@ export function CreateProviderDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create Service Provider</DialogTitle>
+          <DialogTitle>{provider ? 'Edit Service Provider' : 'Create Service Provider'}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
@@ -136,7 +172,7 @@ export function CreateProviderDialog({
             onClick={handleSubmit}
             disabled={isCreating}
           >
-            {isCreating ? "Creating..." : "Create Service Provider"}
+            {isCreating ? "Saving..." : (provider ? "Save Changes" : "Create Service Provider")}
           </Button>
         </div>
       </DialogContent>
