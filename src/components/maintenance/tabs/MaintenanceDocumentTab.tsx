@@ -85,12 +85,16 @@ export function MaintenanceDocumentTab({
     try {
       console.log("Getting signed URL for document:", filePath);
       
-      // First try to download the file to get a signed URL
+      // Construct the full path including the request ID
+      const fullPath = `${request.id}/${filePath}`;
+      console.log("Using full path:", fullPath);
+      
       const { data, error } = await supabase.storage
         .from('maintenance-documents')
-        .createSignedUrl(filePath, 60); // URL valid for 60 seconds
+        .createSignedUrl(fullPath, 60); // URL valid for 60 seconds
 
       if (error) {
+        console.error("Error creating signed URL:", error);
         throw error;
       }
 
