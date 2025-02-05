@@ -1,11 +1,9 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Star, Edit2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Star, Edit } from "lucide-react";
 import { ServiceProviderContact } from "./ServiceProviderContact";
 import { ServiceProviderServices } from "./ServiceProviderServices";
-import { Button } from "@/components/ui/button";
 
 interface ServiceProvider {
   id: string;
@@ -33,87 +31,53 @@ interface ServiceProvider {
 interface ServiceProviderCardProps {
   provider: ServiceProvider;
   onPreferredToggle: (provider: ServiceProvider) => void;
-  onEdit?: (provider: ServiceProvider) => void;
-  userRole?: string;
+  onEdit: (provider: ServiceProvider) => void;
+  showEditButton: boolean;
 }
 
-export function ServiceProviderCard({ provider, onPreferredToggle, onEdit, userRole }: ServiceProviderCardProps) {
-  // Only show edit button if:
-  // 1. User is a landlord
-  // 2. onEdit function is provided
-  // 3. Provider is in their preferred list (meaning they created it)
-  const showEditButton = userRole === "landlord" && onEdit && provider.isPreferred;
+export function ServiceProviderCard({
+  provider,
+  onPreferredToggle,
+  onEdit,
+  showEditButton
+}: ServiceProviderCardProps) {
+  const displayName = provider.business_name || 
+    `${provider.profiles[0]?.first_name} ${provider.profiles[0]?.last_name}`;
 
   return (
-    <Card className={cn("p-6 space-y-6", provider.isPreferred && "border-2 border-primary")}>
-      <div className="flex justify-between items-start">
-        <div className="space-y-2">
-          <h3 className="text-2xl font-semibold text-blue-500">
-            {provider.business_name || `${provider.profiles[0]?.first_name} ${provider.profiles[0]?.last_name}`}
-          </h3>
+    <Card className="p-6">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-lg font-semibold">{displayName}</h3>
           {provider.description && (
-            <p className="text-gray-600">
-              {provider.description}
-            </p>
+            <p className="text-gray-600 mt-1">{provider.description}</p>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          {provider.rating && (
-            <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-              <span className="text-gray-600">
-                {provider.rating.toFixed(1)}
-                {provider.review_count > 0 && (
-                  <span className="text-sm text-gray-500 ml-1">
-                    ({provider.review_count} reviews)
-                  </span>
-                )}
-              </span>
-            </div>
-          )}
+        <div className="flex items-center space-x-2">
+          <Button
+            variant={provider.isPreferred ? "default" : "outline"}
+            size="sm"
+            onClick={() => onPreferredToggle(provider)}
+          >
+            <Star className={`h-4 w-4 ${provider.isPreferred ? "fill-current" : ""}`} />
+            <span className="ml-1">
+              {provider.isPreferred ? "Preferred" : "Add to Preferred"}
+            </span>
+          </Button>
           {showEditButton && (
             <Button
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={() => onEdit(provider)}
-              className="ml-2"
             >
-              <Edit2 className="h-4 w-4" />
+              <Edit className="h-4 w-4" />
             </Button>
           )}
         </div>
       </div>
 
-      <div className="space-y-6">
-        <div>
-          <h4 className="text-lg font-semibold mb-4">Services Offered</h4>
-          <ServiceProviderServices services={provider.services} />
-        </div>
-
-        <div>
-          <h4 className="text-lg font-semibold mb-4">Contact Information</h4>
-          <ServiceProviderContact 
-            phone={provider.contact_phone}
-            email={provider.contact_email}
-            website={provider.website}
-          />
-        </div>
-
-        <div className="flex gap-3">
-          <Button
-            variant={provider.isPreferred ? "secondary" : "outline"}
-            className={cn(
-              "flex-1",
-              provider.isPreferred 
-                ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" 
-                : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-            )}
-            onClick={() => onPreferredToggle(provider)}
-          >
-            {provider.isPreferred ? '★ Preferred Provider' : 'Add to Preferred'}
-          </Button>
-        </div>
-      </div>
+      <ServiceProviderContact provider={provider} />
+      <ServiceProviderServices services={provider.services || []} />
     </Card>
   );
 }

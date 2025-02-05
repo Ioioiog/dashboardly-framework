@@ -314,6 +314,7 @@ export function ServiceProviderList() {
   };
 
   const handleEdit = (provider: ServiceProvider) => {
+    if (userRole === 'service_provider') return; // Prevent service providers from editing
     setSelectedProvider(provider);
     setIsCreateDialogOpen(true);
   };
