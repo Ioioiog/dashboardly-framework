@@ -66,23 +66,31 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
   };
 
   const handleViewInvoice = async () => {
-    if (!request.invoice_document_path) return;
+    if (!request.invoice_document_path) {
+      console.log("No invoice document path available");
+      return;
+    }
     
     try {
-      console.log("Getting signed URL for invoice:", request.invoice_document_path);
+      console.log("Getting signed URL for invoice path:", request.invoice_document_path);
+      
       const { data, error } = await supabase.storage
         .from('invoice-documents')
-        .createSignedUrl(request.invoice_document_path, 300); // 5 minutes validity
+        .createSignedUrl(request.invoice_document_path, 300);
 
       if (error) {
-        console.error("Error getting invoice URL:", error);
+        console.error("Error getting signed URL:", error);
         throw error;
       }
 
-      console.log("Generated signed URL:", data.signedUrl);
+      if (!data?.signedUrl) {
+        throw new Error("No signed URL received");
+      }
+
+      console.log("Opening signed URL:", data.signedUrl);
       window.open(data.signedUrl, '_blank');
     } catch (error) {
-      console.error("Error getting invoice URL:", error);
+      console.error("Error viewing invoice:", error);
       toast({
         title: "Error",
         description: "Failed to retrieve invoice",
