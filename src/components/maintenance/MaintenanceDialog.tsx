@@ -75,15 +75,10 @@ export function MaintenanceDialog({
     if (!requestId || !existingRequest) return;
 
     try {
-      // Ensure approval_status is valid enum value
-      const validatedUpdates = {
-        ...updates,
-        approval_status: updates.approval_status as "pending" | "approved" | "rejected" | null
-      };
-
       const updatedRequest = {
         ...existingRequest,
-        ...validatedUpdates
+        ...updates,
+        approval_status: updates.approval_status as 'pending' | 'approved' | 'rejected' | null
       };
 
       console.log("Validating updated request:", updatedRequest);
