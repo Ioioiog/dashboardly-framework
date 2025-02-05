@@ -72,15 +72,21 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
 
     try {
       console.log("Fetching signed URL for document:", request.document_path);
-      const { data, error } = await supabase.storage
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from('invoice-documents')
-        .createSignedUrl(request.document_path, 60);
+        .createSignedUrl(request.document_path, 3600); // 1 hour expiry
 
-      if (error) throw error;
-
-      if (data?.signedUrl) {
-        window.open(data.signedUrl, '_blank');
+      if (signedUrlError) {
+        console.error("Error creating signed URL:", signedUrlError);
+        throw signedUrlError;
       }
+
+      if (!signedUrlData?.signedUrl) {
+        throw new Error("No signed URL returned");
+      }
+
+      console.log("Opening document with signed URL:", signedUrlData.signedUrl);
+      window.open(signedUrlData.signedUrl, '_blank');
     } catch (error) {
       console.error("Error viewing invoice:", error);
       toast({
@@ -112,7 +118,7 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
           <Input
             id="invoice"
             type="file"
-            accept=".pdf"
+            accept=".pdf,.doc,.docx"
             onChange={handleFileUpload}
             className="mt-1"
           />
