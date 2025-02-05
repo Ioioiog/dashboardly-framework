@@ -83,13 +83,23 @@ export function MaintenanceDocumentTab({
 
   const handleViewDocument = async (filePath: string) => {
     try {
-      console.log("Getting public URL for document:", filePath);
-      const { data: { publicUrl } } = supabase.storage
+      console.log("Getting signed URL for document:", filePath);
+      
+      // First try to download the file to get a signed URL
+      const { data, error } = await supabase.storage
         .from('maintenance-documents')
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 60); // URL valid for 60 seconds
 
-      console.log("Generated public URL:", publicUrl);
-      setPreviewUrl(publicUrl);
+      if (error) {
+        throw error;
+      }
+
+      if (!data?.signedUrl) {
+        throw new Error('Failed to generate signed URL');
+      }
+
+      console.log("Generated signed URL:", data.signedUrl);
+      setPreviewUrl(data.signedUrl);
       setShowPreview(true);
     } catch (error) {
       console.error("Error getting document URL:", error);
@@ -207,6 +217,7 @@ export function MaintenanceDocumentTab({
               src={previewUrl}
               className="w-full h-full rounded-md"
               title="Document Preview"
+              sandbox="allow-same-origin allow-scripts"
             />
           )}
         </DialogContent>
