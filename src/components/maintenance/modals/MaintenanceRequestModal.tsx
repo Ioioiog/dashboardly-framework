@@ -9,6 +9,8 @@ import { MaintenanceChatTab } from "../tabs/MaintenanceChatTab";
 import { MaintenanceDocumentTab } from "../tabs/MaintenanceDocumentTab";
 import { useUserRole } from "@/hooks/use-user-role";
 import { FileObject } from "@supabase/storage-js";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MaintenanceRequestModalProps {
   open: boolean;
@@ -24,10 +26,45 @@ export const MaintenanceRequestModal = ({
   onOpenChange,
   request,
   onUpdateRequest,
-  documents,
-  isLoadingDocuments
 }: MaintenanceRequestModalProps) => {
   const { userRole } = useUserRole();
+
+  const { data: documents, isLoading: isLoadingDocuments } = useQuery({
+    queryKey: ['maintenance-documents', request.id],
+    enabled: !!request.id,
+    queryFn: async () => {
+      console.log("Fetching documents for request:", request.id);
+      
+      // First, get the list of files from the maintenance-documents bucket
+      const { data: maintenanceFiles, error: maintenanceError } = await supabase.storage
+        .from('maintenance-documents')
+        .list(`${request.id}`);
+
+      if (maintenanceError) {
+        console.error("Error fetching maintenance documents:", maintenanceError);
+        throw maintenanceError;
+      }
+
+      // Then, get the invoice document if it exists
+      let invoiceFiles: FileObject[] = [];
+      if (request.invoice_document_path) {
+        console.log("Fetching invoice document:", request.invoice_document_path);
+        const { data: invoiceData, error: invoiceError } = await supabase.storage
+          .from('invoice-documents')
+          .list(`${request.id}`);
+
+        if (invoiceError) {
+          console.error("Error fetching invoice document:", invoiceError);
+        } else if (invoiceData) {
+          invoiceFiles = invoiceData;
+        }
+      }
+
+      const allFiles = [...(maintenanceFiles || []), ...(invoiceFiles || [])];
+      console.log("All fetched documents:", allFiles);
+      return allFiles;
+    }
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
