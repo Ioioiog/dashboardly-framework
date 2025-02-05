@@ -15,6 +15,7 @@ import { ScheduleVisitField } from "../forms/ScheduleVisitField";
 import { ClipboardList, Users, DollarSign, MessageSquare } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FileUp, Eye } from "lucide-react";
+import { useUserRole } from "@/hooks/use-user-role"; // Added this import
 
 interface MaintenanceRequestModalProps {
   open: boolean;
