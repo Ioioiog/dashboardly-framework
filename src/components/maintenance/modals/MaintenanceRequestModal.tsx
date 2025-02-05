@@ -8,12 +8,15 @@ import { MaintenanceCostsTab } from "../tabs/MaintenanceCostsTab";
 import { MaintenanceChatTab } from "../tabs/MaintenanceChatTab";
 import { MaintenanceDocumentTab } from "../tabs/MaintenanceDocumentTab";
 import { useUserRole } from "@/hooks/use-user-role";
+import { FileObject } from "@supabase/storage-js";
 
 interface MaintenanceRequestModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   request: MaintenanceRequest;
   onUpdateRequest: (request: Partial<MaintenanceRequest>) => void;
+  documents?: FileObject[];
+  isLoadingDocuments?: boolean;
 }
 
 export function MaintenanceRequestModal({
@@ -21,6 +24,8 @@ export function MaintenanceRequestModal({
   onOpenChange,
   request,
   onUpdateRequest,
+  documents,
+  isLoadingDocuments
 }: MaintenanceRequestModalProps) {
   const { userRole } = useUserRole();
 
@@ -80,6 +85,8 @@ export function MaintenanceRequestModal({
             <MaintenanceDocumentTab
               request={request}
               onUpdateRequest={onUpdateRequest}
+              documents={documents}
+              isLoading={isLoadingDocuments}
             />
           </TabsContent>
 
