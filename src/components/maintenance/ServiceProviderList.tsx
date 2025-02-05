@@ -158,6 +158,7 @@ export function ServiceProviderList() {
       setIsCreating(true);
       
       console.log("Creating new service provider:", newProvider);
+      const tempPassword = Math.random().toString(36).slice(-8) + "!1A"; // Generate secure temporary password
 
       const { data: existingProfiles, error: profileError } = await supabase
         .from('profiles')
@@ -189,7 +190,7 @@ export function ServiceProviderList() {
       } else {
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: newProvider.email,
-          password: "tempPass123!",
+          password: tempPassword,
           options: {
             data: {
               role: "service_provider",
@@ -198,6 +199,21 @@ export function ServiceProviderList() {
         });
 
         if (authError) throw authError;
+
+        // Send welcome email with temporary password
+        const { error: emailError } = await supabase.functions.invoke('send-service-provider-welcome', {
+          body: {
+            email: newProvider.email,
+            firstName: newProvider.first_name,
+            lastName: newProvider.last_name,
+            tempPassword: tempPassword
+          }
+        });
+
+        if (emailError) {
+          console.error("Error sending welcome email:", emailError);
+          // Continue with the process even if email fails
+        }
 
         const { error: updateError } = await supabase
           .from("profiles")
@@ -213,7 +229,7 @@ export function ServiceProviderList() {
 
         toast({
           title: "Success",
-          description: "Service provider created successfully. They will receive an email to set their password.",
+          description: "Service provider created successfully. They will receive an email with login instructions.",
         });
       }
 
