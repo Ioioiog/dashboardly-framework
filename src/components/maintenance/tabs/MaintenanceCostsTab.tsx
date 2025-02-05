@@ -118,24 +118,25 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
           />
         )}
           
-          {request.document_path && (
-            <div className="flex items-center gap-2 mt-2">
-              <p className="text-sm text-green-600">Invoice uploaded</p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleViewInvoice}
-              >
-                View Invoice
-              </Button>
-            </div>
-          )}
-          {!request.document_path && (
-            <p className="text-sm text-gray-500 flex items-center gap-2">
-              <FileUp className="h-4 w-4" />
-              No invoice uploaded yet
-            </p>
-          )}
+        {request.document_path && (
+          <div className="flex items-center gap-2 mt-2">
+            <p className="text-sm text-green-600">Invoice uploaded</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleViewInvoice}
+            >
+              View Invoice
+            </Button>
+          </div>
+        )}
+        {!request.document_path && (
+          <p className="text-sm text-gray-500 flex items-center gap-2">
+            <FileUp className="h-4 w-4" />
+            No invoice uploaded yet
+          </p>
+        )}
+      </div>
     </div>
   );
 }
