@@ -3,9 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { FileUp, Eye } from "lucide-react";
+import { FileUp, Eye, Trash2, Loader2 } from "lucide-react";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { FileObject } from "@supabase/storage-js";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card } from "@/components/ui/card";
 
 interface MaintenanceDocumentTabProps {
   request: MaintenanceRequest;
@@ -22,6 +24,7 @@ export function MaintenanceDocumentTab({
 }: MaintenanceDocumentTabProps) {
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeletingFile, setIsDeletingFile] = useState<string | null>(null);
 
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -42,7 +45,7 @@ export function MaintenanceDocumentTab({
       const fileExt = file.name.split('.').pop();
       const filePath = `${request.id}/${crypto.randomUUID()}.${fileExt}`;
 
-      const { data, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('maintenance-documents')
         .upload(filePath, file);
 
@@ -70,14 +73,12 @@ export function MaintenanceDocumentTab({
     }
   };
 
-  const handleViewDocument = () => {
-    if (!request.document_path) return;
-    
+  const handleViewDocument = async (filePath: string) => {
     try {
-      console.log("Getting public URL for document:", request.document_path);
+      console.log("Getting public URL for document:", filePath);
       const { data: { publicUrl } } = supabase.storage
         .from('maintenance-documents')
-        .getPublicUrl(request.document_path);
+        .getPublicUrl(filePath);
 
       console.log("Generated public URL:", publicUrl);
       window.open(publicUrl, '_blank');
@@ -91,36 +92,101 @@ export function MaintenanceDocumentTab({
     }
   };
 
+  const handleDeleteDocument = async (filePath: string) => {
+    try {
+      setIsDeletingFile(filePath);
+      const { error } = await supabase.storage
+        .from('maintenance-documents')
+        .remove([filePath]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Document deleted successfully",
+      });
+
+      // Trigger a refresh of the documents list
+      onUpdateRequest({ ...request });
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete document",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeletingFile(null);
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Input
-          type="file"
-          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-          onChange={handleDocumentUpload}
-          disabled={isUploading}
-          className="cursor-pointer"
-        />
-        {request.document_path ? (
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-green-600">Document uploaded</p>
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={handleViewDocument}
-            >
-              <Eye className="h-4 w-4" />
-              View Document
-            </Button>
+    <div className="space-y-6">
+      <Card className="p-4">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <Input
+                type="file"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                onChange={handleDocumentUpload}
+                disabled={isUploading}
+                className="cursor-pointer file:cursor-pointer file:border-0 file:bg-primary file:text-primary-foreground file:px-4 file:py-2 file:mr-4 file:rounded-md hover:file:bg-primary/90 transition-colors"
+              />
+            </div>
+            {isUploading && (
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            )}
           </div>
-        ) : (
-          <p className="text-sm text-gray-500 flex items-center gap-2">
-            <FileUp className="h-4 w-4" />
-            No document uploaded yet
-          </p>
-        )}
-      </div>
+
+          <ScrollArea className="h-[300px] rounded-md border p-4">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : documents && documents.length > 0 ? (
+              <div className="space-y-4">
+                {documents.map((doc) => (
+                  <div 
+                    key={doc.name}
+                    className="flex items-center justify-between p-2 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                  >
+                    <span className="text-sm font-medium truncate flex-1">
+                      {doc.name}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleViewDocument(doc.name)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteDocument(doc.name)}
+                        disabled={isDeletingFile === doc.name}
+                      >
+                        {isDeletingFile === doc.name ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                <FileUp className="h-8 w-8 mb-2" />
+                <p>No documents uploaded yet</p>
+              </div>
+            )}
+          </ScrollArea>
+        </div>
+      </Card>
     </div>
   );
 }
