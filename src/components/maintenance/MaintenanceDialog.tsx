@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateMaintenanceRequest } from "./utils/validation";
-import { MaintenanceRequestModal } from "./modals/MaintenanceRequestModal";
+import MaintenanceRequestModal from "./modals/MaintenanceRequestModal";
 import type { MaintenanceRequest } from "./hooks/useMaintenanceRequest";
 
 interface MaintenanceDialogProps {

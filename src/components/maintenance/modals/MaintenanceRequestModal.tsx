@@ -67,12 +67,12 @@ export const MaintenanceRequestModal = ({
             />
           </TabsContent>
 
-          <TabsTrigger value="provider">
+          <TabsContent value="provider">
             <MaintenanceProviderTab
               request={request}
               onUpdateRequest={onUpdateRequest}
             />
-          </TabsTrigger>
+          </TabsContent>
 
           <TabsContent value="costs">
             <MaintenanceCostsTab
