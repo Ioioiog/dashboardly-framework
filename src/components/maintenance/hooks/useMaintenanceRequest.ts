@@ -37,6 +37,7 @@ export interface MaintenanceRequest {
   issue_type?: string | null;
   contact_phone?: string | null;
   preferred_times?: string[];
+  invoice_document_path?: string | null;
   property?: Property;
   tenant?: Tenant;
 }
