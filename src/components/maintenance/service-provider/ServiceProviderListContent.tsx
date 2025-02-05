@@ -32,12 +32,16 @@ interface ServiceProviderListContentProps {
   providers: ServiceProvider[] | undefined;
   isLoading: boolean;
   onPreferredToggle: (provider: ServiceProvider) => Promise<void>;
+  onEdit?: (provider: ServiceProvider) => void;
+  userRole?: string;
 }
 
 export function ServiceProviderListContent({ 
   providers, 
   isLoading, 
-  onPreferredToggle 
+  onPreferredToggle,
+  onEdit,
+  userRole
 }: ServiceProviderListContentProps) {
   if (isLoading) {
     return (
@@ -81,6 +85,8 @@ export function ServiceProviderListContent({
           key={provider.id}
           provider={provider}
           onPreferredToggle={onPreferredToggle}
+          onEdit={onEdit}
+          userRole={userRole}
         />
       ))}
     </div>

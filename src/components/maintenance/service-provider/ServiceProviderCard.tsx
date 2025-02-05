@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star } from "lucide-react";
+import { Star, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ServiceProviderContact } from "./ServiceProviderContact";
 import { ServiceProviderServices } from "./ServiceProviderServices";
@@ -33,9 +33,11 @@ interface ServiceProvider {
 interface ServiceProviderCardProps {
   provider: ServiceProvider;
   onPreferredToggle: (provider: ServiceProvider) => void;
+  onEdit?: (provider: ServiceProvider) => void;
+  userRole?: string;
 }
 
-export function ServiceProviderCard({ provider, onPreferredToggle }: ServiceProviderCardProps) {
+export function ServiceProviderCard({ provider, onPreferredToggle, onEdit, userRole }: ServiceProviderCardProps) {
   return (
     <Card className={cn("p-6 space-y-6", provider.isPreferred && "border-2 border-primary")}>
       <div className="flex justify-between items-start">
@@ -49,19 +51,31 @@ export function ServiceProviderCard({ provider, onPreferredToggle }: ServiceProv
             </p>
           )}
         </div>
-        {provider.rating && (
-          <div className="flex items-center gap-2">
-            <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-            <span className="text-gray-600">
-              {provider.rating.toFixed(1)}
-              {provider.review_count > 0 && (
-                <span className="text-sm text-gray-500 ml-1">
-                  ({provider.review_count} reviews)
-                </span>
-              )}
-            </span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {provider.rating && (
+            <div className="flex items-center gap-2">
+              <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+              <span className="text-gray-600">
+                {provider.rating.toFixed(1)}
+                {provider.review_count > 0 && (
+                  <span className="text-sm text-gray-500 ml-1">
+                    ({provider.review_count} reviews)
+                  </span>
+                )}
+              </span>
+            </div>
+          )}
+          {userRole === "landlord" && onEdit && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onEdit(provider)}
+              className="ml-2"
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-6">

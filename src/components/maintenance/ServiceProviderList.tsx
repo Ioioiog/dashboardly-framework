@@ -8,6 +8,7 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { ServiceProviderFilters } from "./service-provider/ServiceProviderFilters";
 import { CreateProviderDialog } from "./service-provider/CreateProviderDialog";
 import { ServiceProviderListContent } from "./service-provider/ServiceProviderListContent";
+import { Edit2 } from "lucide-react";
 
 interface ServiceProvider {
   id: string;
@@ -47,6 +48,7 @@ export function ServiceProviderList() {
   const { userRole } = useUserRole();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<ServiceProvider | null>(null);
   const [filters, setFilters] = useState<Filters>({
     search: "",
     category: "all",
@@ -267,6 +269,11 @@ export function ServiceProviderList() {
     }
   };
 
+  const handleEdit = (provider: ServiceProvider) => {
+    setSelectedProvider(provider);
+    setIsCreateDialogOpen(true);
+  };
+
   return (
     <div className="space-y-4">
       {userRole === "landlord" && (
@@ -289,14 +296,23 @@ export function ServiceProviderList() {
         providers={serviceProviders}
         isLoading={isLoading}
         onPreferredToggle={handlePreferredToggle}
+        onEdit={handleEdit}
+        userRole={userRole}
       />
 
       <CreateProviderDialog
         isOpen={isCreateDialogOpen}
-        onClose={() => setIsCreateDialogOpen(false)}
-        onSuccess={() => setIsCreateDialogOpen(false)}
+        onClose={() => {
+          setIsCreateDialogOpen(false);
+          setSelectedProvider(null);
+        }}
+        onSuccess={() => {
+          setIsCreateDialogOpen(false);
+          setSelectedProvider(null);
+        }}
         isCreating={isCreating}
         onCreateProvider={handleCreateServiceProvider}
+        provider={selectedProvider}
       />
     </div>
   );
