@@ -38,11 +38,15 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
       const fileExt = file.name.split('.').pop();
       const filePath = `${request.id}/${crypto.randomUUID()}.${fileExt}`;
 
+      console.log("Uploading file to path:", filePath);
       const { data, error: uploadError } = await supabase.storage
         .from('invoice-documents')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw uploadError;
+      }
 
       console.log("File uploaded successfully:", filePath);
 
