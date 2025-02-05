@@ -8,8 +8,9 @@ import { useAuthState } from "@/hooks/useAuthState";
 
 interface ServiceProvider {
   id: string;
-  first_name: string | null;
-  last_name: string | null;
+  business_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
 }
 
 interface FormData {
@@ -22,7 +23,6 @@ interface FormData {
 interface LandlordFieldsProps {
   formData: FormData;
   onFieldChange: (field: string, value: any) => void;
-  serviceProviders: ServiceProvider[];
   isLoadingProviders: boolean;
   isReadOnly?: boolean;
 }
@@ -30,7 +30,6 @@ interface LandlordFieldsProps {
 export function LandlordFields({
   formData,
   onFieldChange,
-  serviceProviders,
   isLoadingProviders,
   isReadOnly = false
 }: LandlordFieldsProps) {
@@ -45,7 +44,7 @@ export function LandlordFields({
   ];
 
   // Query to fetch preferred service providers for the landlord
-  const { data: preferredProviders } = useQuery({
+  const { data: preferredProviders, isLoading: isLoadingPreferred } = useQuery({
     queryKey: ['preferred-service-providers', currentUserId],
     queryFn: async () => {
       if (!currentUserId) return [];
@@ -167,7 +166,7 @@ export function LandlordFields({
 
       <div>
         <label className="text-sm font-medium mb-2 block">Service Provider</label>
-        {isLoadingProviders ? (
+        {isLoadingProviders || isLoadingPreferred ? (
           <Skeleton className="h-10 w-full" />
         ) : isReadOnly ? (
           <div className="p-3 bg-gray-50 rounded-md border">
@@ -183,9 +182,9 @@ export function LandlordFields({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="unassigned">Not assigned</SelectItem>
-              {preferredProviders?.map((provider) => (
+              {(preferredProviders || []).map((provider) => (
                 <SelectItem key={provider.id} value={provider.id}>
-                  {provider.business_name || `${provider.first_name} ${provider.last_name}`}
+                  {provider.business_name || `${provider.first_name || ''} ${provider.last_name || ''}`}
                 </SelectItem>
               ))}
             </SelectContent>
