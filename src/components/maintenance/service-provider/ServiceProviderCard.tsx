@@ -65,7 +65,7 @@ export function ServiceProviderCard({ provider, onPreferredToggle, onEdit, userR
               </span>
             </div>
           )}
-          {userRole === "landlord" && onEdit && provider.isPreferred && (
+          {userRole === "landlord" && onEdit && (
             <Button
               variant="ghost"
               size="icon"
