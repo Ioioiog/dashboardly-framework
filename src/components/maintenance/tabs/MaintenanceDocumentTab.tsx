@@ -5,13 +5,21 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { FileUp, Eye } from "lucide-react";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
+import { FileObject } from "@supabase/storage-js";
 
 interface MaintenanceDocumentTabProps {
   request: MaintenanceRequest;
   onUpdateRequest: (request: Partial<MaintenanceRequest>) => void;
+  documents?: FileObject[];
+  isLoading?: boolean;
 }
 
-export function MaintenanceDocumentTab({ request, onUpdateRequest }: MaintenanceDocumentTabProps) {
+export function MaintenanceDocumentTab({ 
+  request, 
+  onUpdateRequest,
+  documents,
+  isLoading 
+}: MaintenanceDocumentTabProps) {
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
 
