@@ -1,42 +1,38 @@
 import React from "react";
 import { Phone, Mail, Globe } from "lucide-react";
 
-interface ServiceProvider {
-  contact_phone?: string | null;
-  contact_email?: string | null;
+interface ServiceProviderContactProps {
+  phone?: string | null;
+  email?: string | null;
   website?: string | null;
 }
 
-interface ServiceProviderContactProps {
-  provider: ServiceProvider;
-}
-
-export function ServiceProviderContact({ provider }: ServiceProviderContactProps) {
-  if (!provider.contact_phone && !provider.contact_email && !provider.website) return null;
+export function ServiceProviderContact({ phone, email, website }: ServiceProviderContactProps) {
+  if (!phone && !email && !website) return null;
 
   return (
     <div className="space-y-3">
-      {provider.contact_phone && (
+      {phone && (
         <a
-          href={`tel:${provider.contact_phone}`}
+          href={`tel:${phone}`}
           className="flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors"
         >
           <Phone className="h-4 w-4" />
-          {provider.contact_phone}
+          {phone}
         </a>
       )}
-      {provider.contact_email && (
+      {email && (
         <a
-          href={`mailto:${provider.contact_email}`}
+          href={`mailto:${email}`}
           className="flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors"
         >
           <Mail className="h-4 w-4" />
-          {provider.contact_email}
+          {email}
         </a>
       )}
-      {provider.website && (
+      {website && (
         <a
-          href={provider.website}
+          href={website}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors"
