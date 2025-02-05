@@ -160,83 +160,106 @@ export function ServiceProviderList() {
       console.log("Creating new service provider:", newProvider);
       const tempPassword = Math.random().toString(36).slice(-8) + "!1A"; // Generate secure temporary password
 
-      const { data: existingProfiles, error: profileError } = await supabase
+      // First check if the user already exists
+      const { data: existingUser, error: userCheckError } = await supabase
         .from('profiles')
         .select('id, role')
         .eq('email', newProvider.email)
-        .single();
+        .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') {
-        throw profileError;
+      if (userCheckError) {
+        console.error("Error checking existing user:", userCheckError);
+        throw userCheckError;
       }
 
-      if (existingProfiles) {
+      let userId;
+
+      if (existingUser) {
+        console.log("Existing user found:", existingUser);
+        userId = existingUser.id;
+        
+        // Update existing profile
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
             first_name: newProvider.first_name,
             last_name: newProvider.last_name,
             phone: newProvider.phone,
-            role: 'service_provider',
+            role: 'service_provider'
           })
-          .eq('id', existingProfiles.id);
+          .eq('id', userId);
 
         if (updateError) throw updateError;
-
-        toast({
-          title: "Success",
-          description: "Existing user updated as service provider successfully.",
-        });
       } else {
+        console.log("Creating new user with temporary password");
+        // Create new user
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: newProvider.email,
           password: tempPassword,
           options: {
             data: {
               role: "service_provider",
-            },
-          },
-        });
-
-        if (authError) throw authError;
-
-        // Send welcome email with temporary password
-        const { error: emailError } = await supabase.functions.invoke('send-service-provider-welcome', {
-          body: {
-            email: newProvider.email,
-            firstName: newProvider.first_name,
-            lastName: newProvider.last_name,
-            tempPassword: tempPassword
+              first_name: newProvider.first_name,
+              last_name: newProvider.last_name
+            }
           }
         });
 
-        if (emailError) {
-          console.error("Error sending welcome email:", emailError);
-          // Continue with the process even if email fails
+        if (authError) {
+          console.error("Error creating user:", authError);
+          throw authError;
         }
 
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({
-            first_name: newProvider.first_name,
-            last_name: newProvider.last_name,
-            phone: newProvider.phone,
-            role: "service_provider",
-          })
-          .eq("id", authData.user!.id);
+        userId = authData.user!.id;
+      }
 
-        if (updateError) throw updateError;
+      console.log("Creating/updating service provider profile for user:", userId);
 
+      // Create or update service provider profile
+      const { error: spError } = await supabase
+        .from('service_provider_profiles')
+        .upsert({
+          id: userId,
+          contact_email: newProvider.email,
+          contact_phone: newProvider.phone,
+          is_first_login: true
+        });
+
+      if (spError) {
+        console.error("Error creating service provider profile:", spError);
+        throw spError;
+      }
+
+      // Send welcome email with temporary password
+      console.log("Sending welcome email to new service provider");
+      const { error: emailError } = await supabase.functions.invoke('send-service-provider-welcome', {
+        body: {
+          email: newProvider.email,
+          firstName: newProvider.first_name,
+          lastName: newProvider.last_name,
+          tempPassword: tempPassword
+        }
+      });
+
+      if (emailError) {
+        console.error("Error sending welcome email:", emailError);
+        // Continue despite email error, but notify user
         toast({
-          title: "Success",
-          description: "Service provider created successfully. They will receive an email with login instructions.",
+          title: "Warning",
+          description: "Provider created but welcome email could not be sent. Please contact them directly.",
+          variant: "warning",
         });
       }
+
+      toast({
+        title: "Success",
+        description: "Service provider created successfully.",
+      });
 
       setIsCreateDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ['service-providers-details'] });
     } catch (error: any) {
-      console.error("Error creating service provider:", error);
+      console.error("Error in handleCreateServiceProvider:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to create service provider. Please try again.",
