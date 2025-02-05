@@ -72,6 +72,11 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
   const handleViewInvoice = async () => {
     if (!request.invoice_document_path) {
       console.log("No invoice document path available");
+      toast({
+        title: "Error",
+        description: "No invoice document available",
+        variant: "destructive"
+      });
       return;
     }
     
