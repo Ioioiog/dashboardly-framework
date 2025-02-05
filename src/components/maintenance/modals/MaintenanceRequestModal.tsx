@@ -24,14 +24,14 @@ interface MaintenanceRequestModalProps {
   isLoadingDocuments?: boolean;
 }
 
-export default function MaintenanceRequestModal({
+export const MaintenanceRequestModal = ({
   open,
   onOpenChange,
   request,
   onUpdateRequest,
   documents,
   isLoadingDocuments
-}: MaintenanceRequestModalProps) {
+}: MaintenanceRequestModalProps) => {
   const { userRole } = useUserRole();
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
@@ -165,4 +165,6 @@ export default function MaintenanceRequestModal({
       </DialogContent>
     </Dialog>
   );
-}
+};
+
+export default MaintenanceRequestModal;
