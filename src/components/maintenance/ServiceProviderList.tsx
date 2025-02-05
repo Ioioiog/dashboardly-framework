@@ -208,7 +208,14 @@ export function ServiceProviderList() {
           throw authError;
         }
 
-        userId = authData.user!.id;
+        if (!authData.user) {
+          throw new Error("No user data returned from auth signup");
+        }
+
+        userId = authData.user.id;
+
+        // Wait a moment for the auth trigger to create the profile
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
       console.log("Creating/updating service provider profile for user:", userId);
@@ -218,7 +225,7 @@ export function ServiceProviderList() {
         .from('service_provider_profiles')
         .upsert({
           id: userId,
-          business_name: `${newProvider.first_name} ${newProvider.last_name}`, // Using full name as initial business name
+          business_name: `${newProvider.first_name} ${newProvider.last_name}`,
           contact_email: newProvider.email,
           contact_phone: newProvider.phone,
           is_first_login: true
@@ -242,7 +249,6 @@ export function ServiceProviderList() {
 
       if (emailError) {
         console.error("Error sending welcome email:", emailError);
-        // Continue despite email error, but notify user
         toast({
           title: "Warning",
           description: "Provider created but welcome email could not be sent. Please contact them directly.",
