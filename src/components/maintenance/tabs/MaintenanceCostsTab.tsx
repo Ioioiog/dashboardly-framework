@@ -25,7 +25,9 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
       console.log("Starting invoice upload for request:", request.id);
 
       // Upload file to Supabase Storage
-      const filePath = `${request.id}/${crypto.randomUUID()}.pdf`;
+      const filePath = `${request.id}/${crypto.randomUUID()}.${file.name.split('.').pop()}`;
+      console.log("Uploading file to path:", filePath);
+
       const { error: uploadError } = await supabase.storage
         .from('invoice-documents')
         .upload(filePath, file);
@@ -38,6 +40,7 @@ export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabPr
 
       // Update maintenance request with document path
       await onUpdate({
+        id: request.id,
         document_path: filePath
       });
 
