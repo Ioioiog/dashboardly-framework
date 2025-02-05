@@ -1,24 +1,13 @@
 import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Building2, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthState } from "@/hooks/useAuthState";
-import { ServiceProviderCard } from "./service-provider/ServiceProviderCard";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { useUserRole } from "@/hooks/use-user-role";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface ServiceProviderService {
-  name: string;
-  base_price?: number;
-  price_unit?: string;
-  category: string;
-}
+import { ServiceProviderFilters } from "./service-provider/ServiceProviderFilters";
+import { CreateProviderDialog } from "./service-provider/CreateProviderDialog";
+import { ServiceProviderListContent } from "./service-provider/ServiceProviderListContent";
 
 interface ServiceProvider {
   id: string;
@@ -38,6 +27,13 @@ interface ServiceProvider {
   isPreferred?: boolean;
 }
 
+interface ServiceProviderService {
+  name: string;
+  base_price?: number;
+  price_unit?: string;
+  category: string;
+}
+
 interface Filters {
   search: string;
   category: string;
@@ -55,12 +51,6 @@ export function ServiceProviderList() {
     search: "",
     category: "all",
     rating: "all"
-  });
-  const [newProvider, setNewProvider] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone: "",
   });
 
   // If user is a service provider, don't render anything
@@ -156,45 +146,15 @@ export function ServiceProviderList() {
     enabled: !!currentUserId
   });
 
-  const handleCreateServiceProvider = async () => {
+  const handleCreateServiceProvider = async (newProvider: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+  }) => {
     try {
       setIsCreating(true);
       
-      // Validate all required fields
-      if (!newProvider.first_name.trim() || 
-          !newProvider.last_name.trim() || 
-          !newProvider.email.trim() || 
-          !newProvider.phone.trim()) {
-        toast({
-          title: "Validation Error",
-          description: "Please fill in all required fields (First Name, Last Name, Email, and Phone).",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(newProvider.email)) {
-        toast({
-          title: "Invalid Email",
-          description: "Please enter a valid email address.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Validate phone format (basic validation)
-      const phoneRegex = /^\+?[\d\s-]{10,}$/;
-      if (!phoneRegex.test(newProvider.phone)) {
-        toast({
-          title: "Invalid Phone Number",
-          description: "Please enter a valid phone number (minimum 10 digits).",
-          variant: "destructive",
-        });
-        return;
-      }
-
       console.log("Creating new service provider:", newProvider);
 
       const { data: existingProfiles, error: profileError } = await supabase
@@ -256,7 +216,6 @@ export function ServiceProviderList() {
       }
 
       setIsCreateDialogOpen(false);
-      setNewProvider({ first_name: "", last_name: "", email: "", phone: "" });
       queryClient.invalidateQueries({ queryKey: ['service-providers-details'] });
     } catch (error: any) {
       console.error("Error creating service provider:", error);
@@ -312,154 +271,33 @@ export function ServiceProviderList() {
     <div className="space-y-4">
       {userRole === "landlord" && (
         <div className="flex justify-between items-center mb-6">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => setIsCreateDialogOpen(true)}>
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 text-white" 
+            onClick={() => setIsCreateDialogOpen(true)}
+          >
             Create New Provider
           </Button>
         </div>
       )}
 
-      <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Input
-              placeholder="Search providers..."
-              value={filters.search}
-              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-              className="pl-10"
-            />
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
+      <ServiceProviderFilters 
+        filters={filters}
+        onFiltersChange={setFilters}
+      />
 
-          <Select
-            value={filters.category}
-            onValueChange={(value) => setFilters(prev => ({ ...prev, category: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="plumbing">Plumbing</SelectItem>
-              <SelectItem value="electrical">Electrical</SelectItem>
-              <SelectItem value="hvac">HVAC</SelectItem>
-              <SelectItem value="general">General Maintenance</SelectItem>
-            </SelectContent>
-          </Select>
+      <ServiceProviderListContent
+        providers={serviceProviders}
+        isLoading={isLoading}
+        onPreferredToggle={handlePreferredToggle}
+      />
 
-          <Select
-            value={filters.rating}
-            onValueChange={(value) => setFilters(prev => ({ ...prev, rating: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by rating" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Ratings</SelectItem>
-              <SelectItem value="4">4+ Stars</SelectItem>
-              <SelectItem value="3">3+ Stars</SelectItem>
-              <SelectItem value="2">2+ Stars</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[1, 2].map((i) => (
-            <Card key={i} className="p-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-full"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : !serviceProviders?.length ? (
-        <Card className="p-8">
-          <div className="text-center space-y-4">
-            <Building2 className="mx-auto h-12 w-12 text-gray-400" />
-            <div className="space-y-2">
-              <h3 className="text-lg font-medium text-gray-900">No Service Providers Found</h3>
-              <p className="text-sm text-gray-500 max-w-sm mx-auto">
-                There are currently no service providers available. Click the button above to add your first service provider.
-              </p>
-            </div>
-          </div>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {serviceProviders?.map((provider) => (
-            <ServiceProviderCard
-              key={provider.id}
-              provider={provider}
-              onPreferredToggle={handlePreferredToggle}
-            />
-          ))}
-        </div>
-      )}
-
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create Service Provider</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="first_name">First Name *</Label>
-                <Input
-                  id="first_name"
-                  value={newProvider.first_name}
-                  onChange={(e) => setNewProvider(prev => ({ ...prev, first_name: e.target.value }))}
-                  className="w-full"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="last_name">Last Name *</Label>
-                <Input
-                  id="last_name"
-                  value={newProvider.last_name}
-                  onChange={(e) => setNewProvider(prev => ({ ...prev, last_name: e.target.value }))}
-                  className="w-full"
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={newProvider.email}
-                onChange={(e) => setNewProvider(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone *</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={newProvider.phone}
-                onChange={(e) => setNewProvider(prev => ({ ...prev, phone: e.target.value }))}
-                className="w-full"
-                required
-              />
-            </div>
-            <Button 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
-              onClick={handleCreateServiceProvider}
-              disabled={isCreating}
-            >
-              {isCreating ? "Creating..." : "Create Service Provider"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <CreateProviderDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        onSuccess={() => setIsCreateDialogOpen(false)}
+        isCreating={isCreating}
+        onCreateProvider={handleCreateServiceProvider}
+      />
     </div>
   );
 }
