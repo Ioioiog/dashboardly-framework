@@ -25,6 +25,7 @@ const Earnings = () => {
 
   const { data: earningsSummary, isLoading } = useQuery({
     queryKey: ["earnings-summary", currentUserId],
+    enabled: !!currentUserId,
     queryFn: async (): Promise<EarningsSummary> => {
       console.log("Fetching earnings for user:", currentUserId);
       
@@ -86,7 +87,6 @@ const Earnings = () => {
       <div className="container mx-auto p-6 space-y-6">
         <h1 className="text-2xl font-bold">Earnings Dashboard</h1>
 
-        {/* Metrics Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -131,7 +131,6 @@ const Earnings = () => {
           </Card>
         </div>
 
-        {/* Recent Payments */}
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">Recent Payments</CardTitle>
