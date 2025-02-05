@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { List, Users } from "lucide-react";
+import { useAuthState } from "@/hooks/useAuthState";
 
 type MaintenanceView = 'dashboard' | 'providers';
 
@@ -21,6 +22,7 @@ export default function Maintenance() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const { userRole } = useUserRole();
   const [activeView, setActiveView] = useState<MaintenanceView>('dashboard');
+  const { currentUserId } = useAuthState();
 
   const { data: maintenanceRequests, isLoading } = useQuery({
     queryKey: ["maintenance-requests", priority],
