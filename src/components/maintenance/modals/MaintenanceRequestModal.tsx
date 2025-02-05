@@ -162,8 +162,6 @@ export function MaintenanceRequestModal({
     }
   };
 
-  // ... keep existing code (review, provider, and costs tabs)
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[800px]">
@@ -292,7 +290,6 @@ export function MaintenanceRequestModal({
             <LandlordFields
               formData={request}
               onFieldChange={(field, value) => onUpdateRequest({ [field]: value })}
-              serviceProviders={[]}
               isLoadingProviders={false}
             />
           </TabsContent>
