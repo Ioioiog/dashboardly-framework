@@ -8,12 +8,6 @@ import { FileObject } from "@supabase/storage-js";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { FileUp, Eye, Trash2, Loader2 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 interface MaintenanceDocumentTabProps {
   request: MaintenanceRequest;
@@ -31,8 +25,6 @@ export function MaintenanceDocumentTab({
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [isDeletingFile, setIsDeletingFile] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
 
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -91,7 +83,7 @@ export function MaintenanceDocumentTab({
       
       const { data, error } = await supabase.storage
         .from('maintenance-documents')
-        .createSignedUrl(fullPath, 60); // URL valid for 60 seconds
+        .createSignedUrl(fullPath, 300); // URL valid for 5 minutes
 
       if (error) {
         console.error("Error creating signed URL:", error);
@@ -103,8 +95,8 @@ export function MaintenanceDocumentTab({
       }
 
       console.log("Generated signed URL:", data.signedUrl);
-      setPreviewUrl(data.signedUrl);
-      setShowPreview(true);
+      // Open the document in a new tab
+      window.open(data.signedUrl, '_blank');
     } catch (error) {
       console.error("Error getting document URL:", error);
       toast({
@@ -210,22 +202,6 @@ export function MaintenanceDocumentTab({
           </ScrollArea>
         </div>
       </Card>
-
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="max-w-4xl h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>Document Preview</DialogTitle>
-          </DialogHeader>
-          {previewUrl && (
-            <iframe
-              src={previewUrl}
-              className="w-full h-full rounded-md"
-              title="Document Preview"
-              sandbox="allow-same-origin allow-scripts"
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
