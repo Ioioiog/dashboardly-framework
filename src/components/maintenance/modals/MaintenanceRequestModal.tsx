@@ -13,22 +13,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface MaintenanceRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  requestId?: string;
+  request: any;
+  onUpdateRequest: (updates: any) => Promise<void>;
 }
 
-export function MaintenanceRequestModal({ isOpen, onClose, requestId }: MaintenanceRequestModalProps) {
-  const { existingRequest, updateMutation } = useMaintenanceRequest(requestId);
+export function MaintenanceRequestModal({ isOpen, onClose, request, onUpdateRequest }: MaintenanceRequestModalProps) {
   const { toast } = useToast();
-  const { role } = useUserRole();
-  const isServiceProvider = role === "service_provider";
+  const { userRole } = useUserRole();
+  const isServiceProvider = userRole === "service_provider";
 
   const handleProviderUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
     try {
-      await updateMutation.mutateAsync({
-        ...existingRequest,
+      await onUpdateRequest({
+        ...request,
         service_provider_notes: formData.get("serviceProviderNotes") as string,
         service_provider_fee: parseFloat(formData.get("serviceFee") as string) || 0,
         service_provider_status: formData.get("serviceStatus") as string,
@@ -52,27 +52,28 @@ export function MaintenanceRequestModal({ isOpen, onClose, requestId }: Maintena
     }
   };
 
-  if (!existingRequest && requestId) {
-    return null;
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            {requestId ? "Edit Maintenance Request" : "New Maintenance Request"}
+            {request ? "Edit Maintenance Request" : "New Maintenance Request"}
           </DialogTitle>
         </DialogHeader>
 
-        {!requestId ? (
-          <MaintenanceRequestForm onClose={onClose} />
+        {!request ? (
+          <MaintenanceRequestForm 
+            properties={[]}
+            userRole={userRole}
+            onSubmit={() => {}}
+            isSubmitting={false}
+          />
         ) : isServiceProvider ? (
           <form onSubmit={handleProviderUpdate} className="space-y-4">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="serviceStatus">Service Status</Label>
-                <Select name="serviceStatus" defaultValue={existingRequest?.service_provider_status || "pending"}>
+                <Select name="serviceStatus" defaultValue={request?.service_provider_status || "pending"}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
@@ -91,7 +92,7 @@ export function MaintenanceRequestModal({ isOpen, onClose, requestId }: Maintena
                   type="datetime-local"
                   id="scheduledDate"
                   name="scheduledDate"
-                  defaultValue={existingRequest?.scheduled_date || ""}
+                  defaultValue={request?.scheduled_date || ""}
                 />
               </div>
 
@@ -100,7 +101,7 @@ export function MaintenanceRequestModal({ isOpen, onClose, requestId }: Maintena
                 <Textarea
                   id="serviceProviderNotes"
                   name="serviceProviderNotes"
-                  defaultValue={existingRequest?.service_provider_notes || ""}
+                  defaultValue={request?.service_provider_notes || ""}
                   placeholder="Enter your notes about the service"
                 />
               </div>
@@ -111,7 +112,7 @@ export function MaintenanceRequestModal({ isOpen, onClose, requestId }: Maintena
                   type="number"
                   id="serviceFee"
                   name="serviceFee"
-                  defaultValue={existingRequest?.service_provider_fee || ""}
+                  defaultValue={request?.service_provider_fee || ""}
                   placeholder="Enter the service fee"
                   step="0.01"
                 />
@@ -123,7 +124,7 @@ export function MaintenanceRequestModal({ isOpen, onClose, requestId }: Maintena
                   type="number"
                   id="costEstimate"
                   name="costEstimate"
-                  defaultValue={existingRequest?.cost_estimate || ""}
+                  defaultValue={request?.cost_estimate || ""}
                   placeholder="Enter the estimated cost"
                   step="0.01"
                 />
@@ -134,7 +135,7 @@ export function MaintenanceRequestModal({ isOpen, onClose, requestId }: Maintena
                 <Textarea
                   id="costEstimateNotes"
                   name="costEstimateNotes"
-                  defaultValue={existingRequest?.cost_estimate_notes || ""}
+                  defaultValue={request?.cost_estimate_notes || ""}
                   placeholder="Enter notes about the cost estimate"
                 />
               </div>
@@ -144,19 +145,19 @@ export function MaintenanceRequestModal({ isOpen, onClose, requestId }: Maintena
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? "Saving..." : "Save Changes"}
+              <Button type="submit">
+                Save Changes
               </Button>
             </div>
           </form>
         ) : (
           <div className="space-y-4">
             <h2>Request Details</h2>
-            <p><strong>Title:</strong> {existingRequest.title}</p>
-            <p><strong>Description:</strong> {existingRequest.description}</p>
-            <p><strong>Status:</strong> {existingRequest.status}</p>
-            <p><strong>Created At:</strong> {new Date(existingRequest.created_at).toLocaleString()}</p>
-            <p><strong>Updated At:</strong> {new Date(existingRequest.updated_at).toLocaleString()}</p>
+            <p><strong>Title:</strong> {request.title}</p>
+            <p><strong>Description:</strong> {request.description}</p>
+            <p><strong>Status:</strong> {request.status}</p>
+            <p><strong>Created At:</strong> {new Date(request.created_at).toLocaleString()}</p>
+            <p><strong>Updated At:</strong> {new Date(request.updated_at).toLocaleString()}</p>
           </div>
         )}
       </DialogContent>

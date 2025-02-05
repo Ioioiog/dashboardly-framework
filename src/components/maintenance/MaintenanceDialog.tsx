@@ -83,8 +83,8 @@ export function MaintenanceDialog({
 
   return (
     <MaintenanceRequestModal
-      open={open}
-      onOpenChange={onOpenChange}
+      isOpen={open}
+      onClose={() => onOpenChange(false)}
       request={existingRequest}
       onUpdateRequest={handleUpdateRequest}
     />
