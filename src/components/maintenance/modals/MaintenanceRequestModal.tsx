@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,7 @@ export function MaintenanceRequestModal({
 }: MaintenanceRequestModalProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -166,6 +167,48 @@ export function MaintenanceRequestModal({
 
   const { userRole } = useUserRole();
   const isServiceProvider = userRole === 'service_provider';
+
+  const handleInvoiceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast({
+        title: "Error",
+        description: "File size must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${request.id}/${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('invoice-documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      onUpdateRequest({ 
+        invoice_document_path: filePath,
+        payment_status: 'invoiced'
+      });
+
+      toast({
+        title: "Success",
+        description: "Invoice uploaded successfully",
+      });
+    } catch (error) {
+      console.error('Error uploading invoice:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload invoice",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -361,6 +404,20 @@ export function MaintenanceRequestModal({
                   className="bg-white"
                   disabled={!isServiceProvider}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Upload Invoice</Label>
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  onChange={handleInvoiceUpload}
+                  disabled={!isServiceProvider}
+                  className="cursor-pointer"
+                />
+                <p className="text-sm text-gray-500">
+                  {request.invoice_document_path ? 'Invoice uploaded' : 'No invoice uploaded yet'}
+                </p>
               </div>
 
               <div className="space-y-2">
