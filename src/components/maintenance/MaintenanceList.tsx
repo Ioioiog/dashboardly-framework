@@ -147,7 +147,7 @@ export default function MaintenanceList({
                       {t(`maintenance.priority.${request.priority}`)}
                     </Badge>
                   </div>
-                  {onRequestClick && (
+                  {onRequestClick && userRole !== 'service_provider' && (
                     <Button
                       variant="ghost"
                       size="sm"
