@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
@@ -6,17 +6,21 @@ import { MaintenanceDialog } from "@/components/maintenance/MaintenanceDialog";
 import { MaintenanceHeader } from "@/components/maintenance/dashboard/MaintenanceHeader";
 import { MaintenanceSection } from "@/components/maintenance/dashboard/MaintenanceSection";
 import { useUserRole } from "@/hooks/use-user-role";
-import { useAuthState } from "@/hooks/useAuthState";
+import { ServiceProviderList } from "@/components/maintenance/ServiceProviderList";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { List, Users } from "lucide-react";
 
-type PriorityFilter = "all" | "low" | "medium" | "high";
+type MaintenanceView = 'dashboard' | 'providers';
 
 export default function Maintenance() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
-  const [priority, setPriority] = React.useState<PriorityFilter>("all");
+  const [priority, setPriority] = React.useState<"all" | "low" | "medium" | "high">("all");
   const [searchQuery, setSearchQuery] = React.useState("");
   const { userRole } = useUserRole();
-  const { currentUserId } = useAuthState();
+  const [activeView, setActiveView] = useState<MaintenanceView>('dashboard');
 
   const { data: maintenanceRequests, isLoading } = useQuery({
     queryKey: ["maintenance-requests", priority],
@@ -94,49 +98,85 @@ export default function Maintenance() {
     setIsDialogOpen(true);
   };
 
+  const navigationItems = [
+    {
+      id: 'dashboard' as MaintenanceView,
+      label: 'Property Maintenance Dashboard',
+      icon: List,
+    },
+    {
+      id: 'providers' as MaintenanceView,
+      label: 'Service Providers List',
+      icon: Users,
+    },
+  ];
+
   return (
     <div className="flex h-screen bg-background">
       <DashboardSidebar />
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-8">
-          <MaintenanceHeader
-            priority={priority}
-            onPriorityChange={(value) => setPriority(value as PriorityFilter)}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <MaintenanceSection
-              title="New Requests"
-              description="Requests needing review"
-              requests={newRequests}
-              onRequestClick={handleRequestClick}
-            />
-            
-            <MaintenanceSection
-              title="Active Requests"
-              description="Requests in progress"
-              requests={activeRequests}
-              onRequestClick={handleRequestClick}
-            />
-            
-            <MaintenanceSection
-              title="Review & Complete"
-              description="Work completed, awaiting final review"
-              requests={reviewRequests}
-              onRequestClick={handleRequestClick}
-            />
+          <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto mb-6">
+            {navigationItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={activeView === item.id ? 'default' : 'ghost'}
+                className={cn(
+                  "flex-shrink-0 gap-2",
+                  activeView === item.id && "bg-primary text-primary-foreground"
+                )}
+                onClick={() => setActiveView(item.id)}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Button>
+            ))}
           </div>
 
-          <MaintenanceDialog
-            open={isDialogOpen}
-            onOpenChange={(open) => {
-              setIsDialogOpen(open);
-              if (!open) setSelectedRequestId(undefined);
-            }}
-            requestId={selectedRequestId}
-          />
+          {activeView === 'dashboard' ? (
+            <>
+              <MaintenanceHeader
+                priority={priority}
+                onPriorityChange={(value) => setPriority(value as "all" | "low" | "medium" | "high")}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <MaintenanceSection
+                  title="New Requests"
+                  description="Requests needing review"
+                  requests={newRequests}
+                  onRequestClick={handleRequestClick}
+                />
+                
+                <MaintenanceSection
+                  title="Active Requests"
+                  description="Requests in progress"
+                  requests={activeRequests}
+                  onRequestClick={handleRequestClick}
+                />
+                
+                <MaintenanceSection
+                  title="Review & Complete"
+                  description="Work completed, awaiting final review"
+                  requests={reviewRequests}
+                  onRequestClick={handleRequestClick}
+                />
+              </div>
+
+              <MaintenanceDialog
+                open={isDialogOpen}
+                onOpenChange={(open) => {
+                  setIsDialogOpen(open);
+                  if (!open) setSelectedRequestId(undefined);
+                }}
+                requestId={selectedRequestId}
+              />
+            </>
+          ) : (
+            <ServiceProviderList />
+          )}
         </div>
       </div>
     </div>
