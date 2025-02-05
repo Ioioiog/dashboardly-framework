@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
 import MaintenanceList from "../MaintenanceList";
 import { NoDataCard } from "@/components/dashboard/charts/NoDataCard";
-import { ChartSkeleton } from "@/components/dashboard/charts/ChartSkeleton";
 
 interface MaintenanceRequest {
   id: string;
@@ -45,7 +44,10 @@ export function RequestsSection({
       <h2 className="text-xl font-semibold">{title}</h2>
       {isLoading ? (
         <Card className="p-8">
-          <ChartSkeleton />
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
         </Card>
       ) : requests.length > 0 ? (
         <div className="space-y-4">
