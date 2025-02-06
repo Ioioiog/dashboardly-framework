@@ -49,6 +49,9 @@ export interface MaintenanceRequest {
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   emergency_instructions?: string;
+  cost_estimate_status?: string;
+  approval_status?: string;
+  approval_notes?: string;
 }
 
 export function useMaintenanceRequest(requestId?: string) {
