@@ -293,6 +293,64 @@ export type Database = {
           },
         ]
       }
+      maintenance_notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          read: boolean | null
+          recipient_id: string | null
+          request_id: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean | null
+          recipient_id?: string | null
+          request_id?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean | null
+          recipient_id?: string | null
+          request_id?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_details"
+            referencedColumns: ["tenant_id"]
+          },
+          {
+            foreignKeyName: "maintenance_notifications_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_request_chats: {
         Row: {
           created_at: string
@@ -470,12 +528,17 @@ export type Database = {
           cost_estimate_status: string | null
           created_at: string
           description: string
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_instructions: string | null
           id: string
           images: string[] | null
+          is_emergency: boolean | null
           issue_type: string | null
           materials_cost: number | null
           next_scheduled_date: string | null
           notes: string | null
+          notification_preferences: Json | null
           payment_amount: number | null
           payment_status: string | null
           priority:
@@ -507,12 +570,17 @@ export type Database = {
           cost_estimate_status?: string | null
           created_at?: string
           description: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_instructions?: string | null
           id?: string
           images?: string[] | null
+          is_emergency?: boolean | null
           issue_type?: string | null
           materials_cost?: number | null
           next_scheduled_date?: string | null
           notes?: string | null
+          notification_preferences?: Json | null
           payment_amount?: number | null
           payment_status?: string | null
           priority?:
@@ -544,12 +612,17 @@ export type Database = {
           cost_estimate_status?: string | null
           created_at?: string
           description?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_instructions?: string | null
           id?: string
           images?: string[] | null
+          is_emergency?: boolean | null
           issue_type?: string | null
           materials_cost?: number | null
           next_scheduled_date?: string | null
           notes?: string | null
+          notification_preferences?: Json | null
           payment_amount?: number | null
           payment_status?: string | null
           priority?:

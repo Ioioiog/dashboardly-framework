@@ -88,6 +88,26 @@ export function MaintenanceDialog({
         id: requestId
       } as MaintenanceRequest);
 
+      // Send notification for status updates
+      if (updates.status && updates.status !== existingRequest.status) {
+        const notificationResponse = await supabase.functions.invoke('send-maintenance-notification', {
+          body: { requestId, type: 'status_update' }
+        });
+
+        if (notificationResponse.error) {
+          console.error('Error sending notification:', notificationResponse.error);
+        }
+      }
+
+      // Handle emergency escalation
+      if (updates.is_emergency && !existingRequest.is_emergency) {
+        toast({
+          title: "Emergency Request",
+          description: "This request has been marked as emergency and will be prioritized",
+          variant: "destructive"
+        });
+      }
+
       toast({
         title: "Success",
         description: "Maintenance request updated successfully",
