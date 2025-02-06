@@ -1,7 +1,6 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MaintenanceRequestForm } from "../forms/MaintenanceRequestForm";
-import { LandlordFields } from "../forms/LandlordFields";
 import { MaintenanceCostsTab } from "../tabs/MaintenanceCostsTab";
 import { MaintenanceReviewTab } from "../tabs/MaintenanceReviewTab";
 import { MaintenanceProviderTab } from "../tabs/MaintenanceProviderTab";
@@ -45,6 +44,12 @@ export default function MaintenanceRequestModal({
     onUpdateRequest(processedValues as Partial<MaintenanceRequest>);
   };
 
+  const isOwner = userRole === 'tenant' && request.tenant_id === request.tenant_id;
+  const canEditDetails = isOwner && request.status === 'pending';
+  const canEditProvider = userRole === 'landlord' || (userRole === 'service_provider' && request.assigned_to === request.assigned_to);
+  const canEditCosts = userRole === 'service_provider' && request.assigned_to === request.assigned_to;
+  const canEditStatus = userRole === 'landlord';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
@@ -67,6 +72,7 @@ export default function MaintenanceRequestModal({
               serviceProviders={serviceProviders}
               isLoadingProviders={isLoadingProviders}
               isSubmitting={false}
+              isReadOnly={!canEditDetails}
             />
           </TabsContent>
 
@@ -74,6 +80,8 @@ export default function MaintenanceRequestModal({
             <MaintenanceProviderTab
               request={request}
               onUpdateRequest={onUpdateRequest}
+              userRole={userRole}
+              isReadOnly={!canEditProvider}
             />
           </TabsContent>
 
@@ -81,6 +89,8 @@ export default function MaintenanceRequestModal({
             <MaintenanceCostsTab
               request={request}
               onUpdateRequest={onUpdateRequest}
+              userRole={userRole}
+              isReadOnly={!canEditCosts}
             />
           </TabsContent>
 
@@ -90,6 +100,7 @@ export default function MaintenanceRequestModal({
               onUpdateRequest={onUpdateRequest}
               documents={documents}
               isLoading={isLoadingDocuments}
+              userRole={userRole}
             />
           </TabsContent>
 
@@ -101,6 +112,8 @@ export default function MaintenanceRequestModal({
             <MaintenanceReviewTab
               request={request}
               onUpdateRequest={onUpdateRequest}
+              userRole={userRole}
+              canEditStatus={canEditStatus}
             />
           </TabsContent>
         </Tabs>
