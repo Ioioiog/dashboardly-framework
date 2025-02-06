@@ -6,7 +6,7 @@ import { ImageUpload } from "./ImageUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
@@ -77,64 +77,7 @@ export function MaintenanceRequestForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {isEmergency && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Emergency Request</AlertTitle>
-            <AlertDescription>
-              This request will be treated as an emergency and prioritized accordingly.
-              Please provide emergency contact details below.
-            </AlertDescription>
-          </Alert>
-        )}
-
         <div className="space-y-4">
-          <div>
-            <Label htmlFor="is_emergency" className="flex items-center space-x-2">
-              <Checkbox
-                id="is_emergency"
-                checked={isEmergency}
-                onCheckedChange={(checked) => 
-                  form.setValue("is_emergency", checked as boolean)
-                }
-              />
-              <span className="text-base font-semibold">Mark as Emergency</span>
-            </Label>
-          </div>
-
-          {isEmergency && (
-            <div className="space-y-4 border-l-2 border-red-500 pl-4">
-              <div>
-                <Label htmlFor="emergency_contact_name">Emergency Contact Name</Label>
-                <Input
-                  id="emergency_contact_name"
-                  {...form.register("emergency_contact_name")}
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="emergency_contact_phone">Emergency Contact Phone</Label>
-                <Input
-                  id="emergency_contact_phone"
-                  type="tel"
-                  {...form.register("emergency_contact_phone")}
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="emergency_instructions">Emergency Instructions</Label>
-                <Textarea
-                  id="emergency_instructions"
-                  {...form.register("emergency_instructions")}
-                  placeholder="Any specific instructions for emergency handling..."
-                  className="mt-1"
-                />
-              </div>
-            </div>
-          )}
-
           <div>
             <Label htmlFor="title" className="text-base font-semibold">
               Issue Title<span className="text-red-500">*</span>
@@ -156,7 +99,7 @@ export function MaintenanceRequestForm({
               {...form.register("property_id")}
               className="w-full mt-1 p-2 border rounded-md"
             >
-              <option value="">select property</option>
+              <option value="">Select property</option>
               {properties.map((property) => (
                 <option key={property.id} value={property.id}>
                   {property.name}
@@ -204,6 +147,52 @@ export function MaintenanceRequestForm({
               <option value="high">High - Requires immediate attention</option>
             </select>
           </div>
+
+          <div>
+            <Label htmlFor="is_emergency" className="flex items-center space-x-2">
+              <Checkbox
+                id="is_emergency"
+                checked={isEmergency}
+                onCheckedChange={(checked) => 
+                  form.setValue("is_emergency", checked as boolean)
+                }
+              />
+              <span className="text-base font-semibold">Mark as Emergency</span>
+            </Label>
+          </div>
+
+          {isEmergency && (
+            <div className="space-y-4 border-l-2 border-red-500 pl-4">
+              <div>
+                <Label htmlFor="emergency_contact_name">Emergency Contact Name</Label>
+                <Input
+                  id="emergency_contact_name"
+                  {...form.register("emergency_contact_name")}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="emergency_contact_phone">Emergency Contact Phone</Label>
+                <Input
+                  id="emergency_contact_phone"
+                  type="tel"
+                  {...form.register("emergency_contact_phone")}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="emergency_instructions">Emergency Instructions</Label>
+                <Textarea
+                  id="emergency_instructions"
+                  {...form.register("emergency_instructions")}
+                  placeholder="Any specific instructions for emergency handling..."
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          )}
 
           <div>
             <Label className="text-base font-semibold">
