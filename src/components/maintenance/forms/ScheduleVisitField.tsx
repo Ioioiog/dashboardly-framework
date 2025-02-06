@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
@@ -7,6 +7,7 @@ import { CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { useEffect } from "react";
 
 interface ScheduleVisitFieldProps {
   value?: Date;
@@ -17,12 +18,23 @@ interface ScheduleVisitFieldProps {
 export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitFieldProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState(value ? format(value, "HH:mm") : "");
+  const [localDate, setLocalDate] = useState<Date | undefined>(value);
+  
+  // Update local state when prop changes
+  useEffect(() => {
+    if (value) {
+      setLocalDate(value);
+      setSelectedTime(format(value, "HH:mm"));
+    }
+  }, [value]);
 
   const handleSelect = (date: Date | undefined) => {
     console.log("Date selection initiated:", date);
     if (!date) return;
 
-    // Combine the selected date with the time if it exists
+    setLocalDate(date);
+    
+    // Combine the selected date with the existing time if it exists
     if (selectedTime) {
       const [hours, minutes] = selectedTime.split(':');
       date.setHours(parseInt(hours, 10), parseInt(minutes, 10));
@@ -34,17 +46,22 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
     setIsOpen(false);
   };
 
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = e.target.value;
     setSelectedTime(newTime);
     
-    if (value) {
-      const updatedDate = new Date(value);
+    if (localDate) {
+      const updatedDate = new Date(localDate);
       const [hours, minutes] = newTime.split(':');
       updatedDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
-      onChange(updatedDate);
+      
+      // Only update if we have valid hours and minutes
+      if (!isNaN(updatedDate.getTime())) {
+        setLocalDate(updatedDate);
+        onChange(updatedDate);
+      }
     }
-  };
+  }, [localDate, onChange]);
 
   return (
     <div className="space-y-2">
@@ -57,19 +74,19 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
               type="button"
               className={cn(
                 "w-[240px] justify-start text-left font-normal",
-                !value && "text-muted-foreground",
+                !localDate && "text-muted-foreground",
                 disabled && "opacity-50 cursor-not-allowed"
               )}
               disabled={disabled}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {value ? format(value, "PPP") : <span>Pick a date</span>}
+              {localDate ? format(localDate, "PPP") : <span>Pick a date</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar
               mode="single"
-              selected={value}
+              selected={localDate}
               onSelect={handleSelect}
               disabled={(date) => date < new Date()}
               initialFocus
