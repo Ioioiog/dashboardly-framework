@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useMaintenanceRequest } from "./hooks/useMaintenanceRequest";
 import { useMaintenanceProperties } from "./hooks/useMaintenanceProperties";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -146,7 +146,6 @@ export function MaintenanceDialog({
     if (!requestId || !existingRequest) return;
 
     try {
-      // Preserve existing values for required fields if not provided in updates
       const updatedRequest = {
         ...existingRequest,
         ...updates,
@@ -195,7 +194,6 @@ export function MaintenanceDialog({
     }
   };
 
-  // Enhanced role and auth check
   if (!userRole || !currentUserId) {
     console.log("MaintenanceDialog - Waiting for authentication:", {
       userRole,
@@ -209,7 +207,6 @@ export function MaintenanceDialog({
     );
   }
 
-  // Show loading state while fetching necessary data
   if (isLoadingProperties || isLoadingRequest || (userRole === "landlord" && isLoadingProviders)) {
     console.log("MaintenanceDialog - Loading required data...");
     return (
@@ -227,10 +224,10 @@ export function MaintenanceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[800px]">
-        <DialogDescription className="sr-only">
-          {requestId ? "Edit maintenance request" : "Create new maintenance request"}
-        </DialogDescription>
+      <DialogContent className="max-w-[800px] bg-background">
+        <DialogTitle className="text-lg font-semibold">
+          {requestId ? "Edit Maintenance Request" : "Create New Maintenance Request"}
+        </DialogTitle>
         <MaintenanceRequestModal
           open={open}
           onOpenChange={onOpenChange}
