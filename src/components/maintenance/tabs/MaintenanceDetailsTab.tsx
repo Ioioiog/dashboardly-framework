@@ -4,9 +4,9 @@ import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { format } from "date-fns";
 
 interface MaintenanceDetailsTabProps {
-  request: MaintenanceRequest;
+  request?: MaintenanceRequest;
   onUpdateRequest: (request: Partial<MaintenanceRequest>) => void;
-  isNew?: boolean;  // Added this prop
+  isNew?: boolean;
 }
 
 export function MaintenanceDetailsTab({ request, onUpdateRequest, isNew = false }: MaintenanceDetailsTabProps) {
@@ -38,8 +38,8 @@ export function MaintenanceDetailsTab({ request, onUpdateRequest, isNew = false 
     }
   };
 
-  // Don't show the details card if it's a new request
-  if (isNew) {
+  // Don't show the details card if it's a new request or if request is undefined
+  if (isNew || !request) {
     return null;
   }
 
@@ -58,8 +58,8 @@ export function MaintenanceDetailsTab({ request, onUpdateRequest, isNew = false 
                 <div className="space-y-2">
                   <div>
                     <p className="text-sm text-muted-foreground">Priority</p>
-                    <Badge variant={getPriorityVariant(request.priority)}>
-                      {request.priority}
+                    <Badge variant={getPriorityVariant(request.priority || 'low')}>
+                      {request.priority || 'low'}
                     </Badge>
                   </div>
                   <div>
