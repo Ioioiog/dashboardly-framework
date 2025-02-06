@@ -81,13 +81,15 @@ export default function Maintenance() {
 
   const newRequests = filteredRequests.filter(r => r.status === "pending");
   const activeRequests = filteredRequests.filter(r => r.status === "in_progress");
+  const completedRequests = filteredRequests.filter(r => r.status === "completed");
   const reviewRequests = filteredRequests.filter(r => 
-    r.status !== "completed" && r.status !== "cancelled"
+    r.status !== "cancelled"
   );
 
   console.log("Filtered requests counts:", {
     new: newRequests.length,
     active: activeRequests.length,
+    completed: completedRequests.length,
     review: reviewRequests.length,
     total: filteredRequests.length
   });
@@ -152,7 +154,7 @@ export default function Maintenance() {
                 onNewRequest={handleNewRequest}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <MaintenanceSection
                   title="New Requests"
                   description="Requests needing review"
@@ -167,6 +169,13 @@ export default function Maintenance() {
                   onRequestClick={handleRequestClick}
                 />
                 
+                <MaintenanceSection
+                  title="Completed"
+                  description="Finished maintenance requests"
+                  requests={completedRequests}
+                  onRequestClick={handleRequestClick}
+                />
+
                 <MaintenanceSection
                   title="Review & Complete"
                   description="Work completed, awaiting final review"
