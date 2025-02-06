@@ -19,7 +19,7 @@ interface ImageUploadProps {
 export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [blobUrls, setBlobUrls] = useState<string[]>([]);
 
   const validateImage = (file: File): string | null => {
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
@@ -36,34 +36,42 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     
     console.log("Processing images:", images);
     
-    const validImages = images.filter((image): image is string | File => {
-      if (!image) return false;
-      if (typeof image === "string") {
-        // Accept both http(s) URLs and blob URLs
-        return image.startsWith("http") || image.startsWith("blob:");
+    // Clear existing blob URLs
+    blobUrls.forEach(url => {
+      if (url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
       }
-      return image instanceof File;
     });
     
-    console.log("Valid images after filtering:", validImages);
-    
-    return validImages.map(image => {
+    const newBlobUrls: string[] = [];
+    const urls = images.map(image => {
+      if (!image) return '';
+      
       if (image instanceof File) {
-        return URL.createObjectURL(image);
+        const blobUrl = URL.createObjectURL(image);
+        newBlobUrls.push(blobUrl);
+        return blobUrl;
       }
-      return image;
-    });
+      
+      if (typeof image === "string") {
+        return image;
+      }
+      
+      return '';
+    }).filter(Boolean);
+    
+    setBlobUrls(newBlobUrls);
+    return urls;
   };
 
   useEffect(() => {
     console.log("Images in form:", images);
-    
     const urls = processImages(images);
     console.log("Generated image URLs:", urls);
-    setImageUrls(urls);
 
     return () => {
-      urls.forEach(url => {
+      // Cleanup blob URLs on unmount
+      blobUrls.forEach(url => {
         if (url.startsWith('blob:')) {
           URL.revokeObjectURL(url);
         }
@@ -75,15 +83,13 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     const files = Array.from(e.target.files || []);
     const validCurrentImages = images.filter(img => 
       img && 
-      (typeof img === "string" && (img.startsWith("http") || img.startsWith("blob:")))
+      (typeof img === "string" || img instanceof File)
     );
     
     console.log("Valid current images:", validCurrentImages);
+    console.log("Total images count:", validCurrentImages.length + files.length);
 
-    const totalImages = validCurrentImages.length + files.length;
-    console.log("Total images count:", totalImages);
-
-    if (totalImages > MAX_IMAGES) {
+    if (validCurrentImages.length + files.length > MAX_IMAGES) {
       toast({
         title: "Error",
         description: `You can only upload up to ${MAX_IMAGES} images`,
