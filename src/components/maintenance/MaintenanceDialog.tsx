@@ -1,4 +1,4 @@
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription } from "@/components/ui/dialog";
 import { useMaintenanceRequest } from "./hooks/useMaintenanceRequest";
 import { useMaintenanceProperties } from "./hooks/useMaintenanceProperties";
 import { useUserRole } from "@/hooks/use-user-role";
@@ -25,11 +25,9 @@ export function MaintenanceDialog({
   const { currentUserId } = useAuthState();
   const { toast } = useToast();
 
-  // Add null checks for userRole and currentUserId
   const { data: properties } = useMaintenanceProperties(userRole || 'tenant', currentUserId || '');
   const { existingRequest, createMutation, updateMutation, isLoading } = useMaintenanceRequest(requestId);
 
-  // Fetch service providers for landlords
   const { data: serviceProviders } = useQuery({
     queryKey: ["service-providers"],
     enabled: userRole === "landlord" && open,
@@ -60,7 +58,6 @@ export function MaintenanceDialog({
     },
   });
 
-  // Fetch documents for the maintenance request
   const { data: documents, isLoading: isLoadingDocuments } = useQuery({
     queryKey: ["maintenance-documents", requestId],
     enabled: !!requestId && open,
@@ -95,7 +92,6 @@ export function MaintenanceDialog({
     }
 
     try {
-      // Ensure required fields are present
       if (!data.title || !data.property_id) {
         toast({
           title: "Error",
@@ -188,16 +184,23 @@ export function MaintenanceDialog({
   }
 
   return (
-    <MaintenanceRequestModal
-      open={open}
-      onOpenChange={onOpenChange}
-      request={existingRequest}
-      onUpdateRequest={requestId ? handleUpdateRequest : handleCreateRequest}
-      documents={documents || []}
-      isLoadingDocuments={isLoadingDocuments}
-      properties={properties || []}
-      userRole={userRole}
-      isNew={!requestId}
-    />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[800px]">
+        <DialogDescription className="sr-only">
+          {requestId ? "Edit maintenance request" : "Create new maintenance request"}
+        </DialogDescription>
+        <MaintenanceRequestModal
+          open={open}
+          onOpenChange={onOpenChange}
+          request={existingRequest}
+          onUpdateRequest={requestId ? handleUpdateRequest : handleCreateRequest}
+          documents={documents || []}
+          isLoadingDocuments={isLoadingDocuments}
+          properties={properties || []}
+          userRole={userRole}
+          isNew={!requestId}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }
