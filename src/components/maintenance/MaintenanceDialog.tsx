@@ -71,6 +71,33 @@ export function MaintenanceDialog({
     }
   });
 
+  const handleCreateRequest = async (data: Partial<MaintenanceRequest>) => {
+    try {
+      console.log("Creating new maintenance request with data:", data);
+      const validatedData = validateMaintenanceRequest({
+        ...data,
+        tenant_id: currentUserId!,
+        status: 'pending'
+      });
+      
+      await createMutation.mutateAsync(validatedData as MaintenanceRequest);
+
+      toast({
+        title: "Success",
+        description: "Maintenance request created successfully",
+      });
+
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error creating request:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create request",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleUpdateRequest = async (updates: Partial<MaintenanceRequest>) => {
     if (!requestId || !existingRequest) return;
 
@@ -122,16 +149,15 @@ export function MaintenanceDialog({
     }
   };
 
-  if (!existingRequest) return null;
-
   return (
     <MaintenanceRequestModal
       open={open}
       onOpenChange={onOpenChange}
       request={existingRequest}
-      onUpdateRequest={handleUpdateRequest}
+      onUpdateRequest={requestId ? handleUpdateRequest : handleCreateRequest}
       documents={documents}
       isLoadingDocuments={isLoadingDocuments}
+      isNew={!requestId}
     />
   );
 }
