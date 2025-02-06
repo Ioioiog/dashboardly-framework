@@ -31,7 +31,7 @@ interface MaintenanceListProps {
 }
 
 export default function MaintenanceList({ 
-  requests, 
+  requests = [], // Add default empty array
   isLoading,
   onRequestClick 
 }: MaintenanceListProps) {

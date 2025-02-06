@@ -25,7 +25,8 @@ export function MaintenanceDialog({
   const { currentUserId } = useAuthState();
   const { toast } = useToast();
 
-  const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
+  // Add null checks for userRole and currentUserId
+  const { data: properties } = useMaintenanceProperties(userRole || 'tenant', currentUserId || '');
   const { existingRequest, createMutation, updateMutation, isLoading } = useMaintenanceRequest(requestId);
 
   // Fetch service providers for landlords
@@ -34,18 +35,28 @@ export function MaintenanceDialog({
     enabled: userRole === "landlord" && open,
     queryFn: async () => {
       console.log("Fetching service providers");
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name")
-        .eq("role", "service_provider");
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          throw new Error('No active session');
+        }
 
-      if (profilesError) {
-        console.error("Error fetching service providers:", profilesError);
-        throw profilesError;
+        const { data: profiles, error: profilesError } = await supabase
+          .from("profiles")
+          .select("id, first_name, last_name")
+          .eq("role", "service_provider");
+
+        if (profilesError) {
+          console.error("Error fetching service providers:", profilesError);
+          throw profilesError;
+        }
+
+        console.log("Fetched service providers:", profiles);
+        return profiles?.filter(p => p.first_name || p.last_name) || [];
+      } catch (error) {
+        console.error("Error in service providers query:", error);
+        return [];
       }
-
-      console.log("Fetched service providers:", profiles);
-      return profiles.filter(p => p.first_name || p.last_name);
     },
   });
 
@@ -55,28 +66,41 @@ export function MaintenanceDialog({
     enabled: !!requestId && open,
     queryFn: async () => {
       console.log("Fetching documents for maintenance request:", requestId);
-      
-      const { data: files, error } = await supabase
-        .storage
-        .from('maintenance-documents')
-        .list(requestId);
+      try {
+        const { data: files, error } = await supabase
+          .storage
+          .from('maintenance-documents')
+          .list(requestId || '');
 
-      if (error) {
-        console.error("Error fetching documents:", error);
-        throw error;
+        if (error) {
+          console.error("Error fetching documents:", error);
+          throw error;
+        }
+
+        console.log("Fetched documents:", files);
+        return files || [];
+      } catch (error) {
+        console.error("Error in documents query:", error);
+        return [];
       }
-
-      console.log("Fetched documents:", files);
-      return files;
     }
   });
 
   const handleCreateRequest = async (data: Partial<MaintenanceRequest>) => {
+    if (!currentUserId) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create a request",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       console.log("Creating new maintenance request with data:", data);
       const validatedData = validateMaintenanceRequest({
         ...data,
-        tenant_id: currentUserId!,
+        tenant_id: currentUserId,
         status: 'pending'
       });
       
@@ -149,13 +173,17 @@ export function MaintenanceDialog({
     }
   };
 
+  if (!userRole || !currentUserId) {
+    return null;
+  }
+
   return (
     <MaintenanceRequestModal
       open={open}
       onOpenChange={onOpenChange}
       request={existingRequest}
       onUpdateRequest={requestId ? handleUpdateRequest : handleCreateRequest}
-      documents={documents}
+      documents={documents || []}
       isLoadingDocuments={isLoadingDocuments}
       isNew={!requestId}
     />
