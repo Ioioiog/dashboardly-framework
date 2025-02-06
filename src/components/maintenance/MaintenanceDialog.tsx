@@ -67,11 +67,16 @@ export function MaintenanceDialog({
         return;
       }
 
-      console.log("Creating new maintenance request with data:", data);
+      console.log("Creating maintenance request with data:", {
+        ...data,
+        tenant_id: currentUserId
+      });
+
       const validatedData = validateMaintenanceRequest({
         ...data,
         tenant_id: currentUserId,
-        status: 'pending'
+        status: 'pending',
+        contact_phone: data.contact_phone || null // Ensure contact_phone is included
       });
       
       await createMutation.mutateAsync(validatedData as MaintenanceRequest);
@@ -101,7 +106,8 @@ export function MaintenanceDialog({
         ...updates,
         title: updates.title || existingRequest.title,
         property_id: updates.property_id || existingRequest.property_id,
-        tenant_id: existingRequest.tenant_id
+        tenant_id: existingRequest.tenant_id,
+        contact_phone: updates.contact_phone || existingRequest.contact_phone // Preserve contact_phone
       };
 
       console.log("Validating updated request:", updatedRequest);
