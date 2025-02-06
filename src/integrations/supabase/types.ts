@@ -542,6 +542,7 @@ export type Database = {
           notification_preferences: Json | null
           payment_amount: number | null
           payment_status: string | null
+          preferred_times: string[] | null
           priority:
             | Database["public"]["Enums"]["maintenance_request_priority"]
             | null
@@ -585,6 +586,7 @@ export type Database = {
           notification_preferences?: Json | null
           payment_amount?: number | null
           payment_status?: string | null
+          preferred_times?: string[] | null
           priority?:
             | Database["public"]["Enums"]["maintenance_request_priority"]
             | null
@@ -628,6 +630,7 @@ export type Database = {
           notification_preferences?: Json | null
           payment_amount?: number | null
           payment_status?: string | null
+          preferred_times?: string[] | null
           priority?:
             | Database["public"]["Enums"]["maintenance_request_priority"]
             | null
