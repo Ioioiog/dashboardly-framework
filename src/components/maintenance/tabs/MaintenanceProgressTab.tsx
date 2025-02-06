@@ -3,7 +3,19 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Clock, AlertCircle, XCircle, Calendar, Wrench, FileText } from "lucide-react";
+import { 
+  CheckCircle2, 
+  Clock, 
+  AlertCircle, 
+  XCircle, 
+  Calendar, 
+  Wrench, 
+  FileText,
+  User,
+  DollarSign,
+  ClipboardCheck,
+  MessageSquare
+} from "lucide-react";
 import { format } from "date-fns";
 import { useUserRole } from "@/hooks/use-user-role";
 
@@ -50,25 +62,71 @@ export function MaintenanceProgressTab({ request, onUpdateRequest }: Maintenance
       label: "Request Submitted",
       icon: <FileText className="h-5 w-5" />,
       date: request.created_at,
-      status: 'completed'
+      status: 'completed',
+      description: "Maintenance request has been submitted and logged in the system"
     },
     {
-      label: "Under Review",
+      label: "Initial Review",
       icon: <AlertCircle className="h-5 w-5" />,
       date: request.status === 'pending' ? request.updated_at : null,
-      status: request.status === 'pending' ? 'current' : request.status === 'in_progress' || request.status === 'completed' ? 'completed' : 'pending'
+      status: request.status === 'pending' ? 'current' : 
+             request.status === 'in_progress' || request.status === 'completed' ? 'completed' : 'pending',
+      description: "Request is being reviewed by property management"
+    },
+    {
+      label: "Cost Estimation",
+      icon: <DollarSign className="h-5 w-5" />,
+      date: request.cost_estimate ? request.updated_at : null,
+      status: request.cost_estimate ? 'completed' : 
+             request.status === 'in_progress' ? 'current' : 'pending',
+      description: "Evaluating repair costs and preparing estimates"
+    },
+    {
+      label: "Provider Assignment",
+      icon: <User className="h-5 w-5" />,
+      date: request.assigned_to ? request.updated_at : null,
+      status: request.assigned_to ? 'completed' : 
+             (request.status === 'in_progress' && !request.assigned_to) ? 'current' : 'pending',
+      description: "Assigning qualified service provider to the task"
+    },
+    {
+      label: "Scheduling",
+      icon: <Calendar className="h-5 w-5" />,
+      date: request.scheduled_date || null,
+      status: request.scheduled_date ? 'completed' :
+             (request.assigned_to && !request.scheduled_date) ? 'current' : 'pending',
+      description: "Coordinating visit time with tenant and service provider"
     },
     {
       label: "Work In Progress",
       icon: <Wrench className="h-5 w-5" />,
       date: request.status === 'in_progress' ? request.updated_at : null,
-      status: request.status === 'in_progress' ? 'current' : request.status === 'completed' ? 'completed' : 'pending'
+      status: request.status === 'in_progress' ? 'current' :
+             request.status === 'completed' ? 'completed' : 'pending',
+      description: "Maintenance work is being carried out"
+    },
+    {
+      label: "Quality Check",
+      icon: <ClipboardCheck className="h-5 w-5" />,
+      date: request.completion_report ? request.updated_at : null,
+      status: request.completion_report ? 'completed' :
+             (request.status === 'in_progress' && !request.completion_report) ? 'current' : 'pending',
+      description: "Verifying the quality of completed work"
+    },
+    {
+      label: "Tenant Feedback",
+      icon: <MessageSquare className="h-5 w-5" />,
+      date: request.rating ? request.updated_at : null,
+      status: request.rating ? 'completed' :
+             request.status === 'completed' ? 'current' : 'pending',
+      description: "Collecting feedback from tenant on completed work"
     },
     {
       label: "Completed",
       icon: <CheckCircle2 className="h-5 w-5" />,
       date: request.completion_date || null,
-      status: request.status === 'completed' ? 'completed' : 'pending'
+      status: request.status === 'completed' ? 'completed' : 'pending',
+      description: "Maintenance request has been successfully completed"
     }
   ];
 
@@ -140,8 +198,11 @@ export function MaintenanceProgressTab({ request, onUpdateRequest }: Maintenance
                       }`}>
                         {step.label}
                       </p>
+                      <p className="text-sm text-gray-500">
+                        {step.description}
+                      </p>
                       {step.date && (
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 mt-1">
                           {format(new Date(step.date), 'PPp')}
                         </p>
                       )}
