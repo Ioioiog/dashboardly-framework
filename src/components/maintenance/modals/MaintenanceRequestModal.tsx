@@ -37,10 +37,14 @@ export default function MaintenanceRequestModal({
           </TabsList>
           <TabsContent value="details">
             <MaintenanceRequestForm
-              request={request}
-              onUpdateRequest={onUpdateRequest}
+              existingRequest={request}
+              onSubmit={onUpdateRequest}
               documents={documents}
               isLoadingDocuments={isLoadingDocuments}
+              userRole={userRole || ''}
+              properties={[]}
+              serviceProviders={serviceProviders}
+              isLoadingProviders={isLoadingProviders}
             />
           </TabsContent>
           <TabsContent value="landlord">
