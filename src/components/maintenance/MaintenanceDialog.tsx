@@ -30,7 +30,7 @@ export function MaintenanceDialog({
   const { existingRequest, createMutation, updateMutation, isLoading } = useMaintenanceRequest(requestId);
 
   // Fetch service providers for landlords
-  const { data: serviceProviders, isLoading: isLoadingProviders } = useQuery({
+  const { data: serviceProviders } = useQuery({
     queryKey: ["service-providers"],
     enabled: userRole === "landlord" && open,
     queryFn: async () => {
@@ -38,7 +38,8 @@ export function MaintenanceDialog({
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          throw new Error('No active session');
+          console.error("No active session");
+          return [];
         }
 
         const { data: profiles, error: profilesError } = await supabase
@@ -48,10 +49,9 @@ export function MaintenanceDialog({
 
         if (profilesError) {
           console.error("Error fetching service providers:", profilesError);
-          throw profilesError;
+          return [];
         }
 
-        console.log("Fetched service providers:", profiles);
         return profiles?.filter(p => p.first_name || p.last_name) || [];
       } catch (error) {
         console.error("Error in service providers query:", error);
@@ -65,7 +65,6 @@ export function MaintenanceDialog({
     queryKey: ["maintenance-documents", requestId],
     enabled: !!requestId && open,
     queryFn: async () => {
-      console.log("Fetching documents for maintenance request:", requestId);
       try {
         const { data: files, error } = await supabase
           .storage
@@ -74,10 +73,9 @@ export function MaintenanceDialog({
 
         if (error) {
           console.error("Error fetching documents:", error);
-          throw error;
+          return [];
         }
 
-        console.log("Fetched documents:", files);
         return files || [];
       } catch (error) {
         console.error("Error in documents query:", error);
@@ -97,6 +95,16 @@ export function MaintenanceDialog({
     }
 
     try {
+      // Ensure required fields are present
+      if (!data.title || !data.property_id) {
+        toast({
+          title: "Error",
+          description: "Please fill in all required fields",
+          variant: "destructive"
+        });
+        return;
+      }
+
       console.log("Creating new maintenance request with data:", data);
       const validatedData = validateMaintenanceRequest({
         ...data,
@@ -126,9 +134,13 @@ export function MaintenanceDialog({
     if (!requestId || !existingRequest) return;
 
     try {
+      // Preserve existing values for required fields if not provided in updates
       const updatedRequest = {
         ...existingRequest,
-        ...updates
+        ...updates,
+        title: updates.title || existingRequest.title,
+        property_id: updates.property_id || existingRequest.property_id,
+        tenant_id: existingRequest.tenant_id
       };
 
       console.log("Validating updated request:", updatedRequest);
@@ -139,7 +151,6 @@ export function MaintenanceDialog({
         id: requestId
       } as MaintenanceRequest);
 
-      // Send notification for status updates
       if (updates.status && updates.status !== existingRequest.status) {
         const notificationResponse = await supabase.functions.invoke('send-maintenance-notification', {
           body: { requestId, type: 'status_update' }
@@ -150,7 +161,6 @@ export function MaintenanceDialog({
         }
       }
 
-      // Handle emergency escalation
       if (updates.is_emergency && !existingRequest.is_emergency) {
         toast({
           title: "Emergency Request",
@@ -185,6 +195,8 @@ export function MaintenanceDialog({
       onUpdateRequest={requestId ? handleUpdateRequest : handleCreateRequest}
       documents={documents || []}
       isLoadingDocuments={isLoadingDocuments}
+      properties={properties || []}
+      userRole={userRole}
       isNew={!requestId}
     />
   );
