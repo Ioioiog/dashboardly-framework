@@ -3,8 +3,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Clock, AlertCircle, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, AlertCircle, XCircle, Calendar, Wrench, FileText } from "lucide-react";
 import { format } from "date-fns";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface MaintenanceProgressTabProps {
   request: MaintenanceRequest;
@@ -12,6 +13,8 @@ interface MaintenanceProgressTabProps {
 }
 
 export function MaintenanceProgressTab({ request, onUpdateRequest }: MaintenanceProgressTabProps) {
+  const { userRole } = useUserRole();
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
@@ -42,12 +45,39 @@ export function MaintenanceProgressTab({ request, onUpdateRequest }: Maintenance
     }
   };
 
+  const steps = [
+    {
+      label: "Request Submitted",
+      icon: <FileText className="h-5 w-5" />,
+      date: request.created_at,
+      status: 'completed'
+    },
+    {
+      label: "Under Review",
+      icon: <AlertCircle className="h-5 w-5" />,
+      date: request.status === 'pending' ? request.updated_at : null,
+      status: request.status === 'pending' ? 'current' : request.status === 'in_progress' || request.status === 'completed' ? 'completed' : 'pending'
+    },
+    {
+      label: "Work In Progress",
+      icon: <Wrench className="h-5 w-5" />,
+      date: request.status === 'in_progress' ? request.updated_at : null,
+      status: request.status === 'in_progress' ? 'current' : request.status === 'completed' ? 'completed' : 'pending'
+    },
+    {
+      label: "Completed",
+      icon: <CheckCircle2 className="h-5 w-5" />,
+      date: request.completion_date || null,
+      status: request.status === 'completed' ? 'completed' : 'pending'
+    }
+  ];
+
   return (
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-lg shadow-sm border">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Request Progress</h3>
-          <Badge variant="outline" className={getStatusColor(request.status)}>
+          <Badge className={getStatusColor(request.status)}>
             {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
           </Badge>
         </div>
@@ -58,56 +88,70 @@ export function MaintenanceProgressTab({ request, onUpdateRequest }: Maintenance
             <div>
               <p className="font-medium">Current Status</p>
               <p className="text-sm text-gray-600">
-                Last updated: {new Date().toLocaleDateString()}
+                Last updated: {format(new Date(request.updated_at), 'PPp')}
               </p>
             </div>
           </div>
 
-          <div className="border-t pt-4">
-            <Label className="mb-2">Update Status</Label>
-            <Select 
-              value={request.status} 
-              onValueChange={(value: "pending" | "in_progress" | "completed" | "cancelled") => 
-                onUpdateRequest({ status: value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">Pending Review</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-3 mt-6">
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${request.status === 'pending' ? 'bg-yellow-500' : 'bg-green-500'}`} />
-              <span className="text-sm">Request Submitted</span>
-              <span className="text-xs text-gray-500 ml-auto">
-                {new Date().toLocaleDateString()}
-              </span>
+          {userRole === 'landlord' && (
+            <div className="border-t pt-4">
+              <Label className="mb-2">Update Status</Label>
+              <Select 
+                value={request.status} 
+                onValueChange={(value: "pending" | "in_progress" | "completed" | "cancelled") => 
+                  onUpdateRequest({ status: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pending Review</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          )}
 
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${request.status === 'in_progress' ? 'bg-blue-500' : request.status === 'completed' ? 'bg-green-500' : 'bg-gray-300'}`} />
-              <span className="text-sm">Work In Progress</span>
-              {request.status === 'in_progress' && (
-                <span className="text-xs text-gray-500 ml-auto">Current Stage</span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${request.status === 'completed' ? 'bg-green-500' : 'bg-gray-300'}`} />
-              <span className="text-sm">Request Completed</span>
-              {request.status === 'completed' && request.completion_date && (
-                <span className="text-xs text-gray-500 ml-auto">
-                  {format(new Date(request.completion_date), 'PPp')}
-                </span>
-              )}
+          <div className="mt-8">
+            <div className="space-y-8">
+              {steps.map((step, index) => (
+                <div key={step.label} className="relative">
+                  <div className="flex items-center gap-4">
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 
+                      ${step.status === 'completed' ? 'border-green-500 bg-green-50' :
+                        step.status === 'current' ? 'border-blue-500 bg-blue-50' :
+                        'border-gray-300 bg-gray-50'}`}>
+                      {React.cloneElement(step.icon, {
+                        className: `h-5 w-5 ${
+                          step.status === 'completed' ? 'text-green-500' :
+                          step.status === 'current' ? 'text-blue-500' :
+                          'text-gray-400'
+                        }`
+                      })}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`font-medium ${
+                        step.status === 'completed' ? 'text-green-700' :
+                        step.status === 'current' ? 'text-blue-700' :
+                        'text-gray-500'
+                      }`}>
+                        {step.label}
+                      </p>
+                      {step.date && (
+                        <p className="text-sm text-gray-500">
+                          {format(new Date(step.date), 'PPp')}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {index < steps.length - 1 && (
+                    <div className="absolute left-5 top-10 h-full w-px bg-gray-300" />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>

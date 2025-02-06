@@ -42,6 +42,8 @@ export interface MaintenanceRequest {
   property?: Property;
   tenant?: Tenant;
   materials_cost?: number | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export function useMaintenanceRequest(requestId?: string) {
