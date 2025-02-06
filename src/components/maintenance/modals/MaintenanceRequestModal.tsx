@@ -44,11 +44,15 @@ export default function MaintenanceRequestModal({
     onUpdateRequest(processedValues as Partial<MaintenanceRequest>);
   };
 
+  // Only tenant can edit their own requests when status is pending
   const isOwner = userRole === 'tenant' && request.tenant_id === request.tenant_id;
   const canEditDetails = isOwner && request.status === 'pending';
   const canEditProvider = userRole === 'landlord' || (userRole === 'service_provider' && request.assigned_to === request.assigned_to);
   const canEditCosts = userRole === 'service_provider' && request.assigned_to === request.assigned_to;
   const canEditStatus = userRole === 'landlord';
+
+  console.log('User role:', userRole);
+  console.log('Can edit details:', canEditDetails);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
