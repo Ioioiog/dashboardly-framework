@@ -19,6 +19,7 @@ interface ImageUploadProps {
 export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [processedUrls, setProcessedUrls] = useState<string[]>([]);
   const [blobUrls, setBlobUrls] = useState<string[]>([]);
 
   const validateImage = (file: File): string | null => {
@@ -61,6 +62,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     }).filter(Boolean);
     
     setBlobUrls(newBlobUrls);
+    setProcessedUrls(urls);
     return urls;
   };
 
@@ -127,7 +129,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
   const handlePreviousImage = () => {
     setCurrentImageIndex((prev) => {
       const newIndex = prev - 1;
-      if (newIndex < 0) return imageUrls.length - 1;
+      if (newIndex < 0) return processedUrls.length - 1;
       return newIndex;
     });
   };
@@ -135,19 +137,19 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
   const handleNextImage = () => {
     setCurrentImageIndex((prev) => {
       const newIndex = prev + 1;
-      if (newIndex >= imageUrls.length) return 0;
+      if (newIndex >= processedUrls.length) return 0;
       return newIndex;
     });
   };
 
   useEffect(() => {
     if (selectedImage) {
-      const index = imageUrls.findIndex(url => url === selectedImage);
+      const index = processedUrls.findIndex(url => url === selectedImage);
       if (index !== -1) {
         setCurrentImageIndex(index);
       }
     }
-  }, [selectedImage, imageUrls]);
+  }, [selectedImage, processedUrls]);
 
   const handleImageClick = (imageUrl: string, index: number) => {
     setSelectedImage(imageUrl);
@@ -169,7 +171,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
       >
         <DialogContent className="max-w-[95vw] w-[1400px] h-[90vh] p-0 overflow-hidden bg-black/90">
           <DialogTitle className="p-8 text-white flex items-center justify-between">
-            <span className="text-xl">Image Preview ({currentImageIndex + 1} of {imageUrls.length})</span>
+            <span className="text-xl">Image Preview ({currentImageIndex + 1} of {processedUrls.length})</span>
             <Button
               variant="ghost"
               size="icon"
@@ -187,7 +189,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                   alt="Maintenance request"
                   className="max-h-[85vh] max-w-[90vw] object-contain"
                 />
-                {imageUrls.length > 1 && (
+                {processedUrls.length > 1 && (
                   <>
                     <Button
                       variant="ghost"
@@ -222,7 +224,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                 type="file"
                 accept={ALLOWED_IMAGE_TYPES.join(',')}
                 multiple
-                disabled={disabled || imageUrls.length >= MAX_IMAGES}
+                disabled={disabled || processedUrls.length >= MAX_IMAGES}
                 onChange={handleImageUpload}
                 className="cursor-pointer file:cursor-pointer file:border-0 file:bg-blue-500 file:text-white file:px-4 file:py-2 file:mr-4 file:rounded-md hover:file:bg-blue-600 transition-colors"
               />
@@ -230,9 +232,9 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                 <Upload className="h-4 w-4" />
               </div>
             </div>
-            {imageUrls.length > 0 && (
+            {processedUrls.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {imageUrls.map((imageUrl, index) => (
+                {processedUrls.map((imageUrl, index) => (
                   <div 
                     key={index} 
                     className="relative aspect-square group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow"
