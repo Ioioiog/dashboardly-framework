@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { useUserRole } from "@/hooks/use-user-role";
+import debounce from "lodash/debounce";
 
 interface MaintenanceCostsTabProps {
   request: MaintenanceRequest;
@@ -34,10 +35,35 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
     });
   }, [request]);
 
+  // Debounced update function
+  const debouncedUpdate = useCallback(
+    debounce((field: string, value: number | string) => {
+      console.log("Sending update to Supabase:", { field, value });
+      onUpdateRequest({ [field]: value });
+    }, 1000),
+    [onUpdateRequest]
+  );
+
   const handleInputChange = (field: keyof typeof localValues, value: string | number) => {
-    const newValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
-    setLocalValues(prev => ({ ...prev, [field]: newValue }));
-    onUpdateRequest({ [field]: newValue });
+    let newValue: number | string = value;
+    
+    // Handle numeric fields
+    if (field !== 'cost_estimate_notes') {
+      // Allow empty string or partial input while typing
+      if (value === '') {
+        newValue = 0;
+      } else {
+        // Convert to number and handle invalid inputs
+        const numValue = typeof value === 'string' ? parseFloat(value) : value;
+        newValue = isNaN(numValue) ? 0 : numValue;
+      }
+    }
+
+    // Update local state immediately
+    setLocalValues(prev => ({ ...prev, [field]: value }));
+    
+    // Debounce the update to Supabase
+    debouncedUpdate(field, newValue);
   };
 
   return (
@@ -50,6 +76,8 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           onChange={(e) => handleInputChange('service_provider_fee', e.target.value)}
           className="bg-white"
           disabled={!canEdit}
+          min="0"
+          step="0.01"
         />
       </div>
 
@@ -61,6 +89,8 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           onChange={(e) => handleInputChange('materials_cost', e.target.value)}
           className="bg-white"
           disabled={!canEdit}
+          min="0"
+          step="0.01"
         />
       </div>
 
@@ -72,6 +102,8 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           onChange={(e) => handleInputChange('cost_estimate', e.target.value)}
           className="bg-white"
           disabled={!canEdit}
+          min="0"
+          step="0.01"
         />
       </div>
 
@@ -83,6 +115,8 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           onChange={(e) => handleInputChange('payment_amount', e.target.value)}
           className="bg-white"
           disabled={!canEdit}
+          min="0"
+          step="0.01"
         />
       </div>
 
