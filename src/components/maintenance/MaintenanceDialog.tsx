@@ -25,6 +25,9 @@ export function MaintenanceDialog({
   const { currentUserId } = useAuthState();
   const { toast } = useToast();
 
+  console.log("MaintenanceDialog - Current user role:", userRole);
+  console.log("MaintenanceDialog - Current user ID:", currentUserId);
+
   const { data: properties } = useMaintenanceProperties(userRole || 'tenant', currentUserId || '');
   const { existingRequest, createMutation, updateMutation, isLoading } = useMaintenanceRequest(requestId);
 
@@ -179,7 +182,9 @@ export function MaintenanceDialog({
     }
   };
 
-  if (!userRole || !currentUserId) {
+  // Wait for role to be fetched before rendering
+  if (!userRole) {
+    console.log("MaintenanceDialog - Waiting for user role to be fetched...");
     return null;
   }
 
