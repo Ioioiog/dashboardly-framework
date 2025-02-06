@@ -25,16 +25,21 @@ interface LandlordFieldsProps {
   onFieldChange: (field: string, value: any) => void;
   isLoadingProviders: boolean;
   isReadOnly?: boolean;
+  userRole?: string;
 }
 
 export function LandlordFields({
   formData,
   onFieldChange,
   isLoadingProviders,
-  isReadOnly = false
+  isReadOnly = false,
+  userRole = 'tenant'
 }: LandlordFieldsProps) {
   const { t } = useTranslation();
   const { currentUserId } = useAuthState();
+
+  // Force isReadOnly to true if user is a tenant
+  const isTenantReadOnly = userRole === 'tenant' || isReadOnly;
 
   const statusOptions = [
     { value: "pending", label: t("maintenance.status.pending") },
@@ -119,7 +124,7 @@ export function LandlordFields({
         <label className="text-sm font-medium mb-2 block">
           {t("maintenance.form.status")}
         </label>
-        {isReadOnly ? (
+        {isTenantReadOnly ? (
           <div className="p-3 bg-gray-50 rounded-md border">
             {formData.status ? t(`maintenance.status.${formData.status}`) : "-"}
           </div>
@@ -146,7 +151,7 @@ export function LandlordFields({
         <label className="text-sm font-medium mb-2 block">Service Provider</label>
         {isLoadingProviders || isLoadingAllProviders ? (
           <Skeleton className="h-10 w-full" />
-        ) : isReadOnly ? (
+        ) : isTenantReadOnly ? (
           <div className="p-3 bg-gray-50 rounded-md border">
             {getServiceProviderName(assignedProvider || null)}
           </div>
