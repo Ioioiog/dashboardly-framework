@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { MaintenanceDialog } from "@/components/maintenance/MaintenanceDialog";
-import { MaintenanceHeader } from "@/components/maintenance/dashboard/MaintenanceHeader";
-import { MaintenanceSection } from "@/components/maintenance/dashboard/MaintenanceSection";
+import { MaintenanceHeader } from "@/components/maintenance/sections/MaintenanceHeader";
+import { MaintenanceSection } from "@/components/maintenance/sections/MaintenanceSection";
 import { useUserRole } from "@/hooks/use-user-role";
 import { ServiceProviderList } from "@/components/maintenance/ServiceProviderList";
 import { Button } from "@/components/ui/button";
@@ -100,6 +100,12 @@ export default function Maintenance() {
     setIsDialogOpen(true);
   };
 
+  const handleNewRequest = () => {
+    console.log("Creating new maintenance request");
+    setSelectedRequestId(undefined);
+    setIsDialogOpen(true);
+  };
+
   const navigationItems = [
     {
       id: 'dashboard' as MaintenanceView,
@@ -138,10 +144,7 @@ export default function Maintenance() {
           {activeView === 'dashboard' ? (
             <>
               <MaintenanceHeader
-                priority={priority}
-                onPriorityChange={(value) => setPriority(value as "all" | "low" | "medium" | "high")}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
+                onNewRequest={handleNewRequest}
               />
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

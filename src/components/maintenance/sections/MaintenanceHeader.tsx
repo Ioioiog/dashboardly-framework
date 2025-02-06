@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface MaintenanceHeaderProps {
   onNewRequest: () => void;
@@ -9,24 +10,32 @@ interface MaintenanceHeaderProps {
 
 export function MaintenanceHeader({ onNewRequest }: MaintenanceHeaderProps) {
   const { t } = useTranslation();
+  const { userRole } = useUserRole();
+
+  // Only show create button for tenants and landlords
+  const showCreateButton = userRole === "tenant" || userRole === "landlord";
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-3xl font-bold">
-          {t("maintenance.myRequests")}
-        </h1>
-        <p className="text-gray-500 mt-2">
-          {t("maintenance.createAndTrack")}
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">
+            {t("maintenance.myRequests")}
+          </h1>
+          <p className="text-gray-500 mt-2">
+            {t("maintenance.createAndTrack")}
+          </p>
+        </div>
+        {showCreateButton && (
+          <Button 
+            onClick={onNewRequest}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            {t("maintenance.newRequest")}
+          </Button>
+        )}
       </div>
-      <Button 
-        onClick={onNewRequest}
-        className="bg-blue-600 hover:bg-blue-700 text-white"
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        {t("maintenance.newRequest")}
-      </Button>
     </div>
   );
 }
