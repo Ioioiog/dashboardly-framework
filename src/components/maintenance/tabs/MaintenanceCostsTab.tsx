@@ -12,7 +12,7 @@ interface MaintenanceCostsTabProps {
 
 export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCostsTabProps) {
   const { userRole } = useUserRole();
-  const isServiceProvider = userRole === 'service_provider';
+  const canEdit = userRole === 'service_provider' || userRole === 'landlord';
 
   return (
     <div className="space-y-4">
@@ -23,7 +23,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           value={request.service_provider_fee || 0}
           onChange={(e) => onUpdateRequest({ service_provider_fee: parseFloat(e.target.value) })}
           className="bg-white"
-          disabled={!isServiceProvider}
+          disabled={!canEdit}
         />
       </div>
 
@@ -34,7 +34,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           value={request.materials_cost || 0}
           onChange={(e) => onUpdateRequest({ materials_cost: parseFloat(e.target.value) })}
           className="bg-white"
-          disabled={!isServiceProvider}
+          disabled={!canEdit}
         />
       </div>
 
@@ -45,7 +45,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           value={request.cost_estimate || 0}
           onChange={(e) => onUpdateRequest({ cost_estimate: parseFloat(e.target.value) })}
           className="bg-white"
-          disabled={!isServiceProvider}
+          disabled={!canEdit}
         />
       </div>
 
@@ -56,7 +56,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           value={request.payment_amount || 0}
           onChange={(e) => onUpdateRequest({ payment_amount: parseFloat(e.target.value) })}
           className="bg-white"
-          disabled={!isServiceProvider}
+          disabled={!canEdit}
         />
       </div>
 
@@ -67,7 +67,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           onChange={(e) => onUpdateRequest({ cost_estimate_notes: e.target.value })}
           className="bg-white min-h-[100px]"
           placeholder="Add any notes about costs here..."
-          disabled={!isServiceProvider}
+          disabled={!canEdit}
         />
       </div>
     </div>
