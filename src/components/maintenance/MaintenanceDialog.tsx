@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { validateMaintenanceRequest } from "./utils/validation";
 import MaintenanceRequestModal from "./modals/MaintenanceRequestModal";
 import type { MaintenanceRequest } from "./hooks/useMaintenanceRequest";
+import { I18nextProvider } from "react-i18next";
+import i18n from "@/i18n/config";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -105,13 +107,15 @@ export function MaintenanceDialog({
   if (!existingRequest) return null;
 
   return (
-    <MaintenanceRequestModal
-      open={open}
-      onOpenChange={onOpenChange}
-      request={existingRequest}
-      onUpdateRequest={handleUpdateRequest}
-      documents={documents}
-      isLoadingDocuments={isLoadingDocuments}
-    />
+    <I18nextProvider i18n={i18n}>
+      <MaintenanceRequestModal
+        open={open}
+        onOpenChange={onOpenChange}
+        request={existingRequest}
+        onUpdateRequest={handleUpdateRequest}
+        documents={documents}
+        isLoadingDocuments={isLoadingDocuments}
+      />
+    </I18nextProvider>
   );
 }
