@@ -45,6 +45,11 @@ export interface MaintenanceRequest {
   materials_cost?: number | null;
   created_at: string;
   updated_at: string;
+  // Add new emergency-related fields
+  is_emergency?: boolean;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  emergency_instructions?: string;
 }
 
 export function useMaintenanceRequest(requestId?: string) {
