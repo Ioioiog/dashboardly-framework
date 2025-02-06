@@ -1,12 +1,13 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClipboardList, Users, DollarSign, MessageSquare, FileText } from "lucide-react";
+import { ClipboardList, Users, DollarSign, MessageSquare, FileText, Info } from "lucide-react";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { MaintenanceProgressTab } from "../tabs/MaintenanceProgressTab";
 import { MaintenanceProviderTab } from "../tabs/MaintenanceProviderTab";
 import { MaintenanceCostsTab } from "../tabs/MaintenanceCostsTab";
 import { MaintenanceChatTab } from "../tabs/MaintenanceChatTab";
 import { MaintenanceDocumentTab } from "../tabs/MaintenanceDocumentTab";
+import { MaintenanceDetailsTab } from "../tabs/MaintenanceDetailsTab";
 import { useUserRole } from "@/hooks/use-user-role";
 import { FileObject } from "@supabase/storage-js";
 
@@ -36,8 +37,12 @@ export const MaintenanceRequestModal = ({
           <DialogTitle>Maintenance Request Management</DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="progress" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="details" className="flex items-center gap-2">
+              <Info className="h-4 w-4" />
+              Details
+            </TabsTrigger>
             <TabsTrigger value="progress" className="flex items-center gap-2">
               <ClipboardList className="h-4 w-4" />
               Progress
@@ -59,6 +64,13 @@ export const MaintenanceRequestModal = ({
               Chat
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="details">
+            <MaintenanceDetailsTab 
+              request={request}
+              onUpdateRequest={onUpdateRequest}
+            />
+          </TabsContent>
 
           <TabsContent value="progress">
             <MaintenanceProgressTab 
