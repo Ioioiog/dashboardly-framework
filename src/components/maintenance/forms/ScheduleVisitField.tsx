@@ -23,12 +23,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
     // First update the form with the selected date
     onChange(date);
     console.log("Date set successfully:", date);
-
-    // Close the popover after a longer delay to ensure the date is registered
-    setTimeout(() => {
-      setIsOpen(false);
-      console.log("Popover closed after date selection");
-    }, 300); // Increased delay to 300ms
+    setIsOpen(false);
   };
 
   return (
@@ -45,12 +40,6 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
               disabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={disabled}
-            onClick={(e) => {
-              e.preventDefault();
-              if (!disabled) {
-                setIsOpen(true);
-              }
-            }}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {value ? format(value, "PPP") : <span>Pick a date</span>}
