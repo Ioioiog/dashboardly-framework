@@ -27,17 +27,34 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
     }
   }, [value]);
 
-  const handleSelect = (date: Date | undefined) => {
+  const handleSelect = useCallback((date: Date | undefined) => {
     console.log("Date selection initiated:", date);
     if (!date) return;
-    setLocalDate(date);
+    
+    // If there's already a time selected, preserve it when setting the new date
+    if (selectedTime) {
+      const [hours, minutes] = selectedTime.split(':');
+      const newDate = new Date(date);
+      newDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
+      setLocalDate(newDate);
+    } else {
+      setLocalDate(date);
+    }
     setIsOpen(false);
-  };
+  }, [selectedTime]);
 
   const handleTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = e.target.value;
     setSelectedTime(newTime);
-  }, []);
+    
+    // If we have a localDate, update it with the new time
+    if (localDate && newTime) {
+      const [hours, minutes] = newTime.split(':');
+      const updatedDate = new Date(localDate);
+      updatedDate.setHours(parseInt(hours, 10), parseInt(minutes, 10));
+      setLocalDate(updatedDate);
+    }
+  }, [localDate]);
 
   const handleScheduleClick = () => {
     if (!localDate || !selectedTime) {
