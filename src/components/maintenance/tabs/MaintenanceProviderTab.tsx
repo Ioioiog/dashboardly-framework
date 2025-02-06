@@ -10,11 +10,9 @@ import { Users } from "lucide-react";
 interface MaintenanceProviderTabProps {
   request: MaintenanceRequest;
   onUpdateRequest: (updates: Partial<MaintenanceRequest>) => void;
-  userRole?: string;
-  isReadOnly?: boolean;
 }
 
-export function MaintenanceProviderTab({ request, onUpdateRequest, userRole, isReadOnly }: MaintenanceProviderTabProps) {
+export function MaintenanceProviderTab({ request, onUpdateRequest }: MaintenanceProviderTabProps) {
   return (
     <div className="space-y-4">
       <LandlordFields
@@ -28,7 +26,7 @@ export function MaintenanceProviderTab({ request, onUpdateRequest, userRole, isR
         <ScheduleVisitField
           value={request.scheduled_date ? new Date(request.scheduled_date) : null}
           onChange={(date) => onUpdateRequest({ scheduled_date: date?.toISOString() })}
-          disabled={isReadOnly}
+          disabled={false}
         />
       </div>
 
@@ -37,7 +35,6 @@ export function MaintenanceProviderTab({ request, onUpdateRequest, userRole, isR
         <Select
           value={request.service_provider_status || ''}
           onValueChange={(value) => onUpdateRequest({ service_provider_status: value })}
-          disabled={isReadOnly}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />
@@ -59,7 +56,6 @@ export function MaintenanceProviderTab({ request, onUpdateRequest, userRole, isR
           onChange={(e) => onUpdateRequest({ service_provider_notes: e.target.value })}
           placeholder="Add any notes about the service..."
           className="min-h-[100px]"
-          disabled={isReadOnly}
         />
       </div>
     </div>

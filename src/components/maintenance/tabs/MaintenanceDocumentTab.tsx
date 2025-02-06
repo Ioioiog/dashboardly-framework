@@ -14,7 +14,6 @@ interface MaintenanceDocumentTabProps {
   onUpdateRequest: (request: Partial<MaintenanceRequest>) => void;
   documents?: FileObject[];
   isLoading?: boolean;
-  userRole?: string;
 }
 
 export function MaintenanceDocumentTab({ 

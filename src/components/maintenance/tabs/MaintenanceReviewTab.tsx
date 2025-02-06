@@ -10,11 +10,9 @@ import { FileText } from "lucide-react";
 interface MaintenanceReviewTabProps {
   request: MaintenanceRequest;
   onUpdateRequest: (updates: Partial<MaintenanceRequest>) => void;
-  userRole?: string;
-  canEditStatus?: boolean;
 }
 
-export function MaintenanceReviewTab({ request, onUpdateRequest, userRole, canEditStatus }: MaintenanceReviewTabProps) {
+export function MaintenanceReviewTab({ request, onUpdateRequest }: MaintenanceReviewTabProps) {
   return (
     <div className="space-y-4">
       <div className="grid gap-4">
@@ -96,7 +94,7 @@ export function MaintenanceReviewTab({ request, onUpdateRequest, userRole, canEd
           <Select 
             value={request.status} 
             onValueChange={(value: "pending" | "in_progress" | "completed" | "cancelled") => 
-              canEditStatus && onUpdateRequest({ status: value })
+              onUpdateRequest({ status: value })
             }
           >
             <SelectTrigger>
