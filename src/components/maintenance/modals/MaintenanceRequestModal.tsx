@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MaintenanceRequestForm } from "../forms/MaintenanceRequestForm";
 import { LandlordFields } from "../forms/LandlordFields";
 import type { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
+import type { MaintenanceFormValues } from "../forms/MaintenanceRequestForm";
 
 interface MaintenanceRequestModalProps {
   open: boolean;
@@ -27,6 +28,18 @@ export default function MaintenanceRequestModal({
   isLoadingProviders,
   serviceProviders
 }: MaintenanceRequestModalProps) {
+  const handleFormSubmit = (values: MaintenanceFormValues) => {
+    // Convert File objects to strings in the images array
+    const processedValues = {
+      ...values,
+      images: values.images.map(image => 
+        typeof image === 'string' ? image : URL.createObjectURL(image)
+      )
+    };
+    
+    onUpdateRequest(processedValues as Partial<MaintenanceRequest>);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
@@ -38,7 +51,7 @@ export default function MaintenanceRequestModal({
           <TabsContent value="details">
             <MaintenanceRequestForm
               existingRequest={request}
-              onSubmit={onUpdateRequest}
+              onSubmit={handleFormSubmit}
               documents={documents}
               isLoadingDocuments={isLoadingDocuments}
               userRole={userRole || ''}
