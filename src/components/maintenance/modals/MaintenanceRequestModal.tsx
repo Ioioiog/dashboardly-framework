@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClipboardList, Users, DollarSign, MessageSquare, FileText } from "lucide-react";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
-import { MaintenanceReviewTab } from "../tabs/MaintenanceReviewTab";
+import { MaintenanceProgressTab } from "../tabs/MaintenanceProgressTab";
 import { MaintenanceProviderTab } from "../tabs/MaintenanceProviderTab";
 import { MaintenanceCostsTab } from "../tabs/MaintenanceCostsTab";
 import { MaintenanceChatTab } from "../tabs/MaintenanceChatTab";
@@ -36,11 +36,11 @@ export const MaintenanceRequestModal = ({
           <DialogTitle>Maintenance Request Management</DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="review" className="w-full">
+        <Tabs defaultValue="progress" className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="review" className="flex items-center gap-2">
+            <TabsTrigger value="progress" className="flex items-center gap-2">
               <ClipboardList className="h-4 w-4" />
-              Initial Review
+              Progress
             </TabsTrigger>
             <TabsTrigger value="provider" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -60,8 +60,8 @@ export const MaintenanceRequestModal = ({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="review">
-            <MaintenanceReviewTab 
+          <TabsContent value="progress">
+            <MaintenanceProgressTab 
               request={request}
               onUpdateRequest={onUpdateRequest}
             />
