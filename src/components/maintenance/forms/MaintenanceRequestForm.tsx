@@ -6,8 +6,8 @@ import { ImageUpload } from "./ImageUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import type { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 
 interface Property {
   id: string;
@@ -18,8 +18,8 @@ export interface MaintenanceFormValues {
   title: string;
   description: string;
   property_id: string;
-  priority: string;
-  status: string;
+  priority: 'low' | 'medium' | 'high';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   notes?: string;
   assigned_to?: string;
   service_provider_notes?: string;
@@ -33,7 +33,7 @@ interface MaintenanceRequestFormProps {
   properties: Property[];
   serviceProviders?: Array<{ id: string; first_name: string; last_name: string; }>;
   userRole: string;
-  existingRequest?: MaintenanceFormValues;
+  existingRequest?: MaintenanceRequest;
   onSubmit: (values: MaintenanceFormValues) => void;
   isSubmitting?: boolean;
   isLoadingProviders?: boolean;
