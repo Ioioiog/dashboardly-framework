@@ -2,6 +2,11 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MaintenanceRequestForm } from "../forms/MaintenanceRequestForm";
 import { LandlordFields } from "../forms/LandlordFields";
+import { MaintenanceCostsTab } from "../tabs/MaintenanceCostsTab";
+import { MaintenanceReviewTab } from "../tabs/MaintenanceReviewTab";
+import { MaintenanceProviderTab } from "../tabs/MaintenanceProviderTab";
+import { MaintenanceChatTab } from "../tabs/MaintenanceChatTab";
+import { MaintenanceDocumentTab } from "../tabs/MaintenanceDocumentTab";
 import type { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import type { MaintenanceFormValues } from "../forms/MaintenanceRequestForm";
 
@@ -44,10 +49,15 @@ export default function MaintenanceRequestModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details">Request Details</TabsTrigger>
-            <TabsTrigger value="landlord">Landlord Actions</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="provider">Provider</TabsTrigger>
+            <TabsTrigger value="costs">Costs</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="chat">Chat</TabsTrigger>
+            <TabsTrigger value="review">Review</TabsTrigger>
           </TabsList>
+
           <TabsContent value="details">
             <MaintenanceRequestForm
               existingRequest={request}
@@ -59,13 +69,38 @@ export default function MaintenanceRequestModal({
               isSubmitting={false}
             />
           </TabsContent>
-          <TabsContent value="landlord">
-            <LandlordFields
-              formData={request}
-              onFieldChange={(field, value) => onUpdateRequest({ [field]: value })}
-              isLoadingProviders={isLoadingProviders || false}
-              userRole={userRole}
-              isReadOnly={userRole !== 'landlord'}
+
+          <TabsContent value="provider">
+            <MaintenanceProviderTab
+              request={request}
+              onUpdateRequest={onUpdateRequest}
+            />
+          </TabsContent>
+
+          <TabsContent value="costs">
+            <MaintenanceCostsTab
+              request={request}
+              onUpdateRequest={onUpdateRequest}
+            />
+          </TabsContent>
+
+          <TabsContent value="documents">
+            <MaintenanceDocumentTab
+              request={request}
+              onUpdateRequest={onUpdateRequest}
+              documents={documents}
+              isLoading={isLoadingDocuments}
+            />
+          </TabsContent>
+
+          <TabsContent value="chat">
+            <MaintenanceChatTab requestId={request.id || ''} />
+          </TabsContent>
+
+          <TabsContent value="review">
+            <MaintenanceReviewTab
+              request={request}
+              onUpdateRequest={onUpdateRequest}
             />
           </TabsContent>
         </Tabs>
