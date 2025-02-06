@@ -6,9 +6,10 @@ import { format } from "date-fns";
 interface MaintenanceDetailsTabProps {
   request: MaintenanceRequest;
   onUpdateRequest: (request: Partial<MaintenanceRequest>) => void;
+  isNew?: boolean;  // Added this prop
 }
 
-export function MaintenanceDetailsTab({ request }: MaintenanceDetailsTabProps) {
+export function MaintenanceDetailsTab({ request, onUpdateRequest, isNew = false }: MaintenanceDetailsTabProps) {
   const getPriorityVariant = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -36,6 +37,11 @@ export function MaintenanceDetailsTab({ request }: MaintenanceDetailsTabProps) {
         return 'secondary';
     }
   };
+
+  // Don't show the details card if it's a new request
+  if (isNew) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
