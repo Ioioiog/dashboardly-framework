@@ -76,9 +76,9 @@ export default function MaintenanceList({
       case 'high':
         return 'destructive';
       case 'medium':
-        return 'secondary';
+        return 'warning';
       case 'low':
-        return 'outline';
+        return 'secondary';
       default:
         return 'secondary';
     }

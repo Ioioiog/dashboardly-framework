@@ -9,6 +9,34 @@ interface MaintenanceDetailsTabProps {
 }
 
 export function MaintenanceDetailsTab({ request }: MaintenanceDetailsTabProps) {
+  const getPriorityVariant = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'destructive';
+      case 'medium':
+        return 'warning';
+      case 'low':
+        return 'secondary';
+      default:
+        return 'secondary';
+    }
+  };
+
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'default';
+      case 'pending':
+        return 'secondary';
+      case 'in_progress':
+        return 'outline';
+      case 'cancelled':
+        return 'destructive';
+      default:
+        return 'secondary';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -21,15 +49,19 @@ export function MaintenanceDetailsTab({ request }: MaintenanceDetailsTabProps) {
                   <p className="text-sm text-muted-foreground">Title</p>
                   <p className="font-medium">{request.title}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Priority</p>
-                  <Badge variant={
-                    request.priority === 'high' ? 'destructive' : 
-                    request.priority === 'medium' ? 'warning' : 
-                    'secondary'
-                  }>
-                    {request.priority}
-                  </Badge>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Priority</p>
+                    <Badge variant={getPriorityVariant(request.priority)}>
+                      {request.priority}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Status</p>
+                    <Badge variant={getStatusVariant(request.status)}>
+                      {request.status}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </div>
