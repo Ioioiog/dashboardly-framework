@@ -25,21 +25,30 @@ export function MaintenanceDialog({
   const { currentUserId } = useAuthState();
   const { toast } = useToast();
 
-  console.log("MaintenanceDialog - Current user role:", userRole);
-  console.log("MaintenanceDialog - Current user ID:", currentUserId);
+  console.log("MaintenanceDialog - Initializing with:", {
+    userRole,
+    currentUserId,
+    requestId,
+    isOpen: open
+  });
 
-  const { data: properties } = useMaintenanceProperties(userRole || 'tenant', currentUserId || '');
-  const { existingRequest, createMutation, updateMutation, isLoading } = useMaintenanceRequest(requestId);
+  // Fetch properties only after role is confirmed
+  const { data: properties, isLoading: isLoadingProperties } = useMaintenanceProperties(
+    userRole || 'tenant',
+    currentUserId || ''
+  );
 
-  const { data: serviceProviders } = useQuery({
+  const { existingRequest, createMutation, updateMutation, isLoading: isLoadingRequest } = useMaintenanceRequest(requestId);
+
+  const { data: serviceProviders, isLoading: isLoadingProviders } = useQuery({
     queryKey: ["service-providers"],
     enabled: userRole === "landlord" && open,
     queryFn: async () => {
-      console.log("Fetching service providers");
+      console.log("Fetching service providers for landlord");
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          console.error("No active session");
+          console.error("No active session found when fetching service providers");
           return [];
         }
 
@@ -53,9 +62,10 @@ export function MaintenanceDialog({
           return [];
         }
 
+        console.log(`Found ${profiles?.length || 0} service providers`);
         return profiles?.filter(p => p.first_name || p.last_name) || [];
       } catch (error) {
-        console.error("Error in service providers query:", error);
+        console.error("Unexpected error in service providers query:", error);
         return [];
       }
     },
@@ -65,6 +75,7 @@ export function MaintenanceDialog({
     queryKey: ["maintenance-documents", requestId],
     enabled: !!requestId && open,
     queryFn: async () => {
+      console.log("Fetching documents for request:", requestId);
       try {
         const { data: files, error } = await supabase
           .storage
@@ -76,9 +87,10 @@ export function MaintenanceDialog({
           return [];
         }
 
+        console.log(`Found ${files?.length || 0} documents`);
         return files || [];
       } catch (error) {
-        console.error("Error in documents query:", error);
+        console.error("Unexpected error in documents query:", error);
         return [];
       }
     }
@@ -182,11 +194,27 @@ export function MaintenanceDialog({
     }
   };
 
-  // Wait for role to be fetched before rendering
-  if (!userRole) {
-    console.log("MaintenanceDialog - Waiting for user role to be fetched...");
+  // Enhanced role and auth check
+  if (!userRole || !currentUserId) {
+    console.log("MaintenanceDialog - Waiting for authentication:", {
+      userRole,
+      currentUserId,
+      isLoadingProperties
+    });
     return null;
   }
+
+  // Show loading state while fetching necessary data
+  if (isLoadingProperties || isLoadingRequest || (userRole === "landlord" && isLoadingProviders)) {
+    console.log("MaintenanceDialog - Loading required data...");
+    return null;
+  }
+
+  console.log("MaintenanceDialog - Rendering with:", {
+    hasProperties: !!properties?.length,
+    hasExistingRequest: !!existingRequest,
+    documentsCount: documents?.length || 0
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
