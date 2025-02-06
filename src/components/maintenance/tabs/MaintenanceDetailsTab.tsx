@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -20,13 +21,14 @@ interface MaintenanceDetailsTabProps {
 }
 
 type Priority = "low" | "medium" | "high";
+type RequestStatus = "pending" | "in_progress" | "completed" | "cancelled";
 
 interface FormValues {
   title: string;
   description: string;
   property_id: string;
   priority: Priority;
-  status: string;
+  status: RequestStatus;
   notes?: string;
   assigned_to?: string;
   service_provider_notes?: string;
@@ -53,7 +55,7 @@ export function MaintenanceDetailsTab({
       description: request?.description || "",
       property_id: request?.property_id || "",
       priority: (request?.priority as Priority) || "medium",
-      status: request?.status || "pending",
+      status: (request?.status as RequestStatus) || "pending",
       images: request?.images || [],
       tenant_id: request?.tenant_id || "",
       contact_phone: request?.contact_phone || "",
@@ -69,7 +71,7 @@ export function MaintenanceDetailsTab({
 
   const handleSubmit = (data: FormValues) => {
     console.log("Form submitted with data:", data);
-    onUpdateRequest(data);
+    onUpdateRequest(data as Partial<MaintenanceRequest>);
   };
 
   return (

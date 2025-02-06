@@ -9,6 +9,8 @@ import { MaintenanceChatTab } from "../tabs/MaintenanceChatTab";
 import { MaintenanceDocumentTab } from "../tabs/MaintenanceDocumentTab";
 import { MaintenanceDetailsTab } from "../tabs/MaintenanceDetailsTab";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useMaintenanceProperties } from "../hooks/useMaintenanceProperties";
+import { useAuthState } from "@/hooks/useAuthState";
 import { FileObject } from "@supabase/storage-js";
 
 interface MaintenanceRequestModalProps {
@@ -31,6 +33,8 @@ export const MaintenanceRequestModal = ({
   isNew = false
 }: MaintenanceRequestModalProps) => {
   const { userRole } = useUserRole();
+  const { currentUserId } = useAuthState();
+  const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -78,10 +82,12 @@ export const MaintenanceRequestModal = ({
               request={request}
               onUpdateRequest={onUpdateRequest}
               isNew={isNew}
+              properties={properties || []}
+              userRole={userRole || 'tenant'}
             />
           </TabsContent>
 
-          {!isNew && (
+          {!isNew && request && (
             <>
               <TabsContent value="progress">
                 <MaintenanceProgressTab 
@@ -114,7 +120,7 @@ export const MaintenanceRequestModal = ({
               </TabsContent>
 
               <TabsContent value="communication">
-                <MaintenanceChatTab requestId={request?.id || ''} />
+                <MaintenanceChatTab requestId={request.id || ''} />
               </TabsContent>
             </>
           )}

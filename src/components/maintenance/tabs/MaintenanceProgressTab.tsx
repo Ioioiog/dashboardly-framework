@@ -27,6 +27,10 @@ interface MaintenanceProgressTabProps {
 export function MaintenanceProgressTab({ request, onUpdateRequest }: MaintenanceProgressTabProps) {
   const { userRole } = useUserRole();
 
+  if (!request) {
+    return <div>No request data available</div>;
+  }
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
