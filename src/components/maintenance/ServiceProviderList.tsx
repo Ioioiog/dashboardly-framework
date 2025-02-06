@@ -62,15 +62,23 @@ export function ServiceProviderList() {
     queryKey: ["service-providers-details", filters],
     queryFn: async () => {
       console.log("Fetching service providers with details and filters:", filters);
-      console.log("Current user ID:", currentUserId);
       
       if (!currentUserId) {
         console.log("No user ID available");
         return [];
       }
 
-      // First, get all service provider profiles
-      const { data: spProfiles, error: spError } = await supabase
+      const { data: preferredProviders, error: preferredError } = await supabase
+        .from("landlord_service_providers")
+        .select("service_provider_id")
+        .eq('landlord_id', currentUserId);
+
+      if (preferredError) {
+        console.error("Error fetching preferred providers:", preferredError);
+        throw preferredError;
+      }
+
+      let query = supabase
         .from("service_provider_profiles")
         .select(`
           id,
@@ -82,7 +90,7 @@ export function ServiceProviderList() {
           service_area,
           rating,
           review_count,
-          profiles!inner (
+          profiles!fk_profiles (
             first_name,
             last_name
           ),
@@ -94,58 +102,37 @@ export function ServiceProviderList() {
           )
         `);
 
-      if (spError) {
-        console.error("Error fetching service provider profiles:", spError);
-        throw spError;
+      // Apply filters
+      if (filters.search) {
+        query = query.or(`business_name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
       }
 
-      console.log("Fetched service provider profiles:", spProfiles);
-
-      // Then get preferred providers
-      const { data: preferredProviders, error: preferredError } = await supabase
-        .from("landlord_service_providers")
-        .select("service_provider_id")
-        .eq('landlord_id', currentUserId);
-
-      if (preferredError) {
-        console.error("Error fetching preferred providers:", preferredError);
-        throw preferredError;
+      if (filters.rating !== "all") {
+        query = query.gte("rating", parseInt(filters.rating));
       }
 
-      console.log("Fetched preferred providers:", preferredProviders);
+      const { data: providers, error: providersError } = await query;
+
+      if (providersError) {
+        console.error("Error fetching providers:", providersError);
+        throw providersError;
+      }
 
       const preferredIds = new Set(preferredProviders?.map(p => p.service_provider_id) || []);
 
-      let filteredProviders = (spProfiles || [])
+      let filteredProviders = (providers || [])
         .map(provider => ({
           ...provider,
           profiles: Array.isArray(provider.profiles) ? provider.profiles : [provider.profiles],
           isPreferred: preferredIds.has(provider.id)
         }));
 
-      // Apply search filter
-      if (filters.search) {
-        filteredProviders = filteredProviders.filter(provider => 
-          provider.business_name?.toLowerCase().includes(filters.search.toLowerCase()) ||
-          provider.description?.toLowerCase().includes(filters.search.toLowerCase())
-        );
-      }
-
-      // Apply rating filter
-      if (filters.rating !== "all") {
-        filteredProviders = filteredProviders.filter(provider => 
-          (provider.rating || 0) >= parseInt(filters.rating)
-        );
-      }
-
-      // Apply category filter
+      // Filter by service category if selected
       if (filters.category !== "all") {
         filteredProviders = filteredProviders.filter(provider => 
           provider.services?.some(service => service.category === filters.category)
         );
       }
-
-      console.log("Final filtered providers:", filteredProviders);
 
       return filteredProviders.sort((a, b) => {
         if (a.isPreferred === b.isPreferred) {

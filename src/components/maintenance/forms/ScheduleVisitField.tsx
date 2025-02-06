@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
@@ -8,7 +8,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface ScheduleVisitFieldProps {
-  value?: Date | null;
+  value?: Date;
   onChange: (date: Date | undefined) => void;
   disabled?: boolean;
 }
@@ -20,6 +20,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
     console.log("Date selection initiated:", date);
     if (!date) return;
 
+    // First update the form with the selected date
     onChange(date);
     console.log("Date set successfully:", date);
     setIsOpen(false);
@@ -47,7 +48,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
-            selected={value || undefined}
+            selected={value}
             onSelect={handleSelect}
             disabled={(date) => date < new Date()}
             initialFocus

@@ -24,9 +24,6 @@ export default function Maintenance() {
   const [activeView, setActiveView] = useState<MaintenanceView>('dashboard');
   const { currentUserId } = useAuthState();
 
-  console.log("Current user role:", userRole);
-  const canAccessProvidersList = userRole === 'tenant' || userRole === 'landlord';
-
   const { data: maintenanceRequests, isLoading } = useQuery({
     queryKey: ["maintenance-requests", priority],
     queryFn: async () => {
@@ -108,13 +105,11 @@ export default function Maintenance() {
       id: 'dashboard' as MaintenanceView,
       label: 'Property Maintenance Dashboard',
       icon: List,
-      visible: true,
     },
     {
       id: 'providers' as MaintenanceView,
       label: 'Service Providers List',
       icon: Users,
-      visible: canAccessProvidersList,
     },
   ];
 
@@ -124,22 +119,20 @@ export default function Maintenance() {
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto p-8">
           <div className="w-full flex gap-4 bg-card p-4 rounded-lg shadow-sm overflow-x-auto mb-6">
-            {navigationItems
-              .filter(item => item.visible)
-              .map((item) => (
-                <Button
-                  key={item.id}
-                  variant={activeView === item.id ? 'default' : 'ghost'}
-                  className={cn(
-                    "flex-shrink-0 gap-2",
-                    activeView === item.id && "bg-primary text-primary-foreground"
-                  )}
-                  onClick={() => setActiveView(item.id)}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Button>
-              ))}
+            {navigationItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={activeView === item.id ? 'default' : 'ghost'}
+                className={cn(
+                  "flex-shrink-0 gap-2",
+                  activeView === item.id && "bg-primary text-primary-foreground"
+                )}
+                onClick={() => setActiveView(item.id)}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Button>
+            ))}
           </div>
 
           {activeView === 'dashboard' ? (

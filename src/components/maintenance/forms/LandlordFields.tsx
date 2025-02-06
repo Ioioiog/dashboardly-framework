@@ -25,15 +25,13 @@ interface LandlordFieldsProps {
   onFieldChange: (field: string, value: any) => void;
   isLoadingProviders: boolean;
   isReadOnly?: boolean;
-  userRole?: string;
 }
 
 export function LandlordFields({
   formData,
   onFieldChange,
   isLoadingProviders,
-  isReadOnly = false,
-  userRole
+  isReadOnly = false
 }: LandlordFieldsProps) {
   const { t } = useTranslation();
   const { currentUserId } = useAuthState();
@@ -115,10 +113,6 @@ export function LandlordFields({
            `${provider.first_name || ''} ${provider.last_name || ''}`.trim();
   };
 
-  const canAssignProvider = userRole === 'landlord';
-  console.log("Current user role:", userRole);
-  console.log("Can assign provider:", canAssignProvider);
-
   return (
     <div className="space-y-4">
       <div>
@@ -152,7 +146,7 @@ export function LandlordFields({
         <label className="text-sm font-medium mb-2 block">Service Provider</label>
         {isLoadingProviders || isLoadingAllProviders ? (
           <Skeleton className="h-10 w-full" />
-        ) : isReadOnly || !canAssignProvider ? (
+        ) : isReadOnly ? (
           <div className="p-3 bg-gray-50 rounded-md border">
             {getServiceProviderName(assignedProvider || null)}
           </div>
