@@ -78,7 +78,6 @@ export function MaintenanceDialog({
       const updatedRequest = {
         ...existingRequest,
         ...updates,
-        approval_status: updates.approval_status as 'pending' | 'approved' | 'rejected' | null
       };
 
       console.log("Validating updated request:", updatedRequest);
