@@ -10,41 +10,64 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { ImageUpload } from "../forms/ImageUpload";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
-import { useMaintenanceProperties } from "../hooks/useMaintenanceProperties";
-import { useUserRole } from "@/hooks/use-user-role";
-import { useAuthState } from "@/hooks/useAuthState";
 
 interface MaintenanceDetailsTabProps {
   request?: MaintenanceRequest;
   onUpdateRequest: (request: Partial<MaintenanceRequest>) => void;
   isNew?: boolean;
+  properties: Array<{ id: string; name: string }>;
+  userRole: string;
+}
+
+type Priority = "low" | "medium" | "high";
+
+interface FormValues {
+  title: string;
+  description: string;
+  property_id: string;
+  priority: Priority;
+  status: string;
+  notes?: string;
+  assigned_to?: string;
+  service_provider_notes?: string;
+  images: string[];
+  tenant_id: string;
+  contact_phone?: string;
+  preferred_times?: string[];
+  is_emergency?: boolean;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  emergency_instructions?: string;
 }
 
 export function MaintenanceDetailsTab({
   request,
   onUpdateRequest,
-  isNew = false
+  isNew = false,
+  properties,
+  userRole
 }: MaintenanceDetailsTabProps) {
-  const { userRole } = useUserRole();
-  const { currentUserId } = useAuthState();
-  const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
-
-  const form = useForm<MaintenanceRequest>({
-    defaultValues: request || {
-      title: "",
-      description: "",
-      property_id: "",
-      priority: "medium",
-      status: "pending",
-      images: [],
-      tenant_id: currentUserId,
-      is_emergency: false
+  const form = useForm<FormValues>({
+    defaultValues: {
+      title: request?.title || "",
+      description: request?.description || "",
+      property_id: request?.property_id || "",
+      priority: (request?.priority as Priority) || "medium",
+      status: request?.status || "pending",
+      images: request?.images || [],
+      tenant_id: request?.tenant_id || "",
+      contact_phone: request?.contact_phone || "",
+      preferred_times: request?.preferred_times || [],
+      is_emergency: request?.is_emergency || false,
+      emergency_contact_name: request?.emergency_contact_name || "",
+      emergency_contact_phone: request?.emergency_contact_phone || "",
+      emergency_instructions: request?.emergency_instructions || ""
     }
   });
 
   const isEmergency = form.watch("is_emergency");
 
-  const handleSubmit = (data: MaintenanceRequest) => {
+  const handleSubmit = (data: FormValues) => {
     console.log("Form submitted with data:", data);
     onUpdateRequest(data);
   };
@@ -79,7 +102,7 @@ export function MaintenanceDetailsTab({
                 <SelectValue placeholder="Select property" />
               </SelectTrigger>
               <SelectContent>
-                {properties?.map((property) => (
+                {properties.map((property) => (
                   <SelectItem key={property.id} value={property.id}>
                     {property.name}
                   </SelectItem>
@@ -121,7 +144,7 @@ export function MaintenanceDetailsTab({
             </Label>
             <Select
               value={form.watch("priority")}
-              onValueChange={(value) => form.setValue("priority", value)}
+              onValueChange={(value: Priority) => form.setValue("priority", value)}
               disabled={userRole === "landlord"}
             >
               <SelectTrigger>
@@ -136,8 +159,9 @@ export function MaintenanceDetailsTab({
           </div>
 
           <div>
-            <Label className="flex items-center space-x-2">
+            <Label htmlFor="is_emergency" className="flex items-center space-x-2">
               <Checkbox
+                id="is_emergency"
                 checked={isEmergency}
                 onCheckedChange={(checked) => 
                   form.setValue("is_emergency", checked as boolean)
@@ -226,7 +250,13 @@ export function MaintenanceDetailsTab({
             </Label>
             <ImageUpload
               images={form.watch("images")}
-              onChange={(images) => form.setValue("images", images)}
+              onChange={(images) => {
+                // Convert File objects to strings (URLs) before setting
+                const imageUrls = images.map(image => 
+                  typeof image === 'string' ? image : URL.createObjectURL(image)
+                );
+                form.setValue("images", imageUrls);
+              }}
               disabled={userRole !== "tenant"}
             />
           </div>
