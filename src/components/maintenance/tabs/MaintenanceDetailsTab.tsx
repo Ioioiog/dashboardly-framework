@@ -1,7 +1,18 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useForm } from "react-hook-form";
+import { Form } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import { ImageUpload } from "../forms/ImageUpload";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
-import { format } from "date-fns";
+import { useMaintenanceProperties } from "../hooks/useMaintenanceProperties";
+import { useUserRole } from "@/hooks/use-user-role";
+import { useAuthState } from "@/hooks/useAuthState";
 
 interface MaintenanceDetailsTabProps {
   request?: MaintenanceRequest;
@@ -9,145 +20,224 @@ interface MaintenanceDetailsTabProps {
   isNew?: boolean;
 }
 
-export function MaintenanceDetailsTab({ request, onUpdateRequest, isNew = false }: MaintenanceDetailsTabProps) {
-  const getPriorityVariant = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'destructive';
-      case 'medium':
-        return 'warning';
-      case 'low':
-        return 'secondary';
-      default:
-        return 'secondary';
-    }
-  };
+export function MaintenanceDetailsTab({
+  request,
+  onUpdateRequest,
+  isNew = false
+}: MaintenanceDetailsTabProps) {
+  const { userRole } = useUserRole();
+  const { currentUserId } = useAuthState();
+  const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
 
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'default';
-      case 'pending':
-        return 'secondary';
-      case 'in_progress':
-        return 'outline';
-      case 'cancelled':
-        return 'destructive';
-      default:
-        return 'secondary';
+  const form = useForm<MaintenanceRequest>({
+    defaultValues: request || {
+      title: "",
+      description: "",
+      property_id: "",
+      priority: "medium",
+      status: "pending",
+      images: [],
+      tenant_id: currentUserId,
+      is_emergency: false
     }
-  };
+  });
 
-  // Don't show the details card if it's a new request or if request is undefined
-  if (isNew || !request) {
-    return null;
-  }
+  const isEmergency = form.watch("is_emergency");
+
+  const handleSubmit = (data: MaintenanceRequest) => {
+    console.log("Form submitted with data:", data);
+    onUpdateRequest(data);
+  };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <h3 className="font-semibold text-lg">Issue Details</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Title</p>
-                  <p className="font-medium">{request.title}</p>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Priority</p>
-                    <Badge variant={getPriorityVariant(request.priority || 'low')}>
-                      {request.priority || 'low'}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <Badge variant={getStatusVariant(request.status)}>
-                      {request.status}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Description</p>
-              <p className="text-sm">{request.description}</p>
-            </div>
-
-            {request.contact_phone && (
-              <div>
-                <p className="text-sm text-muted-foreground">Contact Phone</p>
-                <p className="font-medium">{request.contact_phone}</p>
-              </div>
-            )}
-
-            {request.preferred_times && request.preferred_times.length > 0 && (
-              <div>
-                <p className="text-sm text-muted-foreground">Preferred Times</p>
-                <div className="flex gap-2">
-                  {request.preferred_times.map((time) => (
-                    <Badge key={time} variant="outline">
-                      {time}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Created</p>
-                <p className="font-medium">
-                  {format(new Date(request.created_at), 'PPp')}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Last Updated</p>
-                <p className="font-medium">
-                  {format(new Date(request.updated_at), 'PPp')}
-                </p>
-              </div>
-            </div>
-
-            {request.scheduled_date && (
-              <div>
-                <p className="text-sm text-muted-foreground">Scheduled Date</p>
-                <p className="font-medium">
-                  {format(new Date(request.scheduled_date), 'PPp')}
-                </p>
-              </div>
-            )}
-
-            {request.completion_date && (
-              <div>
-                <p className="text-sm text-muted-foreground">Completion Date</p>
-                <p className="font-medium">
-                  {format(new Date(request.completion_date), 'PPp')}
-                </p>
-              </div>
-            )}
-
-            {request.rating !== null && request.rating !== undefined && (
-              <div className="space-y-2">
-                <div>
-                  <p className="text-sm text-muted-foreground">Rating</p>
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium">{request.rating}/5</p>
-                    {request.rating_comment && (
-                      <p className="text-sm text-muted-foreground">
-                        - "{request.rating_comment}"
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="title" className="text-base font-semibold">
+              Issue Title<span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="title"
+              placeholder="Brief description of the issue"
+              {...form.register("title")}
+              className="mt-1"
+              disabled={userRole === "landlord"}
+            />
           </div>
-        </CardContent>
-      </Card>
-    </div>
+
+          <div>
+            <Label htmlFor="property_id" className="text-base font-semibold">
+              Property Address<span className="text-red-500">*</span>
+            </Label>
+            <Select
+              value={form.watch("property_id")}
+              onValueChange={(value) => form.setValue("property_id", value)}
+              disabled={userRole === "landlord" || !isNew}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select property" />
+              </SelectTrigger>
+              <SelectContent>
+                {properties?.map((property) => (
+                  <SelectItem key={property.id} value={property.id}>
+                    {property.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="description" className="text-base font-semibold">
+              Detailed Description<span className="text-red-500">*</span>
+            </Label>
+            <Textarea
+              id="description"
+              placeholder="Please provide as much detail as possible about the issue"
+              {...form.register("description")}
+              className="mt-1 min-h-[120px]"
+              disabled={userRole === "landlord"}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="contact_phone" className="text-base font-semibold">
+              Contact Phone<span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="contact_phone"
+              type="tel"
+              placeholder="Your contact phone number"
+              {...form.register("contact_phone")}
+              className="mt-1"
+              disabled={userRole === "landlord"}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="priority" className="text-base font-semibold">
+              Priority Level<span className="text-red-500">*</span>
+            </Label>
+            <Select
+              value={form.watch("priority")}
+              onValueChange={(value) => form.setValue("priority", value)}
+              disabled={userRole === "landlord"}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Low - Can be addressed anytime</SelectItem>
+                <SelectItem value="medium">Medium - Should be addressed within 2-3 days</SelectItem>
+                <SelectItem value="high">High - Requires immediate attention</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label className="flex items-center space-x-2">
+              <Checkbox
+                checked={isEmergency}
+                onCheckedChange={(checked) => 
+                  form.setValue("is_emergency", checked as boolean)
+                }
+                disabled={userRole === "landlord"}
+              />
+              <span className="text-base font-semibold">Mark as Emergency</span>
+            </Label>
+          </div>
+
+          {isEmergency && (
+            <div className="space-y-4 border-l-2 border-red-500 pl-4">
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  Emergency requests will be prioritized and handled as soon as possible.
+                </AlertDescription>
+              </Alert>
+              
+              <div>
+                <Label>Emergency Contact Name</Label>
+                <Input
+                  {...form.register("emergency_contact_name")}
+                  className="mt-1"
+                  disabled={userRole === "landlord"}
+                />
+              </div>
+
+              <div>
+                <Label>Emergency Contact Phone</Label>
+                <Input
+                  type="tel"
+                  {...form.register("emergency_contact_phone")}
+                  className="mt-1"
+                  disabled={userRole === "landlord"}
+                />
+              </div>
+
+              <div>
+                <Label>Emergency Instructions</Label>
+                <Textarea
+                  {...form.register("emergency_instructions")}
+                  placeholder="Any specific instructions for emergency handling..."
+                  className="mt-1"
+                  disabled={userRole === "landlord"}
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <Label className="text-base font-semibold">
+              Preferred Service Times
+            </Label>
+            <div className="grid grid-cols-3 gap-4 mt-2">
+              <label className="flex items-center space-x-2">
+                <Checkbox
+                  {...form.register("preferred_times")}
+                  value="morning"
+                  disabled={userRole === "landlord"}
+                />
+                <span>Morning</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <Checkbox
+                  {...form.register("preferred_times")}
+                  value="afternoon"
+                  disabled={userRole === "landlord"}
+                />
+                <span>Afternoon</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <Checkbox
+                  {...form.register("preferred_times")}
+                  value="evening"
+                  disabled={userRole === "landlord"}
+                />
+                <span>Evening</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-base font-semibold">
+              Upload Images <span className="text-gray-500 text-sm">(Optional - Max 5MB per image)</span>
+            </Label>
+            <ImageUpload
+              images={form.watch("images")}
+              onChange={(images) => form.setValue("images", images)}
+              disabled={userRole !== "tenant"}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-4 border-t">
+          <Button type="submit">
+            {isNew ? "Create Request" : "Update Request"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
