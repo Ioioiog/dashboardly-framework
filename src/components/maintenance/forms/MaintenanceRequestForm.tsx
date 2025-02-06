@@ -6,7 +6,6 @@ import { ImageUpload } from "./ImageUpload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
@@ -25,7 +24,7 @@ export interface MaintenanceFormValues {
   notes?: string;
   assigned_to?: string;
   service_provider_notes?: string;
-  images: (string | File)[];
+  images: string[];
   tenant_id: string;
   contact_phone?: string;
   preferred_times?: string[];
@@ -53,23 +52,33 @@ export function MaintenanceRequestForm({
   isSubmitting
 }: MaintenanceRequestFormProps) {
   const form = useForm<MaintenanceFormValues>({
-    defaultValues: existingRequest || {
-      title: "",
-      description: "",
-      property_id: "",
-      priority: "medium",
-      status: "pending",
-      images: [],
-      tenant_id: "",
-      contact_phone: "",
-      preferred_times: [],
-      is_emergency: false
+    defaultValues: {
+      ...existingRequest,
+      title: existingRequest?.title || "",
+      description: existingRequest?.description || "",
+      property_id: existingRequest?.property_id || "",
+      priority: existingRequest?.priority || "medium",
+      status: existingRequest?.status || "pending",
+      images: existingRequest?.images || [],
+      tenant_id: existingRequest?.tenant_id || "",
+      contact_phone: existingRequest?.contact_phone || "",
+      preferred_times: existingRequest?.preferred_times || [],
+      is_emergency: existingRequest?.is_emergency || false
     }
   });
 
   const isEmergency = form.watch("is_emergency");
 
   const handleSubmit = (data: MaintenanceFormValues) => {
+    // Ensure description is not empty
+    if (!data.description?.trim()) {
+      form.setError("description", {
+        type: "required",
+        message: "Description is required"
+      });
+      return;
+    }
+    
     console.log("Form submitted with data:", data);
     onSubmit(data);
   };
@@ -85,9 +94,12 @@ export function MaintenanceRequestForm({
             <Input
               id="title"
               placeholder="Brief description of the issue"
-              {...form.register("title")}
+              {...form.register("title", { required: "Title is required" })}
               className="mt-1"
             />
+            {form.formState.errors.title && (
+              <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>
+            )}
           </div>
 
           <div>
@@ -96,7 +108,7 @@ export function MaintenanceRequestForm({
             </Label>
             <select
               id="property_id"
-              {...form.register("property_id")}
+              {...form.register("property_id", { required: "Property is required" })}
               className="w-full mt-1 p-2 border rounded-md"
             >
               <option value="">Select property</option>
@@ -106,6 +118,9 @@ export function MaintenanceRequestForm({
                 </option>
               ))}
             </select>
+            {form.formState.errors.property_id && (
+              <p className="text-red-500 text-sm mt-1">{form.formState.errors.property_id.message}</p>
+            )}
           </div>
 
           <div>
@@ -115,9 +130,12 @@ export function MaintenanceRequestForm({
             <Textarea
               id="description"
               placeholder="Please provide as much detail as possible about the issue"
-              {...form.register("description")}
+              {...form.register("description", { required: "Description is required" })}
               className="mt-1 min-h-[120px]"
             />
+            {form.formState.errors.description && (
+              <p className="text-red-500 text-sm mt-1">{form.formState.errors.description.message}</p>
+            )}
           </div>
 
           <div>
@@ -229,7 +247,7 @@ export function MaintenanceRequestForm({
             </Label>
             <ImageUpload
               images={form.watch("images")}
-              onChange={(images) => form.setValue("images", images)}
+              onChange={(images: string[]) => form.setValue("images", images)}
               disabled={userRole !== "tenant"}
             />
           </div>
