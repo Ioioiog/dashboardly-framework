@@ -1,8 +1,9 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ImagePlus, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ImagePreviewDialog } from "./ImagePreviewDialog";
 
 interface ImageUploadProps {
   images: string[];
@@ -14,6 +15,8 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
   const { toast } = useToast();
   const maxImages = 5;
   const maxSizeInMB = 5;
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const uploadImage = useCallback(async (file: File) => {
     try {
@@ -96,6 +99,23 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     }
   };
 
+  const handleImageClick = (image: string, index: number) => {
+    setSelectedImage(image);
+    setCurrentImageIndex(index);
+  };
+
+  const handlePreviousImage = () => {
+    const newIndex = (currentImageIndex - 1 + images.length) % images.length;
+    setCurrentImageIndex(newIndex);
+    setSelectedImage(images[newIndex]);
+  };
+
+  const handleNextImage = () => {
+    const newIndex = (currentImageIndex + 1) % images.length;
+    setCurrentImageIndex(newIndex);
+    setSelectedImage(images[newIndex]);
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -104,8 +124,9 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
             <img
               src={image}
               alt={`Uploaded image ${index + 1}`}
-              className="w-full h-32 object-cover rounded-lg"
+              className="w-full h-32 object-cover rounded-lg cursor-pointer"
               loading="lazy"
+              onClick={() => handleImageClick(image, index)}
             />
             {!disabled && (
               <Button
@@ -139,6 +160,15 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
           </div>
         )}
       </div>
+
+      <ImagePreviewDialog
+        selectedImage={selectedImage}
+        onClose={() => setSelectedImage(null)}
+        onPrevious={handlePreviousImage}
+        onNext={handleNextImage}
+        totalImages={images.length}
+        currentIndex={currentImageIndex}
+      />
     </div>
   );
 }
