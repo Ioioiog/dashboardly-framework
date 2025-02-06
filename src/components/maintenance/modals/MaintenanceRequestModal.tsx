@@ -89,7 +89,7 @@ export default function MaintenanceRequestModal({
             <MaintenanceCostsTab
               request={request}
               onUpdateRequest={onUpdateRequest}
-              userRole={userRole}
+              providedRole={userRole}
               isReadOnly={!canEditCosts}
             />
           </TabsContent>
