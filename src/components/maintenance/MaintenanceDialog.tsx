@@ -1,15 +1,16 @@
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useMaintenanceRequest } from "./hooks/useMaintenanceRequest";
 import { useMaintenanceProperties } from "./hooks/useMaintenanceProperties";
+import { useMaintenanceServiceProviders } from "./hooks/useMaintenanceServiceProviders";
+import { useMaintenanceDocuments } from "./hooks/useMaintenanceDocuments";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useAuthState } from "@/hooks/useAuthState";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateMaintenanceRequest } from "./utils/validation";
 import MaintenanceRequestModal from "./modals/MaintenanceRequestModal";
+import { MaintenanceDialogLoading } from "./components/MaintenanceDialogLoading";
 import type { MaintenanceRequest } from "./hooks/useMaintenanceRequest";
-import { Loader2 } from "lucide-react";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -33,69 +34,18 @@ export function MaintenanceDialog({
     isOpen: open
   });
 
-  // Fetch properties only after role is confirmed
   const { data: properties, isLoading: isLoadingProperties } = useMaintenanceProperties(
     userRole || 'tenant',
     currentUserId || ''
   );
 
   const { existingRequest, createMutation, updateMutation, isLoading: isLoadingRequest } = useMaintenanceRequest(requestId);
+  
+  const { data: serviceProviders, isLoading: isLoadingProviders } = useMaintenanceServiceProviders(
+    userRole === "landlord" && open
+  );
 
-  const { data: serviceProviders, isLoading: isLoadingProviders } = useQuery({
-    queryKey: ["service-providers"],
-    enabled: userRole === "landlord" && open,
-    queryFn: async () => {
-      console.log("Fetching service providers for landlord");
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          console.error("No active session found when fetching service providers");
-          return [];
-        }
-
-        const { data: profiles, error: profilesError } = await supabase
-          .from("profiles")
-          .select("id, first_name, last_name")
-          .eq("role", "service_provider");
-
-        if (profilesError) {
-          console.error("Error fetching service providers:", profilesError);
-          return [];
-        }
-
-        console.log(`Found ${profiles?.length || 0} service providers`);
-        return profiles?.filter(p => p.first_name || p.last_name) || [];
-      } catch (error) {
-        console.error("Unexpected error in service providers query:", error);
-        return [];
-      }
-    },
-  });
-
-  const { data: documents, isLoading: isLoadingDocuments } = useQuery({
-    queryKey: ["maintenance-documents", requestId],
-    enabled: !!requestId && open,
-    queryFn: async () => {
-      console.log("Fetching documents for request:", requestId);
-      try {
-        const { data: files, error } = await supabase
-          .storage
-          .from('maintenance-documents')
-          .list(requestId || '');
-
-        if (error) {
-          console.error("Error fetching documents:", error);
-          return [];
-        }
-
-        console.log(`Found ${files?.length || 0} documents`);
-        return files || [];
-      } catch (error) {
-        console.error("Unexpected error in documents query:", error);
-        return [];
-      }
-    }
-  });
+  const { data: documents, isLoading: isLoadingDocuments } = useMaintenanceDocuments(requestId, open);
 
   const handleCreateRequest = async (data: Partial<MaintenanceRequest>) => {
     if (!currentUserId) {
@@ -172,14 +122,6 @@ export function MaintenanceDialog({
         }
       }
 
-      if (updates.is_emergency && !existingRequest.is_emergency) {
-        toast({
-          title: "Emergency Request",
-          description: "This request has been marked as emergency and will be prioritized",
-          variant: "destructive"
-        });
-      }
-
       toast({
         title: "Success",
         description: "Maintenance request updated successfully",
@@ -195,32 +137,12 @@ export function MaintenanceDialog({
   };
 
   if (!userRole || !currentUserId) {
-    console.log("MaintenanceDialog - Waiting for authentication:", {
-      userRole,
-      currentUserId,
-      isLoadingProperties
-    });
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <MaintenanceDialogLoading />;
   }
 
   if (isLoadingProperties || isLoadingRequest || (userRole === "landlord" && isLoadingProviders)) {
-    console.log("MaintenanceDialog - Loading required data...");
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <MaintenanceDialogLoading />;
   }
-
-  console.log("MaintenanceDialog - Rendering with:", {
-    hasProperties: !!properties?.length,
-    hasExistingRequest: !!existingRequest,
-    documentsCount: documents?.length || 0
-  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
