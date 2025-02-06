@@ -2,12 +2,8 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { useUserRole } from "@/hooks/use-user-role";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { FileUp, Eye } from "lucide-react";
 
 interface MaintenanceCostsTabProps {
   request: MaintenanceRequest;
@@ -15,75 +11,8 @@ interface MaintenanceCostsTabProps {
 }
 
 export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCostsTabProps) {
-  const { toast } = useToast();
   const { userRole } = useUserRole();
   const isServiceProvider = userRole === 'service_provider';
-
-  const handleInvoiceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "Error",
-        description: "File size must be less than 5MB",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      console.log("Starting invoice upload for request:", request.id);
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${request.id}/${crypto.randomUUID()}.${fileExt}`;
-
-      const { data, error: uploadError } = await supabase.storage
-        .from('invoice-documents')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      console.log("File uploaded successfully:", filePath);
-
-      onUpdateRequest({ 
-        invoice_document_path: filePath,
-        payment_status: 'invoiced'
-      });
-
-      toast({
-        title: "Success",
-        description: "Invoice uploaded successfully",
-      });
-    } catch (error) {
-      console.error('Error uploading invoice:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload invoice",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleViewInvoice = () => {
-    if (!request.invoice_document_path) return;
-    
-    try {
-      console.log("Getting public URL for invoice:", request.invoice_document_path);
-      const { data: { publicUrl } } = supabase.storage
-        .from('invoice-documents')
-        .getPublicUrl(request.invoice_document_path);
-
-      console.log("Generated public URL:", publicUrl);
-      window.open(publicUrl, '_blank');
-    } catch (error) {
-      console.error("Error getting invoice URL:", error);
-      toast({
-        title: "Error",
-        description: "Failed to retrieve invoice",
-        variant: "destructive"
-      });
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -110,44 +39,12 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
       </div>
 
       <div className="space-y-2">
-        <Label>Upload Invoice</Label>
-        <div className="space-y-2">
-          <Input
-            type="file"
-            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            onChange={handleInvoiceUpload}
-            disabled={!isServiceProvider}
-            className="cursor-pointer"
-          />
-          {request.invoice_document_path ? (
-            <div className="flex items-center gap-2">
-              <p className="text-sm text-green-600">Invoice uploaded</p>
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={handleViewInvoice}
-              >
-                <Eye className="h-4 w-4" />
-                View Invoice
-              </Button>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500 flex items-center gap-2">
-              <FileUp className="h-4 w-4" />
-              No invoice uploaded yet
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Invoice Notes</Label>
+        <Label>Cost Notes</Label>
         <Textarea
           value={request.cost_estimate_notes || ''}
           onChange={(e) => onUpdateRequest({ cost_estimate_notes: e.target.value })}
           className="bg-white min-h-[100px]"
-          placeholder="Add any notes about costs or invoice details here..."
+          placeholder="Add any notes about costs here..."
           disabled={!isServiceProvider}
         />
       </div>
