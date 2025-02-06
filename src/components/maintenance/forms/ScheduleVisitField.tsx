@@ -31,7 +31,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
     console.log("Date selection initiated:", date);
     if (!date) return;
     
-    // If there's already a time selected, preserve it when setting the new date
+    // Preserve the existing time when setting new date
     if (selectedTime) {
       const [hours, minutes] = selectedTime.split(':');
       const newDate = new Date(date);
@@ -40,14 +40,12 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
     } else {
       setLocalDate(date);
     }
-    setIsOpen(false);
   }, [selectedTime]);
 
   const handleTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = e.target.value;
     setSelectedTime(newTime);
     
-    // If we have a localDate, update it with the new time
     if (localDate && newTime) {
       const [hours, minutes] = newTime.split(':');
       const updatedDate = new Date(localDate);
@@ -69,6 +67,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
     if (!isNaN(updatedDate.getTime())) {
       console.log("Scheduling visit for:", updatedDate);
       onChange(updatedDate);
+      setIsOpen(false);
     }
   };
 
@@ -83,7 +82,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
                 variant="outline"
                 type="button"
                 className={cn(
-                  "w-[240px] justify-start text-left font-normal cursor-pointer",
+                  "w-[240px] justify-start text-left font-normal hover:cursor-pointer",
                   !localDate && "text-muted-foreground",
                   disabled && "opacity-50 cursor-not-allowed"
                 )}
@@ -100,6 +99,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
                 onSelect={handleSelect}
                 disabled={(date) => date < new Date()}
                 initialFocus
+                className="hover:cursor-pointer"
               />
             </PopoverContent>
           </Popover>
@@ -110,7 +110,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
               type="time"
               value={selectedTime}
               onChange={handleTimeChange}
-              className="w-[120px] cursor-pointer"
+              className="w-[120px] hover:cursor-pointer"
               disabled={disabled}
             />
           </div>
@@ -119,7 +119,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
         <Button 
           onClick={handleScheduleClick}
           disabled={!localDate || !selectedTime || disabled}
-          className="w-full cursor-pointer"
+          className="w-full hover:cursor-pointer"
           variant="secondary"
         >
           <Check className="mr-2 h-4 w-4" />
