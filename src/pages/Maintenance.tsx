@@ -104,6 +104,13 @@ export default function Maintenance() {
     setIsDialogOpen(true);
   };
 
+  const handleDialogChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      setSelectedRequestId(undefined);
+    }
+  };
+
   const navigationItems = [
     {
       id: 'dashboard' as MaintenanceView,
@@ -170,7 +177,7 @@ export default function Maintenance() {
 
               <MaintenanceDialog
                 open={isDialogOpen}
-                onOpenChange={setIsDialogOpen}
+                onOpenChange={handleDialogChange}
                 requestId={selectedRequestId}
               />
             </>
