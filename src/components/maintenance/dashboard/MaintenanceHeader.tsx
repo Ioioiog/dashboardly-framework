@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MaintenanceDialog } from "../MaintenanceDialog";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface MaintenanceHeaderProps {
   priority: string;
@@ -21,8 +22,12 @@ export function MaintenanceHeader({
 }: MaintenanceHeaderProps) {
   const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const { userRole } = useUserRole();
 
   console.log("MaintenanceHeader rendered with priority:", priority);
+  console.log("Current user role:", userRole);
+
+  const canCreateRequest = userRole === 'tenant' || userRole === 'landlord';
 
   return (
     <div className="space-y-6">
@@ -35,13 +40,15 @@ export function MaintenanceHeader({
             {t("maintenance.createAndTrack")}
           </p>
         </div>
-        <Button 
-          onClick={() => setIsDialogOpen(true)}
-          className="bg-primary hover:bg-primary/90"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create New Request
-        </Button>
+        {canCreateRequest && (
+          <Button 
+            onClick={() => setIsDialogOpen(true)}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create New Request
+          </Button>
+        )}
       </div>
 
       <div className="flex gap-4">
