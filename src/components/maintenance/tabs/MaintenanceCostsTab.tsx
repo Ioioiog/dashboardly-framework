@@ -12,9 +12,9 @@ interface MaintenanceCostsTabProps {
   isReadOnly?: boolean;
 }
 
-export function MaintenanceCostsTab({ request, onUpdateRequest, userRole, isReadOnly }: MaintenanceCostsTabProps) {
+export function MaintenanceCostsTab({ request, onUpdateRequest, userRole: providedRole, isReadOnly }: MaintenanceCostsTabProps) {
   const { userRole } = useUserRole();
-  const isServiceProvider = userRole === 'service_provider';
+  const isServiceProvider = (providedRole || userRole) === 'service_provider';
 
   return (
     <div className="space-y-4">
