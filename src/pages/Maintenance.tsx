@@ -4,23 +4,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { MaintenanceDialog } from "@/components/maintenance/MaintenanceDialog";
 import { MaintenanceHeader } from "@/components/maintenance/sections/MaintenanceHeader";
-import { MaintenanceCard } from "@/components/maintenance/dashboard/MaintenanceCard";
 import { MaintenanceSection } from "@/components/maintenance/dashboard/MaintenanceSection";
-import { useUserRole } from "@/hooks/use-user-role";
 import { ServiceProviderList } from "@/components/maintenance/ServiceProviderList";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { List, Users } from "lucide-react";
 import { useAuthState } from "@/hooks/useAuthState";
+import { useUserRole } from "@/hooks/use-user-role";
 
 type MaintenanceView = 'dashboard' | 'providers';
 
 export default function Maintenance() {
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [selectedRequestId, setSelectedRequestId] = React.useState<string | undefined>();
-  const [priority, setPriority] = React.useState<"all" | "low" | "medium" | "high">("all");
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedRequestId, setSelectedRequestId] = useState<string | undefined>();
+  const [priority, setPriority] = useState<"all" | "low" | "medium" | "high">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const { userRole } = useUserRole();
   const [activeView, setActiveView] = useState<MaintenanceView>('dashboard');
   const { currentUserId } = useAuthState();
@@ -57,7 +55,6 @@ export default function Maintenance() {
         console.log('Adding service provider filter:', currentUserId);
         query = query.eq('assigned_to', currentUserId);
       }
-      // For landlords, the RLS policy will handle filtering
 
       const { data, error } = await query;
       
@@ -173,10 +170,7 @@ export default function Maintenance() {
 
               <MaintenanceDialog
                 open={isDialogOpen}
-                onOpenChange={(open) => {
-                  setIsDialogOpen(open);
-                  if (!open) setSelectedRequestId(undefined);
-                }}
+                onOpenChange={setIsDialogOpen}
                 requestId={selectedRequestId}
               />
             </>
