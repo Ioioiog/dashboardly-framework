@@ -77,7 +77,7 @@ export function MaintenanceDialog({
     try {
       const updatedRequest = {
         ...existingRequest,
-        ...updates,
+        ...updates
       };
 
       console.log("Validating updated request:", updatedRequest);

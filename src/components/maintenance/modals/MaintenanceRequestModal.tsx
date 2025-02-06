@@ -77,7 +77,7 @@ export const MaintenanceRequestModal = ({
           <TabsContent value="costs">
             <MaintenanceCostsTab
               request={request}
-              onUpdate={onUpdateRequest}
+              onUpdateRequest={onUpdateRequest}
             />
           </TabsContent>
 

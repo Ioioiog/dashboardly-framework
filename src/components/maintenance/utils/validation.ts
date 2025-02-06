@@ -18,11 +18,7 @@ export const MaintenanceRequestSchema = z.object({
   payment_amount: z.number().optional(),
   payment_status: z.string().nullable().optional(),
   read_by_landlord: z.boolean().optional(),
-  read_by_tenant: z.boolean().optional(),
-  cost_estimate: z.number().nullable().optional(),
-  cost_estimate_notes: z.string().nullable().optional(),
-  approval_status: z.enum(["pending", "approved", "rejected"]).nullable().optional(),
-  approval_notes: z.string().nullable().optional()
+  read_by_tenant: z.boolean().optional()
 });
 
 export type MaintenanceRequestFormData = z.infer<typeof MaintenanceRequestSchema>;

@@ -1,89 +1,156 @@
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calculator } from "lucide-react";
-import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
-import { Card } from "@/components/ui/card";
-import { useCurrency } from "@/hooks/useCurrency";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
+import { useUserRole } from "@/hooks/use-user-role";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { FileUp, Eye } from "lucide-react";
 
 interface MaintenanceCostsTabProps {
   request: MaintenanceRequest;
-  onUpdate: (data: Partial<MaintenanceRequest>) => void;
+  onUpdateRequest: (updates: Partial<MaintenanceRequest>) => void;
 }
 
-export function MaintenanceCostsTab({ request, onUpdate }: MaintenanceCostsTabProps) {
-  const { formatAmount } = useCurrency();
+export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCostsTabProps) {
+  const { toast } = useToast();
+  const { userRole } = useUserRole();
+  const isServiceProvider = userRole === 'service_provider';
+
+  const handleInvoiceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "File size must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      console.log("Starting invoice upload for request:", request.id);
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${request.id}/${crypto.randomUUID()}.${fileExt}`;
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('invoice-documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      console.log("File uploaded successfully:", filePath);
+
+      onUpdateRequest({ 
+        invoice_document_path: filePath,
+        payment_status: 'invoiced'
+      });
+
+      toast({
+        title: "Success",
+        description: "Invoice uploaded successfully",
+      });
+    } catch (error) {
+      console.error('Error uploading invoice:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload invoice",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewInvoice = () => {
+    if (!request.invoice_document_path) return;
+    
+    try {
+      console.log("Getting public URL for invoice:", request.invoice_document_path);
+      const { data: { publicUrl } } = supabase.storage
+        .from('invoice-documents')
+        .getPublicUrl(request.invoice_document_path);
+
+      console.log("Generated public URL:", publicUrl);
+      window.open(publicUrl, '_blank');
+    } catch (error) {
+      console.error("Error getting invoice URL:", error);
+      toast({
+        title: "Error",
+        description: "Failed to retrieve invoice",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Calculator className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold">Cost Breakdown</h3>
-        </div>
-        
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="cost_estimate">Initial Cost Estimate</Label>
-            <div className="flex gap-2 items-center">
-              <Input
-                id="cost_estimate"
-                type="number"
-                value={request.cost_estimate || ""}
-                onChange={(e) =>
-                  onUpdate({ cost_estimate: parseFloat(e.target.value) || 0 })
-                }
-                placeholder="Enter cost estimate..."
-                className="max-w-[200px]"
-              />
-              <span className="text-sm text-muted-foreground">
-                {request.cost_estimate ? formatAmount(request.cost_estimate) : ''}
-              </span>
-            </div>
-          </div>
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Service Provider Fee</Label>
+        <Input
+          type="number"
+          value={request.service_provider_fee || 0}
+          onChange={(e) => onUpdateRequest({ service_provider_fee: parseFloat(e.target.value) })}
+          className="bg-white"
+          disabled={!isServiceProvider}
+        />
+      </div>
 
-          <div>
-            <Label htmlFor="cost_estimate_notes">Estimate Notes</Label>
-            <Textarea
-              id="cost_estimate_notes"
-              value={request.cost_estimate_notes || ""}
-              onChange={(e) => onUpdate({ cost_estimate_notes: e.target.value })}
-              placeholder="Add notes about the cost estimate..."
-              className="h-20"
-            />
-          </div>
+      <div className="space-y-2">
+        <Label>Final Cost</Label>
+        <Input
+          type="number"
+          value={request.payment_amount || 0}
+          onChange={(e) => onUpdateRequest({ payment_amount: parseFloat(e.target.value) })}
+          className="bg-white"
+          disabled={!isServiceProvider}
+        />
+      </div>
 
-          <div>
-            <Label htmlFor="service_provider_fee">Service Provider Fee</Label>
-            <div className="flex gap-2 items-center">
-              <Input
-                id="service_provider_fee"
-                type="number"
-                value={request.service_provider_fee || ""}
-                onChange={(e) =>
-                  onUpdate({ service_provider_fee: parseFloat(e.target.value) || 0 })
-                }
-                placeholder="Enter service fee..."
-                className="max-w-[200px]"
-              />
-              <span className="text-sm text-muted-foreground">
-                {request.service_provider_fee ? formatAmount(request.service_provider_fee) : ''}
-              </span>
+      <div className="space-y-2">
+        <Label>Upload Invoice</Label>
+        <div className="space-y-2">
+          <Input
+            type="file"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            onChange={handleInvoiceUpload}
+            disabled={!isServiceProvider}
+            className="cursor-pointer"
+          />
+          {request.invoice_document_path ? (
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-green-600">Invoice uploaded</p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={handleViewInvoice}
+              >
+                <Eye className="h-4 w-4" />
+                View Invoice
+              </Button>
             </div>
-          </div>
-
-          {(request.cost_estimate || request.service_provider_fee) && (
-            <div className="pt-4 border-t">
-              <div className="flex justify-between items-center">
-                <Label>Total Estimated Cost</Label>
-                <p className="text-lg font-semibold text-primary">
-                  {formatAmount((request.cost_estimate || 0) + (request.service_provider_fee || 0))}
-                </p>
-              </div>
-            </div>
+          ) : (
+            <p className="text-sm text-gray-500 flex items-center gap-2">
+              <FileUp className="h-4 w-4" />
+              No invoice uploaded yet
+            </p>
           )}
         </div>
-      </Card>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Invoice Notes</Label>
+        <Textarea
+          value={request.cost_estimate_notes || ''}
+          onChange={(e) => onUpdateRequest({ cost_estimate_notes: e.target.value })}
+          className="bg-white min-h-[100px]"
+          placeholder="Add any notes about costs or invoice details here..."
+          disabled={!isServiceProvider}
+        />
+      </div>
     </div>
   );
 }

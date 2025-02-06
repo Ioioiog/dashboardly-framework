@@ -33,8 +33,7 @@ export interface MaintenanceRequest {
   payment_amount?: number;
   cost_estimate?: number | null;
   cost_estimate_notes?: string | null;
-  approval_status?: 'pending' | 'approved' | 'rejected' | null;
-  approval_notes?: string | null;
+  rating_comment?: string | null;
   issue_type?: string | null;
   contact_phone?: string | null;
   preferred_times?: string[];
