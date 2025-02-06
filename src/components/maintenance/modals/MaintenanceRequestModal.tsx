@@ -52,12 +52,11 @@ export default function MaintenanceRequestModal({
             <MaintenanceRequestForm
               existingRequest={request}
               onSubmit={handleFormSubmit}
-              documents={documents}
-              isLoadingDocuments={isLoadingDocuments}
               userRole={userRole || ''}
               properties={[]}
               serviceProviders={serviceProviders}
               isLoadingProviders={isLoadingProviders}
+              isSubmitting={false}
             />
           </TabsContent>
           <TabsContent value="landlord">
