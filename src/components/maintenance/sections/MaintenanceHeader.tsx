@@ -15,6 +15,11 @@ export function MaintenanceHeader({ onNewRequest }: MaintenanceHeaderProps) {
   // Only show create button for tenants and landlords
   const showCreateButton = userRole === "tenant" || userRole === "landlord";
 
+  const handleNewRequest = () => {
+    console.log("New request button clicked");
+    onNewRequest();
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -28,7 +33,7 @@ export function MaintenanceHeader({ onNewRequest }: MaintenanceHeaderProps) {
         </div>
         {showCreateButton && (
           <Button 
-            onClick={onNewRequest}
+            onClick={handleNewRequest}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
