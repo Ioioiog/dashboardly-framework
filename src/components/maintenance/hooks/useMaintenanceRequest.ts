@@ -65,7 +65,10 @@ export function useMaintenanceRequest(requestId?: string) {
         .eq('id', requestId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching maintenance request:", error);
+        throw error;
+      }
       return data;
     }
   });
@@ -77,7 +80,10 @@ export function useMaintenanceRequest(requestId?: string) {
         .from('maintenance_requests')
         .insert([data]);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating maintenance request:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
@@ -94,7 +100,10 @@ export function useMaintenanceRequest(requestId?: string) {
         .update(data)
         .eq('id', requestId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating maintenance request:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
