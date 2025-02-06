@@ -37,6 +37,7 @@ interface MaintenanceRequestFormProps {
   onSubmit: (values: MaintenanceFormValues) => void;
   isSubmitting?: boolean;
   isLoadingProviders?: boolean;
+  isReadOnly?: boolean;
 }
 
 export function MaintenanceRequestForm({
@@ -44,7 +45,8 @@ export function MaintenanceRequestForm({
   userRole,
   existingRequest,
   onSubmit,
-  isSubmitting
+  isSubmitting,
+  isReadOnly
 }: MaintenanceRequestFormProps) {
   const form = useForm<MaintenanceFormValues>({
     defaultValues: existingRequest || {
@@ -78,6 +80,7 @@ export function MaintenanceRequestForm({
               placeholder="Brief description of the issue"
               {...form.register("title")}
               className="mt-1"
+              disabled={isReadOnly}
             />
           </div>
 
@@ -89,6 +92,7 @@ export function MaintenanceRequestForm({
               id="property_id"
               {...form.register("property_id")}
               className="w-full mt-1 p-2 border rounded-md"
+              disabled={isReadOnly}
             >
               <option value="">select property</option>
               {properties.map((property) => (
@@ -108,6 +112,7 @@ export function MaintenanceRequestForm({
               placeholder="Please provide as much detail as possible about the issue"
               {...form.register("description")}
               className="mt-1 min-h-[120px]"
+              disabled={isReadOnly}
             />
           </div>
 
@@ -121,6 +126,7 @@ export function MaintenanceRequestForm({
               placeholder="Your contact phone number"
               {...form.register("contact_phone")}
               className="mt-1"
+              disabled={isReadOnly}
             />
           </div>
 
@@ -132,6 +138,7 @@ export function MaintenanceRequestForm({
               id="priority"
               {...form.register("priority")}
               className="w-full mt-1 p-2 border rounded-md"
+              disabled={isReadOnly}
             >
               <option value="low">Low - Can be addressed anytime</option>
               <option value="medium">Medium - Should be addressed within 2-3 days</option>
@@ -148,6 +155,7 @@ export function MaintenanceRequestForm({
                 <Checkbox
                   {...form.register("preferred_times")}
                   value="morning"
+                  disabled={isReadOnly}
                 />
                 <span>Morning</span>
               </label>
@@ -155,6 +163,7 @@ export function MaintenanceRequestForm({
                 <Checkbox
                   {...form.register("preferred_times")}
                   value="afternoon"
+                  disabled={isReadOnly}
                 />
                 <span>Afternoon</span>
               </label>
@@ -162,6 +171,7 @@ export function MaintenanceRequestForm({
                 <Checkbox
                   {...form.register("preferred_times")}
                   value="evening"
+                  disabled={isReadOnly}
                 />
                 <span>Evening</span>
               </label>
@@ -175,13 +185,13 @@ export function MaintenanceRequestForm({
             <ImageUpload
               images={form.watch("images")}
               onChange={(images) => form.setValue("images", images)}
-              disabled={userRole !== "tenant"}
+              disabled={userRole !== "tenant" || isReadOnly}
             />
           </div>
         </div>
 
         <div className="flex justify-end pt-4 border-t">
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting || isReadOnly}>
             {existingRequest ? "Update Request" : "Create Request"}
           </Button>
         </div>

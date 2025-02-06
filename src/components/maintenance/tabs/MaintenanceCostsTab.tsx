@@ -8,9 +8,11 @@ import { useUserRole } from "@/hooks/use-user-role";
 interface MaintenanceCostsTabProps {
   request: MaintenanceRequest;
   onUpdateRequest: (updates: Partial<MaintenanceRequest>) => void;
+  userRole?: string;
+  isReadOnly?: boolean;
 }
 
-export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCostsTabProps) {
+export function MaintenanceCostsTab({ request, onUpdateRequest, userRole, isReadOnly }: MaintenanceCostsTabProps) {
   const { userRole } = useUserRole();
   const isServiceProvider = userRole === 'service_provider';
 
@@ -23,7 +25,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           value={request.service_provider_fee || 0}
           onChange={(e) => onUpdateRequest({ service_provider_fee: parseFloat(e.target.value) })}
           className="bg-white"
-          disabled={!isServiceProvider}
+          disabled={!isServiceProvider || isReadOnly}
         />
       </div>
 
@@ -34,7 +36,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           value={request.materials_cost || 0}
           onChange={(e) => onUpdateRequest({ materials_cost: parseFloat(e.target.value) })}
           className="bg-white"
-          disabled={!isServiceProvider}
+          disabled={!isServiceProvider || isReadOnly}
         />
       </div>
 
@@ -45,7 +47,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           value={request.cost_estimate || 0}
           onChange={(e) => onUpdateRequest({ cost_estimate: parseFloat(e.target.value) })}
           className="bg-white"
-          disabled={!isServiceProvider}
+          disabled={!isServiceProvider || isReadOnly}
         />
       </div>
 
@@ -56,7 +58,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           value={request.payment_amount || 0}
           onChange={(e) => onUpdateRequest({ payment_amount: parseFloat(e.target.value) })}
           className="bg-white"
-          disabled={!isServiceProvider}
+          disabled={!isServiceProvider || isReadOnly}
         />
       </div>
 
@@ -67,7 +69,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           onChange={(e) => onUpdateRequest({ cost_estimate_notes: e.target.value })}
           className="bg-white min-h-[100px]"
           placeholder="Add any notes about costs here..."
-          disabled={!isServiceProvider}
+          disabled={!isServiceProvider || isReadOnly}
         />
       </div>
     </div>
