@@ -124,7 +124,6 @@ export function MaintenanceDetailsTab({
               {...form.register("contact_phone")}
               className="mt-1"
               disabled={userRole === "landlord"}
-              defaultValue={request?.contact_phone || ""}
             />
           </div>
 
