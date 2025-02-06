@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
@@ -7,6 +7,7 @@ import { CalendarIcon, Clock, Check } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { useEffect } from "react";
 
 interface ScheduleVisitFieldProps {
   value?: Date;
@@ -91,18 +92,14 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
                 {localDate ? format(localDate, "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent 
-              className="w-auto p-0" 
-              align="start"
-              style={{ zIndex: 9999 }}
-            >
+            <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
                 selected={localDate}
                 onSelect={handleSelect}
                 disabled={(date) => date < new Date()}
                 initialFocus
-                className="hover:cursor-pointer rounded-md border shadow-sm"
+                className="hover:cursor-pointer"
               />
             </PopoverContent>
           </Popover>
