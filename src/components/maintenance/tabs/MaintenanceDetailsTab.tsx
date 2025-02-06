@@ -75,7 +75,6 @@ export function MaintenanceDetailsTab({
               {...form.register("title")}
               className="mt-1"
               disabled={userRole === "landlord"}
-              defaultValue={request?.title}
             />
           </div>
 
@@ -111,7 +110,6 @@ export function MaintenanceDetailsTab({
               {...form.register("description")}
               className="mt-1 min-h-[120px]"
               disabled={userRole === "landlord"}
-              defaultValue={request?.description}
             />
           </div>
 
@@ -126,7 +124,7 @@ export function MaintenanceDetailsTab({
               {...form.register("contact_phone")}
               className="mt-1"
               disabled={userRole === "landlord"}
-              defaultValue={request?.contact_phone}
+              defaultValue={request?.contact_phone || ""}
             />
           </div>
 
