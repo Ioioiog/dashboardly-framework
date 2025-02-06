@@ -112,6 +112,9 @@ export function MaintenanceDialog({
       onUpdateRequest={handleUpdateRequest}
       documents={documents}
       isLoadingDocuments={isLoadingDocuments}
+      userRole={userRole}
+      isLoadingProviders={isLoadingProviders}
+      serviceProviders={serviceProviders}
     />
   );
 }
