@@ -83,7 +83,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
                 variant="outline"
                 type="button"
                 className={cn(
-                  "w-[240px] justify-start text-left font-normal",
+                  "w-[240px] justify-start text-left font-normal cursor-pointer",
                   !localDate && "text-muted-foreground",
                   disabled && "opacity-50 cursor-not-allowed"
                 )}
@@ -110,7 +110,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
               type="time"
               value={selectedTime}
               onChange={handleTimeChange}
-              className="w-[120px]"
+              className="w-[120px] cursor-pointer"
               disabled={disabled}
             />
           </div>
@@ -119,7 +119,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
         <Button 
           onClick={handleScheduleClick}
           disabled={!localDate || !selectedTime || disabled}
-          className="w-full"
+          className="w-full cursor-pointer"
           variant="secondary"
         >
           <Check className="mr-2 h-4 w-4" />
