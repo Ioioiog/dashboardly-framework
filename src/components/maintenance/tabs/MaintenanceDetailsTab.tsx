@@ -27,7 +27,7 @@ export function MaintenanceDetailsTab({
   properties,
   userRole
 }: MaintenanceDetailsTabProps) {
-  console.log("Current request data:", request);
+  console.log("MaintenanceDetailsTab - Initializing with request:", request);
 
   const form = useForm<MaintenanceRequest>({
     defaultValues: {
@@ -46,6 +46,16 @@ export function MaintenanceDetailsTab({
       emergency_instructions: request?.emergency_instructions || ""
     }
   });
+
+  React.useEffect(() => {
+    if (request) {
+      console.log("MaintenanceDetailsTab - Setting form values from request:", request);
+      form.reset({
+        ...request,
+        preferred_times: request.preferred_times || []
+      });
+    }
+  }, [request, form]);
 
   const isEmergency = form.watch("is_emergency");
 
@@ -176,7 +186,6 @@ export function MaintenanceDetailsTab({
                   {...form.register("emergency_contact_name")}
                   className="mt-1"
                   disabled={userRole === "landlord"}
-                  defaultValue={request?.emergency_contact_name}
                 />
               </div>
 
@@ -187,7 +196,6 @@ export function MaintenanceDetailsTab({
                   {...form.register("emergency_contact_phone")}
                   className="mt-1"
                   disabled={userRole === "landlord"}
-                  defaultValue={request?.emergency_contact_phone}
                 />
               </div>
 
@@ -198,7 +206,6 @@ export function MaintenanceDetailsTab({
                   placeholder="Any specific instructions for emergency handling..."
                   className="mt-1"
                   disabled={userRole === "landlord"}
-                  defaultValue={request?.emergency_instructions}
                 />
               </div>
             </div>
@@ -209,33 +216,22 @@ export function MaintenanceDetailsTab({
               Preferred Service Times
             </Label>
             <div className="grid grid-cols-3 gap-4 mt-2">
-              <label className="flex items-center space-x-2">
-                <Checkbox
-                  {...form.register("preferred_times")}
-                  value="morning"
-                  disabled={userRole === "landlord"}
-                  defaultChecked={request?.preferred_times?.includes("morning")}
-                />
-                <span>Morning</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <Checkbox
-                  {...form.register("preferred_times")}
-                  value="afternoon"
-                  disabled={userRole === "landlord"}
-                  defaultChecked={request?.preferred_times?.includes("afternoon")}
-                />
-                <span>Afternoon</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <Checkbox
-                  {...form.register("preferred_times")}
-                  value="evening"
-                  disabled={userRole === "landlord"}
-                  defaultChecked={request?.preferred_times?.includes("evening")}
-                />
-                <span>Evening</span>
-              </label>
+              {["morning", "afternoon", "evening"].map((time) => (
+                <label key={time} className="flex items-center space-x-2">
+                  <Checkbox
+                    checked={form.watch("preferred_times")?.includes(time)}
+                    onCheckedChange={(checked) => {
+                      const currentTimes = form.watch("preferred_times") || [];
+                      const newTimes = checked
+                        ? [...currentTimes, time]
+                        : currentTimes.filter((t) => t !== time);
+                      form.setValue("preferred_times", newTimes);
+                    }}
+                    disabled={userRole === "landlord"}
+                  />
+                  <span className="capitalize">{time}</span>
+                </label>
+              ))}
             </div>
           </div>
 
