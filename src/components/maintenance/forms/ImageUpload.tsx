@@ -6,6 +6,7 @@ import { Upload } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { ImagePreviewDialog } from "./ImagePreviewDialog";
 import { ImageThumbnail } from "./ImageThumbnail";
+import { supabase } from "@/integrations/supabase/client";
 
 const MAX_IMAGES = 3;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -20,8 +21,7 @@ interface ImageUploadProps {
 export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const [processedUrls, setProcessedUrls] = useState<string[]>([]);
-  const [blobUrls, setBlobUrls] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   const validateImage = (file: File): string | null => {
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
@@ -38,37 +38,32 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     
     console.log("Processing images:", images);
     
-    // Clear existing blob URLs
-    blobUrls.forEach(url => {
-      if (url.startsWith('blob:')) {
-        try {
-          URL.revokeObjectURL(url);
-        } catch (error) {
-          console.error("Error revoking blob URL:", error);
-        }
-      }
-    });
-    
-    const newBlobUrls: string[] = [];
     const urls = await Promise.all(images.map(async (image) => {
       if (!image) return '';
       
       if (image instanceof File) {
         try {
-          const blobUrl = URL.createObjectURL(image);
-          newBlobUrls.push(blobUrl);
+          // Upload to Supabase storage and get URL
+          const fileExt = image.name.split('.').pop();
+          const fileName = `${crypto.randomUUID()}.${fileExt}`;
           
-          // Verify the blob URL is valid
-          await new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = resolve;
-            img.onerror = reject;
-            img.src = blobUrl;
-          });
-          
-          return blobUrl;
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('maintenance-images')
+            .upload(fileName, image);
+
+          if (uploadError) {
+            console.error("Error uploading to Supabase:", uploadError);
+            return '';
+          }
+
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('maintenance-images')
+            .getPublicUrl(fileName);
+
+          return publicUrl;
         } catch (error) {
-          console.error("Error creating/verifying blob URL:", error);
+          console.error("Error processing file upload:", error);
           return '';
         }
       }
@@ -78,11 +73,10 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
       }
       
       return '';
-    })).then(urls => urls.filter(Boolean));
+    }));
     
-    setBlobUrls(newBlobUrls);
-    setProcessedUrls(urls);
-    return urls;
+    setImageUrls(urls.filter(Boolean));
+    return urls.filter(Boolean);
   };
 
   useEffect(() => {
@@ -90,19 +84,6 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     processImages(images).then(urls => {
       console.log("Generated image URLs:", urls);
     });
-
-    return () => {
-      // Cleanup blob URLs on unmount or when images change
-      blobUrls.forEach(url => {
-        if (url.startsWith('blob:')) {
-          try {
-            URL.revokeObjectURL(url);
-          } catch (error) {
-            console.error("Error revoking blob URL on cleanup:", error);
-          }
-        }
-      });
-    };
   }, [images]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,15 +119,27 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     onChange(newImages);
   };
 
-  const handleDeleteImage = (index: number) => {
-    const newImages = [...images];
-    if (processedUrls[index]?.startsWith('blob:')) {
-      try {
-        URL.revokeObjectURL(processedUrls[index]);
-      } catch (error) {
-        console.error("Error revoking blob URL on delete:", error);
+  const handleDeleteImage = async (index: number) => {
+    const imageToDelete = imageUrls[index];
+    if (imageToDelete && imageToDelete.includes('maintenance-images')) {
+      // Extract filename from URL
+      const fileName = imageToDelete.split('/').pop();
+      if (fileName) {
+        try {
+          const { error } = await supabase.storage
+            .from('maintenance-images')
+            .remove([fileName]);
+          
+          if (error) {
+            console.error("Error deleting from Supabase:", error);
+          }
+        } catch (error) {
+          console.error("Error in delete operation:", error);
+        }
       }
     }
+
+    const newImages = [...images];
     newImages.splice(index, 1);
     onChange(newImages);
   };
@@ -154,7 +147,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
   const handlePreviousImage = () => {
     setCurrentImageIndex((prev) => {
       const newIndex = prev - 1;
-      if (newIndex < 0) return processedUrls.length - 1;
+      if (newIndex < 0) return imageUrls.length - 1;
       return newIndex;
     });
   };
@@ -162,7 +155,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
   const handleNextImage = () => {
     setCurrentImageIndex((prev) => {
       const newIndex = prev + 1;
-      if (newIndex >= processedUrls.length) return 0;
+      if (newIndex >= imageUrls.length) return 0;
       return newIndex;
     });
   };
@@ -180,7 +173,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
           onClose={() => setSelectedImage(null)}
           onPrevious={handlePreviousImage}
           onNext={handleNextImage}
-          totalImages={processedUrls.length}
+          totalImages={imageUrls.length}
           currentIndex={currentImageIndex}
         />
       </Dialog>
@@ -194,7 +187,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                 type="file"
                 accept={ALLOWED_IMAGE_TYPES.join(',')}
                 multiple
-                disabled={disabled || processedUrls.length >= MAX_IMAGES}
+                disabled={disabled || imageUrls.length >= MAX_IMAGES}
                 onChange={handleImageUpload}
                 className="cursor-pointer file:cursor-pointer file:border-0 file:bg-blue-500 file:text-white file:px-4 file:py-2 file:mr-4 file:rounded-md hover:file:bg-blue-600 transition-colors"
               />
@@ -202,9 +195,9 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                 <Upload className="h-4 w-4" />
               </div>
             </div>
-            {processedUrls.length > 0 && (
+            {imageUrls.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {processedUrls.map((imageUrl, index) => (
+                {imageUrls.map((imageUrl, index) => (
                   <ImageThumbnail
                     key={index}
                     imageUrl={imageUrl}
