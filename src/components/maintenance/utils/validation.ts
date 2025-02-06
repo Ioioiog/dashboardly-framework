@@ -24,7 +24,17 @@ export const MaintenanceRequestSchema = z.object({
   emergency_contact_phone: z.string().nullable().optional(),
   emergency_instructions: z.string().nullable().optional(),
   contact_phone: z.string().nullable().optional(),
-  preferred_times: z.array(z.string()).optional()
+  preferred_times: z.array(z.string()).nullable().optional().default([]),
+  cost_estimate: z.number().nullable().optional(),
+  cost_estimate_status: z.string().nullable().optional(),
+  cost_estimate_notes: z.string().nullable().optional(),
+  approval_status: z.string().nullable().optional(),
+  approval_notes: z.string().nullable().optional(),
+  materials_cost: z.number().nullable().optional(),
+  completion_date: z.string().nullable().optional(),
+  notification_preferences: z.any().optional(),
+  recurring_schedule: z.any().nullable().optional(),
+  next_scheduled_date: z.string().nullable().optional()
 });
 
 export type MaintenanceRequestFormData = z.infer<typeof MaintenanceRequestSchema>;

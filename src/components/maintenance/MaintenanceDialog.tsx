@@ -107,7 +107,8 @@ export function MaintenanceDialog({
         title: updates.title || existingRequest.title,
         property_id: updates.property_id || existingRequest.property_id,
         tenant_id: existingRequest.tenant_id,
-        contact_phone: updates.contact_phone || existingRequest.contact_phone // Preserve contact_phone
+        contact_phone: updates.contact_phone || existingRequest.contact_phone,
+        preferred_times: updates.preferred_times || existingRequest.preferred_times || []
       };
 
       console.log("Validating updated request:", updatedRequest);
