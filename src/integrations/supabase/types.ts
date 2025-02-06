@@ -523,6 +523,7 @@ export type Database = {
           assigned_to: string | null
           completion_date: string | null
           completion_report: string | null
+          contact_phone: string | null
           cost_estimate: number | null
           cost_estimate_notes: string | null
           cost_estimate_status: string | null
@@ -565,6 +566,7 @@ export type Database = {
           assigned_to?: string | null
           completion_date?: string | null
           completion_report?: string | null
+          contact_phone?: string | null
           cost_estimate?: number | null
           cost_estimate_notes?: string | null
           cost_estimate_status?: string | null
@@ -607,6 +609,7 @@ export type Database = {
           assigned_to?: string | null
           completion_date?: string | null
           completion_report?: string | null
+          contact_phone?: string | null
           cost_estimate?: number | null
           cost_estimate_notes?: string | null
           cost_estimate_status?: string | null
