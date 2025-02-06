@@ -28,6 +28,28 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
       </div>
 
       <div className="space-y-2">
+        <Label>Materials Cost</Label>
+        <Input
+          type="number"
+          value={request.materials_cost || 0}
+          onChange={(e) => onUpdateRequest({ materials_cost: parseFloat(e.target.value) })}
+          className="bg-white"
+          disabled={!isServiceProvider}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Estimated Cost</Label>
+        <Input
+          type="number"
+          value={request.cost_estimate || 0}
+          onChange={(e) => onUpdateRequest({ cost_estimate: parseFloat(e.target.value) })}
+          className="bg-white"
+          disabled={!isServiceProvider}
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label>Final Cost</Label>
         <Input
           type="number"
