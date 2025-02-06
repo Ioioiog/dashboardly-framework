@@ -20,15 +20,15 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
     console.log("Date selection initiated:", date);
     if (!date) return;
 
-    // Update the form with the selected date
+    // First update the form with the selected date
     onChange(date);
     console.log("Date set successfully:", date);
 
-    // Close the popover with a slight delay to ensure the date is registered
+    // Close the popover after a longer delay to ensure the date is registered
     setTimeout(() => {
       setIsOpen(false);
       console.log("Popover closed after date selection");
-    }, 150);
+    }, 300); // Increased delay to 300ms
   };
 
   return (
