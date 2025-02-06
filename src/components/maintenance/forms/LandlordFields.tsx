@@ -116,6 +116,8 @@ export function LandlordFields({
   };
 
   const canAssignProvider = userRole === 'landlord';
+  console.log("Current user role:", userRole);
+  console.log("Can assign provider:", canAssignProvider);
 
   return (
     <div className="space-y-4">
