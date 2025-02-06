@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { validateMaintenanceRequest } from "./utils/validation";
 import MaintenanceRequestModal from "./modals/MaintenanceRequestModal";
 import type { MaintenanceRequest } from "./hooks/useMaintenanceRequest";
+import { Loader2 } from "lucide-react";
 
 interface MaintenanceDialogProps {
   open: boolean;
@@ -201,13 +202,21 @@ export function MaintenanceDialog({
       currentUserId,
       isLoadingProperties
     });
-    return null;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   // Show loading state while fetching necessary data
   if (isLoadingProperties || isLoadingRequest || (userRole === "landlord" && isLoadingProviders)) {
     console.log("MaintenanceDialog - Loading required data...");
-    return null;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   console.log("MaintenanceDialog - Rendering with:", {
