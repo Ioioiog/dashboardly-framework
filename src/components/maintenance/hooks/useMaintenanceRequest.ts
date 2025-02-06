@@ -41,6 +41,7 @@ export interface MaintenanceRequest {
   document_path?: string | null;
   property?: Property;
   tenant?: Tenant;
+  materials_cost?: number | null;
 }
 
 export function useMaintenanceRequest(requestId?: string) {

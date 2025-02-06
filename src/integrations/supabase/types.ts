@@ -473,6 +473,7 @@ export type Database = {
           id: string
           images: string[] | null
           issue_type: string | null
+          materials_cost: number | null
           next_scheduled_date: string | null
           notes: string | null
           payment_amount: number | null
@@ -509,6 +510,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           issue_type?: string | null
+          materials_cost?: number | null
           next_scheduled_date?: string | null
           notes?: string | null
           payment_amount?: number | null
@@ -545,6 +547,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           issue_type?: string | null
+          materials_cost?: number | null
           next_scheduled_date?: string | null
           notes?: string | null
           payment_amount?: number | null
