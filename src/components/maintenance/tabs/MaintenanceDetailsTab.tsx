@@ -252,7 +252,6 @@ export function MaintenanceDetailsTab({
               disabled={userRole !== "tenant"}
             />
           </div>
-
         </div>
 
         <div className="flex justify-end pt-4 border-t">
