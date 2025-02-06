@@ -32,7 +32,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     return null;
   };
 
-  const processImages = (images: (string | File)[]): string[] => {
+  const processImages = async (images: (string | File)[]): Promise<string[]> => {
     if (!images) return [];
     
     console.log("Processing images:", images);
@@ -49,16 +49,26 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     });
     
     const newBlobUrls: string[] = [];
-    const urls = images.map(image => {
+    const urls = await Promise.all(images.map(async (image) => {
       if (!image) return '';
       
       if (image instanceof File) {
         try {
+          // Create a new blob URL for the file
           const blobUrl = URL.createObjectURL(image);
           newBlobUrls.push(blobUrl);
+          
+          // Verify the blob URL is valid by loading it
+          await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = blobUrl;
+          });
+          
           return blobUrl;
         } catch (error) {
-          console.error("Error creating blob URL:", error);
+          console.error("Error creating/verifying blob URL:", error);
           return '';
         }
       }
@@ -68,7 +78,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
       }
       
       return '';
-    }).filter(Boolean);
+    })).then(urls => urls.filter(Boolean));
     
     setBlobUrls(newBlobUrls);
     setProcessedUrls(urls);
@@ -77,8 +87,9 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
 
   useEffect(() => {
     console.log("Images in form:", images);
-    const urls = processImages(images);
-    console.log("Generated image URLs:", urls);
+    processImages(images).then(urls => {
+      console.log("Generated image URLs:", urls);
+    });
 
     return () => {
       // Cleanup blob URLs on unmount or when images change
@@ -209,6 +220,14 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                   src={selectedImage}
                   alt="Maintenance request"
                   className="max-h-[85vh] max-w-[90vw] object-contain"
+                  onError={(e) => {
+                    console.error("Error loading image:", e);
+                    toast({
+                      title: "Error",
+                      description: "Failed to load image",
+                      variant: "destructive"
+                    });
+                  }}
                 />
                 {processedUrls.length > 1 && (
                   <>
@@ -265,6 +284,14 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
                         src={imageUrl}
                         alt={`Uploaded image ${index + 1}`}
                         className="rounded-lg object-cover w-full h-full transition-transform group-hover:scale-105"
+                        onError={(e) => {
+                          console.error("Error loading thumbnail:", e);
+                          toast({
+                            title: "Error",
+                            description: "Failed to load image thumbnail",
+                            variant: "destructive"
+                          });
+                        }}
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Button
