@@ -40,7 +40,11 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     // Clear existing blob URLs
     blobUrls.forEach(url => {
       if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
+        try {
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error("Error revoking blob URL:", error);
+        }
       }
     });
     
@@ -49,9 +53,14 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
       if (!image) return '';
       
       if (image instanceof File) {
-        const blobUrl = URL.createObjectURL(image);
-        newBlobUrls.push(blobUrl);
-        return blobUrl;
+        try {
+          const blobUrl = URL.createObjectURL(image);
+          newBlobUrls.push(blobUrl);
+          return blobUrl;
+        } catch (error) {
+          console.error("Error creating blob URL:", error);
+          return '';
+        }
       }
       
       if (typeof image === "string") {
@@ -72,10 +81,14 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     console.log("Generated image URLs:", urls);
 
     return () => {
-      // Cleanup blob URLs on unmount
+      // Cleanup blob URLs on unmount or when images change
       blobUrls.forEach(url => {
         if (url.startsWith('blob:')) {
-          URL.revokeObjectURL(url);
+          try {
+            URL.revokeObjectURL(url);
+          } catch (error) {
+            console.error("Error revoking blob URL on cleanup:", error);
+          }
         }
       });
     };
@@ -122,6 +135,14 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
 
   const handleDeleteImage = (index: number) => {
     const newImages = [...images];
+    // Revoke blob URL if it exists
+    if (processedUrls[index]?.startsWith('blob:')) {
+      try {
+        URL.revokeObjectURL(processedUrls[index]);
+      } catch (error) {
+        console.error("Error revoking blob URL on delete:", error);
+      }
+    }
     newImages.splice(index, 1);
     onChange(newImages);
   };
