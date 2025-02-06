@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { X, ChevronLeft, ChevronRight, Eye, Upload } from "lucide-react";
+import { Dialog } from "@/components/ui/dialog";
+import { Upload } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
+import { ImagePreviewDialog } from "./ImagePreviewDialog";
+import { ImageThumbnail } from "./ImageThumbnail";
 
 const MAX_IMAGES = 3;
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -54,11 +55,10 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
       
       if (image instanceof File) {
         try {
-          // Create a new blob URL for the file
           const blobUrl = URL.createObjectURL(image);
           newBlobUrls.push(blobUrl);
           
-          // Verify the blob URL is valid by loading it
+          // Verify the blob URL is valid
           await new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = resolve;
@@ -112,9 +112,6 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
       (typeof img === "string" || img instanceof File)
     );
     
-    console.log("Valid current images:", validCurrentImages);
-    console.log("Total images count:", validCurrentImages.length + files.length);
-
     if (validCurrentImages.length + files.length > MAX_IMAGES) {
       toast({
         title: "Error",
@@ -137,16 +134,12 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
       return true;
     });
 
-    console.log("Valid files to upload:", validFiles);
     const newImages = [...validCurrentImages, ...validFiles];
-    console.log("Setting new images:", newImages);
-    
     onChange(newImages);
   };
 
   const handleDeleteImage = (index: number) => {
     const newImages = [...images];
-    // Revoke blob URL if it exists
     if (processedUrls[index]?.startsWith('blob:')) {
       try {
         URL.revokeObjectURL(processedUrls[index]);
@@ -174,25 +167,6 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     });
   };
 
-  useEffect(() => {
-    if (selectedImage) {
-      const index = processedUrls.findIndex(url => url === selectedImage);
-      if (index !== -1) {
-        setCurrentImageIndex(index);
-      }
-    }
-  }, [selectedImage, processedUrls]);
-
-  const handleImageClick = (imageUrl: string, index: number) => {
-    setSelectedImage(imageUrl);
-    setCurrentImageIndex(index);
-  };
-
-  const handleDeleteClick = (e: React.MouseEvent, index: number) => {
-    e.stopPropagation();
-    handleDeleteImage(index);
-  };
-
   return (
     <>
       <Dialog 
@@ -201,58 +175,14 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
           if (!open) setSelectedImage(null);
         }}
       >
-        <DialogContent className="max-w-[95vw] w-[1400px] h-[90vh] p-0 overflow-hidden bg-black/90">
-          <DialogTitle className="p-8 text-white flex items-center justify-between">
-            <span className="text-xl">Image Preview ({currentImageIndex + 1} of {processedUrls.length})</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-white/20"
-              onClick={() => setSelectedImage(null)}
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </DialogTitle>
-          <div className="relative flex items-center justify-center h-[calc(90vh-5rem)]">
-            {selectedImage && (
-              <>
-                <img
-                  src={selectedImage}
-                  alt="Maintenance request"
-                  className="max-h-[85vh] max-w-[90vw] object-contain"
-                  onError={(e) => {
-                    console.error("Error loading image:", e);
-                    toast({
-                      title: "Error",
-                      description: "Failed to load image",
-                      variant: "destructive"
-                    });
-                  }}
-                />
-                {processedUrls.length > 1 && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute left-4 text-white hover:bg-white/20"
-                      onClick={handlePreviousImage}
-                    >
-                      <ChevronLeft className="h-12 w-12" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-4 text-white hover:bg-white/20"
-                      onClick={handleNextImage}
-                    >
-                      <ChevronRight className="h-12 w-12" />
-                    </Button>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        </DialogContent>
+        <ImagePreviewDialog
+          selectedImage={selectedImage}
+          onClose={() => setSelectedImage(null)}
+          onPrevious={handlePreviousImage}
+          onNext={handleNextImage}
+          totalImages={processedUrls.length}
+          currentIndex={currentImageIndex}
+        />
       </Dialog>
 
       <FormItem>
@@ -275,47 +205,17 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
             {processedUrls.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                 {processedUrls.map((imageUrl, index) => (
-                  <div 
-                    key={index} 
-                    className="relative aspect-square group rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <div className="w-full h-full">
-                      <img
-                        src={imageUrl}
-                        alt={`Uploaded image ${index + 1}`}
-                        className="rounded-lg object-cover w-full h-full transition-transform group-hover:scale-105"
-                        onError={(e) => {
-                          console.error("Error loading thumbnail:", e);
-                          toast({
-                            title: "Error",
-                            description: "Failed to load image thumbnail",
-                            variant: "destructive"
-                          });
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="xl"
-                          className="mr-2 px-8 py-6 text-lg"
-                          onClick={() => handleImageClick(imageUrl, index)}
-                        >
-                          <Eye className="h-6 w-6 mr-3" />
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                    {!disabled && (
-                      <button
-                        type="button"
-                        onClick={(e) => handleDeleteClick(e, index)}
-                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
+                  <ImageThumbnail
+                    key={index}
+                    imageUrl={imageUrl}
+                    index={index}
+                    onView={() => {
+                      setSelectedImage(imageUrl);
+                      setCurrentImageIndex(index);
+                    }}
+                    onDelete={() => handleDeleteImage(index)}
+                    disabled={disabled}
+                  />
                 ))}
               </div>
             )}
