@@ -8,9 +8,6 @@ import { MaintenanceCostsTab } from "../tabs/MaintenanceCostsTab";
 import { MaintenanceChatTab } from "../tabs/MaintenanceChatTab";
 import { MaintenanceDocumentTab } from "../tabs/MaintenanceDocumentTab";
 import { MaintenanceDetailsTab } from "../tabs/MaintenanceDetailsTab";
-import { useUserRole } from "@/hooks/use-user-role";
-import { useMaintenanceProperties } from "../hooks/useMaintenanceProperties";
-import { useAuthState } from "@/hooks/useAuthState";
 import { FileObject } from "@supabase/storage-js";
 
 interface MaintenanceRequestModalProps {
@@ -20,6 +17,8 @@ interface MaintenanceRequestModalProps {
   onUpdateRequest: (request: Partial<MaintenanceRequest>) => void;
   documents?: FileObject[];
   isLoadingDocuments?: boolean;
+  properties: Array<{ id: string; name: string }>;
+  userRole: 'tenant' | 'landlord' | 'service_provider';
   isNew?: boolean;
 }
 
@@ -30,12 +29,10 @@ export const MaintenanceRequestModal = ({
   onUpdateRequest,
   documents,
   isLoadingDocuments,
+  properties,
+  userRole,
   isNew = false
 }: MaintenanceRequestModalProps) => {
-  const { userRole } = useUserRole();
-  const { currentUserId } = useAuthState();
-  const { data: properties } = useMaintenanceProperties(userRole!, currentUserId!);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[800px]">
@@ -82,8 +79,8 @@ export const MaintenanceRequestModal = ({
               request={request}
               onUpdateRequest={onUpdateRequest}
               isNew={isNew}
-              properties={properties || []}
-              userRole={userRole || 'tenant'}
+              properties={properties}
+              userRole={userRole}
             />
           </TabsContent>
 
