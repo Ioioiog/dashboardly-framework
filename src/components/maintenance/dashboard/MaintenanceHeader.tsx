@@ -1,13 +1,10 @@
 import React from "react";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MaintenanceDialog } from "../MaintenanceDialog";
 
 interface MaintenanceHeaderProps {
   priority: string;
@@ -22,40 +19,57 @@ export function MaintenanceHeader({
   searchQuery,
   onSearchChange,
 }: MaintenanceHeaderProps) {
-  return (
-    <div className="mb-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Property Maintenance Dashboard</h1>
-        <p className="text-gray-500">Manage and oversee all maintenance requests</p>
-      </div>
-      
-      <div className="flex items-center justify-end gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">Priority:</span>
-          <Select value={priority} onValueChange={onPriorityChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Priorities" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Priorities</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+  const { t } = useTranslation();
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
-        <div className="relative w-[300px]">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+  console.log("MaintenanceHeader rendered with priority:", priority);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">
+            {t("maintenance.myRequests")}
+          </h1>
+          <p className="text-gray-500 mt-2">
+            {t("maintenance.createAndTrack")}
+          </p>
+        </div>
+        <Button 
+          onClick={() => setIsDialogOpen(true)}
+          className="bg-primary hover:bg-primary/90"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create New Request
+        </Button>
+      </div>
+
+      <div className="flex gap-4">
+        <div className="flex-1">
           <Input
-            type="search"
             placeholder="Search requests..."
-            className="pl-10"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full"
           />
         </div>
+        <Select value={priority} onValueChange={onPriorityChange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Priorities</SelectItem>
+            <SelectItem value="low">Low Priority</SelectItem>
+            <SelectItem value="medium">Medium Priority</SelectItem>
+            <SelectItem value="high">High Priority</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
+
+      <MaintenanceDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </div>
   );
 }
