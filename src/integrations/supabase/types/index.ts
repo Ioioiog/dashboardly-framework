@@ -1,3 +1,10 @@
+import { AuthSchema } from './auth-types';
+import { MaintenanceSchema } from './maintenance-types';
+import { PropertySchema } from './property-types';
+import { TenantSchema } from './tenant-types';
+import { PaymentSchema } from './payment-types';
+import { UtilitySchema } from './utility-types';
+
 export * from './auth-types';
 export * from './maintenance-types';
 export * from './property-types';
