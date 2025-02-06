@@ -39,7 +39,8 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     const validImages = images.filter((image): image is string | File => {
       if (!image) return false;
       if (typeof image === "string") {
-        return image !== "{}" && image.startsWith("http");
+        // Accept both http(s) URLs and blob URLs
+        return image.startsWith("http") || image.startsWith("blob:");
       }
       return image instanceof File;
     });
@@ -50,7 +51,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
       if (image instanceof File) {
         return URL.createObjectURL(image);
       }
-      return image as string;
+      return image;
     });
   };
 
@@ -74,9 +75,7 @@ export function ImageUpload({ images, onChange, disabled }: ImageUploadProps) {
     const files = Array.from(e.target.files || []);
     const validCurrentImages = images.filter(img => 
       img && 
-      typeof img === "string" && 
-      img !== "{}" && 
-      img.startsWith("http")
+      (typeof img === "string" && (img.startsWith("http") || img.startsWith("blob:")))
     );
     
     console.log("Valid current images:", validCurrentImages);
