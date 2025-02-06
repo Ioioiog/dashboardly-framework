@@ -27,7 +27,7 @@ export function MaintenanceDetailsTab({
   properties,
   userRole
 }: MaintenanceDetailsTabProps) {
-  console.log("Current request data:", request); // Debug log
+  console.log("Current request data:", request);
 
   const form = useForm<MaintenanceRequest>({
     defaultValues: {
@@ -136,7 +136,7 @@ export function MaintenanceDetailsTab({
             </Label>
             <Select
               value={form.watch("priority")}
-              onValueChange={(value) => form.setValue("priority", value)}
+              onValueChange={(value: "low" | "medium" | "high") => form.setValue("priority", value)}
               disabled={userRole === "landlord"}
             >
               <SelectTrigger>
@@ -252,6 +252,7 @@ export function MaintenanceDetailsTab({
               disabled={userRole !== "tenant"}
             />
           </div>
+
         </div>
 
         <div className="flex justify-end pt-4 border-t">
