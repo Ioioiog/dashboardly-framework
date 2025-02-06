@@ -14,7 +14,8 @@ interface MaintenanceProviderTabProps {
 
 export function MaintenanceProviderTab({ request, onUpdateRequest }: MaintenanceProviderTabProps) {
   const { userRole } = useUserRole();
-  const isEditable = userRole === 'landlord' || userRole === 'service_provider';
+  const isLandlord = userRole === 'landlord';
+  const canEditNotes = userRole === 'landlord' || userRole === 'service_provider';
 
   return (
     <div className="space-y-4">
@@ -22,13 +23,13 @@ export function MaintenanceProviderTab({ request, onUpdateRequest }: Maintenance
         formData={request}
         onFieldChange={(field, value) => onUpdateRequest({ [field]: value })}
         isLoadingProviders={false}
-        isReadOnly={!isEditable}
+        isReadOnly={!isLandlord}
         userRole={userRole}
       />
 
       <div className="space-y-2">
         <Label>Schedule Visit</Label>
-        {isEditable ? (
+        {canEditNotes ? (
           <ScheduleVisitField
             value={request.scheduled_date ? new Date(request.scheduled_date) : undefined}
             onChange={(date) => onUpdateRequest({ scheduled_date: date?.toISOString() })}
@@ -43,7 +44,7 @@ export function MaintenanceProviderTab({ request, onUpdateRequest }: Maintenance
 
       <div className="space-y-2">
         <Label>Service Provider Status</Label>
-        {isEditable ? (
+        {isLandlord ? (
           <Select
             value={request.service_provider_status || ''}
             onValueChange={(value) => onUpdateRequest({ service_provider_status: value })}
@@ -68,7 +69,7 @@ export function MaintenanceProviderTab({ request, onUpdateRequest }: Maintenance
 
       <div className="space-y-2">
         <Label>Service Provider Notes</Label>
-        {isEditable ? (
+        {canEditNotes ? (
           <Textarea
             value={request.service_provider_notes || ''}
             onChange={(e) => onUpdateRequest({ service_provider_notes: e.target.value })}
