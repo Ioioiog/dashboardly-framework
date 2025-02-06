@@ -58,7 +58,7 @@ export function MaintenanceProgressTab({ request, onUpdateRequest }: Maintenance
             <div>
               <p className="font-medium">Current Status</p>
               <p className="text-sm text-gray-600">
-                Last updated: {format(new Date(request.updated_at), 'PPp')}
+                Last updated: {new Date().toLocaleDateString()}
               </p>
             </div>
           </div>
@@ -88,7 +88,7 @@ export function MaintenanceProgressTab({ request, onUpdateRequest }: Maintenance
               <div className={`w-3 h-3 rounded-full ${request.status === 'pending' ? 'bg-yellow-500' : 'bg-green-500'}`} />
               <span className="text-sm">Request Submitted</span>
               <span className="text-xs text-gray-500 ml-auto">
-                {format(new Date(request.created_at), 'PPp')}
+                {new Date().toLocaleDateString()}
               </span>
             </div>
 
