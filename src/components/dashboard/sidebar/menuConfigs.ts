@@ -12,6 +12,7 @@ import {
   UserCog,
   Building2,
   Wallet,
+  HelpCircle,
 } from "lucide-react";
 
 export const serviceProviderMenuItems = [
@@ -46,6 +47,12 @@ export const serviceProviderMenuItems = [
     title: "Settings",
     icon: Settings,
     href: "/settings",
+    roles: ["service_provider"],
+  },
+  {
+    title: "Info",
+    icon: HelpCircle,
+    href: "/info",
     roles: ["service_provider"],
   },
 ];
@@ -106,6 +113,12 @@ export const standardMenuItems = [
     title: "Settings",
     icon: Settings,
     href: "/settings",
+    roles: ["landlord", "tenant"],
+  },
+  {
+    title: "Info",
+    icon: HelpCircle,
+    href: "/info",
     roles: ["landlord", "tenant"],
   },
 ];
