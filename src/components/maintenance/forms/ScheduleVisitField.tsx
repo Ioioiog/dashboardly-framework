@@ -100,6 +100,7 @@ export function ScheduleVisitField({ value, onChange, disabled }: ScheduleVisitF
                 onSelect={handleSelect}
                 disabled={(date) => date < new Date()}
                 initialFocus
+                required
               />
             </PopoverContent>
           </Popover>
