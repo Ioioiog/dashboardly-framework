@@ -43,11 +43,10 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
     console.log('Field updated locally:', { field, value });
   };
 
-  const handleUpdateCosts = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent form submission from changing the URL
+  const handleUpdateCosts = () => {
     console.log('Updating costs with data:', localData);
     try {
-      await onUpdateRequest({
+      onUpdateRequest({
         service_provider_fee: localData.service_provider_fee,
         materials_cost: localData.materials_cost,
         cost_estimate: localData.cost_estimate,
@@ -70,7 +69,7 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
   };
 
   return (
-    <form onSubmit={handleUpdateCosts} className="space-y-4">
+    <div className="space-y-4">
       <div className="space-y-2">
         <Label>Service Provider Fee</Label>
         <Input
@@ -129,13 +128,13 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
       {isServiceProvider && (
         <div className="flex justify-end pt-4">
           <Button 
-            type="submit"
+            onClick={handleUpdateCosts}
             className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
             Update Costs
           </Button>
         </div>
       )}
-    </form>
+    </div>
   );
 }
