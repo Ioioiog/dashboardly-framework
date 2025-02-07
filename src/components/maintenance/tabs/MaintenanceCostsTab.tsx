@@ -13,6 +13,22 @@ interface MaintenanceCostsTabProps {
 export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCostsTabProps) {
   const { userRole } = useUserRole();
   const isServiceProvider = userRole === 'service_provider';
+  const [localData, setLocalData] = React.useState({
+    service_provider_fee: request.service_provider_fee || 0,
+    materials_cost: request.materials_cost || 0,
+    cost_estimate: request.cost_estimate || 0,
+    payment_amount: request.payment_amount || 0,
+    cost_estimate_notes: request.cost_estimate_notes || ''
+  });
+
+  const handleChange = (field: string, value: number | string) => {
+    setLocalData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    // We're not calling onUpdateRequest here anymore
+    console.log('Field updated locally:', { field, value });
+  };
 
   return (
     <div className="space-y-4">
@@ -20,8 +36,8 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
         <Label>Service Provider Fee</Label>
         <Input
           type="number"
-          value={request.service_provider_fee || 0}
-          onChange={(e) => onUpdateRequest({ service_provider_fee: parseFloat(e.target.value) })}
+          value={localData.service_provider_fee}
+          onChange={(e) => handleChange('service_provider_fee', parseFloat(e.target.value))}
           className="bg-white"
           disabled={!isServiceProvider}
         />
@@ -31,8 +47,8 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
         <Label>Materials Cost</Label>
         <Input
           type="number"
-          value={request.materials_cost || 0}
-          onChange={(e) => onUpdateRequest({ materials_cost: parseFloat(e.target.value) })}
+          value={localData.materials_cost}
+          onChange={(e) => handleChange('materials_cost', parseFloat(e.target.value))}
           className="bg-white"
           disabled={!isServiceProvider}
         />
@@ -42,8 +58,8 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
         <Label>Estimated Cost</Label>
         <Input
           type="number"
-          value={request.cost_estimate || 0}
-          onChange={(e) => onUpdateRequest({ cost_estimate: parseFloat(e.target.value) })}
+          value={localData.cost_estimate}
+          onChange={(e) => handleChange('cost_estimate', parseFloat(e.target.value))}
           className="bg-white"
           disabled={!isServiceProvider}
         />
@@ -53,8 +69,8 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
         <Label>Final Cost</Label>
         <Input
           type="number"
-          value={request.payment_amount || 0}
-          onChange={(e) => onUpdateRequest({ payment_amount: parseFloat(e.target.value) })}
+          value={localData.payment_amount}
+          onChange={(e) => handleChange('payment_amount', parseFloat(e.target.value))}
           className="bg-white"
           disabled={!isServiceProvider}
         />
@@ -63,8 +79,8 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
       <div className="space-y-2">
         <Label>Cost Notes</Label>
         <Textarea
-          value={request.cost_estimate_notes || ''}
-          onChange={(e) => onUpdateRequest({ cost_estimate_notes: e.target.value })}
+          value={localData.cost_estimate_notes}
+          onChange={(e) => handleChange('cost_estimate_notes', e.target.value)}
           className="bg-white min-h-[100px]"
           placeholder="Add any notes about costs here..."
           disabled={!isServiceProvider}
