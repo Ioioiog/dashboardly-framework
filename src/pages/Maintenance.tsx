@@ -113,7 +113,8 @@ export default function Maintenance() {
     }
   };
 
-  const navigationItems = [
+  // Only show navigation items if user is not a service provider
+  const navigationItems = userRole !== 'service_provider' ? [
     {
       id: 'dashboard' as MaintenanceView,
       label: 'Property Maintenance Dashboard',
@@ -124,6 +125,12 @@ export default function Maintenance() {
       label: 'Service Providers List',
       icon: Users,
     },
+  ] : [
+    {
+      id: 'dashboard' as MaintenanceView,
+      label: 'Property Maintenance Dashboard',
+      icon: List,
+    }
   ];
 
   return (
@@ -190,7 +197,7 @@ export default function Maintenance() {
                 requestId={selectedRequestId}
               />
             </>
-          ) : (
+          ) : userRole !== 'service_provider' && (
             <ServiceProviderList />
           )}
         </div>
