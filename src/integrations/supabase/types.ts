@@ -293,6 +293,42 @@ export type Database = {
           },
         ]
       }
+      maintenance: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          description: string | null
+          id: string
+          materials_cost: number
+          service_provider_fee: number
+          service_provider_id: string | null
+          status: Database["public"]["Enums"]["maintenance_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          description?: string | null
+          id?: string
+          materials_cost?: number
+          service_provider_fee?: number
+          service_provider_id?: string | null
+          status?: Database["public"]["Enums"]["maintenance_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          description?: string | null
+          id?: string
+          materials_cost?: number
+          service_provider_fee?: number
+          service_provider_id?: string | null
+          status?: Database["public"]["Enums"]["maintenance_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       maintenance_notifications: {
         Row: {
           created_at: string | null
@@ -1762,6 +1798,7 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+      maintenance_status: "pending" | "completed" | "cancelled"
       meter_type: "electricity" | "water" | "gas"
       property_type: "Apartment" | "House" | "Condo" | "Commercial"
       scraping_status: "pending" | "in_progress" | "completed" | "failed"

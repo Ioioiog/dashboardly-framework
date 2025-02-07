@@ -3,6 +3,7 @@ import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import {
   Tooltip,
   TooltipContent,
@@ -16,19 +17,25 @@ interface SignOutButtonProps {
 
 export const SignOutButton: React.FC<SignOutButtonProps> = ({ isExpanded }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {
+      console.log("Signing out user...");
       // Clear any stored tokens first
       localStorage.removeItem('sb-wecmvyohaxizmnhuvjly-auth-token');
       
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
+      console.log("User signed out successfully");
       toast({
         title: "Signed out successfully",
         description: "You have been signed out of your account.",
       });
+
+      // Navigate to auth page after successful sign out
+      navigate("/auth");
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
