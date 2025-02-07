@@ -24,6 +24,17 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
     cost_estimate_notes: request.cost_estimate_notes || ''
   });
 
+  // Update local state when request prop changes
+  React.useEffect(() => {
+    setLocalData({
+      service_provider_fee: request.service_provider_fee || 0,
+      materials_cost: request.materials_cost || 0,
+      cost_estimate: request.cost_estimate || 0,
+      payment_amount: request.payment_amount || 0,
+      cost_estimate_notes: request.cost_estimate_notes || ''
+    });
+  }, [request]);
+
   const handleChange = (field: string, value: number | string) => {
     setLocalData(prev => ({
       ...prev,
