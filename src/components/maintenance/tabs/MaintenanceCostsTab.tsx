@@ -2,8 +2,10 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { MaintenanceRequest } from "../hooks/useMaintenanceRequest";
 import { useUserRole } from "@/hooks/use-user-role";
+import { useToast } from "@/hooks/use-toast";
 
 interface MaintenanceCostsTabProps {
   request: MaintenanceRequest;
@@ -12,6 +14,7 @@ interface MaintenanceCostsTabProps {
 
 export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCostsTabProps) {
   const { userRole } = useUserRole();
+  const { toast } = useToast();
   const isServiceProvider = userRole === 'service_provider';
   const [localData, setLocalData] = React.useState({
     service_provider_fee: request.service_provider_fee || 0,
@@ -26,8 +29,32 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
       ...prev,
       [field]: value
     }));
-    // We're not calling onUpdateRequest here anymore
     console.log('Field updated locally:', { field, value });
+  };
+
+  const handleUpdateCosts = () => {
+    console.log('Updating costs with data:', localData);
+    try {
+      onUpdateRequest({
+        service_provider_fee: localData.service_provider_fee,
+        materials_cost: localData.materials_cost,
+        cost_estimate: localData.cost_estimate,
+        payment_amount: localData.payment_amount,
+        cost_estimate_notes: localData.cost_estimate_notes
+      });
+      
+      toast({
+        title: "Success",
+        description: "Cost information updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating costs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update cost information",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -86,6 +113,17 @@ export function MaintenanceCostsTab({ request, onUpdateRequest }: MaintenanceCos
           disabled={!isServiceProvider}
         />
       </div>
+
+      {isServiceProvider && (
+        <div className="flex justify-end pt-4">
+          <Button 
+            onClick={handleUpdateCosts}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Update Costs
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
