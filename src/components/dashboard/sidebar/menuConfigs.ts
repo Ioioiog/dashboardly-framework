@@ -43,13 +43,6 @@ export const serviceProviderMenuItems = [
     notificationType: "payments"
   },
   {
-    title: "Messages",
-    icon: MessageCircle,
-    href: "/chat",
-    roles: ["service_provider"],
-    notificationType: "messages"
-  },
-  {
     title: "Settings",
     icon: Settings,
     href: "/settings",

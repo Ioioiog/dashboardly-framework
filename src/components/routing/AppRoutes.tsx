@@ -18,12 +18,16 @@ import TenantRegistration from "@/pages/TenantRegistration";
 import { ResetPassword } from "@/components/auth/ResetPassword";
 import { UpdatePassword } from "@/components/auth/UpdatePassword";
 import Index from "@/pages/Index";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface AppRoutesProps {
   isAuthenticated: boolean;
 }
 
 export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
+  const { userRole } = useUserRole();
+  console.log("Current user role:", userRole);
+
   return (
     <Routes>
       <Route path="/" element={<Index />} />
@@ -123,14 +127,17 @@ export function AppRoutes({ isAuthenticated }: AppRoutesProps) {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/chat"
-        element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <Chat />
-          </ProtectedRoute>
-        }
-      />
+      {/* Only render chat route for non-service-provider users */}
+      {userRole !== 'service_provider' && (
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <Chat />
+            </ProtectedRoute>
+          }
+        />
+      )}
       <Route
         path="/maintenance"
         element={
