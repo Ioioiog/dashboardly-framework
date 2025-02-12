@@ -1,185 +1,136 @@
-import { useState, useEffect } from "react";
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Send, Loader2 } from "lucide-react";
+import React, { useRef, useState } from "react";
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import { ChatHeader } from "@/components/chat/ChatHeader";
+import { MessageList } from "@/components/chat/MessageList";
+import { MessageInput } from "@/components/chat/MessageInput";
+import { useConversation } from "@/hooks/chat/useConversation";
+import { useMessages } from "@/hooks/chat/useMessages";
+import { useAuthState } from "@/hooks/useAuthState";
+import { Loader2, Search } from "lucide-react";
 import { useUserRole } from "@/hooks/use-user-role";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { TenantSelect } from "@/components/chat/TenantSelect";
 
-interface Message {
-  id: string;
-  content: string;
-  sender_id: string;
-  receiver_id: string | null;
-  created_at: string;
-  conversation_id?: string;
-  status?: string;
-  read?: boolean;
-  profile_id: string;
-  sender: {
-    first_name: string | null;
-    last_name: string | null;
-    avatar_url: string | null;
-  } | null;
-}
-
-export default function Chat() {
-  const [messages, setMessages] = useState<Message[]>([]);
+const Chat = () => {
+  const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null);
-  const [recipients, setRecipients] = useState<any[]>([]);
-  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const { currentUserId } = useAuthState();
+  const { conversationId, isLoading: isConversationLoading } = useConversation(currentUserId, selectedTenantId);
+  const { messages, sendMessage } = useMessages(conversationId);
   const { userRole } = useUserRole();
-  const isMobile = useIsMobile();
 
-  // ... keep existing code (useEffect and fetchRecipients function)
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newMessage.trim()) {
+      await sendMessage(newMessage, currentUserId);
+      setNewMessage("");
+    }
+  };
+
+  const handleTenantSelect = (tenantId: string) => {
+    setSelectedTenantId(tenantId);
+  };
+
+  const renderContent = () => {
+    if (isConversationLoading) {
+      return (
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        </div>
+      );
+    }
+
+    if (userRole === "landlord" && !selectedTenantId) {
+      return (
+        <div className="flex-1 flex items-center justify-center p-8 text-center bg-slate-50 dark:bg-slate-900">
+          <div className="max-w-md">
+            <h3 className="text-lg font-semibold mb-2">Start a Conversation</h3>
+            <p className="text-muted-foreground">
+              Select a conversation from the sidebar to start chatting.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    if (!conversationId) {
+      return (
+        <div className="flex-1 flex items-center justify-center p-8 text-center bg-slate-50 dark:bg-slate-900">
+          <div className="max-w-md">
+            <h3 className="text-lg font-semibold mb-2">No Conversation Found</h3>
+            <p className="text-muted-foreground">
+              {userRole === "landlord" 
+                ? "There seems to be an issue with the conversation. Please try selecting a different tenant."
+                : "There seems to be an issue with your conversation. Please contact support if this persists."}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <MessageList
+          messages={messages}
+          currentUserId={currentUserId}
+          messagesEndRef={messagesEndRef}
+        />
+        <MessageInput
+          newMessage={newMessage}
+          setNewMessage={setNewMessage}
+          handleSendMessage={handleSendMessage}
+        />
+      </>
+    );
+  };
 
   return (
-    <DashboardLayout>
-      <div className="flex h-[calc(100vh-4rem)] bg-background">
-        {/* Contact List - hidden on mobile when a chat is selected */}
-        <div className={`${
-          isMobile && selectedRecipient ? 'hidden' : 'w-full md:w-80'
-        } border-r bg-background`}>
-          <div className="p-4 border-b">
-            <h2 className="font-semibold text-lg">
-              {userRole === 'tenant' ? 'My Landlord' : 'My Tenants'}
-            </h2>
-          </div>
-          <ScrollArea className="h-[calc(100%-4rem)]">
-            <div className="p-2">
-              {recipients.map((recipient) => (
-                <button
-                  key={recipient.id}
-                  onClick={() => selectRecipient(recipient.id)}
-                  className={`w-full p-3 flex items-center gap-3 rounded-lg hover:bg-accent transition-colors ${
-                    selectedRecipient === recipient.id ? 'bg-accent' : ''
-                  }`}
-                >
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={recipient.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {recipient.first_name?.[0]}
-                      {recipient.last_name?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="text-left">
-                    <p className="font-medium">
-                      {recipient.first_name} {recipient.last_name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {recipient.role}
-                    </p>
-                  </div>
-                </button>
-              ))}
+    <div className="flex h-screen bg-slate-100 dark:bg-slate-900">
+      <DashboardSidebar />
+      
+      {/* Chat Layout */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Conversations Sidebar */}
+        <div className="w-[350px] flex flex-col border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          {/* Search Bar */}
+          <div className="p-3 border-b border-slate-200 dark:border-slate-700">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             </div>
-          </ScrollArea>
+          </div>
+
+          {/* Conversations List */}
+          <div className="flex-1 overflow-y-auto">
+            <TenantSelect
+              onTenantSelect={handleTenantSelect}
+              selectedTenantId={selectedTenantId || undefined}
+              displayStyle="list"
+            />
+          </div>
         </div>
 
         {/* Chat Area */}
-        <div className={`${
-          isMobile && !selectedRecipient ? 'hidden' : 'flex-1'
-        } flex flex-col bg-background`}>
-          {selectedRecipient ? (
-            <>
-              {/* Chat Header */}
-              <div className="p-4 border-b flex items-center gap-3">
-                {isMobile && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedRecipient(null)}
-                    className="mr-2"
-                  >
-                    Back
-                  </Button>
-                )}
-                <Avatar className="h-10 w-10">
-                  <AvatarImage
-                    src={recipients.find(r => r.id === selectedRecipient)?.avatar_url || undefined}
-                  />
-                  <AvatarFallback>
-                    {recipients.find(r => r.id === selectedRecipient)?.first_name?.[0]}
-                    {recipients.find(r => r.id === selectedRecipient)?.last_name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold">
-                    {recipients.find(r => r.id === selectedRecipient)?.first_name}{' '}
-                    {recipients.find(r => r.id === selectedRecipient)?.last_name}
-                  </h3>
-                </div>
-              </div>
-
-              {/* Messages Area */}
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${
-                        message.sender_id === selectedRecipient ? 'justify-start' : 'justify-end'
-                      }`}
-                    >
-                      <div
-                        className={`max-w-[80%] md:max-w-[70%] rounded-2xl px-4 py-2 ${
-                          message.sender_id === selectedRecipient
-                            ? 'bg-accent text-accent-foreground'
-                            : 'bg-primary text-primary-foreground'
-                        }`}
-                      >
-                        <p className="break-words">{message.content}</p>
-                        <p className="text-xs opacity-70 mt-1 text-right">
-                          {new Date(message.created_at).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-
-              {/* Message Input */}
-              <form
-                onSubmit={sendMessage}
-                className="p-4 border-t flex gap-2 bg-background"
-              >
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
-                  className="rounded-full"
-                  disabled={isLoading}
-                />
-                <Button 
-                  type="submit" 
-                  size="icon"
-                  className="rounded-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
-              </form>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground">
-              Select a contact to start chatting
-            </div>
-          )}
+        <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-900">
+          <ChatHeader 
+            onTenantSelect={handleTenantSelect}
+            selectedTenantId={selectedTenantId}
+          />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {renderContent()}
+          </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
-}
+};
+
+export default Chat;
